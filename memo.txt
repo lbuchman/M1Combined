@@ -9,4 +9,7 @@ Missing
 2. USB drive flash
 3. M1 bat switch pins check
 
+m1CloudClient-linux uploadfw -t /home/lbuchman/fw/m1firmware.txz  -m /home/lbuchman/fw/fsbl.stm32  -s  /home/lbuchman/myGitHub/M1TestFixture/m1tfd1_42dbae8_amd64.snap
+
+
 
