@@ -1,0 +1,13 @@
+[Unit]
+Description=logshttpserver
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/lenel/logs
+ExecStart=http-server  -p 82 -d -c-1 -i
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+Alias=logshttpserver

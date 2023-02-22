@@ -1,0 +1,40 @@
+picocom v3.1
+
+port is        : /dev/ttyUSB2
+flowcontrol    : none
+baudrate is    : 115200
+parity is      : none
+databits are   : 8
+stopbits are   : 1
+escape is      : C-a
+local echo is  : no
+noinit is      : no
+noreset is     : no
+hangup is      : no
+nolock is      : no
+send_cmd is    : sz -vv
+receive_cmd is : rz -vv -E
+imap is        : 
+omap is        : 
+emap is        : crcrlf,delbs,
+logfile is     : none
+initstring     : none
+exit_after is  : not set
+exit is        : no
+
+Type [C-a] [C-h] to see available commands
+Terminal ready
+
+
+
+
+
+
+# -R 2222:localhost:22 root@192.168.0.55[38Ds-R 2222:localhost:22 root@192.168.0.55[38Ds-R 2222:localhost:22 root@192.168.0.55[38Dh-R 2222:localhost:22 root@192.168.0.55[38D -R 2222:localhost:22 root@192.168.0.55[38D-R 2222:localhost:22 root@192.168.0.55
+Could not create directory '/root/.ssh'.
+The authenticity of host '192.168.0.55 (192.168.0.55)' can't be established.
+ECDSA key fingerprint is SHA256:4DZPVhwS2nfZqxCwg3r3yDjZQj48ODdx3DB1UxQh1YM.
+Are you sure you want to continue connecting (yes/no)? 
+# 
+Terminating...
+Thanks for using picocom

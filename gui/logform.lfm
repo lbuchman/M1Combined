@@ -1,0 +1,30 @@
+object LoggerForm: TLoggerForm
+  Left = 806
+  Height = 506
+  Top = 230
+  Width = 1822
+  Caption = 'Log'
+  ClientHeight = 506
+  ClientWidth = 1822
+  DesignTimePPI = 192
+  LCLVersion = '2.2.4.0'
+  object Memo1: TMemo
+    Left = 0
+    Height = 506
+    Top = 0
+    Width = 1822
+    Align = alClient
+    DoubleBuffered = True
+    Font.Height = -26
+    Font.Name = 'Sans'
+    OnChange = Memo1Change
+    OnClick = Memo1Click
+    OnDblClick = Memo1DblClick
+    ParentDoubleBuffered = False
+    ParentFont = False
+    ReadOnly = True
+    ScrollBars = ssBoth
+    TabOrder = 0
+    WordWrap = False
+  end
+end

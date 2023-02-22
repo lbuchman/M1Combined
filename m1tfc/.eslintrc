@@ -1,0 +1,5 @@
+{
+    "extends": "@lenel/eslint-config-lenel-base"
+}
+
+

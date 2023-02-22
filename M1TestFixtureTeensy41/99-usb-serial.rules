@@ -1,0 +1,2 @@
+ACTION=="add", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="FT9PII76", SYMLINK+="teensylink"
+ACTION=="add", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="A571ABUW", SYMLINK+="m1term"

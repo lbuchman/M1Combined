@@ -1,0 +1,11 @@
+CompileFlags:
+	Add: [
+		"-I../../third-party/DaisySP/Source",
+		"-I../../third-party/gcem/include",
+		"-DCLANGD"
+	]
+	Remove: [
+		"-D__arm__",
+		"-mvectorize*",
+		"-mthumb*",
+	]

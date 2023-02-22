@@ -1,0 +1,29 @@
+{
+    "cSpell.words": [
+        "Secur",
+        "datagrams",
+        "dpkg",
+        "flink",
+        "fwupdate",
+        "fwupdater",
+        "gwlogger",
+        "gwsystem",
+        "gwudpdgram",
+        "iptables",
+        "libvirt",
+        "msgadaper",
+        "netstat",
+        "nothrow",
+        "oggw",
+        "qcow",
+        "qemu",
+        "snapd",
+        "snapinsights",
+        "snaplib",
+        "sqlcmd",
+        "uuidv",
+        "virsh"
+    ],
+    "html.format.enable": false,
+    "eslint.format.enable": true
+}

@@ -1,0 +1,18 @@
+                                                                                                                       MP1-Boot
+
+                                                                                                                               MPU clock: 648000000 Hz
+     Initializing RAM
+                     Testing RAM.
+                                 Booted from SD Card
+                                                    Loading app image...
+                                                                        Jumping to app
+
+
+                                                                                      MP1-Boot
+
+                                                                                              MPU clock: 648000000 Hz
+                                                                                                                     Initializing RAM
+                                                                                                                                     Testing RAM.
+Booted from SD Card
+                   Loading app image...
+                                       Jumping to app

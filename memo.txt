@@ -1,0 +1,12 @@
+https://wiki.st.com/stm32mpu/wiki/STM32CubeProgrammer_OTP_management#Read_OTP_with_upload_command
+https://wiki.stmicroelectronics.cn/stm32mpu/wiki/How_to_update_OTP_with_U-Boot
+
+https://wiki.st.com/stm32mpu/wiki/STM32CubeProgrammer
+
+Missing
+
+1. Label on Error
+2. USB drive flash
+3. M1 bat switch pins check
+
+

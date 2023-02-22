@@ -1,0 +1,202 @@
+#!/usr/bin/env node
+
+'use strict';
+
+const program = require('commander');
+const { mkdirp } = require('mkdirp');
+const crypto = require('crypto');
+const fs = require('fs-extra');
+const lodash = require('lodash');
+const Base32 = require("base32.js");
+const dateTime = require('date-and-time');
+const azure = require('azure-storage');
+const glob = require('glob');
+const path = require('path');
+const azureOp = require('../src/azureOp');
+const secrets = require('../src/secrets');
+const os = require('../src/os');
+const logger = require('../src/logger');
+
+const m1mtfDir = `${process.env.HOME}/m1mtf`;
+const conString = 'DefaultEndpointsProtocol=https;AccountName=enel2anestingtsm;AccountKey=iltiV6hEaN4Y6l8tvyLQNsCnBX42oHQmfBDCmhGPjwhLgwAKGKtTgIn/hwhVNn5CG+1KAY23e0SE+ASti5kpzQ==;EndpointSuffix=core.windows.net';
+const logContainer = 'm1-3200-logs';
+const secretsContainer = 'm1-3200-secrets';
+const firmwareContainer = 'firmware';
+
+program
+    .name('m1cli')
+    .description('CLI utility retrieve M1-3200 manufacturing logs')
+    .version('0.1.0');
+
+program.command('update')
+    .description('download and update software and firmware i the test fixture')
+    .option('-f, --force', 'force update')
+    .action(async (options) => {
+        const debuglevel = '2';
+        const logfile = logger.getLogger('m1cli', 'update', 'm1cli', '/tmp', debuglevel);
+
+        try {
+            const dir = path.join(process.env.HOME, 'm1mtf');
+            logfile.info('Checking for SW & FW update ...');
+            const blobSvc = azure.createBlobService(conString);
+            logfile.info('Downloading manifestFile');
+            mkdirp.sync(path.join(dir, 'tmp'));
+            await azureOp.downloadFile(blobSvc, firmwareContainer, 'manifestFile.json', path.join(dir, 'tmp', 'manifestFile.json'));
+            const newManifestFile = fs.readJSONSync(path.join(dir, 'tmp', 'manifestFile.json'));
+            let localManifestFile;
+            try {
+                if (options.force) throw Error('force');
+                localManifestFile = fs.readJSONSync(path.join(dir, 'tmp', 'manifestFileLocal.json'));
+            }
+            catch (err) {
+                localManifestFile = [];
+            }
+            if (lodash.isEqual(newManifestFile, localManifestFile)) {
+                logfile.info('No new firmware to update');
+                return;
+            }
+            logfile.info('New FW is available');
+            const isSnapUpdate = newManifestFile.find(element => element.filetype === 'snap');
+            if (isSnapUpdate) {
+                const pidToKill = os.getFrontendPid();
+                await os.executeShellCommand(`kill -9 ${pidToKill}`, logfile, true);
+            }
+            const fileList = newManifestFile.map((item) => {
+                logfile.info(`Downloading ${item.filename}`);
+                return azureOp.downloadFile(blobSvc, firmwareContainer, item.filename, path.join(dir, 'tmp', item.filename));
+            });
+            await Promise.all(fileList);
+            logfile.info('Download complete, checking hashes');
+            azureOp.checkFilesHash(newManifestFile, path.join(dir, 'tmp'));
+            logfile.info('Hashes are fine');
+            const promises = newManifestFile.map((item) => {
+                logfile.info(`updating ${item.filetype}`);
+                switch (item.filetype) {
+                    case 'snap':
+                        return os.executeShellCommand(`kill -9 ${os.getFrontendPid()}`, logfile, true)
+                            .then(() => {
+                                return os.executeShellCommand(`sudo snap install --classic --dangerous ${path.join(dir, 'tmp', item.filename)}`, logfile, false);
+                            });
+                    case 'stm':
+                        return os.executeShellCommand(`cp -f ${path.join(dir, 'tmp', item.filename)} ${dir}`, logfile, false);
+                    case 'txz':
+                        return os.executeShellCommand(`tar -xf ${path.join(dir, 'tmp', item.filename)} -C ${dir}`, logfile, false);
+                    default: throw new Error(`Invalid filetype ${item.filetype}`);
+                }
+            });
+            await Promise.all(promises);
+            await os.executeShellCommand(`cp -f ${path.join(dir, 'tmp', 'manifestFile.json')} ${path.join(dir, 'tmp', 'manifestFileLocal.json')}`, logfile);
+            logfile.info('Done');
+        }
+        catch (err) {
+            logfile.error(err.message);
+        }
+    });
+
+
+program.command('synclogs')
+    .description('sync logs into Cloud AS')
+    .action(async () => {
+        const logfile = console;
+        const matches = glob.sync(`${m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
+        const blobSvc = azure.createBlobService(conString);
+        if (!matches.length) {
+            logfile.info('No log files to upload');
+            return;
+        }
+        try {
+            await azureOp.syncFiles(blobSvc, logContainer, matches);
+        }
+        catch (err) {
+            logfile.error(err.message);
+            return;
+        }
+
+        logfile.info('Download complete files uploaded:');
+        matches.forEach((item) => {
+            logfile.info(path.basename(item));
+            // fs.unlinkSync(item);
+        });
+    });
+
+function padBase32(str) {
+    switch (str.length % 8) {
+        case 2:
+            return `${str}======`;
+        case 4:
+            return `${str}====`;
+        case 5:
+            return `${str}===`;
+        case 7:
+            return `${str}=`;
+        default:
+            return str;
+    }
+}
+
+function fromHexString(hexString) {
+    return Uint8Array.from(Buffer.from(hexString, 'hex'));
+}
+
+function getEncryptedSecretBase32(buffer) {
+    const publicKey = fs.readFileSync(path.join(__dirname, 'public.key'));
+    const encryptedBuffer = crypto.publicEncrypt(publicKey, buffer);
+    fs.writeFileSync(path.join(__dirname, 'test'), encryptedBuffer);
+    const encoder = new Base32.Encoder({ type: 'rfc4648', lc: false, pad: '=' });
+    const str = encoder.write(encryptedBuffer).finalize();
+    return padBase32(str);
+}
+
+program.command('syncsecrets')
+    .description('sync M1-3200 secrets into Cloud AS')
+    .action(async () => {
+        const logfile = console;
+        secrets.initialize(m1mtfDir, logfile);
+        const now = new Date();
+        const filename = `/tmp/${dateTime.format(now, 'YYYY_MM_DD_HH_mm_ss')}.csv`;
+        const pattern = dateTime.compile('YYYY-MM-DDTHH:mm:ssZZ');
+        const date = dateTime.format(now, pattern);
+        try {
+            const blobSvc = azure.createBlobService(conString);
+            const db = secrets.initialize(m1mtfDir, logfile);
+            const records = db.getRecords();
+            if (!records.length) {
+                logfile.info('nothing to do');
+                return;
+            }
+            let firstLine = true;
+            records.forEach((board) => {
+                if (!board.uid || !board.secret || !board.boardS2Serial) return;
+                const data = {
+                    date,
+                    uid: `0000${board.uid.split(':').join('')}`,
+                    secret: board.secret,
+                    serial: board.boardS2Serial
+                };
+
+                const secretBuffer = getEncryptedSecretBase32(fromHexString(data.secret.substring(3)));
+                const line = `${data.date}|${data.uid}|${secretBuffer}|${data.serial.substring(3)}`;
+                if (firstLine) fs.writeFileSync(filename, `${line}\n`);
+                else fs.writeFileSync(filename, `${line}\n`, { flag: 'a+' });
+                firstLine = false;
+            });
+            if (firstLine) {
+                logfile.info('no secrets to sync');
+                return;
+            }
+            await azureOp.syncFiles(blobSvc, secretsContainer, [filename]);
+            fs.unlinkSync(filename);
+
+            records.forEach((board) => {
+                db.updateRecord(board.vendorSerial);
+            });
+
+            logfile.info('Done');
+        }
+        catch (err) {
+            logfile.error(err.message);
+        }
+    });
+
+
+program.parse(process.argv);

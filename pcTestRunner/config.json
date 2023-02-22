@@ -1,0 +1,13 @@
+{
+    "teensyServer": {
+        "tcpPort": 3000,
+        "myUdpPort": 10000,
+        "serialDev": "/dev/teensylink",
+        "serialBaud": 256000,
+        "logdir": "/home/lenel/logs",
+        "m1TestfServerLogFilename": "m1TesterServer",
+        "targetTerminalDev": "/dev/ttyUSB1",
+        "terminalBaud": 115200,
+        "shDelimiter": "#"
+    }
+}

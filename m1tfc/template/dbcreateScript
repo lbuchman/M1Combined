@@ -1,0 +1,31 @@
+-- ************************************************************************
+-- Records
+-- Created by:
+-- ************************************************************************
+-- Table Creation
+CREATE TABLE records ( 
+	                  vendorSerial TEXT PRIMARY KEY,
+		              dateAndTime TEXT,
+					  uid TEXT UNIQUE,
+					  secret  TEXT UNIQUE,
+					  boardS2Serial TEXT UNIQUE,
+					  downloadedCumulus Integer,
+					  ictTestPassed  Integer,
+					  functionalTestPassed  Integer,
+					  flashProgrammed  Integer,
+					  cpuSerial Text,
+					  cloudPushed Integer
+					);
+
+CREATE TABLE UID    ( 
+	                  uid TEXT UNIQUE NOT NULL
+		            );
+		            
+CREATE TABLE Perm    ( 
+	                  mac Integer,
+	                  eeprom Integer
+		            );
+
+-- Triggers
+
+-- Default data

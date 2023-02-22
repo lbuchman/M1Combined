@@ -1,0 +1,116 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch ICT",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["ict", "-d", "2", "-s", "3022480016"]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch cleanUp",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["cleanup",    "-d", "2", "-s", "3022480016" ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch pushtocloud",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["pushtocloud",    "-d", "2", "-s", "3022480016" ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch progMAC",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["progmac",    "-d", "2", "-s", "3022480016" ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch Flash",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["flash",    "-d", "2", "-s", "3022480016" ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch EEPROM",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["eeprom", "-d", "2", "-s", "3022480016" ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch Finalize",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["finalize", "-d", "2", "-s", "3022480016" ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch FuncTest",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["functest",  "-d", "2", "-s", "3022480016" ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch makelabel",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["makelabel", "-d", "2", "-s", "3022480016" ]
+        }
+    ]
+}

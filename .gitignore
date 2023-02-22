@@ -1,11 +1,71 @@
-CMakeLists.txt.user
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
-Makefile
-cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
-_deps
+STMicroelectronics.txz
+*.swp
+m1CloudClient*
+m1client-*
+*_
+gui/gui
+gui/gui.dbg
+.DS_Store
+*.dSYM
+*.res
+*.snap
+node_modules
+Teensyduino.dbg
+Teensyduino
+*.base64
+synapse
+lib/
+backup/
+gui/backup/
+gui/lib/x86_64-win64/
+gui/merchwrig.dbg
+pi/fpc/link90694.res
+pi/fpc/bdArm.dbg
+pi/fpc/bdArm
+pi/fpc/lib/aarch64-linux
+pi/fpc/pasNetLib/source/lib/lib/aarch64-linux/
+pi/fpc/pasNetLib/source/lib/lib/x86_64-linux
+pi/fpc/lib/aarch64-linux/
+pi/fpc/backup/
+pi/fpc/lib/x86_64-linux/
+
+
+node_modules/
+package-lock.json
+.kdev4/
+*.kdev4
+Linux-XRLS2-Spy.kdev4
+extLib/
+build
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app

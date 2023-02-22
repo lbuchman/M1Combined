@@ -1,0 +1,17 @@
+[Unit]
+Description=scanner
+After=network.target
+StartLimitBurst=64000
+StartLimitIntervalSec=33
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/startscanner.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+Alias=scanner
+
+

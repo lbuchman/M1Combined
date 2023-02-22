@@ -1,0 +1,204 @@
+object ConfigForm: TConfigForm
+  Left = 830
+  Height = 866
+  Top = 372
+  Width = 1355
+  Caption = 'Configuration'
+  ClientHeight = 819
+  ClientWidth = 1355
+  DesignTimePPI = 192
+  Menu = MainMenu1
+  LCLVersion = '2.2.4.0'
+  object Label1: TLabel
+    Left = 16
+    Height = 37
+    Top = 39
+    Width = 185
+    Caption = 'Ict FW FilePath'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 16
+    Height = 37
+    Top = 102
+    Width = 264
+    Caption = 'Flash Layout FilePath'
+    ParentColor = False
+  end
+  object Label3: TLabel
+    Left = 16
+    Height = 37
+    Top = 165
+    Width = 309
+    Caption = 'Programming Command'
+    ParentColor = False
+  end
+  object Label4: TLabel
+    Left = 16
+    Height = 37
+    Top = 227
+    Width = 219
+    Caption = 'Scanner Udp Port'
+    ParentColor = False
+  end
+  object Label5: TLabel
+    Left = 16
+    Height = 37
+    Top = 290
+    Width = 157
+    Caption = 'M1SerialDev'
+    ParentColor = False
+  end
+  object Label6: TLabel
+    Left = 16
+    Height = 37
+    Top = 353
+    Width = 168
+    Caption = 'Log Directory'
+    ParentColor = False
+  end
+  object Label7: TLabel
+    Left = 16
+    Height = 37
+    Top = 415
+    Width = 203
+    Caption = 'M1 TerminalDev'
+    ParentColor = False
+  end
+  object Label8: TLabel
+    Left = 16
+    Height = 37
+    Top = 478
+    Width = 219
+    Caption = 'M1Tfc Executable'
+    ParentColor = False
+  end
+  object ictFWFilePathEdit: TEdit
+    Left = 353
+    Height = 48
+    Top = 24
+    Width = 981
+    TabOrder = 0
+  end
+  object FlashLayoutFilePath: TEdit
+    Left = 353
+    Height = 48
+    Top = 87
+    Width = 980
+    TabOrder = 1
+  end
+  object ProgrammingCommandEdit: TEdit
+    Left = 352
+    Height = 48
+    Top = 151
+    Width = 980
+    TabOrder = 2
+  end
+  object ScannerUdpPortEdit: TEdit
+    Left = 353
+    Height = 48
+    Top = 215
+    Width = 979
+    TabOrder = 3
+  end
+  object M1SerialDevEdit: TEdit
+    Left = 353
+    Height = 48
+    Top = 278
+    Width = 979
+    TabOrder = 4
+  end
+  object LogDirrectoryEdit: TEdit
+    Left = 353
+    Height = 48
+    Top = 342
+    Width = 979
+    TabOrder = 5
+  end
+  object M1TerminalDevEdit: TEdit
+    Left = 353
+    Height = 48
+    Top = 406
+    Width = 979
+    TabOrder = 6
+  end
+  object M1TfcExecutable: TEdit
+    Left = 353
+    Height = 48
+    Top = 469
+    Width = 979
+    TabOrder = 7
+  end
+  object Label9: TLabel
+    Left = 16
+    Height = 37
+    Top = 542
+    Width = 221
+    Caption = 'Run in Full Screen'
+    ParentColor = False
+  end
+  object RunInFullScreenEdit: TEdit
+    Left = 353
+    Height = 48
+    Top = 533
+    Width = 979
+    TabOrder = 8
+  end
+  object Label10: TLabel
+    Left = 16
+    Height = 37
+    Top = 616
+    Width = 143
+    Caption = 'Vendor Site'
+    ParentColor = False
+  end
+  object VendorSiteEdit1: TEdit
+    Left = 352
+    Height = 48
+    Top = 603
+    Width = 979
+    MaxLength = 2
+    TabOrder = 9
+  end
+  object UidRangeStartEdit: TEdit
+    Left = 354
+    Height = 48
+    Top = 678
+    Width = 977
+    MaxLength = 17
+    ReadOnly = True
+    TabOrder = 10
+  end
+  object Label11: TLabel
+    Left = 16
+    Height = 37
+    Top = 683
+    Width = 203
+    Caption = 'OUI Range Start'
+    ParentColor = False
+  end
+  object UidCountEdit: TEdit
+    Left = 354
+    Height = 48
+    Top = 744
+    Width = 971
+    MaxLength = 2
+    TabOrder = 11
+  end
+  object OidCountLabel: TLabel
+    Left = 16
+    Height = 37
+    Top = 749
+    Width = 259
+    Caption = 'OUI Current Counter'
+    ParentColor = False
+  end
+  object MainMenu1: TMainMenu
+    Left = 255
+    Top = 54
+    object SaveConfigMenuItem: TMenuItem
+      Caption = 'Save'
+      OnClick = SaveConfigMenuItemClick
+    end
+  end
+end

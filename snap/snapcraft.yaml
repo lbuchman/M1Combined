@@ -1,0 +1,64 @@
+name: m1tfd1 # you probably want to 'snapcraft register <name>'
+version: 42dbae8
+summary: M1 test fixture cli utility
+description: |
+  cli utility for testing M1-3200 in production
+
+grade: devel # must be 'stable' to release into candidate/stable channels
+confinement: classic
+
+base: core20
+
+apps:
+    cli:
+      command: bin/m1tfc
+      plugs: [network, network-bind]
+
+    app:
+      command: usr/bin/gui
+      plugs: [network, network-bind]
+      
+    scanner:
+      command: usr/local/bin/scanner
+      plugs: [network, network-bind]      
+      
+    startscanner:
+      command: usr/bin/startscanner.sh
+      restart-condition: always
+      daemon: simple
+      
+parts:
+    cli:
+      source: ./m1tfc/
+      source-type: local
+      plugin: npm
+      npm-node-version: 16.19.0
+      stage-packages: 
+          - musl
+          
+    app:
+      plugin: dump
+      source: ./gui
+      source-type: local
+      stage-packages: 
+          - musl
+      organize:
+        gui : usr/bin/gui
+      prime:
+      - usr/bin/
+      
+    scanner:
+      plugin: cmake
+      source: ./scanner
+      source-type: local
+      prime:
+      - usr/local
+
+    startscanner:
+      plugin: dump
+      source: ./scanner
+      source-type: local
+      organize:
+        startscanner.sh : usr/bin/startscanner.sh
+      prime:
+      - usr/bin/

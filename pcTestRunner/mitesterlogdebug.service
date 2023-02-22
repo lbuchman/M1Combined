@@ -1,0 +1,12 @@
+[Unit]
+Description=m1testerlogDebug log
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=frontail -n 10 -l 14000 --ui-hide-topbar --ui-highlight --ui-nondent  -p 81 /home/lenel/logs/m1TesterServerDebug.log
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+Alias=m1testerlogDebug

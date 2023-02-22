@@ -1,0 +1,50 @@
+1. Partition SD card
+Make sure to use good adapter
+#cd /home/lenel/stm32mp1-baremetal
+#scripts/partition-sdcard.sh
+
+2. Build
+make sure there is no any errors
+
+#cd /home/lenel/stm32mp1-baremetal/bootloaders/mp1-boot/
+#make
+
+3. Load to SD-Card
+#make load
+
+make sure to put correct device, 99% it will be /dev/sdb
+check the device with dmesg
+make sure the tranfer rate is less then 10MB/S, if transfer rate is greater
+then the data is written to file, not to sd-disk
+
+4. Run terminal
+picocom -b 115200 /dev/ttyACM0
+
+5. To use debugger
+I do not know how to initialize MP1 to not secure mode from GDB, so it is not working directly, but there is a work around with Sd-Card
+Make sure to run MP1-boot from SD-Card
+MP1 boot runs from RAM, not DDR
+start openocd
+#sudo openocd -f board/stm32mp15x_dk2.cfg  -c "gdb_flash_program enable"
+
+start ddd
+ ddd build/fsbl.elf --debugger arm-none-eabi-gdb
+ 
+ From DDD gdp command line run
+ target extended-remote localhost:3333
+ 
+ The debugger will break.
+ Since MP1-Boot is in the main loop, you code will be in the main loop
+ 
+cd ~/STMicroelectronics/STM32Cube/STM32CubeProgrammer/Drivers//rules/
+sudo cp 50-usb-conf.rules /etc/udev/rules.d/
+
+STM32_Programmer_CLI -c port=usb1 -d fsbl.stm32  0x1 -s 0x1
+
+confgpio a 14 output up
+
+confgpio a 14 output up
+1. Add 3 open drain outputs for relays
+2. Send to Saline cloth and two boards
+3.
+

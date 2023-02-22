@@ -1,0 +1,11 @@
+*.kdev4
+*.orig
+memo.txt
+*.tar.gz
+*.uimg
+*.bin
+*.elf
+*.d
+build/
+firmware_m4.h
+firmware_m4_vectors.h
