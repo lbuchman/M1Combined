@@ -143,7 +143,7 @@ function fromHexString(hexString) {
 }
 
 function getEncryptedSecretBase32(buffer) {
-    const publicKeyData = fs.readFileSync(path.join('/var/snap/m1mtf/current', publicKey));
+    const publicKeyData = fs.readFileSync(publicKey);
     const encryptedBuffer = crypto.publicEncrypt(publicKeyData, buffer);
     const encoder = new Base32.Encoder({ type: 'rfc4648', lc: false, pad: '=' });
     const str = encoder.write(encryptedBuffer).finalize();
