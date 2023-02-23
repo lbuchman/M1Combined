@@ -119,7 +119,7 @@ program.command('synclogs')
         logfile.info('Download complete files uploaded:');
         matches.forEach((item) => {
             logfile.info(path.basename(item));
-            // fs.unlinkSync(item);
+            fs.unlinkSync(item);
         });
     });
 
@@ -143,9 +143,8 @@ function fromHexString(hexString) {
 }
 
 function getEncryptedSecretBase32(buffer) {
-    const publicKeyData = fs.readFileSync(path.join(__dirname, publicKey));
+    const publicKeyData = fs.readFileSync(path.join('/var/snap/m1mtf/current', publicKey));
     const encryptedBuffer = crypto.publicEncrypt(publicKeyData, buffer);
-    fs.writeFileSync(path.join(__dirname, 'test'), encryptedBuffer);
     const encoder = new Base32.Encoder({ type: 'rfc4648', lc: false, pad: '=' });
     const str = encoder.write(encryptedBuffer).finalize();
     return padBase32(str);
