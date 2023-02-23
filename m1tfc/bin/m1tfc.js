@@ -291,7 +291,7 @@ program.command('functest')
             logfile.info('Executing m1-3200 functional test ...');
             process.env.SERIAL = options.serial;
             process.env.logDir = `${configData.m1mtfDir}/logs/${options.serial}`;
-            const funcTest = new FuncTest(options.serial, logfile);
+            const funcTest = new FuncTest(options.serial, configData, logfile);
             await funcTest.init(configData.testBoardTerminalDev, configData.serialBaudrate);
             await funcTest.run(configData.programmingCommand, configData.layoutFilePath, configData.login, configData.password, configData.m1SerialDev, '115200');
             // await funcTest.run(configData.programmingCommand, configData.layoutFilePath);

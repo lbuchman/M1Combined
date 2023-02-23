@@ -33,11 +33,11 @@ type
   { TmainForm }
 
   TmainForm = class(TForm)
+    OpenLog: TAction;
     FakeLed: TindLed;
     EnableSerialNumber: TAction;
     DebugLevel2: TAction;
     DevModeLabel: TLabel;
-    LogsMenuItem: TMenuItem;
     DebugLevel0: TAction;
     DebugLevel1: TAction;
     ActionList1: TActionList;
@@ -72,6 +72,7 @@ type
     procedure BarcodeScanEditTimerTimer(Sender: TObject);
     procedure EnableSerialNumberExecute(Sender: TObject);
     procedure LogsMenuItemClick(Sender: TObject);
+    procedure OpenLogExecute(Sender: TObject);
     procedure PublishLogMenuItemClick(Sender: TObject);
     procedure Panel1DblClick(Sender: TObject);
     procedure DoLabelSwitchClick(Sender: TObject);
@@ -311,6 +312,11 @@ begin
      Memo1.Lines.LoadFromFile(LogsOpenDialog1.Filename);
      Height := LogHeight;
   end;
+end;
+
+procedure TmainForm.OpenLogExecute(Sender: TObject);
+begin
+  LogsMenuItemClick(Sender);
 end;
 
 procedure TmainForm.PublishLogMenuItemClick(Sender: TObject);

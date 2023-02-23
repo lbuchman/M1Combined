@@ -18,10 +18,11 @@ const config = require('../src/config');
 const os = require('../src/os');
 const logger = require('../src/logger');
 
-const conString = 'DefaultEndpointsProtocol=https;AccountName=enel2anestingtsm;AccountKey=iltiV6hEaN4Y6l8tvyLQNsCnBX42oHQmfBDCmhGPjwhLgwAKGKtTgIn/hwhVNn5CG+1KAY23e0SE+ASti5kpzQ==;EndpointSuffix=core.windows.net';
 const logContainer = 'm1-3200-logs';
 const secretsContainer = 'm1-3200-secrets';
 const firmwareContainer = 'firmware';
+process.env.SNAP_DATA = '/var/snap/m1tfd1/current';
+const publicKey = path.join(process.env.SNAP_DATA, 'public.key');
 
 program
     .name('m1cli')
@@ -36,9 +37,10 @@ program.command('update')
         const logfile = logger.getLogger('m1cli', 'update', 'm1cli', '/tmp', debuglevel);
 
         try {
+            const configData = await config({});
             const dir = path.join(process.env.HOME, 'm1mtf');
             logfile.info('Checking for SW & FW update ...');
-            const blobSvc = azure.createBlobService(conString);
+            const blobSvc = azure.createBlobService(configData.conString);
             logfile.info('Downloading manifestFile');
             mkdirp.sync(path.join(dir, 'tmp'));
             await azureOp.downloadFile(blobSvc, firmwareContainer, 'manifestFile.json', path.join(dir, 'tmp', 'manifestFile.json'));
@@ -101,7 +103,7 @@ program.command('synclogs')
         const configData = await config({});
         const logfile = console;
         const matches = glob.sync(`${configData.m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
-        const blobSvc = azure.createBlobService(conString);
+        const blobSvc = azure.createBlobService(configData.conString);
         if (!matches.length) {
             logfile.info('No log files to upload');
             return;
@@ -141,8 +143,8 @@ function fromHexString(hexString) {
 }
 
 function getEncryptedSecretBase32(buffer) {
-    const publicKey = fs.readFileSync(path.join(__dirname, 'public.key'));
-    const encryptedBuffer = crypto.publicEncrypt(publicKey, buffer);
+    const publicKeyData = fs.readFileSync(path.join(__dirname, publicKey));
+    const encryptedBuffer = crypto.publicEncrypt(publicKeyData, buffer);
     fs.writeFileSync(path.join(__dirname, 'test'), encryptedBuffer);
     const encoder = new Base32.Encoder({ type: 'rfc4648', lc: false, pad: '=' });
     const str = encoder.write(encryptedBuffer).finalize();
@@ -160,7 +162,7 @@ program.command('syncsecrets')
         const pattern = dateTime.compile('YYYY-MM-DDTHH:mm:ssZZ');
         const date = dateTime.format(now, pattern);
         try {
-            const blobSvc = azure.createBlobService(conString);
+            const blobSvc = azure.createBlobService(configData.conString);
             const db = secrets.initialize(configData.m1mtfDir, logfile);
             const records = db.getRecords();
             if (!records.length) {
@@ -200,7 +202,5 @@ program.command('syncsecrets')
             logfile.error(err.message);
         }
     });
-
-process.env.SNAP_DATA = '/var/snap/m1tfd1/current';
 
 program.parse(process.argv);

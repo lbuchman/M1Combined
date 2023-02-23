@@ -28,9 +28,10 @@ let db;
 let client;
 
 module.exports = class FuncTest {
-    constructor(serial, log) {
+    constructor(serial, config, log) {
         this.logger = log;
         this.serial = serial;
+        this.config = config;
     }
 
     /**
@@ -51,7 +52,7 @@ module.exports = class FuncTest {
         try {
             const ipAddress = process.env.m1defaultIP;
             this.logger.info('Verifying MAC address');
-            const macProgram = new ProgramMac(tsv, this.serial, this.logger);
+            const macProgram = new ProgramMac(this.config, this.serial, this.logger);
             const macValue = await macProgram.getMac(programmer, false);
             const macAddress = macValue.mac;
             if (macAddress === '00:00:00:00:00:00') {

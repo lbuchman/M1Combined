@@ -32,7 +32,7 @@ module.exports = class ProgramMac {
       *
       * @param
       */
-    async run(programmer, config) {
+    async run(programmer) {
         try {
             const fwDir = process.env.fwDir;
             const db = sqliteDriver.initialize(this.logger);
@@ -111,7 +111,7 @@ module.exports = class ProgramMac {
         const fwDir = process.env.fwDir;
         await common.initializeTestFixture(null, false, null, null, this.logger);
         this.logger.debug('Programming TSV file ...');
-        const minimalTsv = tsv.makeMinimalTsv(this.tsv);
+        const minimalTsv = tsv.makeMinimalTsv(this.config.layoutFilePath);
         await common.waitDFU(programmer, this.logger);
         await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${minimalTsv}`, this.logger, false, false, 1024 * 200, fwDir);
         await delay(100);

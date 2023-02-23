@@ -6,7 +6,7 @@
 
 3. Edit configuration and enable lenel user auto login
 
-4. m1client-linux ??? chane path in snap config file
+4. m1client-linux ??? chane path in snap config file connectionstring in config.json put public key in snap_data
 
 
 9. Use install.txz file and unpack it to any directory. Change to this directory and run sudo ./install.sh script.

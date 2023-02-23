@@ -1859,10 +1859,6 @@ object mainForm: TmainForm
       Caption = 'Quit'
       OnClick = QuitMenuItemClick
     end
-    object LogsMenuItem: TMenuItem
-      Caption = 'Open Log'
-      OnClick = LogsMenuItemClick
-    end
     object PublishLogMenuItem: TMenuItem
       Caption = 'Publish Log'
       OnClick = PublishLogMenuItemClick
@@ -1890,6 +1886,11 @@ object mainForm: TmainForm
       Caption = 'EnableSerialNumber'
       OnExecute = EnableSerialNumberExecute
       ShortCut = 57427
+    end
+    object OpenLog: TAction
+      Caption = 'OpenLog'
+      OnExecute = OpenLogExecute
+      ShortCut = 16463
     end
   end
   object BarcodeScanEditTimer: TTimer
