@@ -11,10 +11,11 @@ const tsv = require('../utils/tsv');
 
 const log = console;
 module.exports = class ProgramMac {
-    constructor(tsv_, serial, log_) {
+    constructor(config, serial, log_) {
         this.logger = log_;
-        this.tsv = tsv_;
+        this.tsv = config.layoutFilePath;
         this.serial = serial;
+        this.config = config;
     }
 
     /**
@@ -31,7 +32,7 @@ module.exports = class ProgramMac {
       *
       * @param
       */
-    async run(programmer) {
+    async run(programmer, config) {
         try {
             const fwDir = process.env.fwDir;
             const db = sqliteDriver.initialize(this.logger);
@@ -47,8 +48,8 @@ module.exports = class ProgramMac {
             const word57 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp57}`, this.logger, false);
             const word58 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp58}`, this.logger, false);
             const cpuSerial = utils.getCPUSerial(word57);
-            db.updateCPUSerial(this.serial, cpuSerial);
-            if ((utils.getWordData(word57, utils.otp57) !== '0x00000000') || (utils.getWordData(word58, utils.otp58) !== '0x00000000')) {
+            if (!this.config.testNewMac) db.updateCPUSerial(this.serial, cpuSerial);
+            if (!this.config.testNewMac && (utils.getWordData(word57, utils.otp57) !== '0x00000000') && (utils.getWordData(word58, utils.otp58) !== '0x00000000')) {
                 const otpToMac = utils.otpToMac(utils.getWordData(word57, utils.otp57), utils.getWordData(word58, utils.otp58));
                 this.logger.warn(`OTP is not blank MAC Address is: ${otpToMac}`);
                 const dbRecord = db.getRecordFromMac(otpToMac);
@@ -65,6 +66,7 @@ module.exports = class ProgramMac {
             }
 
             const mac = utils.getNextMac(db.getLastUsedMac());
+            if (!utils.isString(mac)) throw new Error('DA Error, cannot get next MAC');
             const progData = utils.macToOtp(mac);
             this.logger.info('Programing OTP values ...');
             await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp57} value=${progData.oTp57}`, this.logger, false);
@@ -81,10 +83,9 @@ module.exports = class ProgramMac {
                 throw throwError;
             }
             this.logger.info(`MAC: ${mac} programmed`);
+            this.logger.debug('adding MAC to DB');
             db.updateUid(this.serial, mac);
             db.updateLastUsedMac(mac);
-
-            this.logger.debug('adding MAC to DB');
             this.logger.info('MAC programming is done and verified!!!');
             this.logger.info(`MAC Address is: ${mac}`);
             this.mac = mac;

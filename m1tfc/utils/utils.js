@@ -10,6 +10,10 @@ const os = require('../utils/os');
 const otp57 = 57;
 const otp58 = 58;
 
+function isString(x) {
+    return Object.prototype.toString.call(x) === '[object String]';
+}
+
 function testLogicalValue(value, voltageLevel, logicalValue) {
     if (logicalValue === 0) {
         if (value < voltageLevel * 0.2) return true;
@@ -259,5 +263,6 @@ module.exports = {
     printLabel,
     getCPUSerial,
     updateCumulusFile,
-    macToUid
+    macToUid,
+    isString
 };

@@ -38,6 +38,9 @@ if [ -z "STARTMAC" ]; then
    usage
    exit 1
 fi
+
+
+adduser saline
 echo $HOSTNAME > /tmp/hostname
 sudo mv /tmp/hostname /etc/hostname
 mkdir -p /home/lenel/m1mtf
@@ -57,7 +60,7 @@ echo BROTHER_QL_MODEL=QL-810W >> /tmp/etc/environment
 sudo mv /tmp/enviroment /etc/etc/environment
 cp -f rules.d/* /etc/udev/rules.d
 mkdir -p /home/lenel/.ssh
-echo "cp -f azurevmKeys id_rsa authorized_keys /home/lenel/.ssh"
+echo "cp -f cloud.key id_rsa authorized_keys /home/lenel/.ssh"
 cp -f azurevmKeys id_rsa /home/lenel/.ssh
 sudo chown lenel: * -R /home/lenel/.ssh
 chmod 600 /home/lenel/.ssh
@@ -76,8 +79,6 @@ rm /etc/resolv.conf
 ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 cp -f autossh.service /lib/systemd/system
 sed -i 's/20007/'"${SSHPORT}"'/'  /lib/systemd/system/autossh.service
-cp m1client-linux /usr/sbin
-echo "0  3  * * *   root /usr/sbin/m1client-linux update > /tmp/log" >> /etc/crontab
 curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
 sudo bash /tmp/nodesource_setup.sh
 sudo apt update
@@ -85,5 +86,12 @@ sudo apt  install nodejs
 cp -f m1client-linux /usr/sbin
 cp -f tf.db  /home/lenel/m1mtf
 sqlite3 /home/lenel/m1mtf/tf.db "insert into uid values ('${STARTMAC}')"
-m1client-linux update
+cp /etc/crontab /tmp
+echo "0  3  * * *   root /usr/bin/m1client update > /tmp/log" >> /tmp/crontab
+echo "20  3  * * *   root /usr/bin/m1client synclogs > /tmp/log" >> /tmp/crontab
+echo "20  3  * * *   root /usr/sbin/m1client syncsecrets > /tmp/log" >> /tmp/crontab
+cp -fr tfcroncli /usr/lib/node_modules/npm/node_modules/
+cd /usr/lib/node_modules/npm/node_modules/tfcroncli
+npm install -g
+m1client update
 

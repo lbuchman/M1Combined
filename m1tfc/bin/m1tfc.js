@@ -29,7 +29,6 @@ const configuration = {
     ictFWFilePath: `${process.env.HOME}/m1mtf/fsbl.stm32`,
     m1fwBase: `${process.env.HOME}/m1mtf/stm32mp15-lenels2-m1`,
     layoutFilePath: `${process.env.HOME}/m1mtf/stm32mp15-lenels2-m1/flashlayout_st-ls2m1-image-core/trusted//FlashLayout_emmc_stm32mp151f-ls2m1-trusted.tsv`,
-    m1mtfDir: `${process.env.HOME}/m1mtf`,
     programmingCommand: `${process.env.HOME}/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI`,
     m1SerialDev: '/dev/ttyUSB0',
     m1defaultIP: '192.168.0.251',
@@ -156,7 +155,7 @@ program.command('progmac')
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Executing program MAC command ...');
-            const macProgram = new ProgramMac(configData.layoutFilePath, options.serial, logfile);
+            const macProgram = new ProgramMac(configData, options.serial, logfile);
             await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
             if (options.readOnly) await macProgram.getMac(configData.programmingCommand, options.readOnly);
             else await macProgram.run(configData.programmingCommand);
@@ -204,7 +203,7 @@ program.command('pushtocloud')
     .action(async (options) => {
         const configData = await config(configuration);
         const now = new Date();
-        const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH');
+        const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_MM_SS');
         let logfile;
         try {
             logfile = logger.getLogger(options.serial, '  cloud', options.serial, configData.m1mtfDir, options.debug);
@@ -249,7 +248,8 @@ program.command('cleanup')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
-
+        const now = new Date();
+        const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_MM_SS');
         try {
             logfile = logger.getLogger(options.serial, '  clean', options.serial, configData.m1mtfDir, options.debug);
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
@@ -260,7 +260,7 @@ program.command('cleanup')
             const mac = dbRecord[0].uid;
             const uid = utils.macToUid(mac);
             logfile.info('Cleaning up ...');
-            await os.executeShellCommand(`tar -cJf ${configData.m1mtfDir}/logs/${uid}-${options.serial}.txz -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
+            await os.executeShellCommand(`tar -cJf ${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
             await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, false);
             logfile.info('Done');
             await delay(100);
@@ -375,9 +375,10 @@ const log = console;
 
 os.executeShellCommand('killall -9 STM32_Programmer_CLI', log, true)
     .then(async () => {
-        process.env.DBPATH = configuration.m1mtfDir;
-        mkdirp.sync(configuration.m1mtfDir);
-        mkdirp.sync(`${configuration.m1mtfDir}/logs`);
+        const configData = await config(configuration);
+        process.env.DBPATH = configData.m1mtfDir;
+        mkdirp.sync(configData.m1mtfDir);
+        mkdirp.sync(`${configData.m1mtfDir}/logs`);
         program.parse(process.argv);
     });
 // log.info(`Cmd line: ${process.argv.join('  ')}`);

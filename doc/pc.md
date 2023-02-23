@@ -3,37 +3,11 @@
 1. Install Ubuntu-Mate 20.04
 
 2. Setting->Power Mng->Disable Screen Saver and Screen Blank
-   
-3. Edit 
 
-   ```sudo nano /etc/default/grub
-   sudo nano /etc/default/grub # change CMDLINE_LINUX_DEFAULT="quiet pcie_aspm=off splash libata.noacpi=1"
-   sudo update-grub
-   ```
+3. Edit configuration and enable lenel user auto login
 
-10. Install nodejs 16
-    curl -sL https://deb.nodesource.com/setup_16.x -o nodesource_setup.sh
-    sudo bash nodesource_setup.sh
-    sudo apt update
-    sudo apt  install nodejs
+4. m1client-linux ??? chane path in snap config file
 
-11. edit
-
-    ```nano /etc/enviroment```
-
-    replace file with the context below
-
-
-```
-PATH="/snap/bin:/home/lenel/.local/bin:/home/lenel/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin:/opt/arm-gnu-toolchain-12.2.mpacbti-bet1-x86_64-arm-none-eabi/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
-export BROTHER_QL_PRINTER=usb://0x04f9:0x209c
-export BROTHER_QL_MODEL=QL-810W
-```
-
-
-
-
-add autossh, desktop program,keys
 
 9. Use install.txz file and unpack it to any directory. Change to this directory and run sudo ./install.sh script.
 

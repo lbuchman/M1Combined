@@ -14,10 +14,10 @@ const glob = require('glob');
 const path = require('path');
 const azureOp = require('../src/azureOp');
 const secrets = require('../src/secrets');
+const config = require('../src/config');
 const os = require('../src/os');
 const logger = require('../src/logger');
 
-const m1mtfDir = `${process.env.HOME}/m1mtf`;
 const conString = 'DefaultEndpointsProtocol=https;AccountName=enel2anestingtsm;AccountKey=iltiV6hEaN4Y6l8tvyLQNsCnBX42oHQmfBDCmhGPjwhLgwAKGKtTgIn/hwhVNn5CG+1KAY23e0SE+ASti5kpzQ==;EndpointSuffix=core.windows.net';
 const logContainer = 'm1-3200-logs';
 const secretsContainer = 'm1-3200-secrets';
@@ -26,7 +26,7 @@ const firmwareContainer = 'firmware';
 program
     .name('m1cli')
     .description('CLI utility retrieve M1-3200 manufacturing logs')
-    .version('0.1.0');
+    .version('0.2.0');
 
 program.command('update')
     .description('download and update software and firmware i the test fixture')
@@ -59,6 +59,7 @@ program.command('update')
             const isSnapUpdate = newManifestFile.find(element => element.filetype === 'snap');
             if (isSnapUpdate) {
                 const pidToKill = os.getFrontendPid();
+                logfile.info(`sending kill to ${pidToKill}`);
                 await os.executeShellCommand(`kill -9 ${pidToKill}`, logfile, true);
             }
             const fileList = newManifestFile.map((item) => {
@@ -97,8 +98,9 @@ program.command('update')
 program.command('synclogs')
     .description('sync logs into Cloud AS')
     .action(async () => {
+        const configData = await config({});
         const logfile = console;
-        const matches = glob.sync(`${m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
+        const matches = glob.sync(`${configData.m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
         const blobSvc = azure.createBlobService(conString);
         if (!matches.length) {
             logfile.info('No log files to upload');
@@ -150,15 +152,16 @@ function getEncryptedSecretBase32(buffer) {
 program.command('syncsecrets')
     .description('sync M1-3200 secrets into Cloud AS')
     .action(async () => {
+        const configData = await config({});
         const logfile = console;
-        secrets.initialize(m1mtfDir, logfile);
+        secrets.initialize(configData.m1mtfDir, logfile);
         const now = new Date();
         const filename = `/tmp/${dateTime.format(now, 'YYYY_MM_DD_HH_mm_ss')}.csv`;
         const pattern = dateTime.compile('YYYY-MM-DDTHH:mm:ssZZ');
         const date = dateTime.format(now, pattern);
         try {
             const blobSvc = azure.createBlobService(conString);
-            const db = secrets.initialize(m1mtfDir, logfile);
+            const db = secrets.initialize(configData.m1mtfDir, logfile);
             const records = db.getRecords();
             if (!records.length) {
                 logfile.info('nothing to do');
@@ -198,5 +201,6 @@ program.command('syncsecrets')
         }
     });
 
+process.env.SNAP_DATA = '/var/snap/m1tfd1/current';
 
 program.parse(process.argv);
