@@ -7,6 +7,11 @@ const delay = require('delay');
 const chargerIntervalCheck = 5; /* 5 sec */
 const chargerMinVoltage = 12.6;
 
+const batteryStateStatusPins = [
+    { name: 'nBATT_PRESENT', port: 'g', pin: 7, pinNameOnTestBoard: 'none' },
+    { name: 'nDCIN_PWR', port: 'e', pin: 9, pinNameOnTestBoard: 'none' }
+];
+
 async function getChargingVoltage(timeout) {
     if (timeout - new Date() / 1000 > 0) {
         const batChargeVoltage = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName('batChargeVAD')}`);
@@ -24,13 +29,40 @@ async function getChargingVoltage(timeout) {
 
 async function test(logger) {
     try {
-        logger.info('Testing power to battery switch circuit ...');
+        logger.info('Testing power to battery switch circuit, all power on ...');
+        await targetICTLink.sendCommand(`confgpio ${batteryStateStatusPins[0].port} ${batteryStateStatusPins[0].pin} input none`);
+        await targetICTLink.sendCommand(`confgpio ${batteryStateStatusPins[1].port} ${batteryStateStatusPins[1].pin} input none`);
+        await testBoardLink.targetPower(true);
+        await testBoardLink.batteryLoadOn(true);
+        await delay(500);
+        let battPresent = await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[0].port} ${batteryStateStatusPins[0].pin}`);
+        let dcinPresent = await await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[1].port} ${batteryStateStatusPins[1].pin}`);
+        if (battPresent.value !== 1) throw new Error('nBATT_PRESENT status bit is 1, expeced 0');
+        if (dcinPresent.value !== 0) throw new Error('nDCIN_PWR status bit is 1, expeced 0');
+        logger.info('Testing power to battery switch circuit, DC power off ...');
+        await testBoardLink.targetPower(true);
+        await testBoardLink.batteryLoadOn(false);
+        await delay(500);
+        battPresent = await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[0].port} ${batteryStateStatusPins[0].pin}`);
+        dcinPresent = await await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[1].port} ${batteryStateStatusPins[1].pin}`);
+        if (battPresent.value !== 1) throw new Error('nBATT_PRESENT status bit is 1, expeced 0');
+        if (dcinPresent.value !== 0) throw new Error('nDCIN_PWR status bit is 1, expeced 0');
+        logger.info('Testing power to battery switch circuit, DC power off ...');
         await testBoardLink.targetPower(false);
         await testBoardLink.batteryLoadOn(true);
         await delay(500);
-        await targetICTLink.sendCommand('getfwrev');
+        battPresent = await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[0].port} ${batteryStateStatusPins[0].pin}`);
+        dcinPresent = await await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[1].port} ${batteryStateStatusPins[1].pin}`);
+        if (battPresent.value !== 1) throw new Error('nBATT_PRESENT status bit is 1, expeced 0');
+        if (dcinPresent.value !== 1) throw new Error('nDCIN_PWR status bit is 1, expeced 0');
         logger.info('Testing battery charging circuit ...');
         await testBoardLink.targetPower(true);
+        battPresent = await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[0].port} ${batteryStateStatusPins[0].pin}`);
+        dcinPresent = await await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[1].port} ${batteryStateStatusPins[1].pin}`);
+        if (battPresent.value !== 1) throw new Error('nBATT_PRESENT status bit is 1, expeced 0');
+        if (dcinPresent.value !== 1) throw new Error('nDCIN_PWR status bit is 1, expeced 0');
+        battPresent = await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[0].port} ${batteryStateStatusPins[0].pin}`);
+        dcinPresent = await await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[1].port} ${batteryStateStatusPins[1].pin}`);
         const batVoltage = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName('bat12VAD')}`);
         if (!batVoltage.status) {
             throw Error('Target Board control command <getiopin bat12VAD> failed');
