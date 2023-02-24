@@ -60,9 +60,8 @@ program.command('update')
             logfile.info('New FW is available');
             const isSnapUpdate = newManifestFile.find(element => element.filetype === 'snap');
             if (isSnapUpdate) {
-                const pidToKill = os.getFrontendPid();
-                logfile.info(`sending kill to ${pidToKill}`);
-                await os.executeShellCommand(`kill -9 ${pidToKill}`, logfile, true);
+                logfile.info('sending kill to apps');
+                await os.executeShellCommand('killall -9 gui', logfile, true);
             }
             const fileList = newManifestFile.map((item) => {
                 logfile.info(`Downloading ${item.filename}`);

@@ -336,7 +336,7 @@ program.command('makelabel')
             logfile.info('Printing Label ...');
             await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
             if (!options.express) {
-                const macProgram = new ProgramMac(configData.layoutFilePath, options.serial, logfile);
+                const macProgram = new ProgramMac(configData, options.serial, logfile);
                 await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
                 const retValue = await macProgram.getMac(configData.programmingCommand, options.readOnly);
                 if (retValue.exitCode !== exitCodes.normalExit) throw new Error('Could not read i2c EEPROM');

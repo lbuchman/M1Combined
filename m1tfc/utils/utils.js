@@ -269,7 +269,6 @@ module.exports = {
     waitTargetDown,
     printLabel,
     getCPUSerial,
-    updateCumulusFile,
     macToUid,
     isString,
     printCustomLabel
