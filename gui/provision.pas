@@ -23,7 +23,7 @@ type
     constructor Create(CreateSuspended: boolean);
     destructor Destroy; override;
     procedure ExecuteThread;
-    procedure InterruptTest();
+    procedure UserInterruptTest;
     function GetTermnateTestStatus: boolean;
     procedure ResetTest();
   end;
@@ -42,9 +42,10 @@ begin
   Result := TermnateTest;
 end;
 
-procedure TProvisionThread.InterruptTest();
+procedure TProvisionThread.UserInterruptTest;
 begin
   TermnateTest := True;
+
 end;
 
 procedure TProvisionThread.Execute;
@@ -66,6 +67,7 @@ begin
     begin
       Synchronize(MainForm.ResetLeds);
       TermnateTest := False;
+      Synchronize(MainForm.DoLabelError);
       continue;
     end;
     Synchronize(MainForm.MacProgSwitchClick_);
@@ -73,6 +75,7 @@ begin
     if (TermnateTest) then
     begin
       Synchronize(MainForm.ResetLeds);
+      Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
       continue;
     end;
@@ -81,6 +84,7 @@ begin
     if (TermnateTest) then
     begin
       Synchronize(MainForm.ResetLeds);
+      Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
       continue;
     end;
@@ -89,6 +93,7 @@ begin
     if (TermnateTest) then
     begin
       Synchronize(MainForm.ResetLeds);
+      Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
       continue;
     end;
@@ -97,6 +102,7 @@ begin
     if (TermnateTest) then
     begin
       Synchronize(MainForm.ResetLeds);
+      Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
       continue;
     end;
@@ -106,6 +112,7 @@ begin
     if (TermnateTest) then
     begin
       Synchronize(MainForm.ResetLeds);
+      Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
       continue;
     end;

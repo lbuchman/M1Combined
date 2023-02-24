@@ -311,10 +311,22 @@ program.command('makelabel')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
     .option('-e, --express', 'use database data to print the label')
+    .option('-l, --label <string>', 'print custom label')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
         try {
+            if (options.label) {
+                const lines = options.label.split(',');
+                try {
+                    await utils.printCustomLabel(lines, logger);
+                }
+                catch (err) {
+                    //
+                }
+                process.exit(exitCodes.normalExit);
+            }
+
             process.env.fwDir = configData.m1fwBase;
             let uid;
             let eepromData = {};
@@ -352,7 +364,6 @@ program.command('makelabel')
             logfile.debug('Sending data to the printer');
             await utils.printLabel(uid, eepromData.serial.substring(3), logfile);
             logfile.debug('Label is printed');
-            utils.updateCumulusFile(uid, `${configData.m1mtfDir}/Cumulus/${options.serial}.json`);
             await buzzer.buzzerBeepSuccess();
             await testBoardLink.targetPower(false);
             await testBoardLink.batteryOn(false);

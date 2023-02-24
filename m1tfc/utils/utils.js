@@ -211,17 +211,6 @@ function checkDbRecord(records, full) {
     return true;
 }
 
-function updateCumulusFile(uid, cumulusFile) {
-    try {
-        const data = fs.readJsonSync(cumulusFile);
-        data.uid = uid;
-        fs.writeJsonSync(cumulusFile, data);
-    }
-    catch (err) {
-        // just ignore it
-    }
-}
-
 function macToUid(mac) {
     return `0000${mac.split(':').join('')}`;
 }
@@ -233,6 +222,24 @@ async function printLabel(mac, serial, logger) {
     const pritnLabelCmd = `brother_ql print -l 29 ${pngPath}`;
 
     const labelTxt = `text 1,1 "\nM1-3200\n${serial}\n${macToUid(mac)}\n${mac}\n"`;
+    await fs.writeFile(labelPath, labelTxt);
+
+    await os.executeShellCommand(convertCmd, logger, false, false);
+    try {
+        await os.executeShellCommand(pritnLabelCmd, logger, false, false);
+    }
+    catch (err) {
+        throw new Error(`command to print Label failed. Is printer on?: ${pritnLabelCmd}`);
+    }
+}
+
+async function printCustomLabel(lines, logger) {
+    const labelPath = '/tmp/label.txt';
+    const pngPath = '/tmp/label.png';
+    const convertCmd = `convert -size 306x200 xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
+    const pritnLabelCmd = `brother_ql print -l 29 ${pngPath}`;
+
+    const labelTxt = `text 1,1 "\nM1-3200\nTesting Failed\n${lines[0]}\n"`;
     await fs.writeFile(labelPath, labelTxt);
 
     await os.executeShellCommand(convertCmd, logger, false, false);
@@ -264,5 +271,6 @@ module.exports = {
     getCPUSerial,
     updateCumulusFile,
     macToUid,
-    isString
+    isString,
+    printCustomLabel
 };

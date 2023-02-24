@@ -110,6 +110,7 @@ type
     Leds: array[0..5] of ^TindLed;
     MemoCopyTxt : String;
     DebugLevel : String;
+    lastCommand : String;
     function RunM1Tfc(command: string; arg: array of string; var Led: TindLed): integer;
     function CheckSerial(): boolean;
 
@@ -132,6 +133,7 @@ type
     procedure Add25ToProgressBar;
     procedure Add30ToProgressBar;
     procedure ClearbusyFlag1;
+    procedure DoLabelError;
   end;
 
 var
@@ -236,6 +238,18 @@ begin
   arg[4] := '';
   if ClearProgressBar then colorProgress1.Progress := 0;
   RunM1Tfc('makelabel', arg, DoLabelSwitch);
+end;
+
+procedure TmainForm.DoLabelError();
+var
+  arg: array[0..8] of string;
+begin
+  arg[0] := '-l';
+  arg[1] := lastCommand + ',error';
+  arg[2] := '-d';
+  arg[3] := DebugLevel;
+  arg[4] := '';
+  RunM1Tfc('makelabel', arg, FakeLed);
 end;
 
 procedure TmainForm.DoCleanupCmd();
@@ -523,7 +537,7 @@ begin
     aProcess.Terminate(-1);
     Memo1.Lines.Add(log('warn', targetVendorSerial.text, 'Terminated'));
   end;
-  provisionThread.InterruptTest();
+  provisionThread.UserInterruptTest();
 end;
 
 procedure TmainForm.EEPROMSwitchClick(Sender: TObject);
@@ -552,6 +566,10 @@ procedure TmainForm.LedTimerTimer(Sender: TObject);
 var
   led: ^TindLed;
 begin
+  if LedTimer.Tag = 1 then begin
+     LedTimer.Tag := 0;
+     exit;
+  end;
   for led in Leds do
   begin
     if led^.tag = 1 then
@@ -580,6 +598,7 @@ var
   startTime : Integer;
   stdout : String;
 begin
+  lastCommand := command;
   provisionThread.ResetTest();
   startTime := logger.getEpochTime();
   MemoCopyTxt := '';
@@ -638,6 +657,7 @@ begin
   begin
     Led.LedColorOff := clRed;
     InterruptMenuItemClick(self);
+    Led.Tag := 0;
   end;
   AProcess.Free;
   AProcess := nil;
@@ -649,6 +669,7 @@ begin
   end;
   if provisionThread.GetTermnateTestStatus then begin
    Led.LedColorOff := clRed;
+   Led.Tag := 0;
    retValue := 1;
   end;
   newSerialNumberIsAvailable := False;
