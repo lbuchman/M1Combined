@@ -96,7 +96,7 @@ module.exports = class FuncTest {
             await client.execCommand(`cmp ${controlFIle} ${sramFIle}`);
             this.logger.info('SPI test passed');
             this.logger.info('Testing WD');
-            await client.execCommand('sync', 2000);
+            await client.execCommand('sync');
             await client.execCommand('echo 1 > /proc/sys/kernel/sysrq');
             await client.execCommand(`echo "#!/bin/sh\nrm -f  /etc/timestamp\nsleep 3\nsync\necho c > /proc/sysrq-trigger\n" > ${wdScript}`);
             await client.execCommand('sync');
@@ -109,15 +109,15 @@ module.exports = class FuncTest {
             this.logger.info('Waiting for WD reboot');
             await utils.waitTargetDown(ipAddress, new Date() / 1000 + 100);
             this.logger.debug('Waiting for login promt');
-            await m1TermLink.waitLoginPrompt(new Date() / 1000 + 120);
+            await m1TermLink.waitLoginPrompt(new Date() / 1000 + 200);
             this.logger.info('Logging to M1');
             await m1TermLink.logInToTerminal(login, password);
             this.logger.debug('Initializing M1');
             await m1TermLink.initTestMode();
             this.logger.debug('Reconnecting to M1');
             await client.reConnect('root', password, null, new Date() / 1000 + 30);
-            await client.execCommand('/etc/init.d/s2nnweb stop');
-            await client.execCommand('/etc/init.d/s2nn stop');
+            await client.execCommand('/etc/init.d/s2nnweb stop', true);
+            await client.execCommand('/etc/init.d/s2nn stop', true);
             this.logger.info('WD test passed');
             await delay(3000);
             const dateTime = await client.execCommand('hwclock -r | cut -b 1,2,3,4');
@@ -136,7 +136,7 @@ module.exports = class FuncTest {
             await client.execCommand('hwclock -w');
             this.logger.info('Sync clocks to PC');
             this.logger.info(`M1 clock is set to ${pcDateTime.toISOString()}`);
-            await client.execCommand(`touch ${M1TestFileFlag}`, 2000);
+            await client.execCommand(`touch ${M1TestFileFlag}`, true);
             this.logger.info(`Creating file ${M1TestFileFlag}`);
             await client.disconnect();
             await delay(2000);

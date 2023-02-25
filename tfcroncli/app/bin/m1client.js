@@ -38,7 +38,7 @@ program.command('update')
 
         try {
             const configData = await config({});
-            const dir = path.join(process.env.HOME, 'm1mtf');
+            const dir = configData.m1mtfDir;
             logfile.info('Checking for SW & FW update ...');
             const blobSvc = azure.createBlobService(configData.conString);
             logfile.info('Downloading manifestFile');
@@ -71,7 +71,7 @@ program.command('update')
             logfile.info('Download complete, checking hashes');
             azureOp.checkFilesHash(newManifestFile, path.join(dir, 'tmp'));
             logfile.info('Hashes are fine');
-            const promises = newManifestFile.map((item) => {
+            const promises = newManifestFile.map(async (item) => {
                 logfile.info(`updating ${item.filetype}`);
                 switch (item.filetype) {
                     case 'snap':
@@ -82,6 +82,7 @@ program.command('update')
                     case 'stm':
                         return os.executeShellCommand(`cp -f ${path.join(dir, 'tmp', item.filename)} ${dir}`, logfile, false);
                     case 'txz':
+                        await os.executeShellCommand(`rm -fr ${path.join(dir, 'stm32mp15')}*`, logfile, false);
                         return os.executeShellCommand(`tar -xf ${path.join(dir, 'tmp', item.filename)} -C ${dir}`, logfile, false);
                     default: throw new Error(`Invalid filetype ${item.filetype}`);
                 }

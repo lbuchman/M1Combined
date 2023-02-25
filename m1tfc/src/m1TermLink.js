@@ -20,7 +20,7 @@ module.exports = class M1TermLink {
       * @param {object} log
     */
     async initSerial(devFile, baud, log, dump) {
-        await this.serialLink.initSerial(devFile, baud, log, false, dump);
+        await this.serialLink.initSerial(devFile, baud, log, dump);
     }
 
     /**
