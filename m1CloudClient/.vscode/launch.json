@@ -1,0 +1,56 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch List",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1CloudClient.js",
+            "args": ["list"]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch getlog",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1CloudClient.js",
+            "args": ["getlog", "0000000FA6000003"]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch getsecrets",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1CloudClient.js",
+            "args": ["getsecrets", "2023"]
+        }, 
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch downloadfwsw",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1CloudClient.js",
+            "args": ["uploadfw", "-c", "/home/lbuchman/myGitHub/M1Combined/tfcroncli/m1client_42dbae8_amd64.snap", "-t", "/home/lbuchman/fw/m1firmware.txz", "-m", "/home/lbuchman/fw/fsbl.stm32", "-s", "/home/lbuchman/myGitHub/M1Combined/m1tfd1_AAB45432_amd64.snap"]
+        }
+    ]
+}

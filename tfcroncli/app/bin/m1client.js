@@ -74,7 +74,7 @@ program.command('update')
             const promises = newManifestFile.map(async (item) => {
                 logfile.info(`updating ${item.filetype}`);
                 switch (item.filetype) {
-                    case 'snapClient':
+                    case 'snapclient':
                         return os.executeShellCommand(`kill -9 ${os.getFrontendPid()}`, logfile, true)
                             .then(() => {
                                 os.executeShellCommand(`sudo sed -i '/${item.filename}/d' /etc/crontab`, logfile)
