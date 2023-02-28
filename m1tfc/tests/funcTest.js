@@ -116,8 +116,8 @@ module.exports = class FuncTest {
             await m1TermLink.initTestMode();
             this.logger.debug('Reconnecting to M1');
             await client.reConnect('root', password, null, new Date() / 1000 + 30);
-            await client.execCommand('/etc/init.d/s2nnweb stop', true);
-            await client.execCommand('/etc/init.d/s2nn stop', true);
+            await client.execCommand('/etc/init.d/s2nnweb stop');
+            await client.execCommand('/etc/init.d/s2nn stop');
             this.logger.info('WD test passed');
             await delay(3000);
             const dateTime = await client.execCommand('hwclock -r | cut -b 1,2,3,4');
@@ -136,7 +136,7 @@ module.exports = class FuncTest {
             await client.execCommand('hwclock -w');
             this.logger.info('Sync clocks to PC');
             this.logger.info(`M1 clock is set to ${pcDateTime.toISOString()}`);
-            await client.execCommand(`touch ${M1TestFileFlag}`, true);
+            await client.execCommand(`touch ${M1TestFileFlag}`);
             this.logger.info(`Creating file ${M1TestFileFlag}`);
             await client.disconnect();
             await delay(2000);

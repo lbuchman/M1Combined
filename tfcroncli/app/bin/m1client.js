@@ -74,6 +74,14 @@ program.command('update')
             const promises = newManifestFile.map(async (item) => {
                 logfile.info(`updating ${item.filetype}`);
                 switch (item.filetype) {
+                    case 'snapClient':
+                        return os.executeShellCommand(`kill -9 ${os.getFrontendPid()}`, logfile, true)
+                            .then(() => {
+                                os.executeShellCommand(`sudo sed -i '/${item.filename}/d' /etc/crontab`, logfile)
+                                .then (() => {
+                                    os.executeShellCommand(`sudo echo "20  4  * * *   root snap install --classic --dangerous ${path.join(dir, 'tmp', item.filename)}" >> /etc/crontab`, logfile)
+                                })
+                            });
                     case 'snap':
                         return os.executeShellCommand(`kill -9 ${os.getFrontendPid()}`, logfile, true)
                             .then(() => {
