@@ -87,9 +87,9 @@ cp -f m1client-linux /usr/sbin
 cp -f tf.db  /home/lenel/m1mtf
 sqlite3 /home/lenel/m1mtf/tf.db "insert into uid values ('${STARTMAC}')"
 cp /etc/crontab /tmp
-echo "0  3  * * *   root /usr/bin/m1client update > /tmp/log" >> /tmp/crontab
-echo "20  3  * * *   root /usr/bin/m1client synclogs > /tmp/log" >> /tmp/crontab
-echo "20  3  * * *   root /usr/sbin/m1client syncsecrets > /tmp/log" >> /tmp/crontab
+echo "0  3  * * *   root /snap/bin/m1client update > /tmp/log" >> /tmp/crontab
+echo "20  3  * * *   root /snap/bin/m1client synclogs > /tmp/log" >> /tmp/crontab
+echo "20  3  * * *   root /snap/sbin/m1client syncsecrets > /tmp/log" >> /tmp/crontab
 cp -fr tfcroncli /usr/lib/node_modules/npm/node_modules/
 cd /usr/lib/node_modules/npm/node_modules/tfcroncli
 npm install -g

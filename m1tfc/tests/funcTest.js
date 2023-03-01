@@ -123,9 +123,10 @@ module.exports = class FuncTest {
             const dateTime = await client.execCommand('hwclock -r | cut -b 1,2,3,4');
             if (rtcDateYear !== dateTime) throw new Error(`RTC validation failed expected ${rtcDateYear} got ${dateTime}`);
             this.logger.info('RTC is validated');
-            // this.logger.debug('Comparing SPI RAM, after reboot');
-            // await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
-            // const isTheSame = await client.execCommand('echo $?');
+            this.logger.debug('Comparing SPI RAM, after reboot');
+            await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
+            const isTheSame = await client.execCommand('echo $?');
+            await client.execCommand(`dd if=/dev/zero of=${sramFIle} bs=${sRamSize} count=1`);
             await client.execCommand(`rm -f ${controlFIle}`);
             await client.execCommand(`rm -f ${wdScript}`);
             // if (isTheSame !== '0') throw new Error('SPI RAM validation failed');
