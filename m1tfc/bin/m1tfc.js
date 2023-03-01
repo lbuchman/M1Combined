@@ -216,12 +216,12 @@ program.command('pushtocloud')
                 if (!fs.existsSync(`${configData.m1mtfDir}/logs/${uid}-${options.serial}.txz`)) throw new Error('Logs do not exist');
             }
             if (fs.existsSync(`${configData.m1mtfDir}/logs/${options.serial}`)) {
-                await os.executeShellCommand(`tar -cJf ${configData.m1mtfDir}/logs/${uid}-${options.serial}.txz -C ${configData.m1mtfDir}/logs/${options.serial} .`, logfile, false);
+                await os.executeShellCommand(`tar -cJf ${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz -C ${configData.m1mtfDir}/logs/${options.serial} .`, logfile, false);
             }
 
             const blobSvc = azure.createBlobService(configData.asConnectionString);
             await new Promise(async (resolve, reject) => {
-                blobSvc.createBlockBlobFromLocalFile('m1-3200-logs', `${timeStamp}_${uid}-${options.serial}.txz`, `${configData.m1mtfDir}/logs/${uid}-${options.serial}.txz`, async (error) => {
+                blobSvc.createBlockBlobFromLocalFile('m1-3200-logs', `${timeStamp}_${uid}-${options.serial}.txz`, `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz`, async (error) => {
                     if (!error) {
                         resolve();
                         logfile.info(`uploaded file ${timeStamp}_${uid}-${options.serial}.txz`);
