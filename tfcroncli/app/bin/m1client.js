@@ -7,8 +7,8 @@ const { mkdirp } = require('mkdirp');
 const crypto = require('crypto');
 const fs = require('fs-extra');
 const lodash = require('lodash');
-const Base32 = require('base32.js');
 const dateTime = require('date-and-time');
+const Base32 = require('base32.js');
 const azure = require('azure-storage');
 const glob = require('glob');
 const path = require('path');
@@ -34,13 +34,16 @@ program.command('update')
     .option('-f, --force', 'force update')
     .action(async (options) => {
         const debuglevel = '2';
-        const logfile = logger.getLogger('m1cli', 'update', 'm1cli', '/tmp', debuglevel);
-
+        let logfile;
+        let dir;
+        let blobSvc;
         try {
+            os.executeShellCommand(`sudo sed -i '/root snap install/d' /etc/crontab`, logfile)
             const configData = await config({});
-            const dir = configData.m1mtfDir;
+            dir = configData.m1mtfDir;
+            logfile = logger.getLogger('m1cli', 'update', 'm1cli', `${configData.m1mtfDir}/logs/m1cli`, debuglevel);
             logfile.info('Checking for SW & FW update ...');
-            const blobSvc = azure.createBlobService(configData.conString);
+            blobSvc = azure.createBlobService(configData.conString);
             logfile.info('Downloading manifestFile');
             mkdirp.sync(path.join(dir, 'tmp'));
             await azureOp.downloadFile(blobSvc, firmwareContainer, 'manifestFile.json', path.join(dir, 'tmp', 'manifestFile.json'));
@@ -77,10 +80,7 @@ program.command('update')
                     case 'snapclient':
                         return os.executeShellCommand(`kill -9 ${os.getFrontendPid()}`, logfile, true)
                             .then(() => {
-                                os.executeShellCommand(`sudo sed -i '/${item.filename}/d' /etc/crontab`, logfile)
-                                .then (() => {
-                                    os.executeShellCommand(`sudo echo "20  4  * * *   root snap install --classic --dangerous ${path.join(dir, 'tmp', item.filename)}" >> /etc/crontab`, logfile)
-                                })
+                                os.executeShellCommand(`sudo echo "20  4  * * *   root snap install --classic --dangerous ${path.join(dir, 'tmp', item.filename)}" >> /etc/crontab`, logfile)
                             });
                     case 'snap':
                         return os.executeShellCommand(`kill -9 ${os.getFrontendPid()}`, logfile, true)
@@ -100,7 +100,25 @@ program.command('update')
             logfile.info('Done');
         }
         catch (err) {
-            logfile.error(err.message);
+            const logconsole = console;
+            if (logfile !== undefined) logfile.error(err);
+            else logconsole.error(err);
+        }
+        finally {
+            const now = new Date();
+            const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_MM_SS');
+            const filename = `${dir}/logs/${timeStamp}_m1cli.txz`;
+            await os.executeShellCommand(`tar -cJf ${filename} -C ${path.join(dir, 'logs/m1cli/logs', 'm1cli')} .`, false);
+            await new Promise(async (resolve, reject) => {
+                blobSvc.createBlockBlobFromLocalFile('m1-3200-logs', path.basename(filename), filename, async (error) => {
+                    if (!error) {
+                        resolve();
+                        logfile.info(`uploaded file ${filename}`);
+                        return;
+                    }
+                    reject(new Error(error));
+                });
+            });
         }
     });
 
