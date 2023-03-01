@@ -109,6 +109,7 @@ program.command('update')
             const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_MM_SS');
             const filename = `${dir}/logs/${timeStamp}_m1cli.txz`;
             await os.executeShellCommand(`tar -cJf ${filename} -C ${path.join(dir, 'logs/m1cli/logs', 'm1cli')} .`, false);
+            await os.executeShellCommand(`rm -fr ${path.join(dir, 'logs/m1cli/logs', 'm1cli')}`, false);
             await new Promise(async (resolve, reject) => {
                 blobSvc.createBlockBlobFromLocalFile('m1-3200-logs', path.basename(filename), filename, async (error) => {
                     if (!error) {
