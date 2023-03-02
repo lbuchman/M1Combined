@@ -5,9 +5,10 @@ MAC2=$2
 SSHPORT=$3
 HOSTNAME=$4
 STARTMAC=$5
+M1CLIENT=$6
 
 function usage {
-        echo "usage: $0 MAC1 MAC2 SSHPORT HOSTNAME<m1testf?> STARTMAC<00:0F:A6:00:00:00>"
+        echo "usage: $0 MAC1 MAC2 SSHPORT HOSTNAME<m1testf?> STARTMAC<00:0F:A6:00:00:00> m1client<path tp m1client snap>"
 }
 
 
@@ -40,6 +41,10 @@ if [ -z "STARTMAC" ]; then
 fi
 
 
+if [ -z "m1client" ]; then
+   usage
+   exit 1
+fi
 adduser saline
 echo $HOSTNAME > /tmp/hostname
 sudo mv /tmp/hostname /etc/hostname
@@ -89,9 +94,10 @@ sqlite3 /home/lenel/m1mtf/tf.db "insert into uid values ('${STARTMAC}')"
 cp /etc/crontab /tmp
 echo "0  3  * * *   root /snap/bin/m1client update > /tmp/log" >> /tmp/crontab
 echo "20  3  * * *   root /snap/bin/m1client synclogs > /tmp/log" >> /tmp/crontab
-echo "20  3  * * *   root /snap/sbin/m1client syncsecrets > /tmp/log" >> /tmp/crontab
-cp -fr tfcroncli /usr/lib/node_modules/npm/node_modules/
-cd /usr/lib/node_modules/npm/node_modules/tfcroncli
-npm install -g
+echo "40  3  * * *   root /snap/sbin/m1client syncsecrets > /tmp/log" >> /tmp/crontab
+echo "50  3  * * *   root find //home/lenel/m1mtf/logs -type f -mtime +90 -delete > /tmp/log" >> /tmp/crontab
+echo "10  4  * * *   root find /home/lenel/m1mtf/logs -type d -mtime +90 -delete > /tmp/log" >> /tmp/crontab
+cp /tmp/crontab /etc/crontab
+snap install --calssic --dangerous $M1CLIENT 
 m1client update
 

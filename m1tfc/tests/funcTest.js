@@ -95,7 +95,6 @@ module.exports = class FuncTest {
             this.logger.debug('Comparing SPI RAM, initial');
             await client.execCommand(`cmp ${controlFIle} ${sramFIle}`);
             this.logger.info('SPI test passed');
-            this.logger.info('Testing WD');
             await client.execCommand('sync');
             let isM1TestFileFlagSet;
             try {
@@ -108,16 +107,17 @@ module.exports = class FuncTest {
                 await client.execCommand(`echo "#!/bin/sh\nrm -f  /etc/timestamp\nsleep 3\nsync\necho b > /proc/sysrq-trigger\n" > ${wdScript}`);
                 await client.execCommand('sync');
                 await client.execCommand(`chmod +x ${wdScript}`);
+                this.logger.info('Waiting for reboot');
+                await m1TermLink.executeCommand(`sh ${wdScript}`, 1000);
             }
             else {
+                this.logger.info('Testing WD');
                 await client.execCommand('echo 1 > /dev/watchdog1');
+                this.logger.debug('Expect WD to reboot M1-3200');
             }
+
             this.logger.debug('Dropping secure link before reboot');
             await client.disconnect();
-            this.logger.debug('Expect WD to reboot M1-3200');
-            await delay(100);
-            await m1TermLink.executeCommand(`sh ${wdScript}`, 1000);
-            this.logger.info('Waiting for reboot');
             await utils.waitTargetDown(ipAddress, new Date() / 1000 + 100);
             this.logger.debug('Waiting for login promt');
             await m1TermLink.waitLoginPrompt(new Date() / 1000 + 200);
@@ -134,7 +134,7 @@ module.exports = class FuncTest {
             if (rtcDateYear !== dateTime) throw new Error(`RTC validation failed expected ${rtcDateYear} got ${dateTime}`);
             this.logger.info('RTC is validated');
             this.logger.debug('Comparing SPI RAM, after reboot');
-            if (isM1TestFileFlagSet) await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
+            if (!isM1TestFileFlagSet) await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
             await client.execCommand(`dd if=/dev/zero of=${sramFIle} bs=${sRamSize} count=1`);
             await client.execCommand(`rm -f ${controlFIle}`);
             await client.execCommand(`rm -f ${wdScript}`);
@@ -146,8 +146,8 @@ module.exports = class FuncTest {
             await client.execCommand('hwclock -w');
             this.logger.info('Sync clocks to PC');
             this.logger.info(`M1 clock is set to ${pcDateTime.toISOString()}`);
-            await client.execCommand('update-rc.d s2nnweb enable');
-            await client.execCommand('update-rc.d s2nn enable');
+            await client.execCommand('update-rc.d s2nnweb defaults 81');
+            await client.execCommand('update-rc.d s2nn defaults 80');
             await client.execCommand(`touch ${M1TestFileFlag}`);
             this.logger.info(`Creating file ${M1TestFileFlag}`);
             await client.disconnect();

@@ -261,7 +261,7 @@ program.command('cleanup')
             const uid = utils.macToUid(mac);
             logfile.info('Cleaning up ...');
             await os.executeShellCommand(`tar -cJf ${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
-            await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, false);
+            // await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, false);
             logfile.info('Done');
             await delay(100);
         }
