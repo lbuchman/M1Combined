@@ -82,11 +82,11 @@ module.exports = class FuncTest {
             client = new SshClient(ipAddress);
             await client.reConnect('root', password, null, new Date() / 1000 + 70);
             this.logger.debug('Connected to Target');
-            await client.execCommand(`rm -f ${M1TestFileFlag}`, 2000);
             this.logger.debug('Testing I2C Master/Slave connectivity');
             await client.execCommand('i2cdetect -y 1 | grep "50 51 52 UU 54 55 56 57"', 2000);
             this.logger.debug(`Setting RTC to ${rtcDate}`);
             this.logger.debug(`Setting Linux Date to ${linuxDate}`);
+            await client.execCommand('rm -f /etc/adjtime /etc/timestamp');
             await client.execCommand(`date -s "${linuxDate}"`);
             await client.execCommand(`hwclock --set --date "${rtcDate}"`);
             this.logger.info('Testing SPI RAM');
@@ -97,16 +97,27 @@ module.exports = class FuncTest {
             this.logger.info('SPI test passed');
             this.logger.info('Testing WD');
             await client.execCommand('sync');
-            await client.execCommand('echo 1 > /proc/sys/kernel/sysrq');
-            await client.execCommand(`echo "#!/bin/sh\nrm -f  /etc/timestamp\nsleep 3\nsync\necho c > /proc/sysrq-trigger\n" > ${wdScript}`);
-            await client.execCommand('sync');
-            await client.execCommand(`chmod +x ${wdScript}`);
+            let isM1TestFileFlagSet;
+            try {
+                isM1TestFileFlagSet = await client.execCommand(`ls ${M1TestFileFlag}`);
+            }
+            catch (err) {
+                isM1TestFileFlagSet = false;
+            }
+            if (isM1TestFileFlagSet) {
+                await client.execCommand(`echo "#!/bin/sh\nrm -f  /etc/timestamp\nsleep 3\nsync\necho b > /proc/sysrq-trigger\n" > ${wdScript}`);
+                await client.execCommand('sync');
+                await client.execCommand(`chmod +x ${wdScript}`);
+            }
+            else {
+                await client.execCommand('echo 1 > /dev/watchdog1');
+            }
             this.logger.debug('Dropping secure link before reboot');
             await client.disconnect();
-            this.logger.debug('Expect WD to reboot M1-3200 in 1 min');
+            this.logger.debug('Expect WD to reboot M1-3200');
             await delay(100);
             await m1TermLink.executeCommand(`sh ${wdScript}`, 1000);
-            this.logger.info('Waiting for WD reboot');
+            this.logger.info('Waiting for reboot');
             await utils.waitTargetDown(ipAddress, new Date() / 1000 + 100);
             this.logger.debug('Waiting for login promt');
             await m1TermLink.waitLoginPrompt(new Date() / 1000 + 200);
@@ -116,16 +127,14 @@ module.exports = class FuncTest {
             await m1TermLink.initTestMode();
             this.logger.debug('Reconnecting to M1');
             await client.reConnect('root', password, null, new Date() / 1000 + 30);
-            await client.execCommand('/etc/init.d/s2nnweb stop');
-            await client.execCommand('/etc/init.d/s2nn stop');
-            this.logger.info('WD test passed');
+            if (!isM1TestFileFlagSet) this.logger.info('WD test passed');
+            else this.logger.info('rebooted OK');
             await delay(3000);
             const dateTime = await client.execCommand('hwclock -r | cut -b 1,2,3,4');
             if (rtcDateYear !== dateTime) throw new Error(`RTC validation failed expected ${rtcDateYear} got ${dateTime}`);
             this.logger.info('RTC is validated');
             this.logger.debug('Comparing SPI RAM, after reboot');
-            await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
-            const isTheSame = await client.execCommand('echo $?');
+            if (isM1TestFileFlagSet) await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
             await client.execCommand(`dd if=/dev/zero of=${sramFIle} bs=${sRamSize} count=1`);
             await client.execCommand(`rm -f ${controlFIle}`);
             await client.execCommand(`rm -f ${wdScript}`);
@@ -137,6 +146,8 @@ module.exports = class FuncTest {
             await client.execCommand('hwclock -w');
             this.logger.info('Sync clocks to PC');
             this.logger.info(`M1 clock is set to ${pcDateTime.toISOString()}`);
+            await client.execCommand('update-rc.d s2nnweb enable');
+            await client.execCommand('update-rc.d s2nn enable');
             await client.execCommand(`touch ${M1TestFileFlag}`);
             this.logger.info(`Creating file ${M1TestFileFlag}`);
             await client.disconnect();
