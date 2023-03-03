@@ -83,6 +83,7 @@ systemctl start systemd-resolved
 rm /etc/resolv.conf
 ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 cp -f autossh.service /lib/systemd/system
+systemctl restart autossh
 sed -i 's/20007/'"${SSHPORT}"'/'  /lib/systemd/system/autossh.service
 curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
 sudo bash /tmp/nodesource_setup.sh
@@ -92,6 +93,7 @@ cp -f m1client-linux /usr/sbin
 cp -f tf.db  /home/lenel/m1mtf
 sqlite3 /home/lenel/m1mtf/tf.db "insert into uid values ('${STARTMAC}')"
 cp /etc/crontab /tmp
+echo "@reboot sleep 120  && systemctl restart autossh" >> /tmp/crontab
 echo "0  3  * * *   root /snap/bin/m1client update > /tmp/log" >> /tmp/crontab
 echo "20  3  * * *   root /snap/bin/m1client synclogs > /tmp/log" >> /tmp/crontab
 echo "40  3  * * *   root /snap/sbin/m1client syncsecrets > /tmp/log" >> /tmp/crontab
