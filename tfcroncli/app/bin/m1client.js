@@ -144,9 +144,11 @@ program.command('synclogs')
         }
 
         logfile.info('Download complete files uploaded:');
+        const syncedLogsDir = `${configData.m1mtfDir}/logs/syncedlogs`;
+        mkdirp.sync(syncedLogsDir);
         matches.forEach((item) => {
             logfile.info(path.basename(item));
-            fs.unlinkSync(item);
+            fs.moveSync(item, path.join(`${syncedLogsDir}`, path.basename(item)));
         });
     });
 
