@@ -1,7 +1,7 @@
 object mainForm: TmainForm
-  Left = 679
+  Left = 726
   Height = 321
-  Top = 357
+  Top = 292
   Width = 1824
   BorderWidth = 2
   Caption = 'M1-3200 Test Fixture GUI V-0.11'

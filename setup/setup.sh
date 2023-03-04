@@ -5,10 +5,9 @@ MAC2=$2
 SSHPORT=$3
 HOSTNAME=$4
 STARTMAC=$5
-M1CLIENT=$6
 
-function usage {
-        echo "usage: $0 MAC1 MAC2 SSHPORT HOSTNAME<m1testf?> STARTMAC<00:0F:A6:00:00:00> m1client<path tp m1client snap>"
+usage() {
+        echo "usage: $0 MAC1 MAC2 SSHPORT HOSTNAME<m1testf?> STARTMAC<00:0F:A6:00:00:00>"
 }
 
 
@@ -40,14 +39,8 @@ if [ -z "STARTMAC" ]; then
    exit 1
 fi
 
+echo MAC1=$MAC1 MAC2=$MAC2 SSHPORT=$SSHPORT HOSTNAME=$HOSTNAME STARTMAC=$STARTMAC
 
-if [ -z "m1client" ]; then
-   usage
-   exit 1
-fi
-adduser saline
-echo $HOSTNAME > /tmp/hostname
-sudo mv /tmp/hostname /etc/hostname
 mkdir -p /home/lenel/m1mtf
 sudo apt update
 sudo apt upgrade
@@ -59,16 +52,17 @@ sudo apt remove ippusbxd
 sudo apt-mark hold ippusbxd
 sudo sed -i '/CMDLINE_LINUX_DEFAULT/c\CMDLINE_LINUX_DEFAULT="quiet pcie_aspm=off splash libata.noacpi=1"' /etc/default/grub
 sudo update-grub
-echo "PATH=\"/home/lenel/.local/bin:/home/lenel/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\"" > /tmp/enviroment
-echo BROTHER_QL_PRINTER=usb://0x04f9:0x209c >> /tmp/enviroment
-echo BROTHER_QL_MODEL=QL-810W >> /tmp/etc/environment
-sudo mv /tmp/enviroment /etc/etc/environment
+echo "PATH=\"/home/lenel/.local/bin:/home/lenel/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\"" > /etc/environment
+sed -i '/BROTHER_QL_PRINTER/d' /etc/environment
+echo "export BROTHER_QL_PRINTER=usb://0x04f9:0x209c" >> /etc/environment
+echo "export BROTHER_QL_MODEL=QL-810W" >> /etc/environment
+
 cp -f rules.d/* /etc/udev/rules.d
 mkdir -p /home/lenel/.ssh
 echo "cp -f cloud.key id_rsa authorized_keys /home/lenel/.ssh"
-cp -f azurevmKeys id_rsa /home/lenel/.ssh
-sudo chown lenel: * -R /home/lenel/.ssh
-chmod 600 /home/lenel/.ssh
+cp -f cloud.key id_rsa authorized_keys /home/lenel/.ssh
+sudo chown lenel: .* -R /home/lenel/.ssh
+chmod 700 /home/lenel/.ssh
 sudo usermod -a -G dialout lenel
 cp -f M1-3200.desktop /home/lenel/Desktop
 tar -xJf STMicroelectronics.txz -C /home/lenel
@@ -89,17 +83,27 @@ curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
 sudo bash /tmp/nodesource_setup.sh
 sudo apt update
 sudo apt  install nodejs
-cp -f m1client-linux /usr/sbin
+
 cp -f tf.db  /home/lenel/m1mtf
 sqlite3 /home/lenel/m1mtf/tf.db "insert into uid values ('${STARTMAC}')"
-cp /etc/crontab /tmp
-echo "@reboot sleep 120  && systemctl restart autossh" >> /tmp/crontab
-echo "0  3  * * *   root /snap/bin/m1client update > /tmp/log" >> /tmp/crontab
-echo "20  3  * * *   root /snap/bin/m1client synclogs > /tmp/log" >> /tmp/crontab
-echo "40  3  * * *   root /snap/sbin/m1client syncsecrets > /tmp/log" >> /tmp/crontab
-echo "50  3  * * *   root find //home/lenel/m1mtf/logs -type f -mtime +90 -delete > /tmp/log" >> /tmp/crontab
-echo "10  4  * * *   root find /home/lenel/m1mtf/logs -type d -mtime +90 -delete > /tmp/log" >> /tmp/crontab
-cp /tmp/crontab /etc/crontab
-snap install --calssic --dangerous $M1CLIENT 
+sed -i '/m1client/d' /etc/crontab
+sed -i '/systemctl/d' /etc/crontab
+sed -i '/m1mtf/d' /etc/crontab
+
+echo "@reboot sleep 120  && systemctl restart autossh" >> /etc/crontab
+echo "0  3  * * *   root /snap/bin/m1client update > /etc/log" >> /etc/crontab
+echo "20  3  * * *   root /snap/bin/m1client synclogs > /etc/log" >> /etc/crontab
+echo "40  3  * * *   root /snap/sbin/m1client syncsecrets > /etc/log" >> /etc/crontab
+echo "50  3  * * *   root find //home/lenel/m1mtf/logs -type f -mtime +90 -delete > /tmp/log" >> /etc/crontab
+echo "10  4  * * *   root find /home/lenel/m1mtf/logs -type d -mtime +90 -delete > /tmp/log" >> /etc/crontab
+
+snap install --classic --dangerous  m1client.snap 
+snap install --classic --dangerous  m1tfd1.snap
+cp config.json public.key /var/snap/m1tfd1/current
+
+echo $HOSTNAME > /etc/hostname
+sed -i 's/lenel-EB100-KU0061/'"${HOSTNAME}"'/' /etc/hosts
+sudo chown lenel: * -R /home/lenel
+
 m1client update
 

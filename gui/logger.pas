@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, dateutils;
 
 function log(logLevel: string; device: string; str: string): string;
-function getEpochTime() : Integer;
+function getEpochTime(): integer;
 
 implementation
 
@@ -22,12 +22,12 @@ begin
     ']' + ' [' + device + '] ' + logLevel + ':        ' + str;
 end;
 
-function getEpochTime() : Integer;
+function getEpochTime(): integer;
 var
   ThisMoment: TDateTime;
 begin
- ThisMoment := Now;
- result := DateTimeToUnix(ThisMoment);
+  ThisMoment := Now;
+  Result := DateTimeToUnix(ThisMoment);
 end;
 
 end.

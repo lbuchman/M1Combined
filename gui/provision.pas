@@ -34,7 +34,7 @@ uses main;
 
 procedure TProvisionThread.ResetTest();
 begin
-  TermnateTest := false;
+  TermnateTest := False;
 end;
 
 function TProvisionThread.GetTermnateTestStatus: boolean;

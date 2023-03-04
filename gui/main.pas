@@ -113,7 +113,7 @@ type
     lastCommand : String;
     function RunM1Tfc(command: string; arg: array of string; var Led: TindLed): integer;
     function CheckSerial(): boolean;
-
+    function myIPAddress() : String;
   public
     newData: string;
     procedure DoCleanupCmd();
@@ -273,6 +273,28 @@ begin
   RunM1Tfc('cleanup', arg, fakeLed);
 end;
 
+function TmainForm.myIPAddress() : String;
+var
+  theProcess: TProcess;
+  AddressString: AnsiString;
+begin
+  try
+    theProcess := TProcess.Create(nil);
+    theProcess.Executable := 'hostname';
+    theProcess.Parameters.Add('-I');
+    theProcess.Options := [poUsePipes,poWaitOnExit];
+    theProcess.Execute;
+    if theProcess.Output.NumBytesAvailable > 0 then
+    begin
+      SetLength(AddressString{%H-}, theProcess.Output.NumBytesAvailable);
+      theProcess.Output.ReadBuffer(AddressString[1], theProcess.Output.NumBytesAvailable);
+    end;
+    result := AddressString;
+  finally
+    theProcess.Free;
+  end;
+end;
+
 procedure TmainForm.Debuglevel_0_Execute(Sender: TObject);
 begin
   targetVendorSerial.ReadOnly := true;
@@ -385,7 +407,9 @@ begin
 end;
 
 procedure TmainForm.FormCreate(Sender: TObject);
-var pid : String;
+var
+  pid : String;
+  ipaddresses : String;
 begin
   busyFlag := False;
   busyFlag1 := False;
@@ -419,6 +443,8 @@ begin
      finally
        Free;
      end;
+  ipaddresses := myIPAddress();
+  mainForm.Caption := mainForm.Caption + ' My IP: ' + ipaddresses;
 end;
 
 procedure TmainForm.FormShow(Sender: TObject);

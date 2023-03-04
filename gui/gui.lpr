@@ -5,13 +5,16 @@ program gui;
 uses
   cthreads,
   Interfaces, // this includes the LCL widgetset
-  Forms, lazcontrols,
+  Forms,
+  lazcontrols,
   laz_synapse,
   main,
   provision,
   macUtils,
   scannerClient,
-  logForm, logger, configurationJson;
+  logForm,
+  logger,
+  configurationJson;
 
 {$R *.res}
 
