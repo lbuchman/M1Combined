@@ -97,12 +97,12 @@ async function runRibbonCableTestAddressSelectResetPins(settoLevel, floatpins, l
             }
 
             if (!retValue || !utils.testLogicalValue(ret.value, 3.3, settoLevel)) {
-                logger.error(`Failed: Incorrect voltage level on Pin=${ribbonCableSelectPins[count].pinNameOnTestBoard}, logic=3.3V, Value=${ret.value} 1ogValue=${settoLevel}`);
+                logger.error(`Failed: Incorrect voltage level on Pin=${ribbonCableSelectPins[count].pinNameOnTestBoard}, Value=${ret.value} 1ogValue=${settoLevel}`);
                 retValue = false;
                 freturn = false;
             }
             else {
-                logger.info(`Passed pinName=${ribbonCableSelectPins[count].pinNameOnTestBoard}, actual = ${ret.value}. expected 3.3V Log 1 `);
+                logger.info(`Passed pinName=${ribbonCableSelectPins[count].pinNameOnTestBoard}, actual = ${ret.value}`);
             }
         }
 
@@ -147,11 +147,11 @@ async function testI2Cpins(pins, logger, settoLevel) {
             }
 
             if (ret.value !== settoLevel) {
-                logger.error(`Test Failed: Incorrect voltage level on Pin=${pins[count].pinNameOnTestBoard}, expected ${settoLevel} /3.3V Logic , actual=${ret.value} /3.3V Logic`);
+                logger.error(`Test Failed: Incorrect voltage level on Pin=${pins[count].pinNameOnTestBoard}, expected ${settoLevel}, actual=${ret.value}`);
                 retValue = false;
             }
             else {
-                logger.debug(`Passed pinName=${pins[count].pinNameOnTestBoard}, actual = ${ret.value}, expected 3.3V ${settoLevel} `);
+                logger.debug(`Passed pinName=${pins[count].pinNameOnTestBoard}, actual = ${ret.value}, ${settoLevel} `);
             }
         }
 

@@ -1,5 +1,5 @@
 name: m1client # you probably want to 'snapcraft register <name>'
-version: '466237'
+version: 0dbb095
 summary: m1client
 description: |
   cli utility for to sync M1 test fixture logs, stcrets and update

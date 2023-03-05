@@ -1,45 +1,41 @@
 #!/bin/sh
 set -e
-MAC1=$1
-MAC2=$2
-SSHPORT=$3
-HOSTNAME=$4
-STARTMAC=$5
+SSHPORT=$1
+HOSTNAME=$2
+STARTMAC=$3
+TESTSTATION=$4
+
+# Todo need to set test station ID in config.json,   Interface names may not match
 
 usage() {
-        echo "usage: $0 MAC1 MAC2 SSHPORT HOSTNAME<m1testf?> STARTMAC<00:0F:A6:00:00:00>"
+        echo "usage: $0 SSHPORT HOSTNAME<m1testf?> STARTMAC<00:0F:A6:00:00:00> <test Station ID>"
 }
 
 
-if [ -z "MAC1" ]; then
-   echo must sspecify MAC1 address
+
+if [ -z "$SSHPORT" ]; then
    usage
    exit 1
 fi
 
-if [ -z "MAC2" ]; then
-   echo must sspecify MAC1 address
-   usage
-   exit 1
-fi
-
-if [ -z "SSHPORT" ]; then
-   usage
-   exit 1
-fi
-
-if [ -z "HOSTNAME" ]; then
+if [ -z "$HOSTNAME" ]; then
    usage
    exit 1
 fi
 
 
-if [ -z "STARTMAC" ]; then
+if [ -z "$STARTMAC" ]; then
    usage
    exit 1
 fi
 
-echo MAC1=$MAC1 MAC2=$MAC2 SSHPORT=$SSHPORT HOSTNAME=$HOSTNAME STARTMAC=$STARTMAC
+
+if [ -z "$TESTSTATION" ]; then
+   usage
+   exit 1
+fi
+
+echo SSHPORT=$SSHPORT HOSTNAME=$HOSTNAME STARTMAC=$STARTMAC
 
 mkdir -p /home/lenel/m1mtf
 sudo apt update
@@ -66,16 +62,8 @@ chmod 700 /home/lenel/.ssh
 sudo usermod -a -G dialout lenel
 cp -f M1-3200.desktop /home/lenel/Desktop
 tar -xJf STMicroelectronics.txz -C /home/lenel
-sudo mkdir -p /etc/systemd/network
-sudo cp network/* /etc/systemd/network
-sed -i 's/00:01:29:9f:fd:1d/'"${MAC1}"'/' /etc/systemd/network/10-persistent-eth0.link
-sed -i 's/00:01:29:9f:fd:1e/'"${MAC2}"'/' /etc/systemd/network/10-persistent-eth1.link
-systemctl disable NetworkManager
-systemctl enable systemd-networkd
-systemctl enable systemd-resolved
-systemctl start systemd-resolved
-rm /etc/resolv.conf
-ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+rm -f /etc/netplan/*
+cp -f 01-network-manager-all.yaml /etc/netplan
 cp -f autossh.service /lib/systemd/system
 systemctl restart autossh
 sed -i 's/20007/'"${SSHPORT}"'/'  /lib/systemd/system/autossh.service
@@ -90,20 +78,25 @@ sed -i '/m1client/d' /etc/crontab
 sed -i '/systemctl/d' /etc/crontab
 sed -i '/m1mtf/d' /etc/crontab
 
-echo "@reboot sleep 120  && systemctl restart autossh" >> /etc/crontab
-echo "0  3  * * *   root /snap/bin/m1client update > /etc/log" >> /etc/crontab
-echo "20  3  * * *   root /snap/bin/m1client synclogs > /etc/log" >> /etc/crontab
-echo "40  3  * * *   root /snap/sbin/m1client syncsecrets > /etc/log" >> /etc/crontab
-echo "50  3  * * *   root find //home/lenel/m1mtf/logs -type f -mtime +90 -delete > /tmp/log" >> /etc/crontab
-echo "10  4  * * *   root find /home/lenel/m1mtf/logs -type d -mtime +90 -delete > /tmp/log" >> /etc/crontab
+echo "@reboot root sleep 120  && systemctl restart autossh >> /home/lenel/log" >> /etc/crontab
+echo "0  3  * * *   root /snap/bin/m1client update >> /home/lenel/log" >> /etc/crontab
+echo "20  3  * * *   root /snap/bin/m1client synclogs >> /home/lenel/log" >> /etc/crontab
+echo "40  3  * * *   root /snap/sbin/m1client syncsecrets >> /home/lenel/log" >> /etc/crontab
+echo "50  3  * * *   root find //home/lenel/m1mtf/logs -type f -mtime +90 -delete >>> /tmp/log" >> /etc/crontab
+echo "10  4  * * *   root find /home/lenel/m1mtf/logs -type d -mtime +90 -delete >> /tmp/log" >> /etc/crontab
 
 snap install --classic --dangerous  m1client.snap 
 snap install --classic --dangerous  m1tfd1.snap
 cp config.json public.key /var/snap/m1tfd1/current
 
+
+#### $TESTSTATION
+
 echo $HOSTNAME > /etc/hostname
 sed -i 's/lenel-EB100-KU0061/'"${HOSTNAME}"'/' /etc/hosts
 sudo chown lenel: * -R /home/lenel
-
+sudo systemctl enable autossh.service
+chown lenel: -R  /home/lenel/m1mtf
+netplan generate
 m1client update
 
