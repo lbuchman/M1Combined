@@ -2,7 +2,7 @@
     "conString": "DefaultEndpointsProtocol=https;AccountName=enel2anestingtsm;AccountKey=iltiV6hEaN4Y6l8tvyLQNsCnBX42oHQmfBDCmhGPjwhLgwAKGKtTgIn/hwhVNn5CG+1KAY23e0SE+ASti5kpzQ==;EndpointSuffix=core.windows.net",
     "m1mtfDir": "/home/lenel/m1mtf",
     "memTestSize1MBBlocks" : 10,
-    "vendorSite": "F3",
+    "vendorSite": "F333",
     "m1defaultIP": "192.168.1.251",
     "forceEppromOverwrite": false,
     "skipTestpointCheck": true

@@ -88,12 +88,12 @@ echo "10  4  * * *   root find /home/lenel/m1mtf/logs -type d -mtime +90 -delete
 snap install --classic --dangerous  m1client.snap 
 snap install --classic --dangerous  m1tfd1.snap
 cp config.json public.key /var/snap/m1tfd1/current
-
+sed -i 's/20007/'"${SSHPORT}"'/'  /var/snap/m1tfd1/current
 
 #### $TESTSTATION
 
 echo $HOSTNAME > /etc/hostname
-sed -i 's/lenel-EB100-KU0061/'"${HOSTNAME}"'/' /etc/hosts
+sed -i 's/F333/'"${$TESTSTATION}"'/' /etc/hosts
 sudo chown lenel: * -R /home/lenel
 sudo systemctl enable autossh.service
 chown lenel: -R  /home/lenel/m1mtf

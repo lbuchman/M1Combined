@@ -40,6 +40,18 @@
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1client.js",
             "args": ["update", "-f"]
+        }, 
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch dbbackup",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1client.js",
+            "args": ["backupdb"]
         }
     ]
 }

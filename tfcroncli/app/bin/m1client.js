@@ -152,6 +152,24 @@ program.command('synclogs')
         });
     });
 
+program.command('backupdb')
+    .description('backup DB to the cloud')
+    .action(async () => {
+        const configData = await config({});
+        const logfile = console;
+        const dbFile =path.join(configData.m1mtfDir, 'tf.db');
+        const blobSvc = azure.createBlobService(configData.conString);
+        blobSvc.createBlockBlobFromLocalFile('backup', `${configData.vendorSite}_${path.basename(dbFile)}`, dbFile, (err) => {
+            if (err) {
+                logfile.error(err.message);
+            }
+        });
+        
+
+        logfile.info(`Download complete DB file ${dbFile} is uploaded:`);
+    });
+
+
 function padBase32(str) {
     switch (str.length % 8) {
         case 2:
