@@ -23,6 +23,7 @@ const secretsContainer = 'm1-3200-secrets';
 const firmwareContainer = 'firmware';
 process.env.SNAP_DATA = '/var/snap/m1tfd1/current';
 const publicKey = path.join(process.env.SNAP_DATA, 'public.key');
+const debuglevel = '2';
 
 program
     .name('m1cli')
@@ -33,12 +34,12 @@ program.command('update')
     .description('download and update software and firmware i the test fixture')
     .option('-f, --force', 'force update')
     .action(async (options) => {
-        const debuglevel = '2';
         let logfile;
         let dir;
         let blobSvc;
         try {
-            os.executeShellCommand(`sudo sed -i '/root snap install/d' /etc/crontab`, logfile)
+            const str = '/root snap install/d';
+            os.executeShellCommand(`sudo sed -i '${str}' /etc/crontab`, logfile);
             const configData = await config({});
             dir = configData.m1mtfDir;
             logfile = logger.getLogger('m1cli', 'update', 'm1cli', `${configData.m1mtfDir}/logs/m1cli`, debuglevel);
@@ -80,7 +81,7 @@ program.command('update')
                     case 'snapclient':
                         return os.executeShellCommand(`kill -9 ${os.getFrontendPid()}`, logfile, true)
                             .then(() => {
-                                os.executeShellCommand(`sudo echo "20  4  * * *   root snap install --classic --dangerous ${path.join(dir, 'tmp', item.filename)}" >> /home/lenel/log`, logfile)
+                                os.executeShellCommand(`sudo echo "20  4  * * *   root snap install --classic --dangerous ${path.join(dir, 'tmp', item.filename)}" >> /home/lenel/log`, logfile);
                             });
                     case 'snap':
                         return os.executeShellCommand(`kill -9 ${os.getFrontendPid()}`, logfile, true)
@@ -128,7 +129,7 @@ program.command('synclogs')
     .description('sync logs into Cloud AS')
     .action(async () => {
         const configData = await config({});
-        const logfile = console;
+        const logfile = logger.getLogger('m1cli', 'synclogs', 'synclogs', `${configData.m1mtfDir}/logs/m1cli`, debuglevel);
         const matches = glob.sync(`${configData.m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
         const blobSvc = azure.createBlobService(configData.conString);
         if (!matches.length) {
@@ -156,15 +157,14 @@ program.command('backupdb')
     .description('backup DB to the cloud')
     .action(async () => {
         const configData = await config({});
-        const logfile = console;
-        const dbFile =path.join(configData.m1mtfDir, 'tf.db');
+        const logfile = logger.getLogger('m1cli', 'backupdb', 'backupdb', `${configData.m1mtfDir}/logs/m1cli`, debuglevel);
+        const dbFile = path.join(configData.m1mtfDir, 'tf.db');
         const blobSvc = azure.createBlobService(configData.conString);
         blobSvc.createBlockBlobFromLocalFile('backup', `${configData.vendorSite}_${path.basename(dbFile)}`, dbFile, (err) => {
             if (err) {
                 logfile.error(err.message);
             }
         });
-        
 
         logfile.info(`Download complete DB file ${dbFile} is uploaded:`);
     });
@@ -201,7 +201,7 @@ program.command('syncsecrets')
     .description('sync M1-3200 secrets into Cloud AS')
     .action(async () => {
         const configData = await config({});
-        const logfile = console;
+        const logfile = logger.getLogger('m1cli', 'syncsecrets', 'syncsecrets', `${configData.m1mtfDir}/logs/m1cli`, debuglevel);
         secrets.initialize(configData.m1mtfDir, logfile);
         const now = new Date();
         const filename = `/tmp/${dateTime.format(now, 'YYYY_MM_DD_HH_mm_ss')}.csv`;

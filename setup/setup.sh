@@ -81,7 +81,8 @@ sed -i '/m1mtf/d' /etc/crontab
 echo "@reboot root sleep 120  && systemctl restart autossh >> /home/lenel/log" >> /etc/crontab
 echo "0  3  * * *   root /snap/bin/m1client update >> /home/lenel/log" >> /etc/crontab
 echo "20  3  * * *   root /snap/bin/m1client synclogs >> /home/lenel/log" >> /etc/crontab
-echo "40  3  * * *   root /snap/sbin/m1client syncsecrets >> /home/lenel/log" >> /etc/crontab
+echo "40  3  * * *   root /snap/bin/m1client syncsecrets >> /home/lenel/log" >> /etc/crontab
+echo "40  4  * * *   root /snap/bin/m1client backupdb >> /home/lenel/log" >> /etc/crontab
 echo "50  3  * * *   root find //home/lenel/m1mtf/logs -type f -mtime +90 -delete >>> /tmp/log" >> /etc/crontab
 echo "10  4  * * *   root find /home/lenel/m1mtf/logs -type d -mtime +90 -delete >> /tmp/log" >> /etc/crontab
 
