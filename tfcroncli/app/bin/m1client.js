@@ -79,10 +79,7 @@ program.command('update')
                 logfile.info(`updating ${item.filetype}`);
                 switch (item.filetype) {
                     case 'snapclient':
-                        return os.executeShellCommand(`kill -9 ${os.getFrontendPid()}`, logfile, true)
-                            .then(() => {
-                                os.executeShellCommand(`sudo echo "20  4  * * *   root snap install --classic --dangerous ${path.join(dir, 'tmp', item.filename)}" >> /home/lenel/log`, logfile);
-                            });
+                        return os.executeShellCommand(`sudo echo "20  4  * * *   root snap install --classic --dangerous ${path.join(dir, 'tmp', item.filename)}" >> /etc/crontab`, logfile);
                     case 'snap':
                         return os.executeShellCommand(`kill -9 ${os.getFrontendPid()}`, logfile, true)
                             .then(() => {
