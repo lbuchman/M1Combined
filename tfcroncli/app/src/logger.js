@@ -32,7 +32,7 @@ function getLogger(name, test, serial, logFilePath, logdebug) {
         default: throw new Error('Invalid debug level, shall be 0-2');
     }
 
-    const lofFileNamePathDebug = path.join(logFileDir, `${serial}-debug.log`);
+    const lofFileNamePathDebug = path.join(logFileDir, `${serial}-debug-${test}.log`);
     const lofFileNamePathInfo = path.join(logFileDir, `${serial}-info.log`);
     const lofFileNamePathError = path.join(logFileDir, `${serial}-error.log`);
     if (logger) return logger;
