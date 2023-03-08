@@ -126,8 +126,8 @@ program.command('synclogs')
     .description('sync logs into Cloud AS')
     .action(async () => {
         const configData = await config({});
-        const logfile = logger.getLogger('m1cli', 'synclogs', 'synclogs', `${configData.m1mtfDir}/logs/m1cli`, debuglevel);
         const matches = glob.sync(`${configData.m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
+        const logfile = logger.getLogger('m1cli', 'synclogs', 'synclogs', `${configData.m1mtfDir}/logs/m1cli`, debuglevel);
         const blobSvc = azure.createBlobService(configData.conString);
         if (!matches.length) {
             logfile.info('No log files to upload');
