@@ -17,7 +17,7 @@ let logger;
 */
 function getLogger(name, test, serial, logFilePath, logdebug) {
     let consoleLogLevel;
-    const logFileDir = `${logFilePath}/logs/${serial}`;
+    const logFileDir = `${logFilePath}`;
     mkdirp.sync(logFileDir);
     switch (logdebug) {
         case '0':
@@ -33,8 +33,8 @@ function getLogger(name, test, serial, logFilePath, logdebug) {
     }
 
     const lofFileNamePathDebug = path.join(logFileDir, `${serial}-debug-${test}.log`);
-    const lofFileNamePathInfo = path.join(logFileDir, `${serial}-info.log`);
-    const lofFileNamePathError = path.join(logFileDir, `${serial}-error.log`);
+    const lofFileNamePathInfo = path.join(logFileDir, `${serial}-info-${test}.log`);
+    const lofFileNamePathError = path.join(logFileDir, `${serial}-error-${test}.log`);
     if (logger) return logger;
 
     const msg = i => (_.isObject(i.message) ? JSON.stringify(i.message) : i.message);
