@@ -2,8 +2,7 @@
 
 const winston = require('winston');
 const _ = require('lodash');
-// eslint-disable-next-line no-unused-vars
-const fs = require('fs-extra');
+const dateTime = require('date-and-time');
 const path = require('path');
 const { mkdirp } = require('mkdirp');
 
@@ -31,10 +30,12 @@ function getLogger(name, test, serial, logFilePath, logdebug) {
             break;
         default: throw new Error('Invalid debug level, shall be 0-2');
     }
-
-    const lofFileNamePathDebug = path.join(logFileDir, `${serial}-debug-${test}.log`);
-    const lofFileNamePathInfo = path.join(logFileDir, `${serial}-info-${test}.log`);
-    const lofFileNamePathError = path.join(logFileDir, `${serial}-error-${test}.log`);
+    const now = new Date();
+    const pattern = dateTime.compile('YYYY-MM-DDTHH:mm:ssZZ');
+    const date = dateTime.format(now, pattern);
+    const lofFileNamePathDebug = path.join(logFileDir, `${date}-${serial}-debug-${test}.log`);
+    const lofFileNamePathInfo = path.join(logFileDir, `${date}-${serial}-info-${test}.log`);
+    const lofFileNamePathError = path.join(logFileDir, `${date}-${serial}-error-${test}.log`);
     if (logger) return logger;
 
     const msg = i => (_.isObject(i.message) ? JSON.stringify(i.message) : i.message);

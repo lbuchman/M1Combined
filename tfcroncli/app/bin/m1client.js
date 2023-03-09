@@ -110,7 +110,7 @@ program.command('synclogs')
     .action(async () => {
         const configData = await config({});
         const matches = glob.sync(`${configData.m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
-        const logfile = logger.getLogger('m1cli', 'synclogs', 'synclogs', `${configData.m1mtfDir}/m1cli`, debuglevel);
+        const logfile = logger.getLogger('m1cli', 'synclogs', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         const blobSvc = azure.createBlobService(configData.conString);
         if (!matches.length) {
             logfile.info('No log files to upload');
@@ -137,7 +137,7 @@ program.command('backupdb')
     .description('backup DB to the cloud')
     .action(async () => {
         const configData = await config({});
-        const logfile = logger.getLogger('m1cli', 'backupdb', 'backupdb', `${configData.m1mtfDir}/m1cli`, debuglevel);
+        const logfile = logger.getLogger('m1cli', 'backupdb', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         const dbFile = path.join(configData.m1mtfDir, 'tf.db');
         const blobSvc = azure.createBlobService(configData.conString);
         blobSvc.createBlockBlobFromLocalFile('backup', `${configData.vendorSite}_${path.basename(dbFile)}`, dbFile, (err) => {
@@ -181,7 +181,7 @@ program.command('syncsecrets')
     .description('sync M1-3200 secrets into Cloud AS')
     .action(async () => {
         const configData = await config({});
-        const logfile = logger.getLogger('m1cli', 'syncsecrets', 'syncsecrets', `${configData.m1mtfDir}/m1cli`, debuglevel);
+        const logfile = logger.getLogger('m1cli', 'syncsecrets', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         secrets.initialize(configData.m1mtfDir, logfile);
         const now = new Date();
         const filename = `/tmp/${dateTime.format(now, 'YYYY_MM_DD_HH_mm_ss')}.csv`;
