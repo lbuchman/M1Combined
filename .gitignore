@@ -1,8 +1,8 @@
 STMicroelectronics.txz
 *.swp
-m1CloudClient*
-m1client-*
-*_
+m1CloudClient-linux
+m1CloudClient-macos
+m1CloudClient-win.exe
 gui/gui
 gui/gui.dbg
 .DS_Store
