@@ -4,22 +4,14 @@
 
 const program = require('commander');
 const fs = require('fs-extra');
-const lodash = require('lodash');
-const dateTime = require('date-and-time');
 const azure = require('azure-storage');
-const glob = require('glob');
 const path = require('path');
 const azureOp = require('../src/azureOp');
-const secrets = require('../src/secrets');
-const os = require('../src/os');
-const logger = require('../src/logger');
 
-const m1mtfDir = `${process.env.HOME}/m1mtf`;
-const conString = 'DefaultEndpointsProtocol=https;AccountName=enel2anestingtsm;AccountKey=iltiV6hEaN4Y6l8tvyLQNsCnBX42oHQmfBDCmhGPjwhLgwAKGKtTgIn/hwhVNn5CG+1KAY23e0SE+ASti5kpzQ==;EndpointSuffix=core.windows.net';
+const conString = 'DefaultEndpointsProtocol=https;AccountName=lenels2production;AccountKey=QYLAhAvw4SowA6HJqBm2CTkR3Q36PWxfFUPDhqZ4yEyK6lJNb02GEwS/Z/kF8+qMEPs6VAzSnHHt+AStrIr3VQ==;EndpointSuffix=core.windows.net';
 const logContainer = 'm1-3200-logs';
 const secretsContainer = 'm1-3200-secrets';
 const firmwareContainer = 'firmware';
-
 
 program
     .name('m1cli')
@@ -106,22 +98,28 @@ program.command('getsecrets')
 
 program.command('getlog')
     .description('get the log from the Cloud')
+    .option('-t, --teststation <string>', 'test station id like s1, s2 etc')
     .argument('<logId>', 'log file name or uid or serial number from the barcode')
-    .action(async (str) => {
+    .action(async (str, options) => {
         const logfile = console;
         try {
             const blobSvc = azure.createBlobService(conString);
-            const ret = await azureOp.getFileFullname(blobSvc, logContainer, str);
+            const ret = await azureOp.getFileFullname(blobSvc, `${logContainer}-${options.teststation}`, str);
+            if (ret.length === 0) {
+                logfile.info('no such log is available');
+                return;
+            }
             const files = ret.filter((element) => {
                 return element !== null;
             });
 
             if (!files.length) {
                 logfile.info('no such log is available');
+                return;
             }
 
-            await azureOp.downloadFile(blobSvc, logContainer, files[0]);
-            logfile.info(`File ${files[0]} is downloaded`);
+            await azureOp.downloadFile(blobSvc, `${logContainer}-${options.teststation}`, files[0]);
+            logfile.info(`downloaded: ${JSON.stringify(files[0])}`);
         }
         catch (err) {
             logfile.error(err.message);
@@ -152,8 +150,9 @@ program.command('listsecrets')
 
 program.command('listlogs')
     .description('list logs avaialble in the Cloud')
+    .option('-t, --teststation <string>', 'test station id like s1, s2 etc')
     .argument('<date ref>', 'date prefix, the date format is 2023_02_11_16 and used as prefix, so if date = 2023 then all file for 2023 are returned, if date = 2023_02_11_16 only for this date files are ruturned')
-    .action(async (date) => {
+    .action(async (date, options) => {
         const logfile = console;
         if (!date) {
             logfile.error('must specify date, see help');
@@ -161,7 +160,7 @@ program.command('listlogs')
         }
         try {
             const blobSvc = azure.createBlobService(conString);
-            const entries = await azureOp.getList(blobSvc, logContainer, [], date, null);
+            const entries = await azureOp.getList(blobSvc, `${logContainer}-${options.teststation}`, [], date, null);
             entries.forEach((element) => {
                 logfile.log(element.name);
             });
