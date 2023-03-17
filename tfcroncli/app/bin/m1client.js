@@ -117,7 +117,7 @@ program.command('synclogs')
             return;
         }
         try {
-            await azureOp.syncFiles(blobSvc, logContainer, matches);
+            await azureOp.syncFiles(blobSvc, `${logContainer}-${configData.vendorSite.toLowerCase()}`, matches);
         }
         catch (err) {
             logfile.error(err.message);
