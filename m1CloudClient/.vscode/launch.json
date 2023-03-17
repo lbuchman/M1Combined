@@ -19,14 +19,14 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch getlog",
+            "name": "Launch getlogs",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1CloudClient.js",
-            "args": ["getlog", "0000000FA6000003"]
+            "args": ["getlog", "90FA6000002", "-t", "p1"]
         },
         {
             "type": "node",
