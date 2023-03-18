@@ -14,14 +14,10 @@ const M1TermLink = require('../src/m1TermLink');
 const SshClient = require('../utils/SshClient');
 const ProgramMac = require('../tests/programMAC');
 
-const linuxDateYear = '2013';
-const rtcDateYear = '2010';
 const sRamSize = '128K';
 const sramFIle = '/dev/mtd0';
 const controlFIle = '/home/root/eeprom1';
 const wdScript = '/home/root/wd';
-const linuxDate = `${linuxDateYear}-11-19 15:11:40`;
-const rtcDate = `${rtcDateYear}-11-19 15:11:40`;
 const M1TestFileFlag = '/home/s2user/testpassed';
 
 let db;
@@ -84,15 +80,10 @@ module.exports = class FuncTest {
             this.logger.debug('Connected to Target');
             this.logger.debug('Testing I2C Master/Slave connectivity');
             await client.execCommand('i2cdetect -y 1 | grep "50 51 52 UU 54 55 56 57"', 2000);
-            this.logger.debug(`Setting RTC to ${rtcDate}`);
-            this.logger.debug(`Setting Linux Date to ${linuxDate}`);
-            await client.execCommand('rm -f /etc/adjtime /etc/timestamp');
-            await client.execCommand(`date -s "${linuxDate}"`);
-            await client.execCommand(`hwclock --set --date "${rtcDate}"`);
             this.logger.info('Testing SPI RAM');
             await client.execCommand(`dd if=/dev/urandom of=${controlFIle} bs=${sRamSize} count=1`);
             await client.execCommand(`dd if=${controlFIle} of=${sramFIle} bs=${sRamSize} count=1`);
-            this.logger.debug('Comparing SPI RAM, initial');
+            this.logger.debug('Comparing SPI RAM');
             await client.execCommand(`cmp ${controlFIle} ${sramFIle}`);
             this.logger.info('SPI test passed');
             await client.execCommand('sync');
@@ -103,22 +94,48 @@ module.exports = class FuncTest {
             catch (err) {
                 isM1TestFileFlagSet = false;
             }
-            if (isM1TestFileFlagSet) {
-                await client.execCommand(`echo "#!/bin/sh\nrm -f  /etc/timestamp\nsleep 3\nsync\necho b > /proc/sysrq-trigger\n" > ${wdScript}`);
-                await client.execCommand('sync');
-                await client.execCommand(`chmod +x ${wdScript}`);
-                this.logger.info('Waiting for reboot');
-                await m1TermLink.executeCommand(`sh ${wdScript}`, 1000);
-            }
-            else {
+            if (!isM1TestFileFlagSet) {
                 this.logger.info('Testing WD');
                 await client.execCommand('echo 1 > /dev/watchdog1');
                 this.logger.debug('Expect WD to reboot M1-3200');
+                this.logger.debug('Dropping secure link before reboot');
+                await client.disconnect();
+                await utils.waitTargetDown(ipAddress, new Date() / 1000 + 100);
+                this.logger.debug('Waiting for login promt');
+                await m1TermLink.waitLoginPrompt(new Date() / 1000 + 200);
+                this.logger.info('Logging to M1');
+                await m1TermLink.logInToTerminal(login, password);
+                this.logger.debug('Initializing M1');
+                await m1TermLink.initTestMode();
+                this.logger.debug('Reconnecting to M1');
+                await client.reConnect('root', password, null, new Date() / 1000 + 30);
+                if (!isM1TestFileFlagSet) this.logger.info('WD test passed');
+                else this.logger.info('rebooted OK');
+                await delay(3000);
+                this.logger.info('RTC is validated');
+                this.logger.debug('Comparing SPI RAM, after reboot');
+                if (!isM1TestFileFlagSet) await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
             }
 
-            this.logger.debug('Dropping secure link before reboot');
+            await client.execCommand(`dd if=/dev/zero of=${sramFIle} bs=${sRamSize} count=1`);
+            await client.execCommand(`rm -f ${controlFIle}`);
+            await client.execCommand(`rm -f ${wdScript}`);
+            const pcDateTime = new Date();
+            const epochTime = Math.floor(pcDateTime / 1000);
+            await client.execCommand(`date -s "@${epochTime}"`);
+            await client.execCommand('hwclock -w');
+            await client.execCommand('rm -f /etc/adjtime /etc/timestamp');
+            this.logger.info('Sync clocks to PC');
+            this.logger.info(`M1 clock is set to ${pcDateTime.toISOString()}`);
             await client.disconnect();
-            await utils.waitTargetDown(ipAddress, new Date() / 1000 + 100);
+            await delay(2000);
+            await m1TermLink.executeCommand('halt', 1000);
+            this.logger.debug('M1 is shut down');
+            await delay(100);
+            await testBoardLink.targetPower(false);
+            await testBoardLink.batteryOn(false);
+            await delay(10000);
+            await testBoardLink.targetPower(true);
             this.logger.debug('Waiting for login promt');
             await m1TermLink.waitLoginPrompt(new Date() / 1000 + 200);
             this.logger.info('Logging to M1');
@@ -127,34 +144,15 @@ module.exports = class FuncTest {
             await m1TermLink.initTestMode();
             this.logger.debug('Reconnecting to M1');
             await client.reConnect('root', password, null, new Date() / 1000 + 30);
-            if (!isM1TestFileFlagSet) this.logger.info('WD test passed');
-            else this.logger.info('rebooted OK');
-            await delay(3000);
-            const dateTime = await client.execCommand('hwclock -r | cut -b 1,2,3,4');
-            if (rtcDateYear !== dateTime) throw new Error(`RTC validation failed expected ${rtcDateYear} got ${dateTime}`);
-            this.logger.info('RTC is validated');
-            this.logger.debug('Comparing SPI RAM, after reboot');
-            if (!isM1TestFileFlagSet) await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
-            await client.execCommand(`dd if=/dev/zero of=${sramFIle} bs=${sRamSize} count=1`);
-            await client.execCommand(`rm -f ${controlFIle}`);
-            await client.execCommand(`rm -f ${wdScript}`);
-            // if (isTheSame !== '0') throw new Error('SPI RAM validation failed');
-            const pcDateTime = new Date();
-            const epochTime = Math.floor(pcDateTime / 1000);
-            this.logger.info('SPI Flash and RTC are validated after reboot');
-            await client.execCommand(`date -s "@${epochTime}"`);
-            await client.execCommand('hwclock -w');
-            this.logger.info('Sync clocks to PC');
-            this.logger.info(`M1 clock is set to ${pcDateTime.toISOString()}`);
+            const dateTime = new Date(await client.execCommand('hwclock -r')) / 1000;
+            const pcDate = new Date() / 1000;
+            if (Math.abs(pcDate - dateTime) > 5) {
+                throw new Error('RTC check failed');
+            }
             await client.execCommand('update-rc.d s2nnweb defaults 81');
             await client.execCommand('update-rc.d s2nn defaults 80');
             await client.execCommand(`touch ${M1TestFileFlag}`);
             this.logger.info(`Creating file ${M1TestFileFlag}`);
-            await client.disconnect();
-            await delay(2000);
-            await m1TermLink.executeCommand('halt', 1000);
-            this.logger.debug('M1 is shut down');
-            await delay(100);
             db.updateFuncTestStatus(this.serial, utils.boolToInt(true));
             this.logger.info('Funtional test passed');
             await common.testEndSuccess();
