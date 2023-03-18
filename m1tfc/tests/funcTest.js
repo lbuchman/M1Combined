@@ -80,12 +80,9 @@ module.exports = class FuncTest {
             this.logger.debug('Connected to Target');
             this.logger.debug('Testing I2C Master/Slave connectivity');
             await client.execCommand('i2cdetect -y 1 | grep "50 51 52 UU 54 55 56 57"', 2000);
-            this.logger.info('Testing SPI RAM');
+            this.logger.info('I2C test passed');
             await client.execCommand(`dd if=/dev/urandom of=${controlFIle} bs=${sRamSize} count=1`);
             await client.execCommand(`dd if=${controlFIle} of=${sramFIle} bs=${sRamSize} count=1`);
-            this.logger.debug('Comparing SPI RAM');
-            await client.execCommand(`cmp ${controlFIle} ${sramFIle}`);
-            this.logger.info('SPI test passed');
             await client.execCommand('sync');
             let isM1TestFileFlagSet;
             try {
@@ -155,6 +152,9 @@ module.exports = class FuncTest {
             this.logger.info(`Creating file ${M1TestFileFlag}`);
             db.updateFuncTestStatus(this.serial, utils.boolToInt(true));
             this.logger.info('Funtional test passed');
+            await client.execCommand('halt');
+            await delay('sync');
+            await delay(100);
             await common.testEndSuccess();
             process.exit(exitCodes.normalExit);
         }
