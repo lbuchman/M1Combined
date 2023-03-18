@@ -23,6 +23,7 @@ const M1TestFileFlag = '/home/s2user/testpassed';
 let db;
 let client;
 
+
 module.exports = class FuncTest {
     constructor(serial, config, log) {
         this.logger = log;
@@ -78,6 +79,13 @@ module.exports = class FuncTest {
             client = new SshClient(ipAddress);
             await client.reConnect('root', password, null, new Date() / 1000 + 70);
             this.logger.debug('Connected to Target');
+
+            this.logger.info('Verifying MAC address');
+            const link = await client.execCommand('ip link show eth0 | grep link/ether', 2000);
+            if (!link.toLowerCase().includes(macValue.mac.toLowerCase())) {
+                throw new Error('Invalid MAC Address, check OTP');
+            }
+
             this.logger.debug('Testing I2C Master/Slave connectivity');
             await client.execCommand('i2cdetect -y 1 | grep "50 51 52 UU 54 55 56 57"', 2000);
             this.logger.info('I2C test passed');
