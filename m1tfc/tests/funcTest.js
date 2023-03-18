@@ -109,10 +109,8 @@ module.exports = class FuncTest {
                 await m1TermLink.initTestMode();
                 this.logger.debug('Reconnecting to M1');
                 await client.reConnect('root', password, null, new Date() / 1000 + 30);
-                if (!isM1TestFileFlagSet) this.logger.info('WD test passed');
-                else this.logger.info('rebooted OK');
-                await delay(3000);
-                this.logger.info('RTC is validated');
+                this.logger.info('WD test passed');
+                await delay(300);
                 this.logger.debug('Comparing SPI RAM, after reboot');
                 if (!isM1TestFileFlagSet) await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
             }
@@ -130,10 +128,10 @@ module.exports = class FuncTest {
             await client.disconnect();
             await delay(2000);
             await m1TermLink.executeCommand('halt', 1000);
-            this.logger.debug('M1 is shut down');
             await delay(100);
             await testBoardLink.targetPower(false);
             await testBoardLink.batteryOn(false);
+            this.logger.debug('M1 power is off');
             await delay(10000);
             await testBoardLink.targetPower(true);
             this.logger.debug('Waiting for login promt');
