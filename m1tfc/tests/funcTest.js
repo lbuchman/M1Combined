@@ -120,7 +120,7 @@ module.exports = class FuncTest {
                 if (!isM1TestFileFlagSet) await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
                 this.logger.info('SPI RAM test passed');
             }
-
+            this.logger.info('Reseting SPI RAM');
             await client.execCommand(`dd if=/dev/zero of=${sramFIle} bs=${sRamSize} count=1`);
             await client.execCommand(`rm -f ${controlFIle}`);
             await client.execCommand(`rm -f ${wdScript}`);
