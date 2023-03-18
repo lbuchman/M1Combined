@@ -118,6 +118,7 @@ module.exports = class FuncTest {
                 await delay(300);
                 this.logger.debug('Comparing SPI RAM, after reboot');
                 if (!isM1TestFileFlagSet) await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
+                this.logger.info('SPI RAM test passed');
             }
 
             await client.execCommand(`dd if=/dev/zero of=${sramFIle} bs=${sRamSize} count=1`);
