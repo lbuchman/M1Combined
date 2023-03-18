@@ -149,6 +149,8 @@ module.exports = class FuncTest {
             if (Math.abs(pcDate - dateTime) > 5) {
                 throw new Error('RTC check failed');
             }
+            this.logger.info('RTC test passed');
+            this.logger.info('Enabling M1 apps');
             await client.execCommand('update-rc.d s2nnweb defaults 81');
             await client.execCommand('update-rc.d s2nn defaults 80');
             await client.execCommand(`touch ${M1TestFileFlag}`);
