@@ -86,12 +86,6 @@ module.exports = class FuncTest {
                 throw new Error('Invalid MAC Address, check OTP');
             }
 
-            this.logger.debug('Testing I2C Master/Slave connectivity');
-            await client.execCommand('i2cdetect -y 1 | grep "50 51 52 UU 54 55 56 57"', 2000);
-            this.logger.info('I2C test passed');
-            await client.execCommand(`dd if=/dev/urandom of=${controlFIle} bs=${sRamSize} count=1`);
-            await client.execCommand(`dd if=${controlFIle} of=${sramFIle} bs=${sRamSize} count=1`);
-            await client.execCommand('sync');
             let isM1TestFileFlagSet;
             try {
                 isM1TestFileFlagSet = await client.execCommand(`ls ${M1TestFileFlag}`);
@@ -100,6 +94,12 @@ module.exports = class FuncTest {
                 isM1TestFileFlagSet = false;
             }
             if (!isM1TestFileFlagSet) {
+                this.logger.debug('Testing I2C Master/Slave connectivity');
+                await client.execCommand('i2cdetect -y 1 | grep "50 51 52 UU 54 55 56 57"', 2000);
+                this.logger.info('I2C test passed');
+                await client.execCommand(`dd if=/dev/urandom of=${controlFIle} bs=${sRamSize} count=1`);
+                await client.execCommand(`dd if=${controlFIle} of=${sramFIle} bs=${sRamSize} count=1`);
+                await client.execCommand('sync');
                 this.logger.info('Testing WD');
                 await client.execCommand('echo 1 > /dev/watchdog1');
                 this.logger.debug('Expect WD to reboot M1-3200');

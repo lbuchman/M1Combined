@@ -106,7 +106,6 @@ type
     newSerialNumber: string;
     configuration: TConfigration;
     SaveWidth: integer;
-    ClearProgressBar: boolean;
     Leds: array[0..5] of ^TindLed;
     MemoCopyTxt : String;
     DebugLevel : String;
@@ -180,8 +179,9 @@ var
   progress: integer;
 begin
   progress := ColorProgress1.Progress;
-  ColorProgress1.Progress := progress + value;
-  if (ColorProgress1.Progress > 99) then ColorProgress1.ForeColor := clLime;
+  progress := progress + value;
+  if progress > 100 then progress := 100;
+  ColorProgress1.Progress := progress;
 end;
 
 procedure TmainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -215,7 +215,6 @@ begin
   arg[3] := DebugLevel;
   arg[4] := '-e';
   arg[5] := '';
-  if ClearProgressBar then colorProgress1.Progress := 0;
   RunM1Tfc('makelabel', arg, DoLabelSwitch);
 end;
 
@@ -236,7 +235,6 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   arg[4] := '';
-  if ClearProgressBar then colorProgress1.Progress := 0;
   RunM1Tfc('makelabel', arg, DoLabelSwitch);
 end;
 
@@ -269,7 +267,6 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   arg[4] := '';
-  if ClearProgressBar then colorProgress1.Progress := 0;
   RunM1Tfc('cleanup', arg, fakeLed);
 end;
 
@@ -401,7 +398,6 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   arg[4] := '';
-  if ClearProgressBar then ColorProgress1.Progress := 0;
   RunM1Tfc('flash', arg, FlashSwitch);
 
 end;
@@ -453,7 +449,6 @@ begin
   DebugLevel := '0';
   SaveWidth := Width;
   Constraints.MaxWidth := Width;
-  ClearProgressBar := True;
 end;
 
 procedure TmainForm.FuncTestSwitchClick(Sender: TObject);
@@ -473,7 +468,6 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   arg[4] := '';
-  if ClearProgressBar then ColorProgress1.Progress := 0;
   RunM1Tfc('functest', arg, FuncTestSwitch);
 
 end;
@@ -551,7 +545,6 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   arg[4] := '';
-  if ClearProgressBar then ColorProgress1.Progress := 0;
   ret := RunM1Tfc('ict', arg, ICTTestSwitch);
   if (ret <> NormalExit) then InterruptMenuItemClick(self);
 end;
@@ -584,7 +577,6 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   arg[4] := '';
-  if ClearProgressBar then ColorProgress1.Progress := 0;
   RunM1Tfc('eeprom', arg, EEPROMSwitch);
 end;
 
@@ -624,6 +616,17 @@ var
   startTime : Integer;
   stdout : String;
 begin
+ {
+  result := 0;
+  Led.Tag := 1;
+  for  BytesRead:=0 to 20 do begin
+      Application.ProcessMessages;
+      Sleep(300);
+
+  end;
+  Led.Tag := 0;
+  exit(0);
+  }
   lastCommand := command;
   provisionThread.ResetTest();
   startTime := logger.getEpochTime();
@@ -724,7 +727,6 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   arg[4] := '';
-  if ClearProgressBar then ColorProgress1.Progress := 0;
   retValue := RunM1Tfc('progmac', arg, MacProgSwitch);
   if (retValue = OtpIsNotBlank) or (retValue = normalExit) then
   begin
@@ -748,6 +750,10 @@ end;
 
 procedure TmainForm.StartTestClick(Sender: TObject);
 begin
+
+  // todo
+  TargetVendorSerial.Text := '3022480016';
+
   if busyFlag1 then exit;
   if not checkSerial() then
   begin
@@ -767,37 +773,27 @@ end;
 
 procedure TmainForm.ICTTestSwitchClick_;
 begin
-  ClearProgressBar := False;
   ICTTestSwitchClick(self);
-  ClearProgressBar := True;
 end;
 
 procedure TmainForm.MacProgSwitchClick_;
 begin
-  ClearProgressBar := False;
   MacProgSwitchClick(self);
-  ClearProgressBar := True;
 end;
 
 procedure TmainForm.FlashSwitchClick_;
 begin
-  ClearProgressBar := False;
   FlashSwitchClick(self);
-  ClearProgressBar := True;
 end;
 
 procedure TmainForm.FuncTestSwitchClick_;
 begin
-  ClearProgressBar := False;
   FuncTestSwitchClick(self);
-  ClearProgressBar := True;
 end;
 
 procedure TmainForm.EEPROMSwitchClick_;
 begin
-  ClearProgressBar := False;
   EEPROMSwitchClick(self);
-  ClearProgressBar := True;
 end;
 
 function TmainForm.checkSerial(): boolean;
