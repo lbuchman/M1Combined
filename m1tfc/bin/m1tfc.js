@@ -38,7 +38,7 @@ const configuration = {
     login: 'root',
     password: 'only4u2c',
     serialBaudrate: 115200,
-    ConnectionString: 'none',
+    conString: 'none',
     memTestSize1MBBlocks: 10,
     forceEppromOverwrite: false,
     vendorSite: 'N1',
@@ -207,7 +207,7 @@ program.command('pushtocloud')
         const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_MM_SS');
         let logfile;
         try {
-            logfile = logger.getLogger(options.serial, '  cloud', options.serial, configData.m1mtfDir, options.debug);
+            logfile = console;
             const db = sqliteDriver.initialize(logfile);
             const dbRecord = db.getRecord(options.serial);
             const uid = utils.macToUid(dbRecord[0].uid);
@@ -221,7 +221,7 @@ program.command('pushtocloud')
             }
 
             const logContainer = 'm1-3200-logs';
-            const blobSvc = azure.createBlobService(configData.asConnectionString);
+            const blobSvc = azure.createBlobService(configData.conString);
             await new Promise(async (resolve, reject) => {
                 blobSvc.createBlockBlobFromLocalFile(`${logContainer}-${configData.vendorSite}`, `${timeStamp}_${uid}-${options.serial}.txz`, `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz`, async (error) => {
                     if (!error) {
