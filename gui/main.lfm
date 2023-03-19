@@ -4,7 +4,7 @@ object mainForm: TmainForm
   Top = 227
   Width = 1824
   BorderWidth = 2
-  Caption = 'M1-3200 Test Fixture GUI V-0.11'
+  Caption = 'M1-3200 Test Fixture GUI V-0.12'
   ClientHeight = 374
   ClientWidth = 1824
   DesignTimePPI = 137
