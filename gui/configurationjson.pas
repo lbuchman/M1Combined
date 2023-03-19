@@ -47,22 +47,7 @@ function ConfigurationGet: TConfigration;
 var
   config: TConfigration;
 begin
-
-  // jObject := jData as TJSONObject;
-  // config.IctFWFilePath := jObject.get('ictFWFilePath');
-  // config.LayoutFilePath := jObject.get('layoutFilePath');
-  // config.STM32_Programmer_CLI := jObject.get('programmingCommand');
   config.ScannerUdpPort := '10000'; //jObject.get('scannerUdpPort');
-  // config.M1SerialDev := jObject.get('m1SerialDev');
-  // config.Logdir := jObject.get('logdir');
-  // config.TestBoardTerminalDev := jObject.get('testBoardTerminalDev');
-  // config.M1TfcExecutable := jObject.get('m1TfcExecutable');
-  // config.MemTestSize1MBBlocks := jObject.get('memTestSize1MBBlocks');
-  // config.ForceEppromOverwrite := jObject.get('forceEppromOverwrite');
-  // config.VendorSite := jObject.get('vendorSite');
-  // config.SkipTestpointCheck := jObject.get('skipTestpointCheck');
-  // config.UidStartRange := jObject.get('uidStartRange');
-
   Result := config;
 end;
 
