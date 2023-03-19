@@ -195,18 +195,18 @@ function boolToInt(value) {
 }
 
 function checkDbRecord(records, full) {
-    if (records === undefined || records[0] === undefined) throw new Error('Access denied, testing is not complete.');
+    if (records === undefined || records[0] === undefined) throw new Error('Failed, Invalid DB record');
     const record = records[0];
-    if (!record) throw new Error('Invalid database record');
-    if (!record.vendorSerial) throw new Error('Access denied, testing is not complete.');
-    if (!record.ictTestPassed) throw new Error('Access denied, testing is not complete, did ICT test passed?');
-    if (!record.functionalTestPassed) throw new Error('Access denied, testing is not complete, did functional test passed?');
-    if (!record.flashProgrammed) throw new Error('Access denied, testing is not complete, was board flashed?');
-    if (!record.uid) throw new Error('Access denied, testing is not complete, was MAC programmed?');
+    if (!record) throw new Error('Failed, Invalid DB record');
+    if (!record.vendorSerial) throw new Error('Failed, vendorSerial is not defined.');
+    if (!record.ictTestPassed) throw new Error('Failed, ICT test status is not defined');
+    if (!record.functionalTestPassed) throw new Error('Failed, Functional test status is not defined');
+    if (!record.flashProgrammed) throw new Error('Failed, Flash status is not defined');
+    if (!record.uid) throw new Error('Failed, MAC address status is not defined');
     if (full) {
-        if (!record.secret) throw new Error('Access denied, testing is not complete, was EEPROM programmed?');
-        if (!record.boardS2Serial) throw new Error('Access denied, testing is not complete, was EEPROM programmed?');
-        if (!record.dateAndTime) throw new Error('Access denied, testing is not complete, was EEPROM programmed?');
+        if (!record.secret) throw new Error('Failed, EEPROM secret status is not defined');
+        if (!record.boardS2Serial) throw new Error('Failed, EEPROM programming status is not defined');
+        if (!record.dateAndTime) throw new Error('Failed, Missing times stamp in DB');
     }
     return true;
 }

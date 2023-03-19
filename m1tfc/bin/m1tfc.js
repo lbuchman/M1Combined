@@ -28,16 +28,27 @@ const dateTime = require('date-and-time');
 const configuration = {
     ictFWFilePath: `${process.env.HOME}/m1mtf/fsbl.stm32`,
     m1fwBase: `${process.env.HOME}/m1mtf/stm32mp15-lenels2-m1`,
+    m1mtfDir: `${process.env.HOME}/m1mtf`,
     layoutFilePath: `${process.env.HOME}/m1mtf/stm32mp15-lenels2-m1/flashlayout_st-ls2m1-image-core/trusted//FlashLayout_emmc_stm32mp151f-ls2m1-trusted.tsv`,
     programmingCommand: `${process.env.HOME}/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI`,
     m1SerialDev: '/dev/ttyUSB0',
-    m1defaultIP: '192.168.0.251',
+    m1defaultIP: '192.168.1.251',
     testBoardTerminalDev: '/dev/ttyACM0',
     tolerance: 0.05,
     login: 'root',
     password: 'only4u2c',
     serialBaudrate: 115200,
-    asConnectionString: 'DefaultEndpointsProtocol=https;AccountName=enel2anestingtsm;AccountKey=iltiV6hEaN4Y6l8tvyLQNsCnBX42oHQmfBDCmhGPjwhLgwAKGKtTgIn/hwhVNn5CG+1KAY23e0SE+ASti5kpzQ==;EndpointSuffix=core.windows.net'
+    ConnectionString: 'none',
+    memTestSize1MBBlocks: 10,
+    forceEppromOverwrite: false,
+    vendorSite: 'N1',
+    skipTestpointCheck: false,
+    flashDisable: false,
+    progMAC: false, /* need DB setup to enable */
+    progEEPROM: true,
+    makeLabel: true,
+    funcTestDisable: false
+
 };
 
 /* Just for running out of snap */
@@ -103,9 +114,6 @@ program.command('eeprom')
     .description('Program I2C EEPROM.')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
-    .option('-r, --readOnly', 'read I2C EEPROM and display data')
-    .option('-t, --standalone', 'do not use test board')
-    .option('-o, --forceEppromOverwrite', 'write eeprom even if already written')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
@@ -122,10 +130,7 @@ program.command('eeprom')
             await eeprom.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             process.env.CumulusDir = `${configData.m1mtfDir}/Cumulus`;
-            if (options.readOnly) {
-                await eeprom.print(configData.programmingCommand);
-            }
-            else await eeprom.program(configData.programmingCommand, options.serial, configData.vendorSite, configData.forceEppromOverwrite);
+            await eeprom.program(configData.programmingCommand, options.serial, configData.vendorSite, configData.forceEppromOverwrite);
             await delay(100);
             await common.testEndSuccess();
             process.exit(exitCodes.normalExit);
@@ -143,8 +148,6 @@ program.command('progmac')
     .description('program MAC to MP1 OTP, cannot be undone')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug')
-    .option('-r, --readOnly', 'read OTP (MAC) only')
-    .option('-t, --standalone', 'do not use test board')
     .action(async (options) => {
         const configData = await config(configuration);
         process.env.fwDir = configData.m1fwBase;
@@ -157,8 +160,7 @@ program.command('progmac')
             logfile.info('Executing program MAC command ...');
             const macProgram = new ProgramMac(configData, options.serial, logfile);
             await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
-            if (options.readOnly) await macProgram.getMac(configData.programmingCommand, options.readOnly);
-            else await macProgram.run(configData.programmingCommand);
+            await macProgram.run(configData.programmingCommand);
             process.exit(exitCodes.normalExit);
         }
         catch (err) {
@@ -173,7 +175,6 @@ program.command('flash')
     .description('program STM32M1 with the flash layout file')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
-    .option('-t, --standalone', 'do not use test board')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
@@ -218,7 +219,7 @@ program.command('pushtocloud')
             if (fs.existsSync(`${configData.m1mtfDir}/logs/${options.serial}`)) {
                 await os.executeShellCommand(`tar -cJf ${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz -C ${configData.m1mtfDir}/logs/${options.serial} .`, logfile, false);
             }
-            
+
             const logContainer = 'm1-3200-logs';
             const blobSvc = azure.createBlobService(configData.asConnectionString);
             await new Promise(async (resolve, reject) => {
@@ -339,7 +340,7 @@ program.command('makelabel')
             if (!options.express) {
                 const macProgram = new ProgramMac(configData, options.serial, logfile);
                 await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
-                const retValue = await macProgram.getMac(configData.programmingCommand, options.readOnly);
+                const retValue = await macProgram.getMac(configData.programmingCommand);
                 if (retValue.exitCode !== exitCodes.normalExit) throw new Error('Could not read i2c EEPROM');
                 uid = retValue.mac;
                 const eeprom = new Eeprom(configData.ictFWFilePath, logfile);

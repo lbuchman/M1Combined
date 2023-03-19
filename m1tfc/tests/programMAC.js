@@ -107,7 +107,7 @@ module.exports = class ProgramMac {
   *
   * @param
   */
-    async getMac(programmer, readOnly = false) {
+    async getMac(programmer) {
         const fwDir = process.env.fwDir;
         await common.initializeTestFixture(null, false, null, null, this.logger);
         this.logger.debug('Programming TSV file ...');
@@ -122,13 +122,11 @@ module.exports = class ProgramMac {
         if ((utils.getWordData(word57, utils.otp57) !== '0x00000000') || (utils.getWordData(word58, utils.otp58) !== '0x00000000')) {
             const otpToMac = utils.otpToMac(utils.getWordData(word57, utils.otp57), utils.getWordData(word58, utils.otp58));
             this.mac = otpToMac;
-            if (readOnly) log.info(this.mac);
             await common.testEndSuccess();
             await delay(300);
             const exitCode = exitCodes.normalExit;
             return ({ exitCode, mac: this.mac });
         }
-        if (readOnly) log.info('00:00:00:00:00:00');
         await common.testEndSuccess();
         const exitCode = exitCodes.normalExit;
         return ({ exitCode, mac: this.mac });
