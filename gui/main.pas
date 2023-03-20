@@ -763,10 +763,6 @@ end;
 
 procedure TmainForm.StartTestClick(Sender: TObject);
 begin
-
-  // todo
-  TargetVendorSerial.Text := '3022480016';
-
   if busyFlag1 then exit;
   if not checkSerial() then
   begin
