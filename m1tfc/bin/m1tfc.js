@@ -120,6 +120,11 @@ program.command('eeprom')
         try {
             process.env.fwDir = configData.m1fwBase;
             logfile = logger.getLogger(options.serial, ' eeprom', options.serial, configData.m1mtfDir, options.debug);
+            if (!configData.progEEPROM) {
+                logfile.info('Prog EEPROM is disabled');
+                await delay(100);
+                process.exit(exitCodes.normalExit);
+            }
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             if (!configData.vendorSite) await errorAndExit('must define vendor site in $SNAP_DATA/config.json', logfile);
 
@@ -155,6 +160,11 @@ program.command('progmac')
 
         try {
             logfile = logger.getLogger(options.serial, 'progmac', options.serial, configData.m1mtfDir, options.debug);
+            if (!configData.progMAC) {
+                logfile.info('Pro MAC is disabled');
+                await delay(100);
+                process.exit(exitCodes.normalExit);
+            }
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Executing program MAC command ...');
@@ -178,7 +188,11 @@ program.command('flash')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
-
+        if (configData.flashDisable) {
+            logfile.info('Flash eMMC is disabled');
+            await delay(100);
+            process.exit(exitCodes.normalExit);
+        }
         try {
             process.env.fwDir = configData.m1fwBase;
             logfile = logger.getLogger(options.serial, '   eMMC', options.serial, configData.m1mtfDir, options.debug);
@@ -287,6 +301,11 @@ program.command('functest')
         try {
             process.env.fwDir = configData.m1fwBase;
             process.env.m1defaultIP = configData.m1defaultIP;
+            if (configData.funcTestDisable) {
+                logfile.info('Func test is disabled');
+                await delay(100);
+                process.exit(exitCodes.normalExit);
+            }
             logfile = logger.getLogger(options.serial, '   func', options.serial, configData.m1mtfDir, options.debug);
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
@@ -317,6 +336,11 @@ program.command('makelabel')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
+        if (!configData.makeLabel) {
+            logfile.info('Make Label is disabled');
+            await delay(100);
+            process.exit(exitCodes.normalExit);
+        }
         try {
             if (options.label) {
                 const lines = options.label.split(',');
