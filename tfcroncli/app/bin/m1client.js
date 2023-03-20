@@ -40,7 +40,7 @@ program.command('update')
         try {
             const str = '/root snap install/d';
             os.executeShellCommand(`sudo sed -i '${str}' /etc/crontab`, logfile);
-            const configData = await config({});
+            const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
             dir = configData.m1mtfDir;
             logfile = logger.getLogger('m1cli', 'update', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
             logfile.info('Checking for SW & FW update ...');
@@ -108,7 +108,7 @@ program.command('update')
 program.command('synclogs')
     .description('sync logs into Cloud AS')
     .action(async () => {
-        const configData = await config({});
+        const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
         const matches = glob.sync(`${configData.m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
         const logfile = logger.getLogger('m1cli', 'synclogs', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         const blobSvc = azure.createBlobService(configData.conString);
@@ -136,7 +136,7 @@ program.command('synclogs')
 program.command('backupdb')
     .description('backup DB to the cloud')
     .action(async () => {
-        const configData = await config({});
+        const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
         const logfile = logger.getLogger('m1cli', 'backupdb', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         const dbFile = path.join(configData.m1mtfDir, 'tf.db');
         const blobSvc = azure.createBlobService(configData.conString);
@@ -180,7 +180,7 @@ function getEncryptedSecretBase32(buffer) {
 program.command('syncsecrets')
     .description('sync M1-3200 secrets into Cloud AS')
     .action(async () => {
-        const configData = await config({});
+        const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
         const logfile = logger.getLogger('m1cli', 'syncsecrets', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         secrets.initialize(configData.m1mtfDir, logfile);
         const now = new Date();
