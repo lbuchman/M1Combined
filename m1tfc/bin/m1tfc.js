@@ -301,12 +301,12 @@ program.command('functest')
         try {
             process.env.fwDir = configData.m1fwBase;
             process.env.m1defaultIP = configData.m1defaultIP;
+            logfile = logger.getLogger(options.serial, '   func', options.serial, configData.m1mtfDir, options.debug);
             if (configData.funcTestDisable) {
                 logfile.error('Func test is disabled');
                 await delay(100);
                 process.exit(exitCodes.normalExit);
             }
-            logfile = logger.getLogger(options.serial, '   func', options.serial, configData.m1mtfDir, options.debug);
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Executing m1-3200 functional test ...');
@@ -332,10 +332,10 @@ program.command('makelabel')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
     .option('-e, --express', 'use database data to print the label')
-    .option('-l, --label <string>', 'print custom label')
+    .option('-l, --label <string>', 'print label')
     .action(async (options) => {
         const configData = await config(configuration);
-        let logfile;
+        let logfile = console;
         if (!configData.makeLabel) {
             logfile.error('Make Label is disabled');
             await delay(100);

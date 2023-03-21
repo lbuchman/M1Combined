@@ -882,8 +882,8 @@ end;
 procedure TmainForm.DoLabelSwitchClick_Wrapper(Sender: TObject);
 begin
   if DevModeLabel.Caption = 'D0' then begin
-      // TindLed(Sender).LedValue := false;
-      // exit;
+      TindLed(Sender).LedValue := false;
+      exit;
   end;
   if TargetVendorSerial.Text = ''  then begin
       ShowMessage('Barcode Scan is Missing');
