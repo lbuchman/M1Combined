@@ -335,7 +335,7 @@ program.command('makelabel')
     .option('-l, --label <string>', 'print label')
     .action(async (options) => {
         const configData = await config(configuration);
-        let logfile = console;
+        const logfile = logger.getLogger(options.serial, '  label', options.serial, configData.m1mtfDir, options.debug);
         if (!configData.makeLabel) {
             logfile.error('Make Label is disabled');
             await delay(100);
@@ -356,7 +356,6 @@ program.command('makelabel')
             process.env.fwDir = configData.m1fwBase;
             let uid;
             let eepromData = {};
-            logfile = logger.getLogger(options.serial, '  label', options.serial, configData.m1mtfDir, options.debug);
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Printing Label ...');
@@ -397,7 +396,6 @@ program.command('makelabel')
             process.exit(exitCodes.normalExit);
         }
         catch (err) {
-            if (!logfile) logfile = console;
             logfile.error(err.message);
             // logfile.debug(err.stack);
             await delay(100);
