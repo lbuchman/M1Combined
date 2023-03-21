@@ -120,6 +120,7 @@ char stab[] = {
     0,  /* All other keys are undefined */
 };
 
+/* return -1 if nt valid */
 int isDeviceValid(int fd) {
     struct input_id device_info;
     /* suck out some device information */
@@ -150,7 +151,7 @@ int main(int argc, char* argv[]) {
     fd_set rfds;
     struct timeval tv;
     int retval;
-    printf("SCANNER drive rev 0.1\n");
+    printf("SCANNER drive rev 0.2\n");
     char devname[64];
     devname[0] = 0;
 
@@ -177,13 +178,6 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    printf("Device name is %s\n", devname);
-    int device = open(devname, O_RDONLY);
-    if (device < 0) {
-          perror("open()");
-          sleep(1);
-          exit(-1);
-    }
     struct input_event ev;
     int shift = 0;
     char line[4096], *p = line;
@@ -194,12 +188,27 @@ int main(int argc, char* argv[]) {
     fputs("starting\n", stdout);
 
     //fputs("starting\n", stderr);
+    int device = -1;
     while(1) {
-       if (isDeviceValid(device)) {
-           printf("scanner is no loger connected, quiting\n");
-           sleep(80);
-           return -1;
+     
+       if (device == -1) {
+           printf("Device name is %s\n", devname);
+           device = open(devname, O_RDONLY);
+           if (device < 0) {
+              perror("open()");
+              sleep(5);
+              continue;
+           }
        }
+       
+       if (isDeviceValid(device) != 0) {
+           printf("scanner is no loger connected\n");
+           sleep(5);
+           device = -1;
+           continue;
+       }
+       
+       
         FD_ZERO(&rfds);
         FD_SET(device, &rfds);
         tv.tv_sec = 0;
@@ -209,8 +218,7 @@ int main(int argc, char* argv[]) {
 
         if(retval == -1) {
             perror("select()");
-            sleep(80);
-            exit(-1);
+            continue;
         }
 
         if(!retval) {
@@ -229,7 +237,6 @@ int main(int argc, char* argv[]) {
                     char *t = shift ? stab : ntab;
                     char ch = t[ev.code];
 
-                    //printf("Key: %02d State: %d [%c]\n", ev.code, ev.value, ch);
                     if(ch == '\n') {
                         *p = '\0';
                         fputs(line, stdout);
