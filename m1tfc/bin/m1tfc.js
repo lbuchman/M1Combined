@@ -88,7 +88,7 @@ program.command('ict')
         try {
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.m1mtfDir, options.debug);
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
-            logfile.info('Executing ICT command ...');
+            logfile.error('Executing ICT command ...');
             const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
@@ -121,7 +121,7 @@ program.command('eeprom')
             process.env.fwDir = configData.m1fwBase;
             logfile = logger.getLogger(options.serial, ' eeprom', options.serial, configData.m1mtfDir, options.debug);
             if (!configData.progEEPROM) {
-                logfile.info('Prog EEPROM is disabled');
+                logfile.error('Prog EEPROM is disabled');
                 await delay(100);
                 process.exit(exitCodes.normalExit);
             }
@@ -161,7 +161,7 @@ program.command('progmac')
         try {
             logfile = logger.getLogger(options.serial, 'progmac', options.serial, configData.m1mtfDir, options.debug);
             if (!configData.progMAC) {
-                logfile.info('Pro MAC is disabled');
+                logfile.error('Prog MAC is disabled');
                 await delay(100);
                 process.exit(exitCodes.normalExit);
             }
@@ -188,14 +188,14 @@ program.command('flash')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
-        if (configData.flashDisable) {
-            logfile.info('Flash eMMC is disabled');
-            await delay(100);
-            process.exit(exitCodes.normalExit);
-        }
         try {
             process.env.fwDir = configData.m1fwBase;
             logfile = logger.getLogger(options.serial, '   eMMC', options.serial, configData.m1mtfDir, options.debug);
+            if (configData.flashDisable) {
+                logfile.error('Flash eMMC is disabled');
+                await delay(100);
+                process.exit(exitCodes.normalExit);
+            }
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Flashing eMMC ...');
@@ -302,7 +302,7 @@ program.command('functest')
             process.env.fwDir = configData.m1fwBase;
             process.env.m1defaultIP = configData.m1defaultIP;
             if (configData.funcTestDisable) {
-                logfile.info('Func test is disabled');
+                logfile.error('Func test is disabled');
                 await delay(100);
                 process.exit(exitCodes.normalExit);
             }
@@ -337,7 +337,7 @@ program.command('makelabel')
         const configData = await config(configuration);
         let logfile;
         if (!configData.makeLabel) {
-            logfile.info('Make Label is disabled');
+            logfile.error('Make Label is disabled');
             await delay(100);
             process.exit(exitCodes.normalExit);
         }
