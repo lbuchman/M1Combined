@@ -218,7 +218,7 @@ program.command('pushtocloud')
     .action(async (options) => {
         const configData = await config(configuration);
         const now = new Date();
-        const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_MM_SS');
+        const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_mm_ss');
         let logfile;
         try {
             logfile = console;
@@ -265,7 +265,7 @@ program.command('cleanup')
         const configData = await config(configuration);
         let logfile;
         const now = new Date();
-        const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_MM_SS');
+        const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_mm_ss');
         try {
             logfile = logger.getLogger(options.serial, '  clean', options.serial, configData.m1mtfDir, options.debug);
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
