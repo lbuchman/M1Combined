@@ -9,7 +9,7 @@ const exitCodes = require('../src/exitCodes');
 const sqliteDriver = require('../utils/sqliteDriver');
 const tsv = require('../utils/tsv');
 
-const log = console;
+// const log = console;
 module.exports = class ProgramMac {
     constructor(config, serial, log_) {
         this.logger = log_;

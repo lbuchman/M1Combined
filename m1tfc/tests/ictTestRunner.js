@@ -52,7 +52,7 @@ module.exports = class IctTestRunner {
             this.logger.info('Testing Ribbon cable pins ...');
             if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger)) ret = false;
             this.logger.info('Testing RS485 ...');
-            if (!skipTestpointCheck) if (!await rs485.testRs485(this.logger)) ret = false;
+            if (!await rs485.testRs485(this.logger)) ret = false;
             this.logger.info('Testing Status LED ...');
             if (!await ledTest.test(this.logger)) ret = false;
             this.logger.info('Testing Tamper sensor ...');
