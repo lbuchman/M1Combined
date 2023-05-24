@@ -171,7 +171,7 @@ async function testRs422(logger) {
     try {
         const ret = await targetICTLink.sendCommand('testrs422');
         if (!ret.status) {
-            logger.error('Failed Ribbon Rs422 echo test');
+            logger.error(`Failed Ribbon Rs422 echo test error: ${ret.error}`);
             return false;
         }
         logger.info('Passed Ribbon RS422 echo test ');

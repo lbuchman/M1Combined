@@ -265,19 +265,27 @@ int main() {
         char testBufferRx[6];
 
         while(Uart<Board::Rx422UART>::available()) Uart<Board::Rx422UART>::readChar();
-        for(count = 0; count < strlen(testBufferTx); count++) {
+        for(count = 0; count < sizeof(testBufferTx); count++) {
             Uart<Board::Rx422UART>::putchar(testBufferTx[count]);
             int timeout = 20;
 
-            while(timeout > 0 && !Uart<Board::Rx422UART>::available()) {
+            int dataAvailable = Uart<Board::Rx422UART>::available();
+            while(timeout > 0 && !dataAvailable) {
                 timeout -= 1;
                 udelay(1000);
+                dataAvailable = Uart<Board::Rx422UART>::available();
             };
 
-            ret = Uart<Board::Rx422UART>::readChar();
+            if (dataAvailable) {
+                ret = Uart<Board::Rx422UART>::readChar();
+            }
+            else {
+                stream.printf("{ \"status\": false,  \"error\": \"no reply from MP1, count = %d }\n\r", count);
+                return; 
+            }
 
             if(ret != testBufferTx[count]) {
-                stream.printf("{ \"status\": false,  \"error\": \"no reply match count = %d send = %d rec = %d\" }\n\r", count, 101,  ret);
+                stream.printf("{ \"status\": false,  \"error\": \"reply data does not match, count = %d send = %d rec = %d\" }\n\r", count, testBufferTx[count],  ret);
                 return;
             }
         }
