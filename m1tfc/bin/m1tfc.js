@@ -365,7 +365,7 @@ program.command('makelabel')
                 await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
                 const retValue = await macProgram.getMac(configData.programmingCommand);
                 if (retValue.exitCode !== exitCodes.normalExit) throw new Error('Could not read i2c EEPROM');
-                uid = retValue.mac;
+                uid = retValue.mac.toUpperCase();
                 const eeprom = new Eeprom(configData.ictFWFilePath, logfile);
                 await eeprom.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
                 await delay(400);
@@ -375,7 +375,7 @@ program.command('makelabel')
                 const db = sqliteDriver.initialize(logfile);
                 const dbRecord = db.getRecord(options.serial);
                 utils.checkDbRecord(dbRecord, true);
-                uid = dbRecord[0].uid;
+                uid = dbRecord[0].uid.toUpperCase();
                 eepromData.serial = `SN=${dbRecord[0].boardS2Serial}`;
             }
 
