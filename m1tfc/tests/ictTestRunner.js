@@ -71,6 +71,7 @@ module.exports = class IctTestRunner {
                 process.exit(exitCodes.normalExit);
             }
 
+            this.db.updateSerial(serial);
             this.db.updateIctStatus(serial, utils.boolToInt(false));
             await common.testFailed();
             this.logger.warn('One or more tests Failed!!!');

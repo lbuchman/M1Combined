@@ -204,11 +204,11 @@ class DBClass {
             const update = this.db.prepare('UPDATE records set ictTestPassed = ? WHERE vendorSerial = ?');
             const ret = update.run(status, serial);
             if (ret.changes === 0) {
-                throw new Error('DB call to update ictTestPassed Status failed');
+                throw new Error('DB is not updated');
             }
         }
         catch (err) {
-            throw new Error(`cannot ICTPassed Status in DB: ${err.message}`);
+            throw new Error(`updateIctStatus() call failed error: ${err.message}`);
         }
     }
 
