@@ -12,7 +12,7 @@ const testPoints = [
     { name: 'TP36', voltage: 1.2 },
     { name: 'J5.13', voltage: 11.7 },
     { name: 'J5.8', voltage: 6.0 },
-    { name: 'BatCellBat', voltage: 3.15 }
+    { name: 'BatCellBat', voltage: 3.0 }
 ];
 
 async function testDDRVoltage(tolerance, logger) {
