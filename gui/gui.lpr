@@ -11,10 +11,9 @@ uses
   main,
   provision,
   macUtils,
-  scannerClient,
   logForm,
   logger,
-  configurationJson;
+  configurationJson, progresscolor;
 
 {$R *.res}
 
