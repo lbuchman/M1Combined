@@ -121,10 +121,15 @@ module.exports = class FuncTest {
                 this.logger.info('SPI RAM test passed');
             }
 
-            if (!skipUDBPrnTeset) {
-                const result = await client.execCommand('cat /proc/mounts | grep /dev/sda1');
-                if (!result) throw new Error('USB Host port pen Drive test failed');
-                this.logger.info('USB Host port pen Drive test passed');
+            try {
+                if (!skipUDBPrnTeset) {
+                    const result = await client.execCommand('cat /proc/mounts | grep /dev/sda1');
+                    this.logger.info('USB Host port pen Drive test passed');
+                    if (!result) throw new Error('not mounted');
+                }
+            }
+            catch (err) {
+                throw new Error('USB Host port pen Drive test failed');
             }
 
             this.logger.info('Reseting SPI RAM');
