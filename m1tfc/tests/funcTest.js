@@ -45,7 +45,7 @@ module.exports = class FuncTest {
       *
       * @param
       */
-    async run(programmer, tsv, login, password, m1term, baudrate) {
+    async run(programmer, tsv, login, password, m1term, skipUDBPrnTeset, baudrate) {
         try {
             const ipAddress = process.env.m1defaultIP;
             this.logger.info('Verifying MAC address');
@@ -120,6 +120,13 @@ module.exports = class FuncTest {
                 if (!isM1TestFileFlagSet) await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
                 this.logger.info('SPI RAM test passed');
             }
+
+            if (!skipUDBPrnTeset) {
+                const result = await client.execCommand('cat /proc/mounts | grep /dev/sda1');
+                if (!result) throw new Error('USB Host port pen Drive test failed');
+                this.logger.info('USB Host port pen Drive test passed');
+            }
+
             this.logger.info('Reseting SPI RAM');
             await client.execCommand(`dd if=/dev/zero of=${sramFIle} bs=${sRamSize} count=1`);
             await client.execCommand(`rm -f ${controlFIle}`);

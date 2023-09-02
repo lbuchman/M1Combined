@@ -314,7 +314,7 @@ program.command('functest')
             process.env.logDir = `${configData.m1mtfDir}/logs/${options.serial}`;
             const funcTest = new FuncTest(options.serial, configData, logfile);
             await funcTest.init(configData.testBoardTerminalDev, configData.serialBaudrate);
-            await funcTest.run(configData.programmingCommand, configData.layoutFilePath, configData.login, configData.password, configData.m1SerialDev, '115200');
+            await funcTest.run(configData.programmingCommand, configData.layoutFilePath, configData.login, configData.password, configData.m1SerialDev,  configData.skipUDBPrnTeset, '115200');
             // await funcTest.run(configData.programmingCommand, configData.layoutFilePath);
             process.exit(exitCodes.normalExit);
         }
