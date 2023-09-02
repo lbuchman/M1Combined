@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   Menus, Buttons, ComCtrls, ActnList, MaskEdit, SpinEx, IndLed, BCMDButton,
   strutils, BCListBox, BCTrackbarUpdown, DTAnalogGauge, dtthemedgauge,
-  DTAnalogClock, dtthemedclock, scannerClient, Process, logger,
+  DTAnalogClock, dtthemedclock, Process, logger,
   configurationjson, jsonparser, macUtils, provision, ColorProgress, MSSQLConn;
 
 const
@@ -103,7 +103,6 @@ type
     AProcess: TProcess;
     Uid: string;
     doOnes: boolean;
-    scannerThread: TUDPScannerServerThread;
     provisionThread: TProvisionThread;
     busyFlag: boolean;
     busyFlag1: boolean;
@@ -198,9 +197,6 @@ procedure TmainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   InterruptMenuItemClick(self);
   Application.ProcessMessages;
-  scannerThread.Terminate;
-  scannerThread.WaitFor;
-  scannerThread.Free;
   provisionThread.Terminate;
   provisionThread.ExecuteThread;
   provisionThread.WaitFor;
@@ -305,7 +301,7 @@ end;
 
 procedure TmainForm.Debuglevel_0_Execute(Sender: TObject);
 begin
-  targetVendorSerial.ReadOnly := True;
+  // targetVendorSerial.ReadOnly := True;
   Height := DefaultHeight;
   DevModeLabel.Visible := False;
   DevModeLabel.Caption := 'D0';
@@ -333,14 +329,14 @@ end;
 
 procedure TmainForm.EnableSerialNumberExecute(Sender: TObject);
 begin
-  targetVendorSerial.ReadOnly := False;
-  BarcodeScanEditTimer.Enabled := True;
+  // targetVendorSerial.ReadOnly := False;
+  // BarcodeScanEditTimer.Enabled := True;
 end;
 
 procedure TmainForm.BarcodeScanEditTimerTimer(Sender: TObject);
 begin
-  targetVendorSerial.ReadOnly := True;
-  BarcodeScanEditTimer.Enabled := False;
+  // targetVendorSerial.ReadOnly := True;
+  // BarcodeScanEditTimer.Enabled := False;
 end;
 
 procedure TmainForm.LogsMenuItemClick(Sender: TObject);
@@ -423,7 +419,6 @@ begin
   busyFlag1 := False;
   doOnes := True;
   configuration := ConfigurationGet;
-  scannerThread := TUDPScannerServerThread.Create(False, configuration.ScannerUdpPort);
   provisionThread := TProvisionThread.Create(False);
   // Leds[0] := @ProvisionSwitch;
   Leds[0] := @ICTTestSwitch;
@@ -483,26 +478,6 @@ var
   input: string;
 
 begin
-  input := scannerThread.GetSerialNumber;
-
-  if CompareStr('ENTER', input) <> 0 then
-  begin
-    newSerialNumber := input;
-    targetVendorSerial.Text := input;
-    previouseScanInput := input;
-    exit;
-  end;
-
-  if (CompareStr('ENTER', input) = 0) and (targetVendorSerial.Text <> '') then
-  begin
-    if CompareStr('ENTER', previouseScanInput) <> 0 then
-    begin
-      newSerialNumberIsAvailable := True;
-    end;
-  end;
-
-  previouseScanInput := input;
-
 end;
 
 procedure TmainForm.Timer1Timer(Sender: TObject);
@@ -764,11 +739,11 @@ end;
 procedure TmainForm.StartTestClick(Sender: TObject);
 begin
   if busyFlag1 then exit;
+
   if not checkSerial() then
   begin
     exit;
   end;
-  // targetVendorSerial.Text := 'S' + targetVendorSerial.Text;
   Memo1.Clear;
   ResetLeds;
   ColorProgress1.progress := 0;

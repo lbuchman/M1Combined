@@ -8,7 +8,5 @@
     "progMAC": true,
     "progEEPROM":  true,
     "makeLabel": true,
-    "funcTestDisable": false,
-    "scannerDev": "/dev/input/event13"
-
+    "funcTestDisable": false
 }

@@ -17,7 +17,6 @@
         <ComponentName Value="mainForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="47"/>
         <CursorPos X="23" Y="66"/>
@@ -44,8 +43,9 @@
       <Unit4>
         <Filename Value="scannerClient.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <CursorPos X="31" Y="40"/>
+        <CursorPos X="88" Y="14"/>
         <UsageCount Value="221"/>
         <Loaded Value="True"/>
       </Unit4>

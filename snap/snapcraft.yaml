@@ -1,5 +1,5 @@
 name: m1tfd1 # you probably want to 'snapcraft register <name>'
-version: 8af40c74
+version: 912a4654
 summary: M1 test fixture cli utility
 description: |
   cli utility for testing M1-3200 in production
@@ -17,15 +17,6 @@ apps:
     app:
       command: usr/bin/gui
       plugs: [network, network-bind]
-      
-    scanner:
-      command: usr/local/bin/scanner
-      plugs: [network, network-bind]      
-      
-    startscanner:
-      command: usr/bin/startscanner.sh
-      restart-condition: always
-      daemon: simple
       
 parts:
     cli:

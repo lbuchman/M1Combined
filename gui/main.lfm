@@ -4,11 +4,11 @@ object mainForm: TmainForm
   Top = 227
   Width = 2610
   BorderWidth = 2
-  Caption = 'M1-3200 Test Fixture GUI V-0.12'
+  Caption = 'M1-3200 Test Fixture GUI V-0.13'
   ClientHeight = 545
   ClientWidth = 2610
   DesignTimePPI = 196
-  Font.Height = -30
+  Font.Height = -31
   Font.Name = 'Monospace'
   Icon.Data = {
     5FB20000000001000100000000000100200049B200001600000089504E470D0A
@@ -1486,7 +1486,7 @@ object mainForm: TmainForm
     OnDblClick = Panel1DblClick
     object TargetVendorSerial: TEdit
       Left = 934
-      Height = 43
+      Height = 44
       Top = 20
       Width = 382
       Alignment = taCenter
