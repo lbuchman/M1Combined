@@ -45,7 +45,7 @@ module.exports = class FuncTest {
       *
       * @param
       */
-    async run(programmer, tsv, login, password, m1term, skipUDBPrnTeset, baudrate) {
+    async run(programmer, tsv, login, password, m1term, skipUSBPenDriveTest, baudrate) {
         try {
             const ipAddress = process.env.m1defaultIP;
             this.logger.info('Verifying MAC address');
@@ -122,7 +122,7 @@ module.exports = class FuncTest {
             }
 
             try {
-                if (!skipUDBPrnTeset) {
+                if (!skipUSBPenDriveTest) {
                     const result = await client.execCommand('cat /proc/mounts | grep /dev/sda1');
                     this.logger.info('USB Host port pen Drive test passed');
                     if (!result) throw new Error('not mounted');
