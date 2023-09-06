@@ -12,7 +12,7 @@ const testPoints = [
     { name: 'TP36', voltage: 1.2 },
     { name: 'J5.13', voltage: 11.7 },
     { name: 'J5.8', voltage: 6.0 },
-    { name: 'BatCellBat', voltage: 3.0 }
+    { name: 'BatCellBat', voltage: 3.0, tolerance: 0.1 }
 ];
 
 async function testDDRVoltage(tolerance, logger) {
@@ -38,7 +38,8 @@ async function test(tolerance, logger) {
         if (!ret.status) {
             throw new Error(`Test Board control command failed on pinName=${testPoint.name}, ${ret.error}`);
         }
-        if (((Math.abs(ret.value - testPoint.voltage)) / (testPoint.voltage)) > tolerance) {
+        if (!testPoint.tolerance) testPoint.tolerance = tolerance;
+        if (((Math.abs(ret.value - testPoint.voltage)) / (testPoint.voltage)) > testPoint.tolerance) {
             throw new Error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${ret.value}, reqValue=${testPoint.voltage}`);
         }
         else {
