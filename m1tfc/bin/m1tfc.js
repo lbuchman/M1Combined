@@ -44,11 +44,10 @@ const configuration = {
     vendorSite: 'N1',
     skipTestpointCheck: false,
     flashDisable: false,
-    progMAC: false, /* need DB setup to enable */
+    testerMode: commission,
     progEEPROM: true,
     makeLabel: true,
     funcTestDisable: false
-
 };
 
 /* Just for running out of snap */
@@ -160,11 +159,12 @@ program.command('progmac')
 
         try {
             logfile = logger.getLogger(options.serial, 'progmac', options.serial, configData.m1mtfDir, options.debug);
-            if (!configData.progMAC) {
-                logfile.error('Prog MAC is disabled');
+            if (!configData.testerMode == 'retest') {
+                logfile.info('Tester Mode is Re-Test, no MAC programming');
                 await delay(100);
                 process.exit(exitCodes.normalExit);
             }
+            logfile.info('Tester Mode is commission');
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Executing program MAC command ...');
