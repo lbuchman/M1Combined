@@ -798,7 +798,7 @@ end;
 
 procedure TmainForm.FuncTestSwitchClick_Wrapper(Sender: TObject);
 begin
-    if DevModeLabel.Caption = 'D0' then begin
+    if DebugLevel <> '2' then begin
       TindLed(Sender).LedValue := false;
       exit;
   end;
@@ -813,9 +813,9 @@ end;
 
 procedure TmainForm.ICTTestSwitchClick_Wrapper(Sender: TObject);
 begin
-  if DevModeLabel.Caption = 'D0' then begin
-      // TindLed(Sender).LedValue := false;
-      // exit;
+  if DebugLevel <> '2' then begin
+       TindLed(Sender).LedValue := false;
+       exit;
   end;
   if TargetVendorSerial.Text = ''  then begin
       ShowMessage('Barcode Scan is Missing');
@@ -828,7 +828,7 @@ end;
 
 procedure TmainForm.EEPROMSwitchClick_Wrapper(Sender: TObject);
 begin
-  if DevModeLabel.Caption = 'D0' then begin
+  if DebugLevel <> '2' then begin
       TindLed(Sender).LedValue := false;
       exit;
   end;
@@ -842,7 +842,7 @@ end;
 
 procedure TmainForm.MacProgSwitchClick_Wrapper(Sender: TObject);
 begin
-  if DevModeLabel.Caption = 'D0' then begin
+  if DebugLevel <> '2' then begin
       TindLed(Sender).LedValue := false;
       exit;
   end;
@@ -856,12 +856,9 @@ end;
 
 procedure TmainForm.DoLabelSwitchClick_Wrapper(Sender: TObject);
 begin
-  if DevModeLabel.Caption = 'D0' then begin
-      TindLed(Sender).LedValue := false;
-      exit;
-  end;
+
   if TargetVendorSerial.Text = ''  then begin
-      ShowMessage('Barcode Scan is Missing');
+    //  ShowMessage('Barcode Scan is Missing');
   end;
   Panel1DblClick(Sender);
   DoLabelSwitchClick(Sender);
@@ -870,7 +867,7 @@ end;
 
 procedure TmainForm.FlashSwitchClick_Wrapper(Sender: TObject);
 begin
-  if DevModeLabel.Caption = 'D0' then begin
+  if DebugLevel <> '2' then begin
       TindLed(Sender).LedValue := false;
       exit;
   end;

@@ -356,7 +356,7 @@ program.command('makelabel')
             process.env.fwDir = configData.m1fwBase;
             let uid;
             let eepromData = {};
-            if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
+            // if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Printing Label ...');
             await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
