@@ -1879,7 +1879,7 @@ object mainForm: TmainForm
     object DebugLevel2: TAction
       Caption = 'DebugLevel2'
       OnExecute = Debuglevel_2_Execute
-      ShortCut = 57394
+      ShortCut = 16461
     end
     object EnableSerialNumber: TAction
       Caption = 'EnableSerialNumber'
