@@ -44,7 +44,7 @@ const configuration = {
     vendorSite: 'N1',
     skipTestpointCheck: false,
     flashDisable: false,
-    testerMode: commission,
+    testerMode: 'commission',
     progEEPROM: true,
     makeLabel: true,
     funcTestDisable: false

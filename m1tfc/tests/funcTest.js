@@ -85,7 +85,7 @@ module.exports = class FuncTest {
             if (!link.toLowerCase().includes(macValue.mac.toLowerCase())) {
                 throw new Error('Invalid MAC Address, check OTP');
             }
-
+            this.logger.info('MAC address as expected');
             let isM1TestFileFlagSet;
             try {
                 isM1TestFileFlagSet = await client.execCommand(`ls ${M1TestFileFlag}`);

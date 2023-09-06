@@ -229,18 +229,25 @@ var
   arg: array[0..8] of string;
 begin
   DoLabelSwitch.LedValue := False;
-  if targetVendorSerial.Text = '' then exit;
+ // if targetVendorSerial.Text = '' then exit;
   if busyFlag1 then
   begin
     DoLabelSwitch.LedValue := False;
     exit;
   end;
 
-  arg[0] := '-s';
-  arg[1] := Trim(targetVendorSerial.Text);
-  arg[2] := '-d';
-  arg[3] := DebugLevel;
-  arg[4] := '';
+  if (Length(targetVendorSerial.Text) > 0) then begin
+    arg[0] := '-s';
+    arg[1] := Trim(targetVendorSerial.Text);
+    arg[2] := '-d';
+    arg[3] := DebugLevel;
+    arg[4] := '';
+  end
+  else begin
+    arg[0] := '-d';
+    arg[1] := DebugLevel;
+    arg[2] := '';
+  end;
   RunM1Tfc('makelabel', arg, DoLabelSwitch);
 end;
 
@@ -440,7 +447,7 @@ begin
       Free;
     end;
   ipaddresses := myIPAddress();
-  mainForm.Caption := mainForm.Caption + ' My IP: ' + ipaddresses;
+ // mainForm.Caption := mainForm.Caption + ' My IP: ' + ipaddresses;
 end;
 
 procedure TmainForm.FormShow(Sender: TObject);
