@@ -105,7 +105,7 @@ module.exports = class FuncTest {
             this.logger.debug('M1 is shut down');
             await delay(100);
             db.updateFuncTestStatus(this.serial, utils.boolToInt(true));
-            this.logger.info('Funtional test passed');
+            this.logger.info('Functional test passed');
             await common.testEndSuccess();
             process.exit(exitCodes.normalExit);
         }

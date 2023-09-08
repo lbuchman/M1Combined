@@ -191,8 +191,8 @@ program.command('flash')
         try {
             process.env.fwDir = configData.m1fwBase;
             logfile = logger.getLogger(options.serial, '   eMMC', options.serial, configData.m1mtfDir, options.debug);
-            if (configData.flashDisable) {
-                logfile.error('Flash eMMC is disabled');
+            if (!configData.testerMode == 'retest') {
+                logfile.info('Flash eMMC is disabled in retest mode');
                 await delay(100);
                 process.exit(exitCodes.normalExit);
             }

@@ -23,7 +23,6 @@ const M1TestFileFlag = '/home/s2user/testpassed';
 let db;
 let client;
 
-
 module.exports = class FuncTest {
     constructor(serial, config, log) {
         this.logger = log;
@@ -143,9 +142,9 @@ module.exports = class FuncTest {
             await client.execCommand('rm -f /etc/adjtime /etc/timestamp');
             this.logger.info('Sync clocks to PC');
             this.logger.info(`M1 clock is set to ${pcDateTime.toISOString()}`);
-            this.logger.info('Enabling M1 apps');
-            await client.execCommand('update-rc.d s2nnweb defaults 81');
-            await client.execCommand('update-rc.d s2nn defaults 80');
+            // this.logger.info('Enabling M1 apps');
+            // await client.execCommand('update-rc.d s2nnweb defaults 81');
+            // await client.execCommand('update-rc.d s2nn defaults 80');
             await client.execCommand('sync');
             await client.disconnect();
             await delay(2000);
@@ -181,7 +180,7 @@ module.exports = class FuncTest {
             await client.execCommand(`touch ${M1TestFileFlag}`);
             this.logger.info(`Creating file ${M1TestFileFlag}`);
             db.updateFuncTestStatus(this.serial, utils.boolToInt(true));
-            this.logger.info('Funtional test passed');
+            this.logger.info('Functional test passed');
             await client.execCommand('halt');
             await delay('sync');
             await delay(100);
