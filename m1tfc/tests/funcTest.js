@@ -16,8 +16,8 @@ const ProgramMac = require('../tests/programMAC');
 
 const sRamSize = '128K';
 const sramFIle = '/dev/mtd0';
-const controlFIle = '/home/root/eeprom1';
-const wdScript = '/home/root/wd';
+const controlFIle = '/home/s2user/eeprom1';
+const wdScript = '/home/s2user/wd';
 const M1TestFileFlag = '/home/s2user/testpassed';
 
 let db;
