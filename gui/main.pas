@@ -33,6 +33,7 @@ type
   { TmainForm }
 
   TmainForm = class(TForm)
+    AppsCheckSwitch: TindLed;
     OpenLog: TAction;
     FakeLed: TindLed;
     EnableSerialNumber: TAction;
@@ -53,6 +54,7 @@ type
     Memo1: TMemo;
     PublishLogMenuItem: TMenuItem;
     StartTestMenuItem: TMenuItem;
+    StaticText12: TStaticText;
     StopTestMenu: TMenuItem;
     QuitMenuItem: TMenuItem;
     Panel2: TPanel;
@@ -83,6 +85,7 @@ type
     procedure FuncTestSwitchClick(Sender: TObject);
     procedure ICTTestSwitchClick(Sender: TObject);
     procedure EEPROMSwitchClick(Sender: TObject);
+    procedure AppsCheckSwitchClick(Sender: TObject);
     procedure InterruptMenuItemClick(Sender: TObject);
     procedure LedTimerTimer(Sender: TObject);
     procedure MacProgSwitchClick(Sender: TObject);
@@ -99,6 +102,7 @@ type
     procedure MacProgSwitchClick_Wrapper(Sender: TObject);
     procedure DoLabelSwitchClick_Wrapper(Sender: TObject);
     procedure FlashSwitchClick_Wrapper(Sender: TObject);
+    procedure AppsCheckwitchClick_Wrapper(Sender: TObject);
   private
     AProcess: TProcess;
     Uid: string;
@@ -127,6 +131,7 @@ type
     procedure FlashSwitchClick_;
     procedure FuncTestSwitchClick_;
     procedure EEPROMSwitchClick_;
+    procedure AppsCheckSwitchClick_;
     procedure DoLabelSwitchClick_;
     procedure ResetLeds;
     procedure AddToProgressBar(Value: integer);
@@ -550,6 +555,25 @@ begin
   provisionThread.UserInterruptTest();
 end;
 
+
+procedure TmainForm.AppsCheckSwitchClick(Sender: TObject);
+var
+  arg: array[0..10] of string;
+begin
+  AppsCheckSwitch.LedValue := False;
+
+  if busyFlag1 then
+  begin
+    exit;
+  end;
+
+  EEPROMSwitch.LedValue := False;
+  arg[0] := '-d';
+  arg[1] := DebugLevel;
+  arg[2] := '';
+  RunM1Tfc('pingM1apps', arg, AppsCheckSwitch);
+end;
+
 procedure TmainForm.EEPROMSwitchClick(Sender: TObject);
 var
   arg: array[0..10] of string;
@@ -782,6 +806,11 @@ begin
   FuncTestSwitchClick(self);
 end;
 
+procedure TmainForm.AppsCheckSwitchClick_;
+begin
+  AppsCheckSwitchClick(self);
+end;
+
 procedure TmainForm.EEPROMSwitchClick_;
 begin
   EEPROMSwitchClick(self);
@@ -830,6 +859,19 @@ begin
   end;
   Panel1DblClick(Sender);
   ICTTestSwitchClick(Sender);
+  ColorProgress1.Progress := 100;
+end;
+
+
+procedure TmainForm.AppsCheckwitchClick_Wrapper(Sender: TObject);
+begin
+  if DebugLevel <> '2' then begin
+      TindLed(Sender).LedValue := false;
+      exit;
+  end;
+
+  Panel1DblClick(Sender);
+  AppsCheckSwitchClick(Sender);
   ColorProgress1.Progress := 100;
 end;
 

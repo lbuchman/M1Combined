@@ -106,7 +106,15 @@ begin
       TermnateTest := False;
       continue;
     end;
-
+    Synchronize(MainForm.AppsCheckSwitchClick_);
+    Synchronize(MainForm.Add10ToProgressBar);
+    if (TermnateTest) then
+    begin
+      Synchronize(MainForm.ResetLeds);
+      Synchronize(MainForm.DoLabelError);
+      TermnateTest := False;
+      continue;
+    end;
     Synchronize(MainForm.DoLabelSwitchClick_);
     Synchronize(MainForm.Add10ToProgressBar);
     if (TermnateTest) then

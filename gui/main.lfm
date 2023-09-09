@@ -1,7 +1,7 @@
 object mainForm: TmainForm
-  Left = 1079
+  Left = 783
   Height = 588
-  Top = 253
+  Top = 263
   Width = 2610
   BorderWidth = 2
   Caption = 'M1-3200 Test Fixture GUI V-0.13'
@@ -1682,7 +1682,7 @@ object mainForm: TmainForm
       Height = 62
       Top = 97
       Width = 62
-      OnClick = EEPROMSwitchClick_Wrapper
+      OnClick = AppsCheckwitchClick_Wrapper
       LedValue = False
       Bevels = <      
         item
@@ -1721,9 +1721,9 @@ object mainForm: TmainForm
       TabOrder = 5
     end
     object DoLabelSwitch: TindLed
-      Left = 1843
+      Left = 2232
       Height = 62
-      Top = 97
+      Top = 96
       Width = 62
       OnClick = DoLabelSwitchClick_Wrapper
       LedValue = False
@@ -1752,7 +1752,7 @@ object mainForm: TmainForm
       Transparent = True
     end
     object StaticText11: TStaticText
-      Left = 1916
+      Left = 2304
       Height = 41
       Top = 106
       Width = 213
@@ -1821,6 +1821,49 @@ object mainForm: TmainForm
       ShapeLedColorDisabled = 13416
       ShapeType = stEllipse
       Transparent = True
+    end
+    object AppsCheckSwitch: TindLed
+      Left = 1848
+      Height = 62
+      Top = 96
+      Width = 62
+      OnClick = AppsCheckwitchClick_Wrapper
+      LedValue = False
+      Bevels = <      
+        item
+          HighlightColor = clBlack
+          ShadowColor = clBlack
+        end      
+        item
+          Width = 3
+        end      
+        item
+          Style = bcLowered
+        end      
+        item
+          HighlightColor = clBlack
+          ShadowColor = clBlack
+        end>
+      LedColorOn = clYellow
+      LedColorOff = clGray
+      LedColorDisabled = clBlack
+      ShapeLedColorOn = clGreen
+      ShapeLedColorOff = 16384
+      ShapeLedColorDisabled = 13416
+      ShapeType = stEllipse
+      Transparent = True
+    end
+    object StaticText12: TStaticText
+      Left = 1920
+      Height = 41
+      Top = 105
+      Width = 216
+      Caption = 'Apps Check'
+      Font.Height = -31
+      Font.Name = 'Sans'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 7
     end
   end
   object Timer1: TTimer

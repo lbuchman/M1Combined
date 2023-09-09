@@ -61,7 +61,7 @@ async function getEEPRomData() {
 async function printEEPRomData(logger, console) {
     const eeprom = await this.getEEPRomData();
     delete eeprom.status;
-    console.info(`${JSON.stringify(eeprom).trim()}`);
+    // console.debug(`${JSON.stringify(eeprom).trim()}`);
 }
 
 function getSerialN(serial, vendorSite) {
@@ -89,7 +89,7 @@ async function updateEEPRom(serial, eeeproverwrite, vendorSite, logger) {
                 throw new Error('I2C EEPROM Data is Invalid');
             }
             delete eepromData.status;
-            logger.info(`The Data is OK: ${JSON.stringify(eepromData).trim()}`);
+            logger.info('The EEPROM Data is valid');
             db.updateEepromData(serial, eepromData.secret, eepromData.serial);
         }
 
