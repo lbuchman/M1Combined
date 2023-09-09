@@ -267,6 +267,7 @@ program.command('pingM1apps')
         let logfile;
         try {
             process.env.fwDir = configData.m1fwBase;
+            if (!options.serial) options.serial = 'no serial'
             logfile = logger.getLogger(options.serial, '   pingApps', options.serial, configData.m1mtfDir, options.debug);
             if (!configData.pingPorts) {
                 logfile.info('pinging port 80 & 7262 is disabled in config file');
@@ -399,6 +400,7 @@ program.command('makelabel')
                 catch (err) {
                     //
                 }
+                ????????????????????????
                 process.exit(exitCodes.normalExit);
             }
 

@@ -126,7 +126,6 @@ begin
     end;
 
     Synchronize(MainForm.DoCleanupCmd);
-
     Synchronize(MainForm.ClearbusyFlag1);
   end;
 end;

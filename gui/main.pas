@@ -115,7 +115,7 @@ type
     newSerialNumber: string;
     configuration: TConfigration;
     SaveWidth: integer;
-    Leds: array[0..5] of ^TindLed;
+    Leds: array[0..6] of ^TindLed;
     MemoCopyTxt: string;
     DebugLevel: string;
     lastCommand: string;
@@ -439,6 +439,7 @@ begin
   Leds[3] := @FuncTestSwitch;
   Leds[4] := @EEPROMSwitch;
   Leds[5] := @DoLabelSwitch;
+  Leds[6] := @AppsCheckSwitch;
   LedTimer.Enabled := True;
   DebugLevel := '0';
   Memo1.Font.Size := 12;
