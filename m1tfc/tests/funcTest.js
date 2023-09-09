@@ -96,7 +96,7 @@ module.exports = class FuncTest {
             if (isM1TestFileFlagSet) { // fast and durty way to clean test done flag and restart func test
                 this.logger.info('Clearing test status and reboot');
                 await client.execCommand(`rm -f ${M1TestFileFlag}`);
-                await client.execCommand(`reboot`);
+                await client.execCommand('reboot');
                 this.logger.info('Waiting for login promt');
                 await delay(3000);
                 await m1TermLink.waitLoginPrompt(new Date() / 1000 + 100);
@@ -182,13 +182,6 @@ module.exports = class FuncTest {
                 throw new Error('RTC check failed');
             }
             this.logger.info('RTC test passed');
-
-            const s2app = '/home/s2user/s2nn/bin/s2nn';
-            const s2appPs = await client.execCommand('ps -aux | grep s2nn');
-           // if (!s2appPs.includes(s2app)) throw new Error('s2nn is not running');
-            const s2WebApp = '/home/s2user/s2nn/bin/s2nnweb';
-            const s2WebAppPs = await client.execCommand('ps -aux | grep s2nnweb');
-           // if (!s2WebAppPs.includes(s2WebApp)) throw new Error('s2nnweb is not running');
 
             await client.execCommand(`touch ${M1TestFileFlag}`);
             this.logger.info(`Creating file ${M1TestFileFlag}`);

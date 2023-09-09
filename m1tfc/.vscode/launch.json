@@ -79,14 +79,14 @@
         {
             "type": "pwa-node",
             "request": "launch",
-            "name": "Launch Finalize",
+            "name": "pingM1apps",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["finalize", "-d", "2", "-s", "3022480016" ]
+            "args": ["pingM1apps", "-d", "2"] 
         },
         {
             "type": "pwa-node",
@@ -98,7 +98,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["functest",  "-d", "2", "-s", "3022480016" ]
+            "args": ["functest",  "-d", "2", "-s", "3023200041" ]
         },
         {
             "type": "pwa-node",

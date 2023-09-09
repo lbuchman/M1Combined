@@ -6,6 +6,7 @@ const program = require('commander');
 const logger = require('../utils/logger');
 const IctTestRunner = require('../tests/ictTestRunner');
 const delay = require('delay');
+const nodePortScanner = require('node-port-scanner');
 const ProgramMac = require('../tests/programMAC');
 const config = require('../utils/config');
 const exitCodes = require('../src/exitCodes');
@@ -32,7 +33,7 @@ const configuration = {
     layoutFilePath: `${process.env.HOME}/m1mtf/stm32mp15-lenels2-m1/flashlayout_st-ls2m1-image-core/trusted//FlashLayout_emmc_stm32mp151f-ls2m1-trusted.tsv`,
     programmingCommand: `${process.env.HOME}/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI`,
     m1SerialDev: '/dev/ttyUSB0',
-    m1defaultIP: '192.168.1.251',
+    m1defaultIP: '192.168.0.251',
     testBoardTerminalDev: '/dev/ttyACM0',
     tolerance: 0.05,
     login: 'root',
@@ -43,7 +44,7 @@ const configuration = {
     forceEppromOverwrite: false,
     vendorSite: 'N1',
     skipTestpointCheck: false,
-    flashDisable: false,
+    pingPorts: true,
     testerMode: 'commission',
     progEEPROM: true,
     makeLabel: true,
@@ -159,7 +160,7 @@ program.command('progmac')
 
         try {
             logfile = logger.getLogger(options.serial, 'progmac', options.serial, configData.m1mtfDir, options.debug);
-            if (!configData.testerMode == 'retest') {
+            if (!configData.testerMode === 'retest') {
                 logfile.info('Tester Mode is Re-Test, no MAC programming');
                 await delay(100);
                 process.exit(exitCodes.normalExit);
@@ -191,7 +192,7 @@ program.command('flash')
         try {
             process.env.fwDir = configData.m1fwBase;
             logfile = logger.getLogger(options.serial, '   eMMC', options.serial, configData.m1mtfDir, options.debug);
-            if (!configData.testerMode == 'retest') {
+            if (!configData.testerMode === 'retest') {
                 logfile.info('Flash eMMC is disabled in retest mode');
                 await delay(100);
                 process.exit(exitCodes.normalExit);
@@ -256,6 +257,54 @@ program.command('pushtocloud')
         }
     });
 
+//   7262 80
+
+program.command('pingM1apps')
+    .description('try to establish connection to port 7262 and 80')
+    .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
+    .action(async (options) => {
+        const configData = await config(configuration);
+        let logfile;
+        try {
+            process.env.fwDir = configData.m1fwBase;
+            logfile = logger.getLogger(options.serial, '   pingApps', options.serial, configData.m1mtfDir, options.debug);
+            if (!configData.pingPorts) {
+                logfile.info('pinging port 80 & 7262 is disabled in config file');
+                return;
+            }
+            logfile.info('--------------------------------------------');
+            logfile.info('pinging port 80 & 7262 ...');
+            await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
+            logfile.info('M1-3200 power is on');
+            await testBoardLink.targetPower(true);
+            let timerCount = 10;
+            const interval = setInterval(async () => {
+                const results = await nodePortScanner(configuration.m1defaultIP, [80, 7262]);
+                if (!timerCount) {
+                    clearInterval(interval);
+                    logfile.error('test failed');
+                    await delay(100);
+                    await testBoardLink.targetPower(false);
+                    process.exit(exitCodes.commandFailed);
+                }
+                timerCount -= 1;
+                if (results.ports.open.includes(80) && results.ports.open.includes(7262)) {
+                    logfile.info('ports 7262 and 80 are open on M1-3200');
+                    clearInterval(interval);
+                    await testBoardLink.targetPower(false);
+                    return;
+                }
+                logfile.debug(`port 80 open = ${results.ports.open.includes(80)}, port 7262 open = ${results.ports.open.includes(7262)}`);
+            }, 5000);
+        }
+        catch (err) {
+            logfile.error(err);
+            // logfile.error(err.stack);
+            await testBoardLink.targetPower(false);
+            await delay(100);
+            process.exit(exitCodes.commandFailed);
+        }
+    });
 
 program.command('cleanup')
     .description('pack the log and cleanup')
@@ -314,7 +363,7 @@ program.command('functest')
             process.env.logDir = `${configData.m1mtfDir}/logs/${options.serial}`;
             const funcTest = new FuncTest(options.serial, configData, logfile);
             await funcTest.init(configData.testBoardTerminalDev, configData.serialBaudrate);
-            await funcTest.run(configData.programmingCommand, configData.layoutFilePath, configData.login, configData.password, configData.m1SerialDev,  configData.skipUSBPenDriveTest, '115200');
+            await funcTest.run(configData.programmingCommand, configData.layoutFilePath, configData.login, configData.password, configData.m1SerialDev, configData.skipUSBPenDriveTest, '115200');
             // await funcTest.run(configData.programmingCommand, configData.layoutFilePath);
             process.exit(exitCodes.normalExit);
         }
