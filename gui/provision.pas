@@ -68,6 +68,7 @@ begin
       Synchronize(MainForm.ResetLeds);
       TermnateTest := False;
       Synchronize(MainForm.DoLabelError);
+      Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
     Synchronize(MainForm.MacProgSwitchClick_);
@@ -77,6 +78,7 @@ begin
       Synchronize(MainForm.ResetLeds);
       Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
+      Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
     Synchronize(MainForm.FlashSwitchClick_);
@@ -86,6 +88,7 @@ begin
       Synchronize(MainForm.ResetLeds);
       Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
+      Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
     Synchronize(MainForm.FuncTestSwitchClick_);
@@ -95,6 +98,7 @@ begin
       Synchronize(MainForm.ResetLeds);
       Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
+      Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
     Synchronize(MainForm.EEPROMSwitchClick_);
@@ -104,6 +108,7 @@ begin
       Synchronize(MainForm.ResetLeds);
       Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
+      Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
     Synchronize(MainForm.AppsCheckSwitchClick_);
@@ -113,6 +118,7 @@ begin
       Synchronize(MainForm.ResetLeds);
       Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
+      Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
     Synchronize(MainForm.DoLabelSwitchClick_);
@@ -122,6 +128,7 @@ begin
       Synchronize(MainForm.ResetLeds);
       Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
+      Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
 
