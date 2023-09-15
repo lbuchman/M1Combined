@@ -213,7 +213,7 @@ program.command('flash')
     });
 
 program.command('pushtocloud')
-    .description('pack the log for sepecified serial and push to the cloudand cleanup')
+    .description('pack the log for specified serial and push tarball to the cloud')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
     .action(async (options) => {
