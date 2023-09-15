@@ -49,6 +49,7 @@ async function test(logger) {
         if (dcinPresent.value !== 0) throw new Error('nDCIN_PWR status bit is 1, expeced 0');
         await testBoardLink.targetPower(false);
         await testBoardLink.batteryLoadOn(true);
+        logger.info('Testing main 12V power loss');
         await delay(500);
         try {
             battPresent = await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[0].port} ${batteryStateStatusPins[0].pin}`);
@@ -56,6 +57,7 @@ async function test(logger) {
         catch (err) {
             throw new Error('Power off, Battery On test failed');
         }
+        logger.info('Power loss test passed');
         dcinPresent = await await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[1].port} ${batteryStateStatusPins[1].pin}`);
         if (battPresent.value !== 1) throw new Error('nBATT_PRESENT status bit is 1, expeced 0');
         if (dcinPresent.value !== 1) throw new Error('nDCIN_PWR status bit is 1, expeced 0');

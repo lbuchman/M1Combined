@@ -68,6 +68,7 @@ async function runRibbonCableTestAddressSelectResetPins(settoLevel, floatpins, l
     let freturn = true;
     let ret;
     let count = 0;
+    logger.info(`Testing ribbon cable address select lines for value - ${settoLevel}V`);
     try {
         // eslint-disable-next-line no-plusplus
         for (count = 0; count < ribbonCableSelectPins.length; count++) { // canot use forEach or map because callbacks will bring in concurrency
@@ -201,6 +202,7 @@ async function runRibbonCableTest(tolerance, logger) {
     }
     logger.info('Passed I2C Master test');
     if (!await runRibbonCableTestAddressSelectResetPins(1, false, logger)) retValue = false;
+    if (!await runRibbonCableTestAddressSelectResetPins(0, false, logger)) retValue = false;
     if (!await runRibbonCableTestStaticVoltages(tolerance, logger)) retValue = false;
     if (!await testRs422(logger).catch(() => { retValue = false; })) retValue = false;
     if (!retValue) {
