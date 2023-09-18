@@ -58,7 +58,7 @@ async function getEEPRomData() {
     return ret;
 }
 
-async function printEEPRomData(logger, console) {
+async function printEEPRomData(/* logger, console */) {
     const eeprom = await this.getEEPRomData();
     delete eeprom.status;
     // console.debug(`${JSON.stringify(eeprom).trim()}`);
