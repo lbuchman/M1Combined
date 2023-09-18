@@ -26,6 +26,8 @@ const azure = require('azure-storage');
 const dateTime = require('date-and-time');
 
 // AS name Onguard Testing -> enel2anestingtsm
+// pushlog for all logs
+// fix app checkDbRecord
 
 const configuration = {
     ictFWFilePath: `${process.env.HOME}/m1mtf/fsbl.stm32`,
