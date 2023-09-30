@@ -1,0 +1,86 @@
+object aboutForm: TaboutForm
+  Left = 1047
+  Height = 289
+  Top = 557
+  Width = 1096
+  BorderStyle = bsDialog
+  Caption = 'About'
+  ClientHeight = 289
+  ClientWidth = 1096
+  DesignTimePPI = 196
+  FormStyle = fsStayOnTop
+  OnShow = FormShow
+  LCLVersion = '2.2.6.0'
+  object Label1: TLabel
+    Left = 24
+    Height = 36
+    Top = 119
+    Width = 579
+    Caption = 'Test runner Snap version (m1tfd1)'
+    Font.Height = -30
+    Font.Name = 'Sans'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label2: TLabel
+    Left = 24
+    Height = 36
+    Top = 206
+    Width = 488
+    Caption = 'Utils Snap version (m1client)'
+    Font.Height = -30
+    Font.Name = 'Sans'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label6: TLabel
+    Left = 24
+    Height = 36
+    Top = 32
+    Width = 443
+    Caption = 'M1-3200 firmware version'
+    Font.Height = -30
+    Font.Name = 'Sans'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object m1FirmwareVersion: TLabel
+    Left = 752
+    Height = 36
+    Top = 32
+    Width = 217
+    Caption = 'not available'
+    Font.Height = -30
+    Font.Name = 'Sans'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object m1tfd1Version: TLabel
+    Left = 752
+    Height = 36
+    Top = 112
+    Width = 217
+    Caption = 'not available'
+    Font.Height = -30
+    Font.Name = 'Sans'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object m1ClientVersion: TLabel
+    Left = 752
+    Height = 36
+    Top = 200
+    Width = 217
+    Caption = 'not available'
+    Font.Height = -30
+    Font.Name = 'Sans'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+end

@@ -1,10 +1,9 @@
 object mainForm: TmainForm
-  Left = 783
+  Left = 571
   Height = 588
-  Top = 263
+  Top = 388
   Width = 2610
   BorderWidth = 2
-  Caption = 'M1-3200 Test Fixture GUI V-0.13'
   ClientHeight = 545
   ClientWidth = 2610
   DesignTimePPI = 196
@@ -1902,8 +1901,12 @@ object mainForm: TmainForm
       OnClick = QuitMenuItemClick
     end
     object PublishLogMenuItem: TMenuItem
-      Caption = 'Publish Log'
+      Caption = 'Push Logs'
       OnClick = PublishLogMenuItemClick
+    end
+    object AbountMenuItem: TMenuItem
+      Caption = 'About'
+      OnClick = AbountMenuItemClick
     end
   end
   object ActionList1: TActionList

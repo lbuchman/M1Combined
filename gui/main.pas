@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   Menus, Buttons, ComCtrls, ActnList, MaskEdit, SpinEx, IndLed, BCMDButton,
   strutils, BCListBox, BCTrackbarUpdown, DTAnalogGauge, dtthemedgauge,
-  DTAnalogClock, dtthemedclock, Process, logger,
+  DTAnalogClock, dtthemedclock, Process, logger, about,
   configurationjson, jsonparser, macUtils, provision, ColorProgress, MSSQLConn;
 
 const
@@ -34,6 +34,7 @@ type
 
   TmainForm = class(TForm)
     AppsCheckSwitch: TindLed;
+    AbountMenuItem: TMenuItem;
     OpenLog: TAction;
     FakeLed: TindLed;
     EnableSerialNumber: TAction;
@@ -71,6 +72,7 @@ type
     TestTumer: TTimer;
     LedTimer: TTimer;
     BarcodeScanEditTimer: TTimer;
+    procedure AbountMenuItemClick(Sender: TObject);
     procedure BarcodeScanEditTimerTimer(Sender: TObject);
     procedure EnableSerialNumberExecute(Sender: TObject);
     procedure LogsMenuItemClick(Sender: TObject);
@@ -349,6 +351,11 @@ procedure TmainForm.BarcodeScanEditTimerTimer(Sender: TObject);
 begin
   // targetVendorSerial.ReadOnly := True;
   // BarcodeScanEditTimer.Enabled := False;
+end;
+
+procedure TmainForm.AbountMenuItemClick(Sender: TObject);
+begin
+ aboutForm.ShowModal;
 end;
 
 procedure TmainForm.LogsMenuItemClick(Sender: TObject);

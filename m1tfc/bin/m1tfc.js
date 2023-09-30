@@ -327,9 +327,13 @@ program.command('cleanup')
             logfile.info('--------------------------------------------');
             const db = sqliteDriver.initialize(logfile);
             const dbRecord = db.getRecord(options.serial);
-            utils.checkDbRecord(dbRecord, true);
             const mac = dbRecord[0].uid;
-            const uid = utils.macToUid(mac);
+            let uid;
+            if (!mac)
+                uid = '0000000000000000';
+            else
+                uid = utils.macToUid(mac);
+
             logfile.info('Cleaning up ...');
             await os.executeShellCommand(`tar -cJf ${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
             // await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, false);
@@ -431,7 +435,7 @@ program.command('makelabel')
                 const dbRecord = db.getRecord(options.serial);
                 utils.checkDbRecord(dbRecord, true);
                 uid = dbRecord[0].uid.toUpperCase();
-                eepromData.serial = `SN=${dbRecord[0].boardS2Serial}`;
+                eepromData.serial = `${dbRecord[0].boardS2Serial}`;
             }
 
             if (eepromData.serial === '' || uid === '' || uid === '00:00:00:00:00:00') {

@@ -14,7 +14,7 @@ uses
   scannerClient,
   logForm,
   logger,
-  configurationJson;
+  configurationJson, about;
 
 {$R *.res}
 
@@ -24,5 +24,6 @@ begin
   Application.Initialize;
   Application.CreateForm(TmainForm, mainForm);
   Application.CreateForm(TLoggerForm, LoggerForm);
+  Application.CreateForm(TaboutForm, aboutForm);
   Application.Run;
 end.
