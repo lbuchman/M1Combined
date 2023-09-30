@@ -20,7 +20,7 @@ type
     m1ClientVersion: TLabel;
     procedure FormShow(Sender: TObject);
   private
-
+   procedure GetRevision(Sender: TObject; snapName : string);
   public
 
   end;
@@ -32,9 +32,8 @@ implementation
 
 {$R *.lfm}
 
-{ TaboutForm }
-
-procedure TaboutForm.FormShow(Sender: TObject);
+ 
+procedure TaboutForm.GetRevision(Sender: TObject; snapName :string);
 const
 bufferSize = 512;
 var
@@ -42,14 +41,19 @@ var
   Buffer: array[0..bufferSize] of byte;
   BytesRead: longint;
   textToSee: ansistring;
+  tmpStr : String;
   splitOutput: TStringArray;
+  splitLine: TStringArray;
+  count : Integer;
 begin
     // SaveToFile(GetEnvironmentVariable('HOME') + '/m1mtf/m1tfd1app.pid');
-  m1tfd1Version.Caption := '';
+
   AProcess := TProcess.Create(nil);
   AProcess.Executable := 'snap';
   AProcess.Parameters.Add('list');
-
+  AProcess.Parameters.Add('|');
+  AProcess.Parameters.Add('grep');
+  AProcess.Parameters.Add(snapName);
   AProcess.Options := AProcess.Options + [poUsePipes];
   AProcess.Execute;
 
@@ -70,12 +74,36 @@ begin
   textToSee := '';
   SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
   splitOutput := textToSee.Split(#10);
+  BytesRead := length(splitOutput);
 
-  m1tfd1Version.Caption := textToSee;
-
+  for count := 0 to BytesRead do begin
+      tmpStr := splitOutput[count];
+      splitLine := tmpStr.Split(' ');
+      if  splitLine[0] = snapName then begin
+        tmpStr := splitLine[2];
+        TLABEL(Sender).Caption := tmpStr;
+        break;
+      end;
+  end;
 
   AProcess.Free;
   AProcess := nil;
+end;
+
+
+{ TaboutForm }
+
+procedure TaboutForm.FormShow(Sender: TObject);
+var
+tempStringList  : TStringList;
+begin
+  GetRevision(m1tfd1Version, 'm1tfd1');
+  GetRevision(m1ClientVersion, 'm1client');
+  tempStringList := TStringList.Create;
+  tempStringList.LoadFromFIle('/home/lenel/m1mtf/stm32mp15-lenels2-m1/VERSION');
+  m1FirmwareVersion.Caption := tempStringList[0];
+  tempStringList.Free;
+
 end;
 
 end.
