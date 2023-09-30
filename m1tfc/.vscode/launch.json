@@ -14,7 +14,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["ict", "-d", "2", "-s", "3922480016"]
+            "args": ["ict", "-d", "2", "-s", "3922480016", "-b", "new"]
         },
         {
             "type": "pwa-node",
@@ -86,7 +86,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["pingM1apps", "-d", "2"] 
+            "args": ["pingM1apps", "-d", "2", "-s", "3023200041" ] 
         },
         {
             "type": "pwa-node",

@@ -14,6 +14,7 @@ type
   TaboutForm = class(TForm)
     Label1: TLabel;
     Label2: TLabel;
+    Label3: TLabel;
     Label6: TLabel;
     m1FirmwareVersion: TLabel;
     m1tfd1Version: TLabel;

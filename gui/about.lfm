@@ -1,12 +1,12 @@
 object aboutForm: TaboutForm
-  Left = 1047
-  Height = 289
-  Top = 557
-  Width = 1096
+  Left = 154
+  Height = 373
+  Top = 398
+  Width = 1558
   BorderStyle = bsDialog
   Caption = 'About'
-  ClientHeight = 289
-  ClientWidth = 1096
+  ClientHeight = 373
+  ClientWidth = 1558
   DesignTimePPI = 196
   FormStyle = fsStayOnTop
   OnShow = FormShow
@@ -14,7 +14,7 @@ object aboutForm: TaboutForm
   object Label1: TLabel
     Left = 24
     Height = 36
-    Top = 119
+    Top = 207
     Width = 579
     Caption = 'Test runner Snap version (m1tfd1)'
     Font.Height = -30
@@ -26,7 +26,7 @@ object aboutForm: TaboutForm
   object Label2: TLabel
     Left = 24
     Height = 36
-    Top = 206
+    Top = 294
     Width = 488
     Caption = 'Utils Snap version (m1client)'
     Font.Height = -30
@@ -38,7 +38,7 @@ object aboutForm: TaboutForm
   object Label6: TLabel
     Left = 24
     Height = 36
-    Top = 32
+    Top = 120
     Width = 443
     Caption = 'M1-3200 firmware version'
     Font.Height = -30
@@ -50,7 +50,7 @@ object aboutForm: TaboutForm
   object m1FirmwareVersion: TLabel
     Left = 752
     Height = 36
-    Top = 32
+    Top = 120
     Width = 217
     Caption = 'not available'
     Font.Height = -30
@@ -62,7 +62,7 @@ object aboutForm: TaboutForm
   object m1tfd1Version: TLabel
     Left = 752
     Height = 36
-    Top = 112
+    Top = 200
     Width = 217
     Caption = 'not available'
     Font.Height = -30
@@ -74,12 +74,23 @@ object aboutForm: TaboutForm
   object m1ClientVersion: TLabel
     Left = 752
     Height = 36
-    Top = 200
+    Top = 288
     Width = 217
     Caption = 'not available'
     Font.Height = -30
     Font.Name = 'Sans'
     Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label3: TLabel
+    Left = 360
+    Height = 36
+    Top = 16
+    Width = 298
+    Caption = 'LenelS2 Test Fixture'
+    Font.Height = -30
+    Font.Name = 'Sans'
     ParentColor = False
     ParentFont = False
   end

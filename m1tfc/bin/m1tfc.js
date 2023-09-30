@@ -48,7 +48,6 @@ const configuration = {
     vendorSite: 'N1',
     skipTestpointCheck: false,
     pingPorts: true,
-    testerMode: 'commission',
     progEEPROM: true,
     makeLabel: true,
     funcTestDisable: false
@@ -83,6 +82,7 @@ program.command('ict')
     .description('Executes ICT test')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
+    .option('-b, --cellBatTol <cellBatTol>', 'tolerance for coin cell bat, valid values: new, used ')
     // .option('-f, --force', 'force DB update even if record exist')
 
     .action(async (options) => {
@@ -91,11 +91,14 @@ program.command('ict')
         try {
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.m1mtfDir, options.debug);
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
+            if (!options.cellBatTol) await errorAndExit('must define cellBatTol', logfile);
             logfile.info(`Executing ICT command ${configData.ictFWFilePath} ...`);
             const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
-
+            logfile.info(`Coin Cell Battery level:  ${options.cellBatTol}`);
+            if ((options.cellBatTol !== 'new') &&  (!options.cellBatTol !== 'used')) await errorAndExit('cellBatTol value is not valid', logfile);
+            process.env.cellBatTol = options.cellBatTol;
             let skipTestpointCheck = false;
             let memTestSize1MBBlocks = 512;
             if (options.debug) {
@@ -163,11 +166,6 @@ program.command('progmac')
 
         try {
             logfile = logger.getLogger(options.serial, 'progmac', options.serial, configData.m1mtfDir, options.debug);
-            if (!configData.testerMode === 'retest') {
-                logfile.info('Tester Mode is Re-Test, no MAC programming');
-                await delay(100);
-                process.exit(exitCodes.normalExit);
-            }
             logfile.info('Tester Mode is commission');
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
@@ -195,11 +193,6 @@ program.command('flash')
         try {
             process.env.fwDir = configData.m1fwBase;
             logfile = logger.getLogger(options.serial, '   eMMC', options.serial, configData.m1mtfDir, options.debug);
-            if (!configData.testerMode === 'retest') {
-                logfile.info('Flash eMMC is disabled in retest mode');
-                await delay(100);
-                process.exit(exitCodes.normalExit);
-            }
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Flashing eMMC ...');
@@ -260,18 +253,18 @@ program.command('pushtocloud')
         }
     });
 
-//   7262 80
-
 program.command('pingM1apps')
-    .description('try to establish connection to port 7262 and 80')
+    .description('try to establish connection to port 80')
+    .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
         try {
+            if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             process.env.fwDir = configData.m1fwBase;
-            if (!options.serial) options.serial = 'no serial';
-            logfile = logger.getLogger(options.serial, '   pingApps', options.serial, configData.m1mtfDir, options.debug);
+
+            logfile = logger.getLogger(options.serial, '   apps', options.serial, configData.m1mtfDir, options.debug);
             if (!configData.pingPorts) {
                 logfile.info('pinging port 80 is disabled in config file');
                 return;
@@ -280,6 +273,8 @@ program.command('pingM1apps')
             logfile.info('checking ports 80 ...');
             await delay(5);
             await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
+            await testBoardLink.retrieveIoDef();
+            testBoardLink.getIoDef();
             logfile.info('M1-3200 power is on');
             await m1boot.deActivateDFU();
             await testBoardLink.targetPower(true);
@@ -295,12 +290,13 @@ program.command('pingM1apps')
                 }
                 timerCount -= 1;
                 if (results.ports.open.includes(80) && results.ports.open.includes(80)) {
-                    logfile.info('port 80 are open on M1-3200');
+                    logfile.info('Test passed, M1 web app is alive');
                     clearInterval(interval);
                     await testBoardLink.targetPower(false);
-                    return;
+                    delay(500); 
+                    process.exit(exitCodes.normalExit);
                 }
-                logfile.debug(`port 80 open = ${results.ports.open.includes(80)}, port 7262 open = ${results.ports.open.includes(7262)}`);
+                logfile.debug(`port 80 open = ${results.ports.open.includes(80)}}`);
             }, 5000);
         }
         catch (err) {

@@ -19,6 +19,7 @@ type
     event: PRTLEvent;
     TermnateTest: boolean;
   public
+    reTestMode: boolean;
     procedure Execute; override;
     constructor Create(CreateSuspended: boolean);
     destructor Destroy; override;
@@ -61,6 +62,7 @@ begin
       TermnateTest := False;
       continue;
     end;
+    // ICT
     Synchronize(MainForm.ICTTestSwitchClick_);
     Synchronize(MainForm.Add15ToProgressBar);
     if (TermnateTest) then
@@ -71,26 +73,36 @@ begin
       Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
-    Synchronize(MainForm.MacProgSwitchClick_);
-    Synchronize(MainForm.Add10ToProgressBar);
-    if (TermnateTest) then
+
+    if not reTestMode then
     begin
-      Synchronize(MainForm.ResetLeds);
-      Synchronize(MainForm.DoLabelError);
-      TermnateTest := False;
-      Synchronize(MainForm.DoCleanupCmd);
-      continue;
+      // MAC
+      Synchronize(MainForm.MacProgSwitchClick_);
+      Synchronize(MainForm.Add10ToProgressBar);
+      if (TermnateTest) then
+      begin
+        Synchronize(MainForm.ResetLeds);
+        Synchronize(MainForm.DoLabelError);
+        TermnateTest := False;
+        Synchronize(MainForm.DoCleanupCmd);
+        continue;
+      end;
+
+      // Flash
+      Synchronize(MainForm.FlashSwitchClick_);
+      Synchronize(MainForm.Add30ToProgressBar);
+      if (TermnateTest) then
+      begin
+        Synchronize(MainForm.ResetLeds);
+        Synchronize(MainForm.DoLabelError);
+        TermnateTest := False;
+        Synchronize(MainForm.DoCleanupCmd);
+        continue;
+      end;
+
     end;
-    Synchronize(MainForm.FlashSwitchClick_);
-    Synchronize(MainForm.Add30ToProgressBar);
-    if (TermnateTest) then
-    begin
-      Synchronize(MainForm.ResetLeds);
-      Synchronize(MainForm.DoLabelError);
-      TermnateTest := False;
-      Synchronize(MainForm.DoCleanupCmd);
-      continue;
-    end;
+
+    // Func Test
     Synchronize(MainForm.FuncTestSwitchClick_);
     Synchronize(MainForm.Add30ToProgressBar);
     if (TermnateTest) then
@@ -101,16 +113,23 @@ begin
       Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
-    Synchronize(MainForm.EEPROMSwitchClick_);
-    Synchronize(MainForm.Add10ToProgressBar);
-    if (TermnateTest) then
+
+    // EEPROM
+    if not reTestMode then
     begin
-      Synchronize(MainForm.ResetLeds);
-      Synchronize(MainForm.DoLabelError);
-      TermnateTest := False;
-      Synchronize(MainForm.DoCleanupCmd);
-      continue;
+      Synchronize(MainForm.EEPROMSwitchClick_);
+      Synchronize(MainForm.Add10ToProgressBar);
+      if (TermnateTest) then
+      begin
+        Synchronize(MainForm.ResetLeds);
+        Synchronize(MainForm.DoLabelError);
+        TermnateTest := False;
+        Synchronize(MainForm.DoCleanupCmd);
+        continue;
+      end;
     end;
+
+    // APPs check
     Synchronize(MainForm.AppsCheckSwitchClick_);
     Synchronize(MainForm.Add10ToProgressBar);
     if (TermnateTest) then
@@ -121,6 +140,8 @@ begin
       Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
+
+    // Print Label
     Synchronize(MainForm.DoLabelSwitchClick_);
     Synchronize(MainForm.Add10ToProgressBar);
     if (TermnateTest) then

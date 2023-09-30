@@ -77,6 +77,7 @@ type
     procedure BarcodeScanEditTimerTimer(Sender: TObject);
     procedure EnableSerialNumberExecute(Sender: TObject);
     procedure LogsMenuItemClick(Sender: TObject);
+    procedure Re_TestMenuItem1Click(Sender: TObject);
     procedure Re_TestMenuItemClick(Sender: TObject);
     procedure OpenLogExecute(Sender: TObject);
     procedure PublishLogMenuItemClick(Sender: TObject);
@@ -375,6 +376,21 @@ begin
   end;
 end;
 
+procedure TmainForm.Re_TestMenuItem1Click(Sender: TObject);
+begin
+  if busyFlag1 then exit;
+
+  if not checkSerial() then
+  begin
+    exit;
+  end;
+  Memo1.Clear;
+  ResetLeds;
+  ColorProgress1.progress := 0;
+  provisionThread.reTestMode := True;
+  provisionThread.ExecuteThread;
+end;
+
 procedure TmainForm.Re_TestMenuItemClick(Sender: TObject);
 begin
   //
@@ -570,7 +586,6 @@ begin
   provisionThread.UserInterruptTest();
 end;
 
-
 procedure TmainForm.AppsCheckSwitchClick(Sender: TObject);
 var
   arg: array[0..10] of string;
@@ -583,9 +598,11 @@ begin
   end;
 
   EEPROMSwitch.LedValue := False;
-  arg[0] := '-d';
-  arg[1] := DebugLevel;
-  arg[2] := '';
+  arg[0] := '-s';
+  arg[1] := Trim(targetVendorSerial.Text);
+  arg[2] := '-d';
+  arg[3] := DebugLevel;
+  arg[4] := '';
   RunM1Tfc('pingM1apps', arg, AppsCheckSwitch);
 end;
 
@@ -793,6 +810,7 @@ begin
   Memo1.Clear;
   ResetLeds;
   ColorProgress1.progress := 0;
+  provisionThread.reTestMode := false;
   provisionThread.ExecuteThread;
 end;
 

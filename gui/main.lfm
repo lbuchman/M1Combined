@@ -1,7 +1,7 @@
 object mainForm: TmainForm
-  Left = 571
+  Left = 470
   Height = 588
-  Top = 388
+  Top = 367
   Width = 2610
   BorderWidth = 2
   ClientHeight = 545
@@ -1892,13 +1892,13 @@ object mainForm: TmainForm
       ShortCut = 16466
       OnClick = Commission
     end
-    object StopTestMenu: TMenuItem
-      Caption = 'Stop Test'
-      OnClick = InterruptMenuItemClick
+    object Re_TestMenuItem1: TMenuItem
+      Caption = 'Re-Test'
+      OnClick = Re_TestMenuItem1Click
     end
-    object QuitMenuItem: TMenuItem
-      Caption = 'Quit'
-      OnClick = QuitMenuItemClick
+    object StopTestMenu: TMenuItem
+      Caption = 'Stop-Test'
+      OnClick = InterruptMenuItemClick
     end
     object PublishLogMenuItem: TMenuItem
       Caption = 'Push Logs'
@@ -1908,8 +1908,9 @@ object mainForm: TmainForm
       Caption = 'About'
       OnClick = AbountMenuItemClick
     end
-    object Re_TestMenuItem1: TMenuItem
-      Caption = 'Re-Test'
+    object QuitMenuItem: TMenuItem
+      Caption = 'Quit'
+      OnClick = QuitMenuItemClick
     end
   end
   object ActionList1: TActionList
