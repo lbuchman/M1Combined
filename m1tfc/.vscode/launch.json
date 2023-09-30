@@ -50,7 +50,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["progmac",    "-d", "2", "-s", "3022480016" ]
+            "args": ["progmac",    "-d", "2", "-s", "32200042" ]
         },
         {
             "type": "pwa-node",

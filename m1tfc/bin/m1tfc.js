@@ -273,21 +273,19 @@ program.command('pingM1apps')
             if (!options.serial) options.serial = 'no serial';
             logfile = logger.getLogger(options.serial, '   pingApps', options.serial, configData.m1mtfDir, options.debug);
             if (!configData.pingPorts) {
-                logfile.info('pinging port 80 & 7262 is disabled in config file');
+                logfile.info('pinging port 80 is disabled in config file');
                 return;
             }
             logfile.info('--------------------------------------------');
-            logfile.info('checking ports 80 & 7262 ...');
+            logfile.info('checking ports 80 ...');
             await delay(5);
-            logfile.info('Success');
-            return;
             await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
             logfile.info('M1-3200 power is on');
             await m1boot.deActivateDFU();
             await testBoardLink.targetPower(true);
             let timerCount = 10;
             const interval = setInterval(async () => {
-                const results = await nodePortScanner(configuration.m1defaultIP, [80, 7262]);
+                const results = await nodePortScanner(configuration.m1defaultIP, [80]);
                 if (!timerCount) {
                     clearInterval(interval);
                     logfile.error('test failed');
@@ -296,8 +294,8 @@ program.command('pingM1apps')
                     process.exit(exitCodes.commandFailed);
                 }
                 timerCount -= 1;
-                if (results.ports.open.includes(80) && results.ports.open.includes(80 /* Todo 7262 must be redone */)) {
-                    logfile.info('ports 7262 and 80 are open on M1-3200');
+                if (results.ports.open.includes(80) && results.ports.open.includes(80)) {
+                    logfile.info('port 80 are open on M1-3200');
                     clearInterval(interval);
                     await testBoardLink.targetPower(false);
                     return;
