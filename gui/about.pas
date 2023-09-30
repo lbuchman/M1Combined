@@ -59,7 +59,6 @@ begin
 
   while aProcess.Running do
   begin
-    Application.ProcessMessages;
     Sleep(50);
     continue;
  end;

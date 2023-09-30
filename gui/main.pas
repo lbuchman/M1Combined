@@ -35,6 +35,7 @@ type
   TmainForm = class(TForm)
     AppsCheckSwitch: TindLed;
     AbountMenuItem: TMenuItem;
+    Re_TestMenuItem1: TMenuItem;
     OpenLog: TAction;
     FakeLed: TindLed;
     EnableSerialNumber: TAction;
@@ -76,6 +77,7 @@ type
     procedure BarcodeScanEditTimerTimer(Sender: TObject);
     procedure EnableSerialNumberExecute(Sender: TObject);
     procedure LogsMenuItemClick(Sender: TObject);
+    procedure Re_TestMenuItemClick(Sender: TObject);
     procedure OpenLogExecute(Sender: TObject);
     procedure PublishLogMenuItemClick(Sender: TObject);
     procedure Panel1DblClick(Sender: TObject);
@@ -92,7 +94,7 @@ type
     procedure LedTimerTimer(Sender: TObject);
     procedure MacProgSwitchClick(Sender: TObject);
     procedure Memo1DblClick(Sender: TObject);
-    procedure StartTestClick(Sender: TObject);
+    procedure Commission(Sender: TObject);
     procedure QuitMenuItemClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Debuglevel_2_Execute(Sender: TObject);
@@ -373,6 +375,11 @@ begin
   end;
 end;
 
+procedure TmainForm.Re_TestMenuItemClick(Sender: TObject);
+begin
+  //
+end;
+
 procedure TmainForm.OpenLogExecute(Sender: TObject);
 begin
   LogsMenuItemClick(Sender);
@@ -512,7 +519,7 @@ begin
     begin
       exit;
     end;
-    StartTestClick(Sender);
+    Commission(Sender);
     busyFlag := False;
     newSerialNumberIsAvailable := False;
   end;
@@ -775,7 +782,7 @@ begin
   Memo1.Clear;
 end;
 
-procedure TmainForm.StartTestClick(Sender: TObject);
+procedure TmainForm.Commission(Sender: TObject);
 begin
   if busyFlag1 then exit;
 

@@ -1888,9 +1888,9 @@ object mainForm: TmainForm
     Left = 92
     Top = 309
     object StartTestMenuItem: TMenuItem
-      Caption = 'Start Test'
+      Caption = 'Commission'
       ShortCut = 16466
-      OnClick = StartTestClick
+      OnClick = Commission
     end
     object StopTestMenu: TMenuItem
       Caption = 'Stop Test'
@@ -1907,6 +1907,9 @@ object mainForm: TmainForm
     object AbountMenuItem: TMenuItem
       Caption = 'About'
       OnClick = AbountMenuItemClick
+    end
+    object Re_TestMenuItem1: TMenuItem
+      Caption = 'Re-Test'
     end
   end
   object ActionList1: TActionList
