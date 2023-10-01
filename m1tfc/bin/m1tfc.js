@@ -22,7 +22,7 @@ const utils = require('../utils/utils');
 const buzzer = require('../tests/buzzer');
 const testBoardLink = require('../src/testBoardLink');
 const { mkdirp } = require('mkdirp');
-const azure = require('azure-storage');
+// const azure = require('azure-storage');
 const dateTime = require('date-and-time');
 
 // AS name Onguard Testing -> enel2anestingtsm
@@ -223,16 +223,22 @@ program.command('pushtocloud')
             logfile = console;
             const db = sqliteDriver.initialize(logfile);
             const dbRecord = db.getRecord(options.serial);
-            const uid = utils.macToUid(dbRecord[0].uid);
+            let uid;
+            if (!dbRecord[0] || !dbRecord[0].uid) {
+                uid = utils.macToUid('0000000000000000');
+            }
+            else {
+                uid = utils.macToUid(dbRecord[0].uid);
+            }
+
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('Pushing log to Cloud ...');
-            if (!fs.existsSync(`${configData.m1mtfDir}/logs/${options.serial}`)) {
-                if (!fs.existsSync(`${configData.m1mtfDir}/logs/${uid}-${options.serial}.txz`)) throw new Error('Logs do not exist');
-            }
             if (fs.existsSync(`${configData.m1mtfDir}/logs/${options.serial}`)) {
                 await os.executeShellCommand(`tar -cJf ${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz -C ${configData.m1mtfDir}/logs/${options.serial} .`, logfile, false);
             }
 
+            await os.executeShellCommand('/snap/bin/m1client synclogs', logfile, false);
+            /*
             const logContainer = 'm1-3200-logs';
             const blobSvc = azure.createBlobService(configData.conString);
             await new Promise(async (resolve, reject) => {
@@ -246,6 +252,7 @@ program.command('pushtocloud')
                     reject(new Error(error));
                 });
             });
+            */
         }
         catch (err) {
             if (err === '') logfile.info('Upload failed');
@@ -327,10 +334,12 @@ program.command('cleanup')
             const dbRecord = db.getRecord(options.serial);
             const mac = dbRecord[0].uid;
             let uid;
-            if (!mac)
+            if (!mac) {
                 uid = '0000000000000000';
-            else
+            }
+            else {
                 uid = utils.macToUid(mac);
+            }
 
             logfile.info('Cleaning up ...');
             await os.executeShellCommand(`tar -cJf ${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
@@ -411,7 +420,6 @@ program.command('makelabel')
             }
 
             process.env.fwDir = configData.m1fwBase;
-            let uid;
             let eepromData = {};
             // if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
@@ -422,7 +430,7 @@ program.command('makelabel')
             await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
             const retValue = await macProgram.getMac(configData.programmingCommand);
             if (retValue.exitCode !== exitCodes.normalExit) throw new Error('Could not read i2c EEPROM');
-            uid = retValue.mac.toUpperCase();
+            const uid = retValue.mac.toUpperCase();
             const eeprom = new Eeprom(configData.ictFWFilePath, logfile);
             await eeprom.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);

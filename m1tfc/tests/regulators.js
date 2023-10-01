@@ -32,7 +32,7 @@ async function testDDRVoltage(tolerance, logger) {
 
 
 async function cellBatTest(logger) {
-    if (process.env.cellBatTol == 'used') {
+    if (process.env.cellBatTol === 'used') {
         coinCellBattery.minVoltage = 2.75;
     }
     if (process.env.coinCellDebug) {
@@ -57,7 +57,7 @@ async function cellBatTest(logger) {
 async function test(tolerance, logger) {
     // eslint-disable-next-line no-restricted-syntax
     for (const testPoint of testPoints) {
-        if (process.env.cellBatTol == 'new') {
+        if (process.env.cellBatTol === 'new') {
             testPoints.voltage = 3.3;
         }
         else {

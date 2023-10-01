@@ -107,7 +107,7 @@ begin
     end;
 
     // Func Test
-    // Synchronize(MainForm.FuncTestSwitchClick_);
+    Synchronize(MainForm.FuncTestSwitchClick_);
     Synchronize(MainForm.Add40ToProgressBar);
     if (TermnateTest) then
     begin
