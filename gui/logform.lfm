@@ -1,21 +1,21 @@
 object LoggerForm: TLoggerForm
   Left = 806
-  Height = 506
+  Height = 517
   Top = 230
-  Width = 1822
+  Width = 2761
   Caption = 'Log'
-  ClientHeight = 506
-  ClientWidth = 1822
-  DesignTimePPI = 192
-  LCLVersion = '2.2.4.0'
+  ClientHeight = 517
+  ClientWidth = 2761
+  DesignTimePPI = 196
+  LCLVersion = '2.2.6.0'
   object Memo1: TMemo
     Left = 0
-    Height = 506
+    Height = 517
     Top = 0
-    Width = 1822
+    Width = 2761
     Align = alClient
     DoubleBuffered = True
-    Font.Height = -26
+    Font.Height = -27
     Font.Name = 'Sans'
     OnChange = Memo1Change
     OnClick = Memo1Click

@@ -1450,6 +1450,7 @@ object mainForm: TmainForm
     Top = 346
     Width = 2606
     Align = alClient
+    OnChange = Memo1Change
     OnDblClick = Memo1DblClick
     ReadOnly = True
     ScrollBars = ssBoth
@@ -1889,15 +1890,17 @@ object mainForm: TmainForm
     Top = 309
     object StartTestMenuItem: TMenuItem
       Caption = 'Commission'
-      ShortCut = 16466
+      ShortCut = 16451
       OnClick = Commission
     end
     object Re_TestMenuItem1: TMenuItem
       Caption = 'Re-Test'
+      ShortCut = 16466
       OnClick = Re_TestMenuItem1Click
     end
     object StopTestMenu: TMenuItem
       Caption = 'Stop-Test'
+      ShortCut = 16467
       OnClick = InterruptMenuItemClick
     end
     object PublishLogMenuItem: TMenuItem
@@ -1910,6 +1913,7 @@ object mainForm: TmainForm
     end
     object QuitMenuItem: TMenuItem
       Caption = 'Quit'
+      ShortCut = 16465
       OnClick = QuitMenuItemClick
     end
   end
@@ -1936,10 +1940,25 @@ object mainForm: TmainForm
       OnExecute = EnableSerialNumberExecute
       ShortCut = 57427
     end
-    object OpenLog: TAction
-      Caption = 'OpenLog'
-      OnExecute = OpenLogExecute
-      ShortCut = 16463
+    object CommissionClick: TAction
+      Caption = 'Commission'
+      OnExecute = Commission
+      ShortCut = 16451
+    end
+    object Re_Test: TAction
+      Caption = 'Re_Test'
+      OnExecute = Re_TestMenuItem1Click
+      ShortCut = 16466
+    end
+    object StopTestClick: TAction
+      Caption = 'Stoptest'
+      OnExecute = InterruptMenuItemClick
+      ShortCut = 16467
+    end
+    object QuitClick: TAction
+      Caption = 'QuitClick'
+      OnExecute = QuitMenuItemClick
+      ShortCut = 16465
     end
   end
   object BarcodeScanEditTimer: TTimer

@@ -47,6 +47,7 @@ module.exports = class IctTestRunner {
             await common.initializeTestFixture(programmer, false, this.stm32, this.m1Dev, this.logger);
             if (!skipTestpointCheck) this.logger.info('Testing test points ...');
             if (!skipTestpointCheck) await regulators.test(this.tolerance, this.logger);
+            await regulators.cellBatTest(this.logger);
             await common.programStm(programmer, false, this.stm32, this.m1Dev, this.logger);
             if (!skipTestpointCheck) await regulators.testDDRVoltage(this.tolerance, this.logger);
             this.logger.info('Testing Ribbon cable pins ...');

@@ -33,10 +33,13 @@ type
   { TmainForm }
 
   TmainForm = class(TForm)
+    Re_Test: TAction;
+    StopTestClick: TAction;
+    QuitClick: TAction;
     AppsCheckSwitch: TindLed;
     AbountMenuItem: TMenuItem;
     Re_TestMenuItem1: TMenuItem;
-    OpenLog: TAction;
+    CommissionClick: TAction;
     FakeLed: TindLed;
     EnableSerialNumber: TAction;
     DebugLevel2: TAction;
@@ -74,9 +77,11 @@ type
     LedTimer: TTimer;
     BarcodeScanEditTimer: TTimer;
     procedure AbountMenuItemClick(Sender: TObject);
+    procedure Action2Execute(Sender: TObject);
     procedure BarcodeScanEditTimerTimer(Sender: TObject);
     procedure EnableSerialNumberExecute(Sender: TObject);
     procedure LogsMenuItemClick(Sender: TObject);
+    procedure Memo1Change(Sender: TObject);
     procedure Re_TestMenuItem1Click(Sender: TObject);
     procedure Re_TestMenuItemClick(Sender: TObject);
     procedure OpenLogExecute(Sender: TObject);
@@ -361,6 +366,11 @@ begin
  aboutForm.ShowModal;
 end;
 
+procedure TmainForm.Action2Execute(Sender: TObject);
+begin
+
+end;
+
 procedure TmainForm.LogsMenuItemClick(Sender: TObject);
 var
   homeEnv: string;
@@ -376,6 +386,11 @@ begin
   end;
 end;
 
+procedure TmainForm.Memo1Change(Sender: TObject);
+begin
+
+end;
+
 procedure TmainForm.Re_TestMenuItem1Click(Sender: TObject);
 begin
   if busyFlag1 then exit;
@@ -386,6 +401,7 @@ begin
   end;
   Memo1.Clear;
   ResetLeds;
+  Memo1.Lines.Add(log('info', targetVendorSerial.Text, 'Re-test board'));
   ColorProgress1.progress := 0;
   provisionThread.reTestMode := True;
   provisionThread.ExecuteThread;
@@ -571,7 +587,10 @@ begin
   arg[1] := Trim(targetVendorSerial.Text);
   arg[2] := '-d';
   arg[3] := DebugLevel;
-  arg[4] := '';
+  arg[4] := '-b';
+  if (provisionThread.reTestMode) then arg[5] := 'used'
+  else arg[5] := 'new';
+  arg[6] := '';
   ret := RunM1Tfc('ict', arg, ICTTestSwitch);
   if (ret <> NormalExit) then InterruptMenuItemClick(self);
 end;
@@ -808,6 +827,7 @@ begin
     exit;
   end;
   Memo1.Clear;
+  Memo1.Lines.Add(log('info', targetVendorSerial.Text, 'Commission new board'));
   ResetLeds;
   ColorProgress1.progress := 0;
   provisionThread.reTestMode := false;
@@ -890,6 +910,7 @@ begin
       ShowMessage('Barcode Scan is Missing');
       exit;
   end;
+  provisionThread.reTestMode := true;
   Panel1DblClick(Sender);
   ICTTestSwitchClick(Sender);
   ColorProgress1.Progress := 100;

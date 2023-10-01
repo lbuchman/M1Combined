@@ -58,7 +58,7 @@ if (!process.env.SNAP) {
     process.env.SNAP_COMMON = `${process.env.HOME}/snap_common`;
     process.env.SNAP_DATA = `${process.env.HOME}/snap_data`;
     process.env.SNAP = '/snap/m1tfd/current';
-    process.env.SNAP_VERSION = '100';
+    process.env.SNAP_VERSION = '08c433e';
 }
 
 /**
@@ -76,7 +76,7 @@ async function errorAndExit(errorStr, log) {
 program
     .name('icttest')
     .description('CLI utility to test and program M1-3200 boards')
-    .version('0.1.0');
+    .version(process.env.SNAP_VERSION);
 
 program.command('ict')
     .description('Executes ICT test')
@@ -97,7 +97,7 @@ program.command('ict')
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             logfile.info(`Coin Cell Battery level:  ${options.cellBatTol}`);
-            if ((options.cellBatTol !== 'new') &&  (!options.cellBatTol !== 'used')) await errorAndExit('cellBatTol value is not valid', logfile);
+            if ((options.cellBatTol !== 'new') && (options.cellBatTol !== 'used')) await errorAndExit('cellBatTol argument  -b option is not valid', logfile);
             process.env.cellBatTol = options.cellBatTol;
             let skipTestpointCheck = false;
             let memTestSize1MBBlocks = 512;
@@ -293,10 +293,10 @@ program.command('pingM1apps')
                     logfile.info('Test passed, M1 web app is alive');
                     clearInterval(interval);
                     await testBoardLink.targetPower(false);
-                    delay(500); 
+                    delay(500);
                     process.exit(exitCodes.normalExit);
                 }
-                logfile.debug(`port 80 open = ${results.ports.open.includes(80)}}`);
+                logfile.debug(`port 80 open = ${results.ports.open.includes(80)}`);
             }, 5000);
         }
         catch (err) {
@@ -386,7 +386,7 @@ program.command('makelabel')
     .description('prints the M1-3200 Label')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
-    .option('-e, --express', 'use database data to print the label')
+    .option('-e, --express', 'depricated')
     .option('-l, --label <string>', 'print label')
     .action(async (options) => {
         const configData = await config(configuration);
@@ -415,24 +415,17 @@ program.command('makelabel')
             logfile.info('--------------------------------------------');
             logfile.info('Printing Label ...');
             await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
-            if (!options.express) {
-                const macProgram = new ProgramMac(configData, options.serial, logfile);
-                await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
-                const retValue = await macProgram.getMac(configData.programmingCommand);
-                if (retValue.exitCode !== exitCodes.normalExit) throw new Error('Could not read i2c EEPROM');
-                uid = retValue.mac.toUpperCase();
-                const eeprom = new Eeprom(configData.ictFWFilePath, logfile);
-                await eeprom.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
-                await delay(400);
-                eepromData = await eeprom.get(configData.programmingCommand);
-            }
-            else {
-                const db = sqliteDriver.initialize(logfile);
-                const dbRecord = db.getRecord(options.serial);
-                utils.checkDbRecord(dbRecord, true);
-                uid = dbRecord[0].uid.toUpperCase();
-                eepromData.serial = `${dbRecord[0].boardS2Serial}`;
-            }
+
+            const macProgram = new ProgramMac(configData, options.serial, logfile);
+            await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
+            const retValue = await macProgram.getMac(configData.programmingCommand);
+            if (retValue.exitCode !== exitCodes.normalExit) throw new Error('Could not read i2c EEPROM');
+            uid = retValue.mac.toUpperCase();
+            const eeprom = new Eeprom(configData.ictFWFilePath, logfile);
+            await eeprom.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+            await delay(400);
+            eepromData = await eeprom.get(configData.programmingCommand);
+
 
             if (eepromData.serial === '' || uid === '' || uid === '00:00:00:00:00:00') {
                 await buzzer.buzzerBeepFailed();

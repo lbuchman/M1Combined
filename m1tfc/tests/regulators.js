@@ -11,9 +11,10 @@ const testPoints = [
     { name: 'TP34', voltage: 3.3 },
     { name: 'TP36', voltage: 1.2 },
     { name: 'J5.13', voltage: 11.7 },
-    { name: 'J5.8', voltage: 6.0 },
-    { name: 'BatCellBat', voltage: 3.3, tolerance: 0.05 }
+    { name: 'J5.8', voltage: 6.0 }
 ];
+
+const coinCellBattery = { name: 'BatCellBat', minVoltage: 3.1, maxVoltage: 3.7 };
 
 async function testDDRVoltage(tolerance, logger) {
     const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(ddrVoltage.name)}`);
@@ -29,6 +30,25 @@ async function testDDRVoltage(tolerance, logger) {
     return true;
 }
 
+
+async function cellBatTest(logger) {
+    if (process.env.cellBatTol == 'used') {
+        coinCellBattery.minVoltage = 2.75;
+    }
+    logger.info(`Minimum Coin cell battery voltage expected ${coinCellBattery.minVoltage}V`);
+    const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(coinCellBattery.name)}`);
+    if (!ret.status) {
+        throw new Error(`Test Board control command failed on pinName=${coinCellBattery.name}, ${ret.error}`);
+    }
+    coinCellBattery.tolerance = 0.05;
+    if ((ret.value < coinCellBattery.minVoltage) || (ret.value > coinCellBattery.maxVoltage)) {
+        throw new Error(`Failed: Coin cell battery voltage not in the range. actual: ${ret.value}V, req: ${coinCellBattery.minVoltage}V - 3.3V`);
+    }
+    else {
+        logger.info(`Passed coin cell battery test, Actual = ${ret.value}V, Expected: ${coinCellBattery.minVoltage}V - 3.3V`);
+    }
+    return true;
+}
 
 async function test(tolerance, logger) {
     // eslint-disable-next-line no-restricted-syntax
@@ -57,5 +77,6 @@ async function test(tolerance, logger) {
 
 module.exports = {
     test,
-    testDDRVoltage
+    testDDRVoltage,
+    cellBatTest
 };
