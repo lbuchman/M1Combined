@@ -64,7 +64,7 @@ begin
     end;
     // ICT
     Synchronize(MainForm.ICTTestSwitchClick_);
-    Synchronize(MainForm.Add15ToProgressBar);
+    Synchronize(MainForm.Add5ToProgressBar);
     if (TermnateTest) then
     begin
       Synchronize(MainForm.ResetLeds);
@@ -107,7 +107,7 @@ begin
     end;
 
     // Func Test
-    Synchronize(MainForm.FuncTestSwitchClick_);
+    // Synchronize(MainForm.FuncTestSwitchClick_);
     Synchronize(MainForm.Add40ToProgressBar);
     if (TermnateTest) then
     begin
@@ -122,7 +122,7 @@ begin
     if not reTestMode then
     begin
       Synchronize(MainForm.EEPROMSwitchClick_);
-      Synchronize(MainForm.Add3ToProgressBar);
+      Synchronize(MainForm.Add5ToProgressBar);
       if (TermnateTest) then
       begin
         Synchronize(MainForm.ResetLeds);
@@ -148,6 +148,7 @@ begin
 
     // Print Label
     Synchronize(MainForm.DoLabelSwitchClick_);
+    Synchronize(MainForm.Add5ToProgressBar);
     Synchronize(MainForm.Add3ToProgressBar);
     if (TermnateTest) then
     begin
