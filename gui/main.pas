@@ -146,11 +146,13 @@ type
     procedure ResetLeds;
     procedure AddToProgressBar(Value: integer);
     procedure Add5ToProgressBar;
+    procedure Add3ToProgressBar;
     procedure Add10ToProgressBar;
     procedure Add15ToProgressBar;
     procedure Add20ToProgressBar;
     procedure Add25ToProgressBar;
     procedure Add30ToProgressBar;
+    procedure Add40ToProgressBar;
     procedure ClearbusyFlag1;
     procedure DoLabelError;
   end;
@@ -183,6 +185,11 @@ begin
   AddToProgressBar(15);
 end;
 
+procedure TmainForm.Add3ToProgressBar;
+begin
+  AddToProgressBar(3);
+end;
+
 procedure TmainForm.Add20ToProgressBar;
 begin
   AddToProgressBar(20);
@@ -196,6 +203,11 @@ end;
 procedure TmainForm.Add30ToProgressBar;
 begin
   AddToProgressBar(30);
+end;
+
+procedure TmainForm.Add40ToProgressBar;
+begin
+  AddToProgressBar(40);
 end;
 
 procedure TmainForm.AddToProgressBar(Value: integer);
@@ -487,7 +499,7 @@ begin
   Leds[5] := @DoLabelSwitch;
   Leds[6] := @AppsCheckSwitch;
   LedTimer.Enabled := True;
-  DebugLevel := '0';
+  DebugLevel := '1';
   Memo1.Font.Size := 12;
 
   pid := IntToStr(system.GetProcessID);
@@ -505,7 +517,7 @@ end;
 procedure TmainForm.FormShow(Sender: TObject);
 begin
   // Debuglevel_0_Execute(Sender);
-  DebugLevel := '0';
+  DebugLevel := '1';
   SaveWidth := Width;
   Constraints.MaxWidth := Width;
 end;

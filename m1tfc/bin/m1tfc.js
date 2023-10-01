@@ -50,7 +50,8 @@ const configuration = {
     pingPorts: true,
     progEEPROM: true,
     makeLabel: true,
-    funcTestDisable: false
+    funcTestDisable: false,
+    coinCellDebug: true
 };
 
 /* Just for running out of snap */
@@ -89,6 +90,7 @@ program.command('ict')
         const configData = await config(configuration);
         let logfile;
         try {
+            process.env.coinCellDebug = config.coinCellDebug;
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.m1mtfDir, options.debug);
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             if (!options.cellBatTol) await errorAndExit('must define cellBatTol', logfile);

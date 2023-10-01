@@ -35,6 +35,10 @@ async function cellBatTest(logger) {
     if (process.env.cellBatTol == 'used') {
         coinCellBattery.minVoltage = 2.75;
     }
+    if (process.env.coinCellDebug) {
+        coinCellBattery.minVoltage = 2.9;
+    }
+
     logger.info(`Minimum Coin cell battery voltage expected ${coinCellBattery.minVoltage}V`);
     const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(coinCellBattery.name)}`);
     if (!ret.status) {
@@ -42,7 +46,7 @@ async function cellBatTest(logger) {
     }
     coinCellBattery.tolerance = 0.05;
     if ((ret.value < coinCellBattery.minVoltage) || (ret.value > coinCellBattery.maxVoltage)) {
-        throw new Error(`Failed: Coin cell battery voltage not in the range. actual: ${ret.value}V, req: ${coinCellBattery.minVoltage}V - 3.3V`);
+        throw new Error(`Failed: Coin cell battery voltage is not in the range. actual: ${ret.value}V, req: ${coinCellBattery.minVoltage}V - 3.3V`);
     }
     else {
         logger.info(`Passed coin cell battery test, Actual = ${ret.value}V, Expected: ${coinCellBattery.minVoltage}V - 3.3V`);

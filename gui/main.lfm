@@ -1,11 +1,11 @@
 object mainForm: TmainForm
-  Left = 470
-  Height = 588
-  Top = 367
-  Width = 2610
+  Left = 461
+  Height = 1382
+  Top = 474
+  Width = 2875
   BorderWidth = 2
-  ClientHeight = 545
-  ClientWidth = 2610
+  ClientHeight = 1339
+  ClientWidth = 2875
   DesignTimePPI = 196
   Font.Height = -31
   Font.Name = 'Monospace'
@@ -1446,9 +1446,9 @@ object mainForm: TmainForm
   LCLVersion = '2.2.6.0'
   object Memo1: TMemo
     Left = 2
-    Height = 197
+    Height = 991
     Top = 346
-    Width = 2606
+    Width = 2871
     Align = alClient
     OnChange = Memo1Change
     OnDblClick = Memo1DblClick
@@ -1461,7 +1461,7 @@ object mainForm: TmainForm
     Left = 2
     Height = 62
     Top = 284
-    Width = 2606
+    Width = 2871
     Align = alTop
     Color = clBtnShadow
     Font.Height = -33
@@ -1474,12 +1474,12 @@ object mainForm: TmainForm
     Left = 2
     Height = 282
     Top = 2
-    Width = 2606
+    Width = 2871
     Align = alTop
     BevelWidth = 4
     BorderStyle = bsSingle
     ClientHeight = 280
-    ClientWidth = 2604
+    ClientWidth = 2869
     Color = 45537
     ParentColor = False
     TabOrder = 0
@@ -1767,11 +1767,11 @@ object mainForm: TmainForm
       Left = 4
       Height = 63
       Top = 213
-      Width = 2596
+      Width = 2861
       Align = alBottom
       BackColor = clAppWorkspace
       Color = clBtnHighlight
-      ForeColor = clActiveCaption
+      ForeColor = clSkyBlue
       ParentColor = False
       Progress = 0
     end

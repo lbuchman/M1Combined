@@ -78,7 +78,7 @@ begin
     begin
       // MAC
       Synchronize(MainForm.MacProgSwitchClick_);
-      Synchronize(MainForm.Add10ToProgressBar);
+      Synchronize(MainForm.Add3ToProgressBar);
       if (TermnateTest) then
       begin
         Synchronize(MainForm.ResetLeds);
@@ -90,7 +90,7 @@ begin
 
       // Flash
       Synchronize(MainForm.FlashSwitchClick_);
-      Synchronize(MainForm.Add30ToProgressBar);
+      Synchronize(MainForm.Add40ToProgressBar);
       if (TermnateTest) then
       begin
         Synchronize(MainForm.ResetLeds);
@@ -100,11 +100,15 @@ begin
         continue;
       end;
 
+    end
+    else begin
+      Synchronize(MainForm.Add40ToProgressBar);
+      Synchronize(MainForm.Add3ToProgressBar);
     end;
 
     // Func Test
     Synchronize(MainForm.FuncTestSwitchClick_);
-    Synchronize(MainForm.Add30ToProgressBar);
+    Synchronize(MainForm.Add40ToProgressBar);
     if (TermnateTest) then
     begin
       Synchronize(MainForm.ResetLeds);
@@ -118,7 +122,7 @@ begin
     if not reTestMode then
     begin
       Synchronize(MainForm.EEPROMSwitchClick_);
-      Synchronize(MainForm.Add10ToProgressBar);
+      Synchronize(MainForm.Add3ToProgressBar);
       if (TermnateTest) then
       begin
         Synchronize(MainForm.ResetLeds);
@@ -127,11 +131,12 @@ begin
         Synchronize(MainForm.DoCleanupCmd);
         continue;
       end;
-    end;
+    end
+    else Synchronize(MainForm.Add3ToProgressBar);
 
     // APPs check
     Synchronize(MainForm.AppsCheckSwitchClick_);
-    Synchronize(MainForm.Add10ToProgressBar);
+    Synchronize(MainForm.Add3ToProgressBar);
     if (TermnateTest) then
     begin
       Synchronize(MainForm.ResetLeds);
@@ -143,7 +148,7 @@ begin
 
     // Print Label
     Synchronize(MainForm.DoLabelSwitchClick_);
-    Synchronize(MainForm.Add10ToProgressBar);
+    Synchronize(MainForm.Add3ToProgressBar);
     if (TermnateTest) then
     begin
       Synchronize(MainForm.ResetLeds);
