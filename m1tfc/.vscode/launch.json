@@ -26,7 +26,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["cleanup",    "-d", "2", "-s", "32200042" ]
+            "args": ["cleanup", "-d", "1", "-s", "3023200042" ]
         },
         {
             "type": "pwa-node",

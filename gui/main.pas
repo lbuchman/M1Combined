@@ -282,6 +282,7 @@ procedure TmainForm.DoLabelError();
 var
   arg: array[0..8] of string;
 begin
+  exit;
   arg[0] := '-l';
   arg[1] := lastCommand + ',error';
   arg[2] := '-d';
@@ -304,9 +305,7 @@ begin
 
   arg[0] := '-s';
   arg[1] := Trim(targetVendorSerial.Text);
-  arg[2] := '-d';
-  arg[3] := DebugLevel;
-  arg[4] := '';
+  arg[2] := '';
   RunM1Tfc('cleanup', arg, fakeLed);
 end;
 
@@ -336,7 +335,6 @@ end;
 procedure TmainForm.Debuglevel_0_Execute(Sender: TObject);
 begin
   // targetVendorSerial.ReadOnly := True;
-  Height := DefaultHeight;
   DevModeLabel.Visible := False;
   DevModeLabel.Caption := 'D0';
   DevModeLabel.Font.color := clRed;
@@ -345,7 +343,6 @@ end;
 
 procedure TmainForm.Debuglevel_1_Execute(Sender: TObject);
 begin
-  Height := LogHeight;
   DevModeLabel.Visible := True;
   DevModeLabel.Caption := 'D1';
   DevModeLabel.Font.color := clRed;
@@ -354,7 +351,6 @@ end;
 
 procedure TmainForm.Debuglevel_2_Execute(Sender: TObject);
 begin
-  Height := LogHeight;
   DevModeLabel.Visible := True;
   DevModeLabel.Caption := 'D2';
   DevModeLabel.Font.color := clRed;
@@ -394,7 +390,6 @@ begin
   if LogsOpenDialog1.Execute then
   begin
     Memo1.Lines.LoadFromFile(LogsOpenDialog1.Filename);
-    Height := LogHeight;
   end;
 end;
 
@@ -430,25 +425,46 @@ begin
 end;
 
 procedure TmainForm.PublishLogMenuItemClick(Sender: TObject);
+const
+  bufferSize = 1024 * 16;
 var
-  arg: array[0..8] of string;
+  aLocalProcess: TProcess;
+  Buffer: array[0..bufferSize] of byte;
+  BytesRead: longint;
+  textToSee: ansistring;
+  tmpStr : String;
+  splitOutput: TStringArray;
+  splitLine: TStringArray;
+  count : Integer;
 begin
-  FlashSwitch.LedValue := False;
-  if targetVendorSerial.Text = '' then exit;
+  aLocalProcess := TProcess.Create(nil);
+  aLocalProcess.Executable := '/snap/bin/m1client';
+  aLocalProcess.Parameters.Add('synclogs');
+  aLocalProcess.Options := aLocalProcess.Options + [poUsePipes];
+  aLocalProcess.Execute;
 
-  if busyFlag1 then
+  while aLocalProcess.Running do
   begin
-    exit;
+    Sleep(50);
+    continue;
+ end;
+
+  Buffer[0] := 0;
+  BytesRead := aLocalProcess.Output.NumBytesAvailable;
+  if BytesRead > (bufferSize -1) then begin
+     exit;
   end;
+  BytesRead := aLocalProcess.Output.Read(Buffer, BytesRead);
+  if BytesRead >= bufferSize then Buffer[bufferSize - 1] := 0
+  else
+    Buffer[BytesRead] := 0;
 
-  FlashSwitch.LedValue := False;
-  arg[0] := '-s';
-  arg[1] := Trim(targetVendorSerial.Text);
-  arg[2] := '-d';
-  arg[3] := DebugLevel;
-  arg[4] := '';
-  RunM1Tfc('pushtocloud', arg, fakeLed);
-
+  Sleep(50);
+  textToSee := '';
+  SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
+  Memo1.Lines.Add(logger.log('info', 'pushlogs', textToSee));
+  aLocalProcess.Free;
+  aLocalProcess := nil;
 end;
 
 procedure TmainForm.Panel1DblClick(Sender: TObject);
@@ -695,17 +711,11 @@ var
   startTime: integer;
   stdout: string;
 begin
- {
-  result := 0;
-  Led.Tag := 1;
-  for  BytesRead:=0 to 20 do begin
-      Application.ProcessMessages;
-      Sleep(300);
+  if   command = 'cleanup' then
+  begin
 
+     Led.tag := 1;
   end;
-  Led.Tag := 0;
-  exit(0);
-  }
   lastCommand := command;
   provisionThread.ResetTest();
   startTime := logger.getEpochTime();
@@ -715,7 +725,7 @@ begin
   Uid := '';
   busyFlag1 := True;
   AProcess := TProcess.Create(nil);
-  AProcess.Executable := 'm1tfd1.cli'{'m1tfc'};
+  AProcess.Executable := 'm1tfd1.cli';
   AProcess.Parameters.Add(command);
   tmpInt := 0;
   // Memo1.Lines.Add(logger.log('info', command, 'Executing <' + command + '>'));
@@ -935,7 +945,9 @@ begin
       TindLed(Sender).LedValue := false;
       exit;
   end;
-
+  if TargetVendorSerial.Text = '' then begin
+      ShowMessage('Barcode Scan is Missing');
+  end;
   Panel1DblClick(Sender);
   AppsCheckSwitchClick(Sender);
   ColorProgress1.Progress := 100;

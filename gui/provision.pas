@@ -69,7 +69,7 @@ begin
     begin
       Synchronize(MainForm.ResetLeds);
       TermnateTest := False;
-      Synchronize(MainForm.DoLabelError);
+      // Create undefined log Synchronize(MainForm.DoLabelError);
       Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;

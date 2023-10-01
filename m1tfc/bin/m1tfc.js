@@ -91,8 +91,8 @@ program.command('ict')
         let logfile;
         try {
             process.env.coinCellDebug = config.coinCellDebug;
+            if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.m1mtfDir, options.debug);
-            if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             if (!options.cellBatTol) await errorAndExit('must define cellBatTol', logfile);
             logfile.info(`Executing ICT command ${configData.ictFWFilePath} ...`);
             const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
@@ -127,13 +127,13 @@ program.command('eeprom')
         let logfile;
         try {
             process.env.fwDir = configData.m1fwBase;
+            if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, ' eeprom', options.serial, configData.m1mtfDir, options.debug);
             if (!configData.progEEPROM) {
                 logfile.error('Prog EEPROM is disabled');
                 await delay(100);
                 process.exit(exitCodes.normalExit);
             }
-            if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             if (!configData.vendorSite) await errorAndExit('must define vendor site in $SNAP_DATA/config.json', logfile);
 
             logfile.info('--------------------------------------------');
@@ -167,9 +167,9 @@ program.command('progmac')
         let logfile;
 
         try {
+            if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, 'progmac', options.serial, configData.m1mtfDir, options.debug);
             logfile.info('Tester Mode is commission');
-            if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Executing program MAC command ...');
             const macProgram = new ProgramMac(configData, options.serial, logfile);
@@ -193,9 +193,9 @@ program.command('flash')
         const configData = await config(configuration);
         let logfile;
         try {
+            if (!options.serial) await errorAndExit('must define vendor serial number', console);
             process.env.fwDir = configData.m1fwBase;
             logfile = logger.getLogger(options.serial, '   eMMC', options.serial, configData.m1mtfDir, options.debug);
-            if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Flashing eMMC ...');
             const flashEmmc = new FlashEmmc(configData.layoutFilePath, options.serial, logfile);
@@ -210,58 +210,6 @@ program.command('flash')
         }
     });
 
-program.command('pushtocloud')
-    .description('pack the log for specified serial and push tarball to the cloud')
-    .option('-s, --serial <string>', 'vendor serial number')
-    .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
-    .action(async (options) => {
-        const configData = await config(configuration);
-        const now = new Date();
-        const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_mm_ss');
-        let logfile;
-        try {
-            logfile = console;
-            const db = sqliteDriver.initialize(logfile);
-            const dbRecord = db.getRecord(options.serial);
-            let uid;
-            if (!dbRecord[0] || !dbRecord[0].uid) {
-                uid = utils.macToUid('0000000000000000');
-            }
-            else {
-                uid = utils.macToUid(dbRecord[0].uid);
-            }
-
-            if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
-            logfile.info('Pushing log to Cloud ...');
-            if (fs.existsSync(`${configData.m1mtfDir}/logs/${options.serial}`)) {
-                await os.executeShellCommand(`tar -cJf ${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz -C ${configData.m1mtfDir}/logs/${options.serial} .`, logfile, false);
-            }
-
-            await os.executeShellCommand('/snap/bin/m1client synclogs', logfile, false);
-            /*
-            const logContainer = 'm1-3200-logs';
-            const blobSvc = azure.createBlobService(configData.conString);
-            await new Promise(async (resolve, reject) => {
-                blobSvc.createBlockBlobFromLocalFile(`${logContainer}-${configData.vendorSite}`, `${timeStamp}_${uid}-${options.serial}.txz`, `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz`, async (error) => {
-                    if (!error) {
-                        resolve();
-                        logfile.info(`uploaded file ${timeStamp}_${uid}-${options.serial}.txz`);
-                        await delay(100);
-                        return;
-                    }
-                    reject(new Error(error));
-                });
-            });
-            */
-        }
-        catch (err) {
-            if (err === '') logfile.info('Upload failed');
-            else logfile.info(err);
-            await delay(100);
-            process.exit(exitCodes.commandFailed);
-        }
-    });
-
 program.command('pingM1apps')
     .description('try to establish connection to port 80')
     .option('-s, --serial <string>', 'vendor serial number')
@@ -270,9 +218,7 @@ program.command('pingM1apps')
         const configData = await config(configuration);
         let logfile;
         try {
-            if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
-            process.env.fwDir = configData.m1fwBase;
-
+            if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '   apps', options.serial, configData.m1mtfDir, options.debug);
             if (!configData.pingPorts) {
                 logfile.info('pinging port 80 is disabled in config file');
@@ -320,16 +266,13 @@ program.command('pingM1apps')
 program.command('cleanup')
     .description('pack the log and cleanup')
     .option('-s, --serial <string>', 'vendor serial number')
-    .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
     .action(async (options) => {
         const configData = await config(configuration);
-        let logfile;
+        let logfile = console;
         const now = new Date();
         const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_mm_ss');
         try {
-            logfile = logger.getLogger(options.serial, '  clean', options.serial, configData.m1mtfDir, options.debug);
-            if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
-            logfile.info('--------------------------------------------');
+            if (!options.serial) await errorAndExit('must define vendor serial number', console);
             const db = sqliteDriver.initialize(logfile);
             const dbRecord = db.getRecord(options.serial);
             const mac = dbRecord[0].uid;
@@ -341,10 +284,10 @@ program.command('cleanup')
                 uid = utils.macToUid(mac);
             }
 
-            logfile.info('Cleaning up ...');
-            await os.executeShellCommand(`tar -cJf ${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
-            // await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, false);
-            logfile.info('Done');
+            const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz`;
+            await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
+            // console.info(`logfile to created  ${tarFile}`);
+            await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, false);
             await delay(100);
         }
         catch (err) {
@@ -365,6 +308,7 @@ program.command('functest')
         let logfile;
 
         try {
+            if (!options.serial) await errorAndExit('must define vendor serial number', console);
             process.env.fwDir = configData.m1fwBase;
             process.env.m1defaultIP = configData.m1defaultIP;
             logfile = logger.getLogger(options.serial, '   func', options.serial, configData.m1mtfDir, options.debug);
@@ -373,7 +317,6 @@ program.command('functest')
                 await delay(100);
                 process.exit(exitCodes.normalExit);
             }
-            if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Executing m1-3200 functional test ...');
             process.env.SERIAL = options.serial;
@@ -400,6 +343,7 @@ program.command('makelabel')
     .option('-e, --express', 'depricated')
     .option('-l, --label <string>', 'print label')
     .action(async (options) => {
+        if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
         const configData = await config(configuration);
         const logfile = logger.getLogger(options.serial, '  label', options.serial, configData.m1mtfDir, options.debug);
         if (!configData.makeLabel) {

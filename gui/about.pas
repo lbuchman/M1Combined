@@ -36,7 +36,7 @@ implementation
  
 procedure TaboutForm.GetRevision(Sender: TObject; snapName :string);
 const
-bufferSize = 512;
+bufferSize = 1024 * 16;
 var
   AProcess: TProcess;
   Buffer: array[0..bufferSize] of byte;
@@ -47,8 +47,6 @@ var
   splitLine: TStringArray;
   count : Integer;
 begin
-    // SaveToFile(GetEnvironmentVariable('HOME') + '/m1mtf/m1tfd1app.pid');
-
   AProcess := TProcess.Create(nil);
   AProcess.Executable := 'snap';
   AProcess.Parameters.Add('list');
