@@ -101,7 +101,8 @@ begin
       end;
 
     end
-    else begin
+    else
+    begin
       Synchronize(MainForm.Add40ToProgressBar);
       Synchronize(MainForm.Add3ToProgressBar);
     end;
@@ -132,7 +133,8 @@ begin
         continue;
       end;
     end
-    else Synchronize(MainForm.Add3ToProgressBar);
+    else
+      Synchronize(MainForm.Add3ToProgressBar);
 
     // APPs check
     Synchronize(MainForm.AppsCheckSwitchClick_);
@@ -147,18 +149,25 @@ begin
     end;
 
     // Print Label
-    Synchronize(MainForm.DoLabelSwitchClick_);
-    Synchronize(MainForm.Add5ToProgressBar);
-    Synchronize(MainForm.Add3ToProgressBar);
-    if (TermnateTest) then
+    if not reTestMode then
     begin
-      Synchronize(MainForm.ResetLeds);
-      Synchronize(MainForm.DoLabelError);
-      TermnateTest := False;
-      Synchronize(MainForm.DoCleanupCmd);
-      continue;
+      Synchronize(MainForm.DoLabelSwitchClick_);
+      Synchronize(MainForm.Add5ToProgressBar);
+      Synchronize(MainForm.Add3ToProgressBar);
+      if (TermnateTest) then
+      begin
+        Synchronize(MainForm.ResetLeds);
+        Synchronize(MainForm.DoLabelError);
+        TermnateTest := False;
+        Synchronize(MainForm.DoCleanupCmd);
+        continue;
+      end;
+    end
+    else
+    begin
+      Synchronize(MainForm.Add3ToProgressBar);
+      Synchronize(MainForm.Add5ToProgressBar);
     end;
-
     Synchronize(MainForm.DoCleanupCmd);
     Synchronize(MainForm.ClearbusyFlag1);
   end;
