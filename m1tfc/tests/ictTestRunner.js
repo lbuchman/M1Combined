@@ -45,7 +45,7 @@ module.exports = class IctTestRunner {
     async runTest(programmer, serial, ddrblocks, skipTestpointCheck) {
         process.env.serial = serial;
         this.db.updateSerial(serial);
-        this.db.updateErrorCode(process.env.serial, '', '');
+        this.db.updateErrorCode(process.env.serial, 'blank', '');
         let ret = true;
         try {
             await common.initializeTestFixture(programmer, false, this.stm32, this.m1Dev, this.logger, this.db);
@@ -56,7 +56,7 @@ module.exports = class IctTestRunner {
             await common.programStm(programmer, this.stm32, this.m1Dev, this.logger, this.db);
             }
             catch (err) {
-                this.db.updateErrorCode(process.env.serial, errorCodes.codes['STM'], 'ET');
+                this.db.updateErrorCode(process.env.serial, errorCodes.codes['STM'].errorCode, 'ET');
                 throw err;
             }
             if (!skipTestpointCheck) await regulators.testDDRVoltage(this.tolerance, this.logger, this.db);

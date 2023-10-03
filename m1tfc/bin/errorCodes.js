@@ -1,0 +1,42 @@
+'use strict';
+
+const errorCodes = {
+    TP025: { errorCode: '0000TP25', test: 'ICT', desc: 'value is out of tolerance' },
+    TP33: { errorCode: '0000TP33', test: 'ICT', desc: 'value is out of tolerance' },
+    TP35: { errorCode: '0000TP35', test: 'ICT', desc: 'value is out of tolerance' },
+    TP34: { errorCode: '0000TP34', test: 'ICT', desc: 'value is out of tolerance' },
+    TP36: { errorCode: '0000TP36', test: 'ICT', desc: 'value is out of tolerance' },
+    TP31: { errorCode: '0000TP31', test: 'ICT', desc: 'value is out of tolerance' },
+    'J5.13': { errorCode: '0TPJ5.13', test: 'ICT', desc: 'value is out of tolerance' },
+    'J5.8': { errorCode: '00TPJ5.8', test: 'ICT', desc: 'value is out of tolerance' },
+    BatCellBat: { errorCode: '0CoinBat', test: 'ICT', desc: 'value is out of tolerance' },
+    'J5.18': { errorCode: '0TPJ5.18', test: 'ICT', desc: 'continuity failed' },
+    'J5.15': { errorCode: '0TPJ5.15', test: 'ICT', desc: 'continuity failed' },
+    'J5.17': { errorCode: '0TPJ5.17', test: 'ICT', desc: 'continuity failed' },
+    'J5.19': { errorCode: '0TPJ5.19', test: 'ICT', desc: 'continuity failed' },
+    'J5.16': { errorCode: '0TPJ5.16', test: 'ICT', desc: 'continuity failed' },
+    'J5.5': { errorCode: '00TPJ5.5', test: 'ICT', desc: 'value is out of tolerance' },
+    'J5.7': { errorCode: '00TPJ5.7', test: 'ICT', desc: 'value is out of tolerance' },
+    'J5.14': { errorCode: '0TPJ5.14', test: 'ICT', desc: 'value is out of tolerance' },
+    'J5.23': { errorCode: '0TPJ5.23', test: 'ICT', desc: 'value is out of tolerance' },
+    'J5.25': { errorCode: '0TPJ5.25', test: 'ICT', desc: 'value is out of tolerance' },
+    'J5.20': { errorCode: '0TPJ5.20', test: 'ICT', desc: 'value is out of tolerance' },
+    'J5.22': { errorCode: '0TPJ5.22', test: 'ICT', desc: 'value is out of tolerance' },
+    'J5.24': { errorCode: '0TPJ5.24', test: 'ICT', desc: 'value is out of tolerance' },
+    'J5.26': { errorCode: '0TPJ5.26', test: 'ICT', desc: 'value is out of tolerance' },
+    RS422: { errorCode: '000RS422', test: 'ICT', desc: 'echo test failed' },
+    RS485: { errorCode: '000RS485', test: 'ICT', desc: 'echo test failed' },
+    RedLed: { errorCode: '00RedLed', test: 'ICT', desc: 'value is out of tolerance' },
+    BlueLed: { errorCode: '0BlueLed', test: 'ICT', desc: 'value is out of tolerance' },
+    Tamper: { errorCode: '00Tamper', test: 'ICT', desc: 'continuity failed' },
+    DDR3Bus: { errorCode: 'DDR3DBus', test: 'ICT', desc: 'continuity failed' },
+    DDR3ABus: { errorCode: 'DDR3ABus', test: 'ICT', desc: 'continuity failed' },
+    DDR3: { errorCode: '0000DDR3', test: 'ICT', desc: 'continuity failed' },
+    EEPROM: { errorCode: '00EEPROM', test: 'ICT', desc: 'functional test' },
+    BATOP: { errorCode: '00EBATOP', test: 'ICT', desc: 'power to battery switch' },
+    BACHR: { errorCode: '00EBACHR', test: 'ICT', desc: 'battery module charging' },
+    STM: { errorCode: '00000STM', test: 'ICT', desc: 'failed to program M1 STM, failed DFU' },
+};
+
+exports.codes = errorCodes;
+

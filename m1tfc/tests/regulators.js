@@ -1,7 +1,7 @@
 'use strict';
 
 const testBoardLink = require('../src/testBoardLink');
-const errorCodes = require('../bin/errorcodes');
+const errorCodes = require('../bin/errorCodes');
 
 const ddrVoltage = { name: 'TP31', voltage: 1.35 };
 
@@ -20,11 +20,11 @@ const coinCellBattery = { name: 'BatCellBat', minVoltage: 3.1, maxVoltage: 3.7 }
 async function testDDRVoltage(tolerance, logger, db) {
     const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(ddrVoltage.name)}`);
     if (!ret.status) {
-        db.updateErrorCode(process.env.serial, errorcodes.codes[ddrVoltage.name], 'T');
+        db.updateErrorCode(process.env.serial, errorCodes.codes[ddrVoltage.name].errorCode, 'T');
         throw new Error(`Test Board control command failed on pinName=${ddrVoltage.name}, ${ret.error}`);
     }
     if (((Math.abs(ret.value - ddrVoltage.voltage)) / (ddrVoltage.voltage)) > tolerance) {
-        db.updateErrorCode(process.env.serial, errorcodes.codes[ddrVoltage.name], 'E');
+        db.updateErrorCode(process.env.serial, errorCodes.codes[ddrVoltage.name].errorCode, 'E');
         throw new Error(`Failed: Voltage is out of tolerance, TP=${ddrVoltage.name}, value=${ret.value}, reqValue=${ddrVoltage.voltage}`);
     }
     else {
@@ -44,12 +44,12 @@ async function cellBatTest(logger, db) {
     logger.info(`Minimum Coin cell battery voltage expected ${coinCellBattery.minVoltage}V`);
     const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(coinCellBattery.name)}`);
     if (!ret.status) {
-        db.updateErrorCode(process.env.serial, errorcodes.codes[coinCellBattery.name], 'T');
+        db.updateErrorCode(process.env.serial, errorCodes.codes[coinCellBattery.name].errorCode, 'T');
         throw new Error(`Test Board control command failed on pinName=${coinCellBattery.name}, ${ret.error}`);
     }
     coinCellBattery.tolerance = 0.05;
     if ((ret.value < coinCellBattery.minVoltage) || (ret.value > coinCellBattery.maxVoltage)) {
-        db.updateErrorCode(process.env.serial, errorcodes.codes[coinCellBattery.name], 'E');
+        db.updateErrorCode(process.env.serial, errorCodes.codes[coinCellBattery.name].errorCode, 'E');
         throw new Error(`Failed: Coin cell battery voltage is not in the range. actual: ${ret.value}V, req: ${coinCellBattery.minVoltage}V - 3.3V`);
     }
     else {
@@ -70,12 +70,12 @@ async function test(tolerance, logger, db) {
         // eslint-disable-next-line no-await-in-loop
         const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(testPoint.name)}`);
         if (!ret.status) {
-            db.updateErrorCode(process.env.serial, errorcodes.codes[testPoint.name], 'T');
+            db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'T');
             throw new Error(`Test Board control command failed on pinName=${testPoint.name}, ${ret.error}`);
         }
         if (!testPoint.tolerance) testPoint.tolerance = tolerance;
         if (((Math.abs(ret.value - testPoint.voltage)) / (testPoint.voltage)) > testPoint.tolerance) {
-            db.updateErrorCode(process.env.serial, errorcodes.codes[testPoint.name], 'E');
+            db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
             throw new Error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${ret.value}, reqValue=${testPoint.voltage}`);
         }
         else {
