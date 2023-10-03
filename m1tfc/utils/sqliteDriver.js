@@ -72,6 +72,36 @@ class DBClass {
     * @public
     *
     */
+    updateErrorCode(serial, errorcode) {
+        try {
+            if (!this.db) throw new Error('DB file is not open');
+            const update = this.db.prepare('UPDATE records set errorcode = ? WHERE vendorSerial = ?');
+            const ret = update.run(errorcode, serial);
+            if (ret.changes === 0) {
+                throw new Error('DB is not updated');
+            }
+        }
+        catch (err) {
+            throw new Error(`updateErrorCode() call failed error: ${err.message}`);
+        }
+    }
+
+    /**
+    * @public
+    *
+    */
+    getErrorCode(serial) {
+        if (!this.db) throw new Error('DB file is not open, cannot get next MAC');
+        const select = this.db.prepare('SELECT errorcode  FROM records  where vendorSerial = ?');
+        const retValue = select.all(serial);
+        if (retValue && retValue[0] && retValue[0].errorcode) return retValue[0].errorcode;
+        return null;
+    }
+    /**
+    * @public
+    *
+    */
+
     updateLastUsedMac(mac) {
         if (!this.db) throw new Error('DB file is not open, cannot get next MAC');
         const insert = this.db.prepare('INSERT INTO uid (uid) VALUES (?)');
