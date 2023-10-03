@@ -12,7 +12,6 @@ const config = require('../utils/config');
 const exitCodes = require('../src/exitCodes');
 const m1boot = require('../tests/m1boot');
 const os = require('../utils/os');
-const fs = require('fs-extra');
 const Eeprom = require('../tests/programEeprom');
 const FlashEmmc = require('../tests/flashEmmc');
 const FuncTest = require('../tests/funcTest');
@@ -266,7 +265,7 @@ program.command('cleanup')
     .option('-e, --failed', 'will append E to the tar ball file name')
     .action(async (options) => {
         const configData = await config(configuration);
-        let logfile = console;
+        const logfile = console;
         const now = new Date();
         const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_mm_ss');
         try {
@@ -284,7 +283,7 @@ program.command('cleanup')
             let errSuf = '';
             if (options.failed) {
                 errSuf = 'E';
-            } 
+            }
             const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${errSuf}.txz`;
             await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
             // console.info(`logfile to created  ${tarFile}`);
@@ -344,7 +343,7 @@ program.command('makelabel')
     .option('-e, --express', 'depricated')
     .option('-l, --label <string>', 'print label')
     .action(async (options) => {
-        if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
+        if (!options.serial) await errorAndExit('must define vendor serial number', console);
         const configData = await config(configuration);
         const logfile = logger.getLogger(options.serial, '  label', options.serial, configData.m1mtfDir, options.debug);
         if (!configData.makeLabel) {

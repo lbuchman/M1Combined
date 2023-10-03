@@ -1,6 +1,7 @@
 'use strict';
 
 const testBoardLink = require('../src/testBoardLink');
+const errorCodes = require('../bin/errorcodes');
 
 const ddrVoltage = { name: 'TP31', voltage: 1.35 };
 
