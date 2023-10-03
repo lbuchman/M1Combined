@@ -26,8 +26,6 @@ const { mkdirp } = require('mkdirp');
 const dateTime = require('date-and-time');
 
 // AS name Onguard Testing -> enel2anestingtsm
-// pushlog for all logs
-// fix app checkDbRecord
 
 const configuration = {
     ictFWFilePath: `${process.env.HOME}/m1mtf/fsbl.stm32`,
@@ -266,6 +264,7 @@ program.command('pingM1apps')
 program.command('cleanup')
     .description('pack the log and cleanup')
     .option('-s, --serial <string>', 'vendor serial number')
+    .option('-e, --failed', 'will append E to the tar ball file name')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile = console;
@@ -283,8 +282,11 @@ program.command('cleanup')
             else {
                 uid = utils.macToUid(mac);
             }
-
-            const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}.txz`;
+            let errSuf = '';
+            if (options.failed) {
+                errSuf = 'E';
+            } 
+            const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${errSuf}.txz`;
             await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
             // console.info(`logfile to created  ${tarFile}`);
             await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, false);

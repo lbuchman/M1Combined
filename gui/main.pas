@@ -116,6 +116,7 @@ type
   private
     AProcess: TProcess;
     Uid: string;
+    testStatus: boolean;
     doOnes: boolean;
     provisionThread: TProvisionThread;
     busyFlag: boolean;
@@ -155,6 +156,8 @@ type
     procedure Add40ToProgressBar;
     procedure ClearbusyFlag1;
     procedure DoLabelError;
+    procedure SetTestStatusFailed;
+    procedure SetTestStatusOk;
   end;
 
 var
@@ -165,6 +168,17 @@ implementation
 {$R *.lfm}
 
 { TmainForm }
+
+procedure TmainForm.SetTestStatusFailed;
+begin
+  testStatus := False;
+end;
+
+procedure TmainForm.SetTestStatusOk;
+begin
+  testStatus := True;
+end;
+
 procedure TmainForm.ClearbusyFlag1;
 begin
   busyFlag1 := False;
@@ -256,21 +270,23 @@ var
   arg: array[0..8] of string;
 begin
   DoLabelSwitch.LedValue := False;
- // if targetVendorSerial.Text = '' then exit;
+  // if targetVendorSerial.Text = '' then exit;
   if busyFlag1 then
   begin
     DoLabelSwitch.LedValue := False;
     exit;
   end;
 
-  if (Length(targetVendorSerial.Text) > 0) then begin
+  if (Length(targetVendorSerial.Text) > 0) then
+  begin
     arg[0] := '-s';
     arg[1] := Trim(targetVendorSerial.Text);
     arg[2] := '-d';
     arg[3] := DebugLevel;
     arg[4] := '';
   end
-  else begin
+  else
+  begin
     arg[0] := '-d';
     arg[1] := DebugLevel;
     arg[2] := '';
@@ -305,7 +321,16 @@ begin
 
   arg[0] := '-s';
   arg[1] := Trim(targetVendorSerial.Text);
-  arg[2] := '';
+  if (testStatus) then
+  begin
+    arg[2] := '';
+  end
+  else
+  begin
+    arg[2] := '-e';
+    arg[3] := '';
+  end;
+
   RunM1Tfc('cleanup', arg, fakeLed);
 end;
 
@@ -371,7 +396,7 @@ end;
 
 procedure TmainForm.AbountMenuItemClick(Sender: TObject);
 begin
- aboutForm.ShowModal;
+  aboutForm.ShowModal;
 end;
 
 procedure TmainForm.Action2Execute(Sender: TObject);
@@ -416,7 +441,7 @@ end;
 
 procedure TmainForm.Re_TestMenuItemClick(Sender: TObject);
 begin
-  //
+
 end;
 
 procedure TmainForm.OpenLogExecute(Sender: TObject);
@@ -432,10 +457,10 @@ var
   Buffer: array[0..bufferSize] of byte;
   BytesRead: longint;
   textToSee: ansistring;
-  tmpStr : String;
+  tmpStr: string;
   splitOutput: TStringArray;
   splitLine: TStringArray;
-  count : Integer;
+  Count: integer;
 begin
   aLocalProcess := TProcess.Create(nil);
   aLocalProcess.Executable := '/snap/bin/m1client';
@@ -447,12 +472,13 @@ begin
   begin
     Sleep(50);
     continue;
- end;
+  end;
 
   Buffer[0] := 0;
   BytesRead := aLocalProcess.Output.NumBytesAvailable;
-  if BytesRead > (bufferSize -1) then begin
-     exit;
+  if BytesRead > (bufferSize - 1) then
+  begin
+    exit;
   end;
   BytesRead := aLocalProcess.Output.Read(Buffer, BytesRead);
   if BytesRead >= bufferSize then Buffer[bufferSize - 1] := 0
@@ -501,6 +527,7 @@ var
   pid: string;
   ipaddresses: string;
 begin
+  testStatus := True;
   busyFlag := False;
   busyFlag1 := False;
   doOnes := True;
@@ -527,7 +554,7 @@ begin
       Free;
     end;
   ipaddresses := myIPAddress();
- // mainForm.Caption := mainForm.Caption + ' My IP: ' + ipaddresses;
+  // mainForm.Caption := mainForm.Caption + ' My IP: ' + ipaddresses;
 end;
 
 procedure TmainForm.FormShow(Sender: TObject);
@@ -617,7 +644,8 @@ begin
   arg[3] := DebugLevel;
   arg[4] := '-b';
   if (provisionThread.reTestMode) then arg[5] := 'used'
-  else arg[5] := 'new';
+  else
+    arg[5] := 'new';
   arg[6] := '';
   ret := RunM1Tfc('ict', arg, ICTTestSwitch);
   if (ret <> NormalExit) then InterruptMenuItemClick(self);
@@ -711,10 +739,10 @@ var
   startTime: integer;
   stdout: string;
 begin
-  if   command = 'cleanup' then
+  if command = 'cleanup' then
   begin
 
-     Led.tag := 1;
+    Led.tag := 1;
   end;
   lastCommand := command;
   provisionThread.ResetTest();
@@ -852,7 +880,7 @@ begin
   Memo1.Lines.Add(log('info', targetVendorSerial.Text, 'Commission new board'));
   ResetLeds;
   ColorProgress1.progress := 0;
-  provisionThread.reTestMode := false;
+  provisionThread.reTestMode := False;
   provisionThread.ExecuteThread;
 end;
 
@@ -909,13 +937,15 @@ end;
 
 procedure TmainForm.FuncTestSwitchClick_Wrapper(Sender: TObject);
 begin
-    if DebugLevel <> '2' then begin
-      TindLed(Sender).LedValue := false;
-      exit;
+  if DebugLevel <> '2' then
+  begin
+    TindLed(Sender).LedValue := False;
+    exit;
   end;
-  if TargetVendorSerial.Text = ''  then begin
-      ShowMessage('Barcode Scan is Missing');
-      exit;
+  if TargetVendorSerial.Text = '' then
+  begin
+    ShowMessage('Barcode Scan is Missing');
+    exit;
   end;
   Panel1DblClick(Sender);
   FuncTestSwitchClick(Sender);
@@ -924,15 +954,17 @@ end;
 
 procedure TmainForm.ICTTestSwitchClick_Wrapper(Sender: TObject);
 begin
-  if DebugLevel <> '2' then begin
-       TindLed(Sender).LedValue := false;
-       exit;
+  if DebugLevel <> '2' then
+  begin
+    TindLed(Sender).LedValue := False;
+    exit;
   end;
-  if TargetVendorSerial.Text = ''  then begin
-      ShowMessage('Barcode Scan is Missing');
-      exit;
+  if TargetVendorSerial.Text = '' then
+  begin
+    ShowMessage('Barcode Scan is Missing');
+    exit;
   end;
-  provisionThread.reTestMode := true;
+  provisionThread.reTestMode := True;
   Panel1DblClick(Sender);
   ICTTestSwitchClick(Sender);
   ColorProgress1.Progress := 100;
@@ -941,12 +973,14 @@ end;
 
 procedure TmainForm.AppsCheckwitchClick_Wrapper(Sender: TObject);
 begin
-  if DebugLevel <> '2' then begin
-      TindLed(Sender).LedValue := false;
-      exit;
+  if DebugLevel <> '2' then
+  begin
+    TindLed(Sender).LedValue := False;
+    exit;
   end;
-  if TargetVendorSerial.Text = '' then begin
-      ShowMessage('Barcode Scan is Missing');
+  if TargetVendorSerial.Text = '' then
+  begin
+    ShowMessage('Barcode Scan is Missing');
   end;
   Panel1DblClick(Sender);
   AppsCheckSwitchClick(Sender);
@@ -955,12 +989,14 @@ end;
 
 procedure TmainForm.EEPROMSwitchClick_Wrapper(Sender: TObject);
 begin
-  if DebugLevel <> '2' then begin
-      TindLed(Sender).LedValue := false;
-      exit;
+  if DebugLevel <> '2' then
+  begin
+    TindLed(Sender).LedValue := False;
+    exit;
   end;
-  if TargetVendorSerial.Text = '' then begin
-      ShowMessage('Barcode Scan is Missing');
+  if TargetVendorSerial.Text = '' then
+  begin
+    ShowMessage('Barcode Scan is Missing');
   end;
   Panel1DblClick(Sender);
   EEPROMSwitchClick(Sender);
@@ -969,12 +1005,14 @@ end;
 
 procedure TmainForm.MacProgSwitchClick_Wrapper(Sender: TObject);
 begin
-  if DebugLevel <> '2' then begin
-      TindLed(Sender).LedValue := false;
-      exit;
+  if DebugLevel <> '2' then
+  begin
+    TindLed(Sender).LedValue := False;
+    exit;
   end;
-  if TargetVendorSerial.Text = ''  then begin
-      ShowMessage('Barcode Scan is Missing');
+  if TargetVendorSerial.Text = '' then
+  begin
+    ShowMessage('Barcode Scan is Missing');
   end;
   Panel1DblClick(Sender);
   MacProgSwitchClick(Sender);
@@ -984,7 +1022,8 @@ end;
 procedure TmainForm.DoLabelSwitchClick_Wrapper(Sender: TObject);
 begin
 
-  if TargetVendorSerial.Text = ''  then begin
+  if TargetVendorSerial.Text = '' then
+  begin
     //  ShowMessage('Barcode Scan is Missing');
   end;
   Panel1DblClick(Sender);
@@ -994,12 +1033,14 @@ end;
 
 procedure TmainForm.FlashSwitchClick_Wrapper(Sender: TObject);
 begin
-  if DebugLevel <> '2' then begin
-      TindLed(Sender).LedValue := false;
-      exit;
+  if DebugLevel <> '2' then
+  begin
+    TindLed(Sender).LedValue := False;
+    exit;
   end;
-  if TargetVendorSerial.Text = ''  then begin
-      ShowMessage('Barcode Scan is Missing');
+  if TargetVendorSerial.Text = '' then
+  begin
+    ShowMessage('Barcode Scan is Missing');
   end;
   Panel1DblClick(Sender);
   FlashSwitchClick(Sender);

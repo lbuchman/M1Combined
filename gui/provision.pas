@@ -70,7 +70,8 @@ begin
       Synchronize(MainForm.ResetLeds);
       TermnateTest := False;
       // Create undefined log Synchronize(MainForm.DoLabelError);
-      Synchronize(MainForm.DoCleanupCmd);
+      Synchronize(MainForm.SetTestStatusFailed);
+      if not reTestMode then Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
 
@@ -84,7 +85,8 @@ begin
         Synchronize(MainForm.ResetLeds);
         Synchronize(MainForm.DoLabelError);
         TermnateTest := False;
-        Synchronize(MainForm.DoCleanupCmd);
+        Synchronize(MainForm.SetTestStatusFailed);
+        if not reTestMode then Synchronize(MainForm.DoCleanupCmd);
         continue;
       end;
 
@@ -96,7 +98,8 @@ begin
         Synchronize(MainForm.ResetLeds);
         Synchronize(MainForm.DoLabelError);
         TermnateTest := False;
-        Synchronize(MainForm.DoCleanupCmd);
+        Synchronize(MainForm.SetTestStatusFailed);
+        if not reTestMode then Synchronize(MainForm.DoCleanupCmd);
         continue;
       end;
 
@@ -115,7 +118,8 @@ begin
       Synchronize(MainForm.ResetLeds);
       Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
-      Synchronize(MainForm.DoCleanupCmd);
+      Synchronize(MainForm.SetTestStatusFailed);
+      if not reTestMode then Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
 
@@ -129,7 +133,8 @@ begin
         Synchronize(MainForm.ResetLeds);
         Synchronize(MainForm.DoLabelError);
         TermnateTest := False;
-        Synchronize(MainForm.DoCleanupCmd);
+        Synchronize(MainForm.SetTestStatusFailed);
+        if not reTestMode then Synchronize(MainForm.DoCleanupCmd);
         continue;
       end;
     end
@@ -144,7 +149,8 @@ begin
       Synchronize(MainForm.ResetLeds);
       Synchronize(MainForm.DoLabelError);
       TermnateTest := False;
-      Synchronize(MainForm.DoCleanupCmd);
+      Synchronize(MainForm.SetTestStatusFailed);
+      if not reTestMode then Synchronize(MainForm.DoCleanupCmd);
       continue;
     end;
 
@@ -159,7 +165,8 @@ begin
         Synchronize(MainForm.ResetLeds);
         Synchronize(MainForm.DoLabelError);
         TermnateTest := False;
-        Synchronize(MainForm.DoCleanupCmd);
+        Synchronize(MainForm.SetTestStatusFailed);
+        if not reTestMode then Synchronize(MainForm.DoCleanupCmd);
         continue;
       end;
     end
@@ -168,7 +175,11 @@ begin
       Synchronize(MainForm.Add3ToProgressBar);
       Synchronize(MainForm.Add5ToProgressBar);
     end;
-    Synchronize(MainForm.DoCleanupCmd);
+    Synchronize(MainForm.SetTestStatusOk);
+    if not reTestMode then
+    begin
+      Synchronize(MainForm.DoCleanupCmd);
+    end;
     Synchronize(MainForm.ClearbusyFlag1);
   end;
 end;

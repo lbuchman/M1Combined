@@ -84,9 +84,8 @@ echo "20  3  * * *   root /snap/bin/m1client synclogs" >> /etc/crontab
 echo "40  3  * * *   root /snap/bin/m1client syncsecrets" >> /etc/crontab
 echo "40  4  * * *   root /snap/bin/m1client backupdb" >> /etc/crontab
 echo "40  6  * * *   root sudo sed -i '/root snap install/d'" >> /etc/crontab
-echo "50  3  * * *   root find //home/lenel/m1mtf/logs -type f -mtime +90 -delete" >> /etc/crontab
-echo "10  4  * * *   root find /home/lenel/m1mtf/logs -type d -mtime +90 -delete" >> /etc/crontab
-echo "10  4  * * *   root find /home/lenel/m1mtf/logs -type d -mtime +90 -delete" >> /etc/crontab
+echo "50  3  * * *   root find //home/lenel/m1mtf/synclogs -type f -mtime +365 -delete" >> /etc/crontab
+echo "10  4  * * *   root find /home/lenel/m1mtf/logs -type d -mtime +14 -delete" >> /etc/crontab
 echo "10  4  * * *   root find /home/lenel/m1mtf/m1cli -type f -mtime +7 -delete" >> /etc/crontab
 
 snap install --classic --dangerous  m1client.snap 

@@ -128,7 +128,7 @@ program.command('synclogs')
         }
 
         logfile.info('Download complete files uploaded:');
-        const syncedLogsDir = `${configData.m1mtfDir}/logs/syncedlogs`;
+        const syncedLogsDir = `${configData.m1mtfDir}/syncedlogs`;
         mkdirp.sync(syncedLogsDir);
         await os.executeShellCommand(`chown lenel: ${syncedLogsDir}`, logfile);
         matches.forEach((item) => {
