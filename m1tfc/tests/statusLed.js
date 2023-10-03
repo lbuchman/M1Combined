@@ -53,7 +53,7 @@ async function initLed() {
     }
 }
 
-async function test(logger) {
+async function test(logger, db) {
     try {
         await initLed(logger);
         await setLedActive(statusLed.ledBlue, statusLed.ledRed, logger);

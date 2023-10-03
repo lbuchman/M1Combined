@@ -59,7 +59,7 @@ async function testDDRtest(ddrblocks, logger) {
     return true;
 }
 
-async function testDDR3Test(ddrblocks, logger) {
+async function testDDR3Test(ddrblocks, logger, db) {
     let ret = true;
     if (!await testDDRDatabus(logger)) ret = false;
     if (!await testDDRAddrbus(logger)) ret = false;

@@ -3,7 +3,7 @@
 
 const targetICTLink = require('../src/m1ICTLink');
 
-async function testRs485(logger) {
+async function testRs485(logger, db) {
     try {
         const ret = await targetICTLink.sendCommand('testrs485');
         if (!ret.status) {

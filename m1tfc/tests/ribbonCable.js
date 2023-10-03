@@ -186,7 +186,7 @@ async function testRs422(logger) {
     return true;
 }
 
-async function runRibbonCableTest(tolerance, logger) {
+async function runRibbonCableTest(tolerance, logger, db) {
     let retValue = true;
     const i2cTestCases = [0, 1, 0, 1];
     // eslint-disable-next-line no-restricted-syntax

@@ -72,11 +72,11 @@ class DBClass {
     * @public
     *
     */
-    updateErrorCode(serial, errorcode) {
+    updateErrorCode(serial, errorcode, sufix) {
         try {
             if (!this.db) throw new Error('DB file is not open');
             const update = this.db.prepare('UPDATE records set errorcode = ? WHERE vendorSerial = ?');
-            const ret = update.run(errorcode, serial);
+            const ret = update.run(`${sufix}${errorcode.errorcode}`, serial);
             if (ret.changes === 0) {
                 throw new Error('DB is not updated');
             }

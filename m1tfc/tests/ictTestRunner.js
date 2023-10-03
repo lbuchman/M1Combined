@@ -14,6 +14,7 @@ const eeprom = require('./eeprom');
 const exitCodes = require('../src/exitCodes');
 const sqliteDriver = require('../utils/sqliteDriver');
 const utils = require('../utils/utils');
+const errorCodes = require('../bin/errorcodes');
 
 module.exports = class IctTestRunner {
     constructor(stm32, tolerance, log) {
@@ -42,37 +43,44 @@ module.exports = class IctTestRunner {
       * @param
       */
     async runTest(programmer, serial, ddrblocks, skipTestpointCheck) {
+        process.env.serial = serial;
+        this.db.updateSerial(serial);
+        this.db.updateErrorCode(process.env.serial, '', '');
         let ret = true;
         try {
-            await common.initializeTestFixture(programmer, false, this.stm32, this.m1Dev, this.logger);
+            await common.initializeTestFixture(programmer, false, this.stm32, this.m1Dev, this.logger, this.db);
             if (!skipTestpointCheck) this.logger.info('Testing test points ...');
-            if (!skipTestpointCheck) await regulators.test(this.tolerance, this.logger);
-            await regulators.cellBatTest(this.logger);
-            await common.programStm(programmer, false, this.stm32, this.m1Dev, this.logger);
-            if (!skipTestpointCheck) await regulators.testDDRVoltage(this.tolerance, this.logger);
+            if (!skipTestpointCheck) await regulators.test(this.tolerance, this.logger, this.db);
+            await regulators.cellBatTest(this.logger, this.db);
+            try {
+            await common.programStm(programmer, this.stm32, this.m1Dev, this.logger, this.db);
+            }
+            catch (err) {
+                this.db.updateErrorCode(process.env.serial, errorCodes.codes['STM'], 'ET');
+                throw err;
+            }
+            if (!skipTestpointCheck) await regulators.testDDRVoltage(this.tolerance, this.logger, this.db);
             this.logger.info('Testing Ribbon cable pins ...');
-            if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger)) ret = false;
+            if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger, this.db)) ret = false;
             this.logger.info('Testing RS485 ...');
-            if (!await rs485.testRs485(this.logger)) ret = false;
+            if (!await rs485.testRs485(this.logger, this.db)) ret = false;
             this.logger.info('Testing Status LED ...');
-            if (!await ledTest.test(this.logger)) ret = false;
+            if (!await ledTest.test(this.logger, this.db)) ret = false;
             this.logger.info('Testing Tamper sensor ...');
-            if (!await tamperTest.test(this.logger)) ret = false;
+            if (!await tamperTest.test(this.logger, this.db)) ret = false;
             this.logger.info('Testing DDR3 memory ...');
-            if (!await ddr3.testDDR3Test(ddrblocks, this.logger)) ret = false;
+            if (!await ddr3.testDDR3Test(ddrblocks, this.logger, this.db)) ret = false;
             this.logger.info('Testing I2C EEPROM ...');
-            if (!await eeprom.checkEEPROM(this.logger)) ret = false;
-            if (!await battery.test(this.logger)) ret = false;
+            if (!await eeprom.checkEEPROM(this.logger, this.db)) ret = false;
+            if (!await battery.test(this.logger, this.db)) ret = false;
 
             if (ret) {
                 this.logger.info('ICT Test Passed!!!');
                 await common.testEndSuccess();
-                this.db.updateSerial(serial);
                 this.db.updateIctStatus(serial, utils.boolToInt(true));
                 process.exit(exitCodes.normalExit);
             }
 
-            this.db.updateSerial(serial);
             this.db.updateIctStatus(serial, utils.boolToInt(false));
             await common.testFailed();
             this.logger.warn('One or more tests Failed!!!');

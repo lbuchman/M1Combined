@@ -59,7 +59,7 @@ async function initSensor() {
     }
 }
 
-async function test(logger) {
+async function test(logger, db) {
     try {
         await initSensor(logger);
         let sensorState;

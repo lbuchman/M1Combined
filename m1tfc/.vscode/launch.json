@@ -14,7 +14,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["ict", "-d", "2", "-s", "3922480016", "-b", "used"]
+            "args": ["ict", "-d", "2", "-s", "3023200042", "-b", "used"]
         },
         {
             "type": "pwa-node",
@@ -27,18 +27,6 @@
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["cleanup", "-d", "1", "-s", "3023200042" ]
-        },
-        {
-            "type": "pwa-node",
-            "request": "launch",
-            "name": "Launch pushtocloud",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "outputCapture": "std",
-            "console": "integratedTerminal",
-            "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["pushtocloud",    "-d", "2", "-s", "3022480016" ]
         },
         {
             "type": "pwa-node",

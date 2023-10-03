@@ -24,7 +24,7 @@ function getWeek() {
 }
 
 
-async function checkEEPROM(logger) {
+async function checkEEPROM(logger, db) {
     const ret = await targetICTLink.sendCommand('checkeeeprom');
     if (!ret.status) {
         logger.error(`I2C EEPROM Test failed  ${ret.error}`);

@@ -27,7 +27,7 @@ async function getChargingVoltage(timeout) {
     throw Error('Battery charging circuit test failed');
 }
 
-async function test(logger) {
+async function test(logger, db) {
     try {
         logger.info('Testing battery switch circuit');
         await targetICTLink.sendCommand(`confgpio ${batteryStateStatusPins[0].port} ${batteryStateStatusPins[0].pin} input none`);
