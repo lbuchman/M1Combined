@@ -15,7 +15,7 @@ CREATE TABLE records (
 					  flashProgrammed  Integer,
 					  cpuSerial Text,
 					  cloudPushed Integer.
-					  errorCode Text
+					  errorcode Text
 					);
 
 CREATE TABLE UID    ( 
@@ -26,12 +26,6 @@ CREATE TABLE Perm    (
 	                  mac Integer,
 	                  eeprom Integer
 		            );
-
-CREATE TABLE FailureCode    ( 
-	                  vendorSerial TEXT PRIMARY KEY,
-	                  description TEXT UNIQUE,
-	                  FailureCode TEXT UNIQUE,
-		            );					
 
 -- Triggers
 
