@@ -167,7 +167,6 @@ program.command('progmac')
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, 'progmac', options.serial, configData.m1mtfDir, options.debug);
-            logfile.info('Tester Mode is commission');
             logfile.info('--------------------------------------------');
             logfile.info('Executing program MAC command ...');
             const macProgram = new ProgramMac(configData, options.serial, logfile);
