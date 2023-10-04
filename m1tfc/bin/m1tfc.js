@@ -23,6 +23,7 @@ const testBoardLink = require('../src/testBoardLink');
 const { mkdirp } = require('mkdirp');
 // const azure = require('azure-storage');
 const dateTime = require('date-and-time');
+const errorCodes = require('../bin/errorCodes');
 
 // AS name Onguard Testing -> enel2anestingtsm
 
@@ -122,10 +123,12 @@ program.command('eeprom')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
+        let db;
         try {
             process.env.fwDir = configData.m1fwBase;
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, ' eeprom', options.serial, configData.m1mtfDir, options.debug);
+            db = sqliteDriver.initialize(logfile);
             if (!configData.progEEPROM) {
                 logfile.error('Prog EEPROM is disabled');
                 await delay(100);
@@ -148,6 +151,8 @@ program.command('eeprom')
         catch (err) {
             if (!logfile) logfile = console;
             logfile.error(err);
+            /* eslint-disable dot-notation */
+            db.updateErrorCode(options.serial, errorCodes.codes['EEPROMUPDATE'].errorCode, 'E');
             // logfile.error(err.stack);
             await delay(100);
             process.exit(exitCodes.commandFailed);
@@ -162,10 +167,11 @@ program.command('progmac')
         const configData = await config(configuration);
         process.env.fwDir = configData.m1fwBase;
         let logfile;
-
+        let db;
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, 'progmac', options.serial, configData.m1mtfDir, options.debug);
+            db = sqliteDriver.initialize(logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Executing program MAC command ...');
             const macProgram = new ProgramMac(configData, options.serial, logfile);
@@ -176,6 +182,7 @@ program.command('progmac')
         catch (err) {
             logfile.error(err.message);
             // logfile.error(err.stack);
+            db.updateErrorCode(options.serial, errorCodes.codes['MAC'].errorCode, 'E');
             await delay(100);
             process.exit(err.level);
         }
@@ -188,8 +195,10 @@ program.command('flash')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
+        let db;
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
+            db = sqliteDriver.initialize(logfile);
             process.env.fwDir = configData.m1fwBase;
             logfile = logger.getLogger(options.serial, '   eMMC', options.serial, configData.m1mtfDir, options.debug);
             logfile.info('--------------------------------------------');
@@ -201,6 +210,8 @@ program.command('flash')
         catch (err) {
             logfile.error(err);
             // logfile.error(err.stack);
+            /* eslint-disable dot-notation */
+            db.updateErrorCode(options.serial, errorCodes.codes['FLASH'].errorCode, 'E');
             await delay(100);
             process.exit(exitCodes.commandFailed);
         }
@@ -222,6 +233,7 @@ program.command('pingM1apps')
             }
             logfile.info('--------------------------------------------');
             logfile.info('checking ports 80 ...');
+            const db = sqliteDriver.initialize(logfile);
             await delay(5);
             await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
             await testBoardLink.retrieveIoDef();
@@ -237,6 +249,7 @@ program.command('pingM1apps')
                     logfile.error('test failed');
                     await delay(100);
                     await testBoardLink.targetPower(false);
+                    db.updateErrorCode(options.serial, errorCodes.codes['APP80'].errorCode, 'E');
                     process.exit(exitCodes.commandFailed);
                 }
                 timerCount -= 1;
@@ -324,7 +337,6 @@ program.command('functest')
             const funcTest = new FuncTest(options.serial, configData, logfile);
             await funcTest.init(configData.testBoardTerminalDev, configData.serialBaudrate);
             await funcTest.run(configData.programmingCommand, configData.layoutFilePath, configData.login, configData.password, configData.m1SerialDev, configData.skipUSBPenDriveTest, '115200');
-            // await funcTest.run(configData.programmingCommand, configData.layoutFilePath);
             process.exit(exitCodes.normalExit);
         }
         catch (err) {
@@ -366,7 +378,6 @@ program.command('makelabel')
             if (dbError && dbError.length) {
                 const uiD = '0';
                 await utils.printLabel(uiD, options.serial, configData.vendorSite, dbError, logger);
-                //await buzzer.buzzerBeepFailed();
                 await testBoardLink.targetPower(false);
                 await testBoardLink.batteryOn(false);
                 await delay(100);
@@ -392,7 +403,6 @@ program.command('makelabel')
                 logfile.debug('Sending data to the printer');
                 await utils.printLabel(uid, eepromData.serial.substring(3), configData.vendorSite, dbError, logger);
                 logfile.debug('Label is printed');
-                // await buzzer.buzzerBeepSuccess();
                 await testBoardLink.targetPower(false);
                 await testBoardLink.batteryOn(false);
                 await delay(100);

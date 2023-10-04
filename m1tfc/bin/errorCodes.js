@@ -34,10 +34,14 @@ const errorCodes = {
     DDR3Bus: { errorCode: '0000DDR3-DBus', test: 'ICT', desc: 'continuity failed' },
     DDR3ABus: { errorCode: '0000DDR3-ABus', test: 'ICT', desc: 'continuity failed' },
     DDR3: { errorCode: '000000000DDR3', test: 'ICT', desc: 'continuity failed' },
-    EEPROM: { errorCode: '0000000EEPROM', test: 'ICT', desc: 'functional test' },
+    EEPROM: { errorCode: '0000000EEPROM', test: 'ICT', desc: 'EEPROM test failed' },
+    EEPROMUPDATE: { errorCode: '00UPD-0EEPROM', test: 'ICT', desc: 'update EEPROM, the issue could be DFU and the PC test' },
     BATOP: { errorCode: '00BATT-SWITCH', test: 'ICT', desc: 'main power to battery switch test' },
     BACHR: { errorCode: '000BATT-CHARG', test: 'ICT', desc: 'battery module charging' },
-    STM: { errorCode: '000000USB-DFU', test: 'ICT', desc: 'failed to program M1 STM, failed DFU' }
+    STM: { errorCode: '000000USB-DFU', test: 'ICT', desc: 'failed to program M1 STM, failed DFU' },
+    APP80: { errorCode: '00000APP-PING', test: 'APP', desc: 'the UUT do not reply to app ping. UUT sw init issue in func test' },
+    FLASH: { errorCode: '0000000000FLASH', test: 'FLASH', desc: 'program FLASH failed' },
+    MAC: { errorCode: '000000PROG-AMC', test: 'MAC', desc: 'program MAC failed' }
 };
 
 exports.codes = errorCodes;
