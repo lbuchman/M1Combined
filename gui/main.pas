@@ -295,16 +295,8 @@ begin
 end;
 
 procedure TmainForm.DoLabelError();
-var
-  arg: array[0..8] of string;
 begin
-  exit;
-  arg[0] := '-l';
-  arg[1] := lastCommand + ',error';
-  arg[2] := '-d';
-  arg[3] := DebugLevel;
-  arg[4] := '';
-  RunM1Tfc('makelabel', arg, FakeLed);
+  DoLabelSwitchClick(self);
 end;
 
 procedure TmainForm.DoCleanupCmd();

@@ -56,7 +56,7 @@ module.exports = class IctTestRunner {
                 await common.programStm(programmer, this.stm32, this.m1Dev, this.logger, this.db);
             }
             catch (err) {
-                /* jshint sub:true */
+                /* eslint-disable dot-notation */
                 this.db.updateErrorCode(process.env.serial, errorCodes.codes['STM'].errorCode, 'ET');
                 throw err;
             }

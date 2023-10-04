@@ -363,10 +363,10 @@ program.command('makelabel')
             const macProgram = new ProgramMac(configData, options.serial, logfile);
             await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
 
-            if (dbError.length) {
+            if (dbError && dbError.length) {
                 const uiD = '0';
                 await utils.printLabel(uiD, options.serial, configData.vendorSite, dbError, logger);
-                await buzzer.buzzerBeepFailed();
+                //await buzzer.buzzerBeepFailed();
                 await testBoardLink.targetPower(false);
                 await testBoardLink.batteryOn(false);
                 await delay(100);
@@ -390,9 +390,9 @@ program.command('makelabel')
                 }
 
                 logfile.debug('Sending data to the printer');
-                await utils.printLabel(uid, eepromData.serial.substring(3), logfile);
+                await utils.printLabel(uid, eepromData.serial.substring(3), configData.vendorSite, dbError, logger);
                 logfile.debug('Label is printed');
-                await buzzer.buzzerBeepSuccess();
+                // await buzzer.buzzerBeepSuccess();
                 await testBoardLink.targetPower(false);
                 await testBoardLink.batteryOn(false);
                 await delay(100);

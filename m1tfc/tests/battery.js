@@ -78,7 +78,7 @@ async function test(logger, db) {
         logger.info(`Battery test passed. charging Voltage = ${chargingVoltage}V`);
     }
     catch (err) {
-        /*jshint sub:true*/
+        /* eslint-disable dot-notation */
         db.updateErrorCode(process.env.serial, errorCodes.codes['BACHR'].errorCode, 'E');
         throw new Error(err.message);
     }

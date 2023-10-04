@@ -69,7 +69,7 @@ begin
     begin
       Synchronize(MainForm.ResetLeds);
       TermnateTest := False;
-      // Create undefined log Synchronize(MainForm.DoLabelError);
+      Synchronize(MainForm.DoLabelError);
       Synchronize(MainForm.SetTestStatusFailed);
       if not reTestMode then Synchronize(MainForm.DoCleanupCmd);
       continue;

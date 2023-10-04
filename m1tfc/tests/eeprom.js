@@ -29,6 +29,7 @@ async function checkEEPROM(logger, db) {
     const ret = await targetICTLink.sendCommand('checkeeeprom');
     if (!ret.status) {
         logger.error(`I2C EEPROM Test failed  ${ret.error}`);
+        /* eslint-disable dot-notation */
         db.updateErrorCode(process.env.serial, errorCodes.codes['EEPROM'].errorCode, 'E');
         return false;
     }
