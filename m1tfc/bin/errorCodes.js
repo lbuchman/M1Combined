@@ -31,7 +31,7 @@ const errorCodes = {
     RS485: { errorCode: '000RS485', test: 'ICT', desc: 'echo test failed' },
     RedLed: { errorCode: '00RedLed', test: 'ICT', desc: 'value is out of tolerance' },
     BlueLed: { errorCode: '0BlueLed', test: 'ICT', desc: 'value is out of tolerance' },
-    Tamper: { errorCode: '00Tamper', test: 'ICT', desc: 'continuity failed' },
+    TamperPin: { errorCode: '00Tamper', test: 'ICT', desc: 'continuity failed' },
     DDR3Bus: { errorCode: 'DDR3DBus', test: 'ICT', desc: 'continuity failed' },
     DDR3ABus: { errorCode: 'DDR3ABus', test: 'ICT', desc: 'continuity failed' },
     DDR3: { errorCode: '0000DDR3', test: 'ICT', desc: 'continuity failed' },
