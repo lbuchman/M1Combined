@@ -39,8 +39,8 @@ module.exports = class SerialLink {
                 }
                 catch (err) {
                     this.parser.removeAllListeners('data');
-                    this.logger.error(err.message);
-                    this.logger.error(data.toString());
+                    this.logger.debug(err.message);
+                    this.logger.debug(data.toString());
                     reject(err);
                 }
             });

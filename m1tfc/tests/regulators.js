@@ -12,6 +12,8 @@ const testPoints = [
     { name: 'TP34', voltage: 3.3 },
     { name: 'TP36', voltage: 1.2 },
     { name: 'J5.13', voltage: 11.7 },
+    { name: 'J5.5', voltage: 6.0 },
+    { name: 'J5.7', voltage: 6.0 },
     { name: 'J5.8', voltage: 6.0 }
 ];
 

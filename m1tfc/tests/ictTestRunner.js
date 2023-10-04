@@ -14,7 +14,7 @@ const eeprom = require('./eeprom');
 const exitCodes = require('../src/exitCodes');
 const sqliteDriver = require('../utils/sqliteDriver');
 const utils = require('../utils/utils');
-const errorCodes = require('../bin/errorcodes');
+const errorCodes = require('../bin/errorCodes');
 
 module.exports = class IctTestRunner {
     constructor(stm32, tolerance, log) {
