@@ -341,61 +341,63 @@ program.command('makelabel')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
     .option('-e, --express', 'depricated')
-    .option('-l, --label <string>', 'print label')
+    .option('-l, --label <string>', 'depricated')
     .action(async (options) => {
         if (!options.serial) await errorAndExit('must define vendor serial number', console);
         const configData = await config(configuration);
         const logfile = logger.getLogger(options.serial, '  label', options.serial, configData.m1mtfDir, options.debug);
+        const db = sqliteDriver.initialize(logfile);
         if (!configData.makeLabel) {
             logfile.error('Make Label is disabled');
             await delay(100);
             process.exit(exitCodes.normalExit);
         }
         try {
-            if (options.label) {
-                const lines = options.label.split(',');
-                try {
-                    await utils.printCustomLabel(lines, logger);
-                }
-                catch (err) {
-                    //
-                }
-                process.exit(exitCodes.normalExit);
-            }
-
             process.env.fwDir = configData.m1fwBase;
             let eepromData = {};
             // if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Printing Label ...');
             await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
-
+            const dbError = db.getErrorCode(options.serial);
             const macProgram = new ProgramMac(configData, options.serial, logfile);
             await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
-            const retValue = await macProgram.getMac(configData.programmingCommand);
-            if (retValue.exitCode !== exitCodes.normalExit) throw new Error('Could not read i2c EEPROM');
-            const uid = retValue.mac.toUpperCase();
-            const eeprom = new Eeprom(configData.ictFWFilePath, logfile);
-            await eeprom.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
-            await delay(400);
-            eepromData = await eeprom.get(configData.programmingCommand);
 
-
-            if (eepromData.serial === '' || uid === '' || uid === '00:00:00:00:00:00') {
+            if (dbError.length) {
+                const uiD = '0';
+                await utils.printLabel(uiD, options.serial, configData.vendorSite, dbError, logger);
                 await buzzer.buzzerBeepFailed();
-                await buzzer.testFailed();
+                await testBoardLink.targetPower(false);
+                await testBoardLink.batteryOn(false);
                 await delay(100);
-                process.exit(exitCodes.commandFailed);
+                process.exit(exitCodes.normalExit);
             }
+            else {
+                const retValue = await macProgram.getMac(configData.programmingCommand);
+                if (retValue.exitCode !== exitCodes.normalExit) throw new Error('Could not read i2c EEPROM');
+                const uid = retValue.mac.toUpperCase();
 
-            logfile.debug('Sending data to the printer');
-            await utils.printLabel(uid, eepromData.serial.substring(3), logfile);
-            logfile.debug('Label is printed');
-            await buzzer.buzzerBeepSuccess();
-            await testBoardLink.targetPower(false);
-            await testBoardLink.batteryOn(false);
-            await delay(100);
-            process.exit(exitCodes.normalExit);
+                const eeprom = new Eeprom(configData.ictFWFilePath, logfile);
+                await eeprom.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+                await delay(400);
+                eepromData = await eeprom.get(configData.programmingCommand);
+
+                if (eepromData.serial === '' || uid === '' || uid === '00:00:00:00:00:00') {
+                    await buzzer.buzzerBeepFailed();
+                    await buzzer.testFailed();
+                    await delay(100);
+                    process.exit(exitCodes.commandFailed);
+                }
+
+                logfile.debug('Sending data to the printer');
+                await utils.printLabel(uid, eepromData.serial.substring(3), logfile);
+                logfile.debug('Label is printed');
+                await buzzer.buzzerBeepSuccess();
+                await testBoardLink.targetPower(false);
+                await testBoardLink.batteryOn(false);
+                await delay(100);
+                process.exit(exitCodes.normalExit);
+            }
         }
         catch (err) {
             logfile.error(err.message);

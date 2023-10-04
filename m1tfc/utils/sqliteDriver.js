@@ -68,11 +68,11 @@ class DBClass {
         return ret;
     }
 
- /**
-    * @public
-    *
-    */
-     resetErrorCode(serial) {
+    /**
+       * @public
+       *
+       */
+    resetErrorCode(serial) {
         try {
             if (!this.db) throw new Error('DB file is not open');
             const update = this.db.prepare('UPDATE records set errorcode = ? WHERE vendorSerial = ?');
@@ -85,6 +85,7 @@ class DBClass {
             throw new Error(`updateErrorCode() call failed error: ${err.message}`);
         }
     }
+
     /**
     * @public
     *
@@ -95,7 +96,7 @@ class DBClass {
             if (!this.db) throw new Error('DB file is not open');
             const valueNow = this.getErrorCode(serial);
             if (valueNow.includes(newError)) return;
-            const number = valueNow.push(newError);
+            valueNow.push(newError);
 
             const update = this.db.prepare('UPDATE records set errorcode = ? WHERE vendorSerial = ?');
             const ret = update.run(JSON.stringify(valueNow), serial);
@@ -116,8 +117,7 @@ class DBClass {
         if (!this.db) throw new Error('DB file is not open, cannot get next MAC');
         const select = this.db.prepare('SELECT errorcode  FROM records  where vendorSerial = ?');
         const retValue = select.all(serial);
-        if (retValue && retValue[0] && retValue[0].errorcode)  
-        {
+        if (retValue && retValue[0] && retValue[0].errorcode) {
             const ret = retValue[0].errorcode;
             return JSON.parse(ret);
         }
@@ -247,24 +247,6 @@ class DBClass {
         const ret = update.run(cpuSN, serial);
         if (ret.changes === 0) {
             throw new Error('DB call to update cpuSN failed');
-        }
-    }
-
-    /**
-    * @public
-    *
-    */
-    updateIctStatus(serial, status) {
-        try {
-            if (!this.db) throw new Error('DB file is not open');
-            const update = this.db.prepare('UPDATE records set ictTestPassed = ? WHERE vendorSerial = ?');
-            const ret = update.run(status, serial);
-            if (ret.changes === 0) {
-                throw new Error('DB is not updated');
-            }
-        }
-        catch (err) {
-            throw new Error(`updateIctStatus() call failed error: ${err.message}`);
         }
     }
 

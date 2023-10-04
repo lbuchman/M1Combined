@@ -215,33 +215,28 @@ function macToUid(mac) {
     return `0000${mac.split(':').join('')}`;
 }
 
-async function printLabel(mac, serial, logger) {
+async function printLabel(mac, serial, tsId, dbError, logger) {
     const labelPath = '/tmp/label.txt';
     const pngPath = '/tmp/label.png';
-    const convertCmd = `convert -size 306x200 xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
+    let convertCmd = `convert -size 306x200 xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
     const pritnLabelCmd = `brother_ql print -l 29 ${pngPath}`;
 
-    const labelTxt = `text 1,1 "\nM1-3200\n${serial}\n${macToUid(mac)}\n${mac}\n"`;
-    await fs.writeFile(labelPath, labelTxt);
+    let labelTxt;
 
-    await os.executeShellCommand(convertCmd, logger, false, false);
-    try {
-        await os.executeShellCommand(pritnLabelCmd, logger, false, false);
+    if (dbError.length) {
+        convertCmd = `convert -size 306x${150 + 25 * (dbError.length + 1)} xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
+        labelTxt = `text 1,1 "\nFailed\nM1-3200\n${serial}${tsId}\n`;
+        dbError.forEach((item) => {
+            labelTxt += `${item}\n`;
+        });
+        labelTxt += '"';
     }
-    catch (err) {
-        throw new Error(`command to print Label failed. Is printer on?: ${pritnLabelCmd}`);
+    else {
+        labelTxt = `text 1,1 "\nM1-3200\n${serial}${tsId}\n${macToUid(mac)}\n${mac}\n"`;
+
     }
-}
 
-async function printCustomLabel(lines, logger) {
-    const labelPath = '/tmp/label.txt';
-    const pngPath = '/tmp/label.png';
-    const convertCmd = `convert -size 306x200 xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
-    const pritnLabelCmd = `brother_ql print -l 29 ${pngPath}`;
-
-    const labelTxt = `text 1,1 "\nM1-3200\nTesting Failed\n${lines[0]}\n"`;
     await fs.writeFile(labelPath, labelTxt);
-
     await os.executeShellCommand(convertCmd, logger, false, false);
     try {
         await os.executeShellCommand(pritnLabelCmd, logger, false, false);
@@ -270,6 +265,5 @@ module.exports = {
     printLabel,
     getCPUSerial,
     macToUid,
-    isString,
-    printCustomLabel
+    isString
 };

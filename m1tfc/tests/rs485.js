@@ -17,6 +17,7 @@ async function testRs485(logger, db) {
         logger.error('Failed RS485 echo test');
         // logger.error(err);
         // logger.debug(err.stack);
+        /* jshint sub:true */
         db.updateErrorCode(process.env.serial, errorCodes.codes['RS485'].errorCode, 'E');
         return false;
     }

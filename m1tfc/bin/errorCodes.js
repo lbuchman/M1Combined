@@ -37,7 +37,7 @@ const errorCodes = {
     EEPROM: { errorCode: '00EEPROM', test: 'ICT', desc: 'functional test' },
     BATOP: { errorCode: '00EBATOP', test: 'ICT', desc: 'power to battery switch' },
     BACHR: { errorCode: '00EBACHR', test: 'ICT', desc: 'battery module charging' },
-    STM: { errorCode: '00000STM', test: 'ICT', desc: 'failed to program M1 STM, failed DFU' },
+    STM: { errorCode: '00000STM', test: 'ICT', desc: 'failed to program M1 STM, failed DFU' }
 };
 
 exports.codes = errorCodes;

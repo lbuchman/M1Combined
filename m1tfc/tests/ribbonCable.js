@@ -191,6 +191,7 @@ async function testRs422(logger) {
     }
     catch (err) {
         logger.error('Failed Ribbon RS422 echo test');
+        /* jshint sub:true */
         db.updateErrorCode(process.env.serial, errorCodes.codes['RS422'].errorCode, 'E');
         // logger.error(err);
         // logger.debug(err.stack);
