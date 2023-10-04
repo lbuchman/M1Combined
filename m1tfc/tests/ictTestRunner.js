@@ -45,7 +45,7 @@ module.exports = class IctTestRunner {
     async runTest(programmer, serial, ddrblocks, skipTestpointCheck) {
         process.env.serial = serial;
         this.db.updateSerial(serial);
-        this.db.updateErrorCode(process.env.serial, 'blank', '');
+        this.db.resetErrorCode(process.env.serial);
         let ret = true;
         try {
             await common.initializeTestFixture(programmer, false, this.stm32, this.m1Dev, this.logger, this.db);
