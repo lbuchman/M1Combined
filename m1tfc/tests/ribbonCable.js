@@ -52,7 +52,6 @@ async function runRibbonCableTestStaticVoltages(tolerance, logger) {
                 retValue = false;
                 freturn = false;
                 db.updateErrorCode(process.env.serial, errorCodes.codes[testBoardIoDef[count].pinName].errorCode, 'E');
-
             }
             else {
                 logger.info(`Passed pinName=${testBoardIoDef[count].pinName}, actual = ${ret.value}V, expected = ${testBoardIoDef[count].reqValue}V `);

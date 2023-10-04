@@ -5,6 +5,7 @@ const lodash = require('lodash');
 const sqliteDriver = require('../utils/sqliteDriver');
 const { delay } = require('lodash');
 const utils = require('../utils/utils');
+const errorCodes = require('../bin/errorCodes');
 
 function getSecret(size) {
     return [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
@@ -28,6 +29,7 @@ async function checkEEPROM(logger, db) {
     const ret = await targetICTLink.sendCommand('checkeeeprom');
     if (!ret.status) {
         logger.error(`I2C EEPROM Test failed  ${ret.error}`);
+        db.updateErrorCode(process.env.serial, errorCodes.codes['EEPROM'].errorCode, 'E');
         return false;
     }
 

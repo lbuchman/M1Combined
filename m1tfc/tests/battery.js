@@ -3,6 +3,7 @@
 const testBoardLink = require('../src/testBoardLink');
 const targetICTLink = require('../src/m1ICTLink');
 const delay = require('delay');
+const errorCodes = require('../bin/errorCodes');
 
 const chargerIntervalCheck = 5; /* 5 sec */
 const chargerMinVoltage = 12.6;
@@ -77,6 +78,7 @@ async function test(logger, db) {
         logger.info(`Battery test passed. charging Voltage = ${chargingVoltage}V`);
     }
     catch (err) {
+        db.updateErrorCode(process.env.serial, errorCodes.codes['BACHR'].errorCode, 'E');
         throw new Error(err.message);
     }
     finally {

@@ -53,7 +53,7 @@ module.exports = class IctTestRunner {
             if (!skipTestpointCheck) await regulators.test(this.tolerance, this.logger, this.db);
             await regulators.cellBatTest(this.logger, this.db);
             try {
-            await common.programStm(programmer, this.stm32, this.m1Dev, this.logger, this.db);
+                await common.programStm(programmer, this.stm32, this.m1Dev, this.logger, this.db);
             }
             catch (err) {
                 this.db.updateErrorCode(process.env.serial, errorCodes.codes['STM'].errorCode, 'ET');

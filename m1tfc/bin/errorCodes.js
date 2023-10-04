@@ -26,7 +26,6 @@ const errorCodes = {
     'J5.24': { errorCode: '0TPJ5.24', test: 'ICT', desc: 'value is out of tolerance' },
     'J5.26': { errorCode: '0TPJ5.26', test: 'ICT', desc: 'value is out of tolerance' },
     'J8.2': { errorCode: '0LDBJ8.2', test: 'ICT', desc: 'value is out of tolerance' },
-    'J8.2': { errorCode: '0LDRJ8.1', test: 'ICT', desc: 'value is out of tolerance' },
     RS422: { errorCode: '000RS422', test: 'ICT', desc: 'echo test failed' },
     RS485: { errorCode: '000RS485', test: 'ICT', desc: 'echo test failed' },
     RedLed: { errorCode: '00RedLed', test: 'ICT', desc: 'value is out of tolerance' },
@@ -42,4 +41,3 @@ const errorCodes = {
 };
 
 exports.codes = errorCodes;
-

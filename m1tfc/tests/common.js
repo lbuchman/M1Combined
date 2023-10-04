@@ -53,7 +53,7 @@ async function getICTFWRev(retries) {
     throw new Error('cannot get rev from M1 ict fw');
 }
 
-async function programStm(programmer, stm32, m1Dev, logger, db) {
+async function programStm(programmer, stm32, m1Dev, logger) {
     logger.debug('Programming UUT ICT FW into SRAM...');
     await waitDFU(programmer, logger);
     await delay(300);
@@ -67,7 +67,7 @@ async function programStm(programmer, stm32, m1Dev, logger, db) {
     logger.debug(`Target ICT FW Rev - ${fwRev}`);
 }
 
-async function initializeTestFixture(programmer, programSTM, stm32, m1Dev, logger, db) {
+async function initializeTestFixture(programmer, programSTM, stm32, m1Dev, logger) {
     await testBoardLink.retrieveIoDef();
     testBoardLink.getIoDef();
 
