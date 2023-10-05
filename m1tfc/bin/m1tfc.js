@@ -420,7 +420,7 @@ program.command('makelabel')
             }
         }
         catch (err) {
-            if (!err.includes('Not printing the label')) {
+            if (err.message && !err.message.includes('Not printing the label')) {
                 logfile.error(err.message);
             }
             // logfile.debug(err.stack);

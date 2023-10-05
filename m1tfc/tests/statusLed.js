@@ -86,8 +86,6 @@ async function test(logger, db) {
         // logger.debug(err.stack);
         return false;
     }
-
-    return true;
 }
 
 module.exports = {
