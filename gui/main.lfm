@@ -1,7 +1,7 @@
 object mainForm: TmainForm
-  Left = 441
+  Left = 471
   Height = 1382
-  Top = 445
+  Top = 440
   Width = 2875
   BorderWidth = 2
   ClientHeight = 1339
@@ -1682,7 +1682,7 @@ object mainForm: TmainForm
       Height = 62
       Top = 97
       Width = 62
-      OnClick = AppsCheckwitchClick_Wrapper
+      OnClick = EEPROMSwitchClick_Wrapper
       LedValue = False
       Bevels = <      
         item

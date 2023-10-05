@@ -374,12 +374,12 @@ program.command('makelabel')
             // if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Printing Label ...');
-            
+
             await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
 
             if (options.error) {
                 const dbError = db.getErrorCode(options.serial);
-                if (!dbError || !dbError.length) throw new Error('no errors in the database');
+                if (!dbError || !dbError.length) throw new Error('Not printing the label, no errors in the database');
                 const uiD = '0';
                 await utils.printLabel(uiD, options.serial, configData.vendorSite, dbError, logger);
                 await testBoardLink.targetPower(false);
@@ -407,7 +407,7 @@ program.command('makelabel')
                 }
 
                 logfile.debug('Sending data to the printer');
-                if (eepromData.serial.substring(3).slice(0, -3) !== options.serial) {
+                if (eepromData.serial.substring(3).slice(0, -2) !== options.serial) {
                     throw new Error(`serial number ${options.serial} does not match EEPROM value ${eepromData.serial.substring(3)}`);
                 }
 
@@ -420,7 +420,9 @@ program.command('makelabel')
             }
         }
         catch (err) {
-            logfile.error(err.message);
+            if (!err.includes('Not printing the label')) {
+                logfile.error(err.message);
+            }
             // logfile.debug(err.stack);
             await delay(100);
             await buzzer.buzzerBeepFailed();
