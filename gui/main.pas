@@ -33,6 +33,8 @@ type
   { TmainForm }
 
   TmainForm = class(TForm)
+    Label2: TLabel;
+    UUT_Device: TComboBox;
     Re_Test: TAction;
     StopTestClick: TAction;
     QuitClick: TAction;

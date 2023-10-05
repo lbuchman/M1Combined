@@ -371,9 +371,7 @@ program.command('makelabel')
         try {
             process.env.fwDir = configData.m1fwBase;
             let eepromData = {};
-            // if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
-            logfile.info('--------------------------------------------');
-            logfile.info('Printing Label ...');
+            if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
 
             await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
 
@@ -388,6 +386,8 @@ program.command('makelabel')
                 process.exit(exitCodes.normalExit);
             }
             else {
+                logfile.info('--------------------------------------------');
+                logfile.info('Printing Label ...');
                 const macProgram = new ProgramMac(configData, options.serial, logfile);
                 await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
                 const retValue = await macProgram.getMac(configData.programmingCommand);
