@@ -1,6 +1,7 @@
 'use strict';
 
 const errorCodes = {
+    EXCEPT: { errorCode: '0000EXCEPTION', test: 'ICT', desc: 'see logs' },
     TP025: { errorCode: '000000000TP25', test: 'ICT', desc: 'value is out of tolerance' },
     TP33: { errorCode: '000000000TP33', test: 'ICT', desc: 'value is out of tolerance' },
     TP35: { errorCode: '000000000TP35', test: 'ICT', desc: 'value is out of tolerance' },

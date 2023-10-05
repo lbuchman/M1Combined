@@ -87,10 +87,12 @@ program.command('ict')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
+        let db;
         try {
             process.env.coinCellDebug = config.coinCellDebug;
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.m1mtfDir, options.debug);
+            db = sqliteDriver.initialize(logfile);
             if (!options.cellBatTol) await errorAndExit('must define cellBatTol', logfile);
             logfile.info(`Executing ICT command ${configData.ictFWFilePath} ...`);
             const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
@@ -111,6 +113,8 @@ program.command('ict')
             if (!logfile) logfile = console;
             logfile.error(err);
             // logfile.error(err.stack);
+            /* eslint-disable dot-notation */
+            db.updateErrorCode(options.serial, errorCodes.codes['EXCEPTION'].errorCode, 'T');
             await delay(100);
             process.exit(exitCodes.commandFailed);
         }
@@ -142,7 +146,6 @@ program.command('eeprom')
             const eeprom = new Eeprom(configData.ictFWFilePath, logfile);
             await eeprom.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
-            process.env.CumulusDir = `${configData.m1mtfDir}/Cumulus`;
             await eeprom.program(configData.programmingCommand, options.serial, configData.vendorSite, configData.forceEppromOverwrite);
             await delay(100);
             await common.testEndSuccess();
@@ -224,6 +227,7 @@ program.command('pingM1apps')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
+        let db;
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '   apps', options.serial, configData.m1mtfDir, options.debug);
@@ -233,7 +237,7 @@ program.command('pingM1apps')
             }
             logfile.info('--------------------------------------------');
             logfile.info('checking ports 80 ...');
-            const db = sqliteDriver.initialize(logfile);
+            db = sqliteDriver.initialize(logfile);
             await delay(5);
             await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
             await testBoardLink.retrieveIoDef();
@@ -267,6 +271,7 @@ program.command('pingM1apps')
             logfile.error(err);
             // logfile.error(err.stack);
             await testBoardLink.targetPower(false);
+            db.updateErrorCode(options.serial, errorCodes.codes['APP80'].errorCode, 'T');
             await delay(100);
             process.exit(exitCodes.commandFailed);
         }
@@ -352,8 +357,7 @@ program.command('makelabel')
     .description('prints the M1-3200 Label')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
-    .option('-e, --express', 'depricated')
-    .option('-l, --label <string>', 'depricated')
+    .option('-e, --error', 'error print from the database')
     .action(async (options) => {
         if (!options.serial) await errorAndExit('must define vendor serial number', console);
         const configData = await config(configuration);
@@ -370,12 +374,10 @@ program.command('makelabel')
             // if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Printing Label ...');
-            await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
-            const dbError = db.getErrorCode(options.serial);
-            const macProgram = new ProgramMac(configData, options.serial, logfile);
-            await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
 
-            if (dbError && dbError.length) {
+            if (options.error) {
+                const dbError = db.getErrorCode(options.serial);
+                if (!dbError || !dbError.length) throw new Error('no errors in the database');
                 const uiD = '0';
                 await utils.printLabel(uiD, options.serial, configData.vendorSite, dbError, logger);
                 await testBoardLink.targetPower(false);
@@ -384,8 +386,11 @@ program.command('makelabel')
                 process.exit(exitCodes.normalExit);
             }
             else {
+                await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
+                const macProgram = new ProgramMac(configData, options.serial, logfile);
+                await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
                 const retValue = await macProgram.getMac(configData.programmingCommand);
-                if (retValue.exitCode !== exitCodes.normalExit) throw new Error('Could not read i2c EEPROM');
+                if (retValue.exitCode !== exitCodes.normalExit) throw new Error('Could not read MP1 OTP');
                 const uid = retValue.mac.toUpperCase();
 
                 const eeprom = new Eeprom(configData.ictFWFilePath, logfile);
@@ -401,7 +406,11 @@ program.command('makelabel')
                 }
 
                 logfile.debug('Sending data to the printer');
-                await utils.printLabel(uid, eepromData.serial.substring(3), configData.vendorSite, dbError, logger);
+                if (eepromData.serial.substring(3).slice(0, -3) !== options.serial) {
+                    throw new Error(`serial number ${options.serial} does not match EEPROM value ${eepromData.serial.substring(3)}`);
+                }
+
+                await utils.printLabel(uid, eepromData.serial.substring(3), configData.vendorSite, [], logger);
                 logfile.debug('Label is printed');
                 await testBoardLink.targetPower(false);
                 await testBoardLink.batteryOn(false);

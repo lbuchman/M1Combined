@@ -245,24 +245,8 @@ begin
 end;
 
 procedure TmainForm.DoLabelSwitchClick_();
-var
-  arg: array[0..8] of string;
 begin
-  DoLabelSwitch.LedValue := False;
-  if targetVendorSerial.Text = '' then exit;
-  if busyFlag1 then
-  begin
-    DoLabelSwitch.LedValue := False;
-    exit;
-  end;
-
-  arg[0] := '-s';
-  arg[1] := Trim(targetVendorSerial.Text);
-  arg[2] := '-d';
-  arg[3] := DebugLevel;
-  arg[4] := '-e';
-  arg[5] := '';
-  RunM1Tfc('makelabel', arg, DoLabelSwitch);
+  DoLabelSwitchClick(self);
 end;
 
 procedure TmainForm.DoLabelSwitchClick(Sender: TObject);
@@ -277,20 +261,12 @@ begin
     exit;
   end;
 
-  if (Length(targetVendorSerial.Text) > 0) then
-  begin
-    arg[0] := '-s';
-    arg[1] := Trim(targetVendorSerial.Text);
-    arg[2] := '-d';
-    arg[3] := DebugLevel;
-    arg[4] := '';
-  end
-  else
-  begin
-    arg[0] := '-d';
-    arg[1] := DebugLevel;
-    arg[2] := '';
-  end;
+  arg[0] := '-s';
+  arg[1] := Trim(targetVendorSerial.Text);
+  arg[2] := '-d';
+  arg[3] := DebugLevel;
+  arg[4] := '';
+
   RunM1Tfc('makelabel', arg, DoLabelSwitch);
 end;
 

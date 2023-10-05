@@ -250,6 +250,25 @@ class DBClass {
         }
     }
 
+
+    /**
+        * @public
+        *
+        */
+    updateIctStatus(serial, status) {
+        try {
+            if (!this.db) throw new Error('DB file is not open');
+            const update = this.db.prepare('UPDATE records set ictTestPassed = ? WHERE vendorSerial = ?');
+            const ret = update.run(status, serial);
+            if (ret.changes === 0) {
+                throw new Error('DB is not updated');
+            }
+        }
+        catch (err) {
+            throw new Error(`updateIctStatus() call failed error: ${err.message}`);
+        }
+    }
+
     /**
     * @public
     *
