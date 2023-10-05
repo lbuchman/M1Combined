@@ -374,6 +374,8 @@ program.command('makelabel')
             // if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Printing Label ...');
+            
+            await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
 
             if (options.error) {
                 const dbError = db.getErrorCode(options.serial);
@@ -386,7 +388,6 @@ program.command('makelabel')
                 process.exit(exitCodes.normalExit);
             }
             else {
-                await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
                 const macProgram = new ProgramMac(configData, options.serial, logfile);
                 await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
                 const retValue = await macProgram.getMac(configData.programmingCommand);
