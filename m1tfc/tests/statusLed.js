@@ -55,6 +55,7 @@ async function initLed() {
 }
 
 async function test(logger, db) {
+    let ret = true;
     try {
         await initLed(logger);
         await setLedActive(statusLed.ledBlue, statusLed.ledRed, logger);
@@ -63,7 +64,7 @@ async function test(logger, db) {
         if (!lodash.inRange(ledVoltage, statusLed.ledBlue.minVoltage, statusLed.ledBlue.maxVoltage)) {
             logger.error(`Led test failed, expected voltage range ${statusLed.ledBlue.minVoltage} - ${statusLed.ledBlue.maxVoltage}, actual ${ledVoltage}`);
             db.updateErrorCode(process.env.serial, errorCodes.codes[statusLed.ledBlue.pinNameOnTestBoard].errorCode, 'E');
-            return false;
+            ret = false;
         }
 
         setLedActive(statusLed.ledRed, statusLed.ledBlue, logger);
@@ -71,10 +72,11 @@ async function test(logger, db) {
         if (!lodash.inRange(ledVoltage, statusLed.ledRed.minVoltage, statusLed.ledRed.maxVoltage)) {
             logger.error(`Led test failed, expected voltage range ${statusLed.ledBlue.minVoltage} - ${statusLed.ledBlue.maxVoltage}, actual ${ledVoltage}`);
             db.updateErrorCode(process.env.serial, errorCodes.codes[statusLed.ledRed.pinNameOnTestBoard].errorCode, 'E');
-            return false;
+            ret = false;
         }
 
-        logger.info('Passed Led test');
+        if (ret) logger.info('Passed Led test');
+        else logger.error('Led test failed');
     }
     catch (err) {
         logger.error('Failed Led test');

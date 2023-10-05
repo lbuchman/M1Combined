@@ -117,6 +117,7 @@ type
     AProcess: TProcess;
     Uid: string;
     testStatus: boolean;
+    printError: boolean;
     doOnes: boolean;
     provisionThread: TProvisionThread;
     busyFlag: boolean;
@@ -265,14 +266,20 @@ begin
   arg[1] := Trim(targetVendorSerial.Text);
   arg[2] := '-d';
   arg[3] := DebugLevel;
-  arg[4] := '';
+  if not printError then arg[4] := ''
+  else begin
+     arg[4] := '-e';
+     arg[5] := '';
+  end;
 
   RunM1Tfc('makelabel', arg, DoLabelSwitch);
 end;
 
 procedure TmainForm.DoLabelError();
 begin
+  printError := true;
   DoLabelSwitchClick(self);
+  printError := false;
 end;
 
 procedure TmainForm.DoCleanupCmd();
@@ -495,6 +502,7 @@ var
   pid: string;
   ipaddresses: string;
 begin
+  printError := False;
   testStatus := True;
   busyFlag := False;
   busyFlag1 := False;

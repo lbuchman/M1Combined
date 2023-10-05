@@ -59,14 +59,7 @@ async function getEEPRomData() {
         }
         throw new Error(`I2C EEPROM verifyeepromdata cmd failed  ${ret.error}`);
     }
-    printEEPRomData(ret);
     return ret;
-}
-
-async function printEEPRomData(logger) {
-    const eeprom = await this.getEEPRomData();
-    delete eeprom.status;
-    logger.debug(`${JSON.stringify(eeprom).trim()}`);
 }
 
 function getSerialN(serial, vendorSite) {
@@ -121,7 +114,6 @@ async function updateEEPRom(serial, eeeproverwrite, vendorSite, logger) {
 
 module.exports = {
     checkEEPROM,
-    printEEPRomData,
     updateEEPRom,
     getEEPRomData
 };
