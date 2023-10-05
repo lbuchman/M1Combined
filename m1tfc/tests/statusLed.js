@@ -77,6 +77,7 @@ async function test(logger, db) {
 
         if (ret) logger.info('Passed Led test');
         else logger.error('Led test failed');
+        return ret;
     }
     catch (err) {
         logger.error('Failed Led test');
