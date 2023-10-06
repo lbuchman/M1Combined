@@ -1,7 +1,7 @@
 object mainForm: TmainForm
-  Left = 585
+  Left = 1039
   Height = 1382
-  Top = 375
+  Top = 237
   Width = 2875
   BorderWidth = 2
   ClientHeight = 1339
@@ -1469,6 +1469,7 @@ object mainForm: TmainForm
     ParentColor = False
     ParentFont = False
     TabOrder = 2
+    OnClick = Panel2Click
   end
   object Panel1: TPanel
     Left = 2
@@ -1493,6 +1494,7 @@ object mainForm: TmainForm
       MaxLength = 10
       NumbersOnly = True
       TabOrder = 0
+      Text = '3023200042'
     end
     object Label1: TLabel
       Left = 1351

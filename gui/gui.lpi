@@ -129,7 +129,7 @@
         <PackageName Value="LCL"/>
       </Item8>
     </RequiredPackages>
-    <Units Count="9">
+    <Units Count="7">
       <Unit0>
         <Filename Value="gui.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -146,38 +146,29 @@
         <IsPartOfProject Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="macutils.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="macUtils"/>
-      </Unit3>
-      <Unit4>
-        <Filename Value="scannerClient.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit4>
-      <Unit5>
         <Filename Value="logform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="LoggerForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="logForm"/>
-      </Unit5>
-      <Unit6>
+      </Unit3>
+      <Unit4>
         <Filename Value="logger.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit6>
-      <Unit7>
+      </Unit4>
+      <Unit5>
         <Filename Value="configurationjson.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="configurationJson"/>
-      </Unit7>
-      <Unit8>
+      </Unit5>
+      <Unit6>
         <Filename Value="about.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="aboutForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit8>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

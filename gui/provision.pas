@@ -31,7 +31,7 @@ type
 
 implementation
 
-uses main;
+// uses main;
 
 procedure TProvisionThread.ResetTest();
 begin
@@ -51,6 +51,7 @@ end;
 
 procedure TProvisionThread.Execute;
 begin
+  {
   TermnateTest := False;
   while not Terminated do
   begin
@@ -182,6 +183,7 @@ begin
     end;
     Synchronize(MainForm.ClearbusyFlag1);
   end;
+  }
 end;
 
 constructor TProvisionThread.Create(CreateSuspended: boolean);

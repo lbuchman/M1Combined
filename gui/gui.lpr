@@ -10,8 +10,6 @@ uses
   laz_synapse,
   main,
   provision,
-  macUtils,
-  scannerClient,
   logForm,
   logger,
   configurationJson,
