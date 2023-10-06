@@ -33,8 +33,6 @@ type
   { TmainForm }
 
   TmainForm = class(TForm)
-    Label2: TLabel;
-    UUT_Device: TComboBox;
     Re_Test: TAction;
     StopTestClick: TAction;
     QuitClick: TAction;
@@ -161,6 +159,7 @@ type
     procedure DoLabelError;
     procedure SetTestStatusFailed;
     procedure SetTestStatusOk;
+    function CheckSerialBarcodeScan(serial ; AnsiString) : AnsiString;
   end;
 
 var
@@ -269,9 +268,10 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   if not printError then arg[4] := ''
-  else begin
-     arg[4] := '-e';
-     arg[5] := '';
+  else
+  begin
+    arg[4] := '-e';
+    arg[5] := '';
   end;
 
   RunM1Tfc('makelabel', arg, DoLabelSwitch);
@@ -279,9 +279,9 @@ end;
 
 procedure TmainForm.DoLabelError();
 begin
-  printError := true;
+  printError := True;
   DoLabelSwitchClick(self);
-  printError := false;
+  printError := False;
 end;
 
 procedure TmainForm.DoCleanupCmd();
@@ -365,10 +365,93 @@ begin
   // BarcodeScanEditTimer.Enabled := True;
 end;
 
-procedure TmainForm.BarcodeScanEditTimerTimer(Sender: TObject);
+ procedure TmainForm.CheckSerialBarcodeScan(serial ; AnsiString) : AnsiString;
+var
+  str: ansistring;
+  intN: integer;
+  ret: ansistring;
 begin
-  // targetVendorSerial.ReadOnly := True;
-  // BarcodeScanEditTimer.Enabled := False;
+  serial := targetVendorSerial.Text;
+  try
+    str := AnsiMidStr(serial, 1, 2);
+    case str of
+      '30': ret := 'M1-3200';
+    end;
+
+    str := AnsiMidStr(serial, 3, 2);
+    intN := StrToInt(str);
+    if (intN > 22) and (intN < 47) then
+    begin
+      ret += ' Y-20' + str;
+    end;
+
+    str := AnsiMidStr(serial, 5, 2);
+    intN := StrToInt(str);
+    if (intN <= 53) and (intN >= 0) then
+    begin
+      ret += ' W-' + str;
+    end;
+
+    str := AnsiMidStr(serial, 7, 4);
+    intN := StrToInt(str);
+    if intN <= 1000 then
+    begin
+      ret += ' S-' + str;
+    end;
+  except
+     On E: EConvertError do
+     begin
+
+     end;
+
+  end;
+  MainForm.Text := ret;
+
+end;
+
+procedure TmainForm.BarcodeScanEditTimerTimer(Sender: TObject);
+var
+  serial : ansistring;
+  str: ansistring;
+  intN: integer;
+  ret: ansistring;
+begin
+  serial := targetVendorSerial.Text;
+  try
+    str := AnsiMidStr(serial, 1, 2);
+    case str of
+      '30': ret := 'M1-3200';
+    end;
+
+    str := AnsiMidStr(serial, 3, 2);
+    intN := StrToInt(str);
+    if (intN > 22) and (intN < 47) then
+    begin
+      ret += ' Y-20' + str;
+    end;
+
+    str := AnsiMidStr(serial, 5, 2);
+    intN := StrToInt(str);
+    if (intN <= 53) and (intN >= 0) then
+    begin
+      ret += ' W-' + str;
+    end;
+
+    str := AnsiMidStr(serial, 7, 4);
+    intN := StrToInt(str);
+    if intN <= 1000 then
+    begin
+      ret += ' S-' + str;
+    end;
+  except
+     On E: EConvertError do
+     begin
+
+     end;
+
+  end;
+  MainForm.Text := ret;
+
 end;
 
 procedure TmainForm.AbountMenuItemClick(Sender: TObject);
