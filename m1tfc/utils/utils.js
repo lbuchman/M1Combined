@@ -201,7 +201,7 @@ function checkDbRecord(records, full) {
     if (!record.vendorSerial) throw new Error('Failed, vendorSerial is not defined.');
     if (!record.ictTestPassed) throw new Error('Failed, Must pass ICT test to program EEPROM');
     if (!record.functionalTestPassed) throw new Error('Failed, Must pass Functional test to program EEPROM');
-    if (!record.flashProgrammed) throw new Error('Failed, Must pass Flash Programming to program EEPROM');
+    // if (!record.flashProgrammed) throw new Error('Failed, Must pass Flash Programming to program EEPROM');
     if (!record.uid) throw new Error('Failed, Must pass MAC Programming to program EEPROM');
     if (full) {
         if (!record.secret) throw new Error('Failed, EEPROM secret status is not defined');

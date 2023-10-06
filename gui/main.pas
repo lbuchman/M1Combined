@@ -467,13 +467,13 @@ begin
   Tests[0] := MakeTestRecord('ICT', 5, TMethodPtr(@ICTTestSwitchClick),
     @ICTTestSwitch, True);
   Tests[1] := MakeTestRecord('MAC', 3, TMethodPtr(@MacProgSwitchClick),
-    @MacProgSwitch, False);
+    @MacProgSwitch, True);
   Tests[2] := MakeTestRecord('Flash', 40, TMethodPtr(@FlashSwitchClick),
     @FlashSwitch, False);
   Tests[3] := MakeTestRecord('Func', 43, TMethodPtr(@FuncTestSwitchClick),
     @FuncTestSwitch, True);
   Tests[4] := MakeTestRecord('EEPROM', 5, TMethodPtr(@EEPROMSwitchClick),
-    @EEPROMSwitch, False);
+    @EEPROMSwitch, True);
   Tests[5] := MakeTestRecord('Apps', 3, TMethodPtr(@AppsCheckSwitchClick),
     @AppsCheckSwitch, True);
   Tests[6] := MakeTestRecord('Label', 8, TMethodPtr(@DoLabelSwitchClick),
