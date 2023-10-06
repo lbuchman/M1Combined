@@ -14,22 +14,15 @@ const
   ProcessTerminated = -9;
   NormalExit = 0;
   ProcessExecError = 1;
-  MacMissing = 2;
-  CommandFailed = 3;
-  IctTestFailed = 4;
-  TestPointTestaile = 5;
-  ProgramEepromFailed = 6;
-  ProgramMacFailed = 7;
-  TamperSensorTestFailed = 8;
-  ConfigVendorSiteMissing = 9;
   OtpIsNotBlank = 10;
   EepromIsntBlank = 11;
-  TestTerminated = 12;
 
 
 type
   TMethodPtr = procedure(Sender: TObject) of object;
 
+type
+  TestingMode = (none = 0, commission = 1, re_test = 2);
 
 type
   TestRecord = record
@@ -120,7 +113,7 @@ type
     procedure FlashSwitchClick_Wrapper(Sender: TObject);
     procedure AppsCheckSwitchClick_Wrapper(Sender: TObject);
   private
-    TestMode: ansistring;
+    TestMode: TestingMode;
     AProcess: TProcess;
     Uid: string;
     testStatus: boolean;
@@ -134,13 +127,14 @@ type
 
     function RunM1Tfc(command: string; arg: array of string; var Led: TindLed): integer;
     function CheckSerialBarcodeScan(serial: ansistring): boolean;
-    procedure RunTests(testingMode: ansistring);
+    procedure RunTests(tMode: TestingMode);
   public
     newData: string;
     procedure DoCleanupCmd();
     procedure ResetLeds;
     procedure AddToProgressBar(Value: integer);
-    procedure ClearbusyFlag;
+    procedure ClearBusyFlag;
+    procedure SetBusyFlag;
     procedure DoLabelError;
     procedure SetTestStatusFailed;
     procedure SetTestStatusOk;
@@ -168,6 +162,11 @@ end;
 procedure TmainForm.SetTestStatusOk;
 begin
   testStatus := True;
+end;
+
+procedure TmainForm.SetbusyFlag;
+begin
+  busyFlag := True;
 end;
 
 procedure TmainForm.ClearbusyFlag;
@@ -360,15 +359,15 @@ end;
 procedure TmainForm.Re_TestMenuItem1Click(Sender: TObject);
 begin
   if busyFlag then exit;
-
   if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
     exit;
   end;
   Memo1.Clear;
+  Memo1.Lines.Add(log('info', targetVendorSerial.Text, 'Commission new board'));
   ResetLeds;
-  Memo1.Lines.Add(log('info', targetVendorSerial.Text, 'Re-test board'));
   ColorProgress1.progress := 0;
+  RunTests(TestingMode.re_test);
 end;
 
 procedure TmainForm.OpenLogExecute(Sender: TObject);
@@ -460,7 +459,7 @@ var
 begin
   printError := False;
   testStatus := True;
-  busyFlag := False;
+  ClearBusyFlag;
   doOnes := True;
   configuration := ConfigurationGet;
 
@@ -536,7 +535,7 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   arg[4] := '-b';
-  if (TestMode = 'ReTest') then arg[5] := 'used'
+  if TestMode = TestingMode.re_test then arg[5] := 'used'
   else
     arg[5] := 'new';
 
@@ -643,7 +642,7 @@ begin
   Led.tag := 1;
   retValue := -1;
   Uid := '';
-  busyFlag := True;
+  SetBusyFlag;
   AProcess := TProcess.Create(nil);
   AProcess.Executable := 'm1tfd1.cli';
   AProcess.Parameters.Add(command);
@@ -702,7 +701,6 @@ begin
   end;
   AProcess.Free;
   AProcess := nil;
-  busyFlag := False;
   Led.tag := 0;
   Led.LedValue := False;
   if (retValue = 0) then
@@ -717,6 +715,7 @@ begin
 
   Result := retValue;
   testRet := Result;
+  ClearBusyFlag;
 end;
 
 function TmainForm.MacProgSwitchClick(Sender: TObject): integer;
@@ -729,7 +728,7 @@ var
 begin
   MacProgSwitch.LedValue := False;
   if targetVendorSerial.Text = '' then exit;
-
+  TestMode := TestingMode.none;
   if busyFlag then
   begin
     exit;
@@ -769,7 +768,6 @@ end;
 procedure TmainForm.Commission(Sender: TObject);
 begin
   if busyFlag then exit;
-
   if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
     exit;
@@ -778,7 +776,7 @@ begin
   Memo1.Lines.Add(log('info', targetVendorSerial.Text, 'Commission new board'));
   ResetLeds;
   ColorProgress1.progress := 0;
-  RunTests('TestMode');
+  RunTests(TestingMode.commission);
 end;
 
 procedure TmainForm.QuitMenuItemClick(Sender: TObject);
@@ -790,7 +788,7 @@ end;
 
 procedure TmainForm.FuncTestSwitchClick_Wrapper(Sender: TObject);
 begin
-  if TestMode <> 'None' then
+  if TestMode <> TestingMode.none then
   begin
     if DebugLevel <> '2' then
     begin
@@ -808,7 +806,7 @@ end;
 
 procedure TmainForm.ICTTestSwitchClick_Wrapper(Sender: TObject);
 begin
-  if TestMode <> 'None' then
+  if TestMode <> TestingMode.none then
   begin
     if DebugLevel <> '2' then
     begin
@@ -827,7 +825,7 @@ end;
 
 procedure TmainForm.AppsCheckSwitchClick_Wrapper(Sender: TObject);
 begin
-  if TestMode <> 'None' then
+  if TestMode <> TestingMode.none then
   begin
     if DebugLevel <> '2' then
     begin
@@ -845,7 +843,7 @@ end;
 
 procedure TmainForm.EEPROMSwitchClick_Wrapper(Sender: TObject);
 begin
-  if TestMode <> 'None' then
+  if TestMode <> TestingMode.none then
   begin
     if DebugLevel <> '2' then
     begin
@@ -863,7 +861,7 @@ end;
 
 procedure TmainForm.MacProgSwitchClick_Wrapper(Sender: TObject);
 begin
-  if TestMode <> 'None' then
+  if TestMode <> TestingMode.none then
   begin
     if DebugLevel <> '2' then
     begin
@@ -892,7 +890,7 @@ end;
 
 procedure TmainForm.FlashSwitchClick_Wrapper(Sender: TObject);
 begin
-  if TestMode <> 'None' then
+  if TestMode <> TestingMode.none then
   begin
     if DebugLevel <> '2' then
     begin
@@ -912,26 +910,28 @@ begin
   FlashSwitchClick(Sender);
 end;
 
-procedure TmainForm.RunTests(testingMode: ansistring);
+procedure TmainForm.RunTests(tMode: TestingMode);
 var
   test: TestRecord;
+  testReturnStatus : Integer;
 begin
+  TestMode := tMode;
   for test in Tests do
   begin
     testRet := NormalExit;
     test.methodPtr(self);
-    if testRet <> NormalExit then break; // testRet is global since method is procedure
-
+    testReturnStatus := testRet;
+    if testReturnStatus <> NormalExit then break; // testRet is global since method is procedure
   end;
 
-  if (testRet <> NormalExit) then
+  ResetLeds;
+  if TestMode = TestingMode.commission then DoCleanupCmd;
+  if (testReturnStatus <> NormalExit) And (testReturnStatus <> ProcessTerminated) then
   begin
-    InterruptMenuItemClick(self);
+      DoLabelError;
   end;
 
-  TestMode := 'None';
-  exit;
-
+  TestMode := TestingMode.none;
 end;
   {---------------------------------------------------------------------}
   {
