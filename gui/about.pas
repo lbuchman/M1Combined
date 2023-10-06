@@ -21,7 +21,7 @@ type
     m1ClientVersion: TLabel;
     procedure FormShow(Sender: TObject);
   private
-   procedure GetRevision(Sender: TObject; snapName : string);
+    procedure GetRevision(Sender: TObject; snapName: string);
   public
 
   end;
@@ -33,19 +33,19 @@ implementation
 
 {$R *.lfm}
 
- 
-procedure TaboutForm.GetRevision(Sender: TObject; snapName :string);
+
+procedure TaboutForm.GetRevision(Sender: TObject; snapName: string);
 const
-bufferSize = 1024 * 16;
+  bufferSize = 1024 * 16;
 var
   AProcess: TProcess;
   Buffer: array[0..bufferSize] of byte;
   BytesRead: longint;
   textToSee: ansistring;
-  tmpStr : String;
+  tmpStr: string;
   splitOutput: TStringArray;
   splitLine: TStringArray;
-  count : Integer;
+  Count: integer;
 begin
   AProcess := TProcess.Create(nil);
   AProcess.Executable := 'snap';
@@ -60,7 +60,7 @@ begin
   begin
     Sleep(50);
     continue;
- end;
+  end;
 
   Buffer[0] := 0;
   BytesRead := AProcess.Output.Read(Buffer, AProcess.Output.NumBytesAvailable);
@@ -74,14 +74,16 @@ begin
   splitOutput := textToSee.Split(#10);
   BytesRead := length(splitOutput);
 
-  for count := 0 to BytesRead do begin
-      tmpStr := splitOutput[count];
-      splitLine := tmpStr.Split(' ');
-      if  splitLine[0] = snapName then begin
-        tmpStr := splitLine[2];
-        TLABEL(Sender).Caption := tmpStr;
-        break;
-      end;
+  for Count := 0 to BytesRead do
+  begin
+    tmpStr := splitOutput[Count];
+    splitLine := tmpStr.Split(' ');
+    if splitLine[0] = snapName then
+    begin
+      tmpStr := splitLine[2];
+      TLABEL(Sender).Caption := tmpStr;
+      break;
+    end;
   end;
 
   AProcess.Free;
@@ -93,7 +95,7 @@ end;
 
 procedure TaboutForm.FormShow(Sender: TObject);
 var
-tempStringList  : TStringList;
+  tempStringList: TStringList;
 begin
   GetRevision(m1tfd1Version, 'm1tfd1');
   GetRevision(m1ClientVersion, 'm1client');
@@ -105,4 +107,3 @@ begin
 end;
 
 end.
-

@@ -30,7 +30,7 @@ var
   envVarName: string;
 begin
   Result := '';
-  {$IFDEF WINDOWS}
+{$IFDEF WINDOWS}
   envVarName := 'HOMEPATH';
 {$ELSE}
   envVarName := 'HOME';

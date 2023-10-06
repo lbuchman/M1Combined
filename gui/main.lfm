@@ -1,7 +1,7 @@
 object mainForm: TmainForm
-  Left = 1039
+  Left = 570
   Height = 1382
-  Top = 237
+  Top = 715
   Width = 2875
   BorderWidth = 2
   ClientHeight = 1339
@@ -1442,7 +1442,6 @@ object mainForm: TmainForm
   Menu = MainMenu1
   OnClose = FormClose
   OnCreate = FormCreate
-  OnShow = FormShow
   LCLVersion = '2.2.6.0'
   object Memo1: TMemo
     Left = 2
@@ -1450,7 +1449,6 @@ object mainForm: TmainForm
     Top = 346
     Width = 2871
     Align = alClient
-    OnChange = Memo1Change
     OnDblClick = Memo1DblClick
     ReadOnly = True
     ScrollBars = ssBoth
@@ -1469,7 +1467,6 @@ object mainForm: TmainForm
     ParentColor = False
     ParentFont = False
     TabOrder = 2
-    OnClick = Panel2Click
   end
   object Panel1: TPanel
     Left = 2
@@ -1596,9 +1593,9 @@ object mainForm: TmainForm
       TabOrder = 2
     end
     object FlashSwitch: TindLed
-      Left = 745
+      Left = 744
       Height = 62
-      Top = 103
+      Top = 96
       Width = 62
       OnClick = FlashSwitchClick_Wrapper
       LedValue = False
@@ -1795,9 +1792,9 @@ object mainForm: TmainForm
       Visible = False
     end
     object FakeLed: TindLed
-      Left = 896
+      Left = 968
       Height = 62
-      Top = 96
+      Top = 85
       Width = 62
       Visible = False
       OnClick = DoLabelSwitchClick
@@ -1831,7 +1828,7 @@ object mainForm: TmainForm
       Height = 62
       Top = 96
       Width = 62
-      OnClick = AppsCheckwitchClick_Wrapper
+      OnClick = AppsCheckSwitchClick_Wrapper
       LedValue = False
       Bevels = <      
         item
@@ -1935,7 +1932,6 @@ object mainForm: TmainForm
     end
     object EnableSerialNumber: TAction
       Caption = 'EnableSerialNumber'
-      OnExecute = EnableSerialNumberExecute
       ShortCut = 57427
     end
     object CommissionClick: TAction

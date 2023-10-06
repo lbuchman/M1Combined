@@ -25,12 +25,20 @@ const
   EepromIsntBlank = 11;
   TestTerminated = 12;
 
+
 type
-  Test = record
+  TMethodPtr = procedure of object;
+
+
+type
+  TestRecord = record
     Name: string;
-    Leds: ^TindLed;
-    ProgressValue: integer;
+    led: ^TindLed;
+    progressValue: integer;
+    methodPtr: TMethodPtr;
   end;
+
+  pTestLed = ^TindLed;
 
 
 type
@@ -81,28 +89,23 @@ type
     LedTimer: TTimer;
     procedure AbountMenuItemClick(Sender: TObject);
     procedure Action2Execute(Sender: TObject);
-    procedure EnableSerialNumberExecute(Sender: TObject);
     procedure LogsMenuItemClick(Sender: TObject);
-    procedure Memo1Change(Sender: TObject);
-    procedure Panel2Click(Sender: TObject);
     procedure Re_TestMenuItem1Click(Sender: TObject);
-    procedure Re_TestMenuItemClick(Sender: TObject);
     procedure OpenLogExecute(Sender: TObject);
     procedure PublishLogMenuItemClick(Sender: TObject);
     procedure Panel1DblClick(Sender: TObject);
-    procedure DoLabelSwitchClick(Sender: TObject);
-    procedure FlashSwitchClick(Sender: TObject);
+    function DoLabelSwitchClick(Sender: TObject): integer;
+    function FlashSwitchClick(Sender: TObject): integer;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
-    procedure FormShow(Sender: TObject);
-    procedure FuncTestSwitchClick(Sender: TObject);
+    function FuncTestSwitchClick(Sender: TObject): integer;
     function ICTTestSwitchClick(Sender: TObject): integer;
-    procedure EEPROMSwitchClick(Sender: TObject);
+    function EEPROMSwitchClick(Sender: TObject): integer;
     procedure EEPROMSwitchClick_Wrapper(Sender: TObject);
-    procedure AppsCheckSwitchClick(Sender: TObject);
+    function AppsCheckSwitchClick(Sender: TObject): integer;
     procedure InterruptMenuItemClick(Sender: TObject);
     procedure LedTimerTimer(Sender: TObject);
-    procedure MacProgSwitchClick(Sender: TObject);
+    function MacProgSwitchClick(Sender: TObject): integer;
     procedure Memo1DblClick(Sender: TObject);
     procedure Commission(Sender: TObject);
     procedure QuitMenuItemClick(Sender: TObject);
@@ -111,23 +114,22 @@ type
     procedure Debuglevel_0_Execute(Sender: TObject);
     procedure FuncTestSwitchClick_Wrapper(Sender: TObject);
     procedure ICTTestSwitchClick_Wrapper(Sender: TObject);
-    function MacProgSwitchClick_Wrapper(Sender: TObject) : integer;
+    procedure MacProgSwitchClick_Wrapper(Sender: TObject);
     procedure DoLabelSwitchClick_Wrapper(Sender: TObject);
     procedure FlashSwitchClick_Wrapper(Sender: TObject);
-    procedure AppsCheckwitchClick_Wrapper(Sender: TObject);
+    procedure AppsCheckSwitchClick_Wrapper(Sender: TObject);
   private
     TermnateTest: boolean;
     TestMode: ansistring;
     AProcess: TProcess;
     Uid: string;
     testStatus: boolean;
+    testRet: integer;
     printError: boolean;
     doOnes: boolean;
     busyFlag: boolean;
-    busyFlag1: boolean;
     configuration: TConfigration;
-    Leds: array[0..6] of ^TindLed;
-    Tests: array[0..6] of Test;
+    Tests: array[0..6] of TestRecord;
     MemoCopyTxt: string;
     DebugLevel: string;
 
@@ -139,10 +141,12 @@ type
     procedure DoCleanupCmd();
     procedure ResetLeds;
     procedure AddToProgressBar(Value: integer);
-    procedure ClearbusyFlag1;
+    procedure ClearbusyFlag;
     procedure DoLabelError;
     procedure SetTestStatusFailed;
     procedure SetTestStatusOk;
+    function MakeTestRecord(testName: ansistring; progressValue: integer;
+      methodPtr: TMethodPtr; testLed: pTestLed): TestRecord;
   end;
 
 type
@@ -167,9 +171,9 @@ begin
   testStatus := True;
 end;
 
-procedure TmainForm.ClearbusyFlag1;
+procedure TmainForm.ClearbusyFlag;
 begin
-  busyFlag1 := False;
+  busyFlag := False;
 end;
 
 procedure TmainForm.AddToProgressBar(Value: integer);
@@ -188,13 +192,13 @@ begin
   Application.ProcessMessages;
 end;
 
-procedure TmainForm.DoLabelSwitchClick(Sender: TObject);
+function TmainForm.DoLabelSwitchClick(Sender: TObject): integer;
 var
   arg: array[0..8] of string;
 begin
   DoLabelSwitch.LedValue := False;
   // if targetVendorSerial.Text = '' then exit;
-  if busyFlag1 then
+  if busyFlag then
   begin
     DoLabelSwitch.LedValue := False;
     exit;
@@ -211,7 +215,8 @@ begin
     arg[5] := '';
   end;
 
-  RunM1Tfc('makelabel', arg, DoLabelSwitch);
+  testRet := RunM1Tfc('makelabel', arg, DoLabelSwitch);
+  Result := testRet;
 end;
 
 procedure TmainForm.DoLabelError();
@@ -227,7 +232,7 @@ var
 begin
   DoLabelSwitch.LedValue := False;
   if targetVendorSerial.Text = '' then exit;
-  if busyFlag1 then
+  if busyFlag then
   begin
     DoLabelSwitch.LedValue := False;
     exit;
@@ -271,12 +276,6 @@ begin
   DevModeLabel.Caption := 'D2';
   DevModeLabel.Font.color := clRed;
   DebugLevel := '2';
-end;
-
-procedure TmainForm.EnableSerialNumberExecute(Sender: TObject);
-begin
-  // targetVendorSerial.ReadOnly := False;
-  // BarcodeScanEditTimer.Enabled := True;
 end;
 
 function TmainForm.CheckSerialBarcodeScan(serial: ansistring): boolean;
@@ -359,19 +358,9 @@ begin
   end;
 end;
 
-procedure TmainForm.Memo1Change(Sender: TObject);
-begin
-
-end;
-
-procedure TmainForm.Panel2Click(Sender: TObject);
-begin
-
-end;
-
 procedure TmainForm.Re_TestMenuItem1Click(Sender: TObject);
 begin
-  if busyFlag1 then exit;
+  if busyFlag then exit;
 
   if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
@@ -381,11 +370,6 @@ begin
   ResetLeds;
   Memo1.Lines.Add(log('info', targetVendorSerial.Text, 'Re-test board'));
   ColorProgress1.progress := 0;
-end;
-
-procedure TmainForm.Re_TestMenuItemClick(Sender: TObject);
-begin
-
 end;
 
 procedure TmainForm.OpenLogExecute(Sender: TObject);
@@ -440,14 +424,14 @@ begin
   ResetLeds();
 end;
 
-procedure TmainForm.FlashSwitchClick(Sender: TObject);
+function TmainForm.FlashSwitchClick(Sender: TObject): integer;
 var
   arg: array[0..8] of string;
 begin
   FlashSwitch.LedValue := False;
   if targetVendorSerial.Text = '' then exit;
 
-  if busyFlag1 then
+  if busyFlag then
   begin
     exit;
   end;
@@ -458,8 +442,17 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   arg[4] := '';
-  RunM1Tfc('flash', arg, FlashSwitch);
+  testRet := RunM1Tfc('flash', arg, FlashSwitch);
+  Result := testRet;
+end;
 
+function TmainForm.MakeTestRecord(testName: ansistring; progressValue: integer;
+  methodPtr: TMethodPtr; testLed: pTestLed): TestRecord;
+begin
+  Result.Name := testName;
+  Result.led := testLed;
+  Result.progressValue := progressValue;
+  Result.methodPtr := methodPtr;
 end;
 
 procedure TmainForm.FormCreate(Sender: TObject);
@@ -469,17 +462,19 @@ begin
   printError := False;
   testStatus := True;
   busyFlag := False;
-  busyFlag1 := False;
   doOnes := True;
   configuration := ConfigurationGet;
 
-  Leds[0] := @ICTTestSwitch;
-  Leds[1] := @MacProgSwitch;
-  Leds[2] := @FlashSwitch;
-  Leds[3] := @FuncTestSwitch;
-  Leds[4] := @EEPROMSwitch;
-  Leds[5] := @AppsCheckSwitch;
-  Leds[6] := @DoLabelSwitch;
+  Tests[0] := MakeTestRecord('ICT', 5, TMethodPtr(@ICTTestSwitchClick), @ICTTestSwitch);
+  Tests[1] := MakeTestRecord('MAC', 3, TMethodPtr(@MacProgSwitchClick), @MacProgSwitch);
+  Tests[2] := MakeTestRecord('Flash', 40, TMethodPtr(@FlashSwitchClick), @FlashSwitch);
+  Tests[3] := MakeTestRecord('Func', 43, TMethodPtr(@FuncTestSwitchClick),
+    @FuncTestSwitch);
+  Tests[4] := MakeTestRecord('EEPROM', 5, TMethodPtr(@EEPROMSwitchClick), @EEPROMSwitch);
+  Tests[5] := MakeTestRecord('Apps', 3, TMethodPtr(@AppsCheckSwitchClick),
+    @AppsCheckSwitch);
+  Tests[6] := MakeTestRecord('Label', 8, TMethodPtr(@DoLabelSwitchClick),
+    @DoLabelSwitch);
 
   LedTimer.Enabled := True;
   DebugLevel := '2';
@@ -495,19 +490,14 @@ begin
     end;
 end;
 
-procedure TmainForm.FormShow(Sender: TObject);
-begin
-
-end;
-
-procedure TmainForm.FuncTestSwitchClick(Sender: TObject);
+function TmainForm.FuncTestSwitchClick(Sender: TObject): integer;
 var
   arg: array[0..8] of string;
 begin
   FuncTestSwitch.LedValue := False;
   if targetVendorSerial.Text = '' then exit;
 
-  if busyFlag1 then
+  if busyFlag then
   begin
     exit;
   end;
@@ -517,17 +507,17 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   arg[4] := '';
-  RunM1Tfc('functest', arg, FuncTestSwitch);
-
+  testRet := RunM1Tfc('functest', arg, FuncTestSwitch);
+  Result := testRet;
 end;
 
 procedure TmainForm.ResetLeds;
 var
-  led: ^TindLed;
+  test: TestRecord;
 begin
-  for led in Leds do
+  for test in Tests do
   begin
-    led^.LedColorOff := clGray;
+    test.led^.LedColorOff := clGray;
   end;
 end;
 
@@ -539,7 +529,7 @@ var
 begin
   ICTTestSwitch.LedValue := False;
 
-  if busyFlag1 then
+  if busyFlag then
   begin
     exit;
   end;
@@ -569,13 +559,13 @@ begin
   TermnateTest := True;
 end;
 
-procedure TmainForm.AppsCheckSwitchClick(Sender: TObject);
+function TmainForm.AppsCheckSwitchClick(Sender: TObject): integer;
 var
   arg: array[0..10] of string;
 begin
   AppsCheckSwitch.LedValue := False;
 
-  if busyFlag1 then
+  if busyFlag then
   begin
     exit;
   end;
@@ -586,17 +576,18 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   arg[4] := '';
-  RunM1Tfc('pingM1apps', arg, AppsCheckSwitch);
+  testRet := RunM1Tfc('pingM1apps', arg, AppsCheckSwitch);
+  Result := testRet;
 end;
 
-procedure TmainForm.EEPROMSwitchClick(Sender: TObject);
+function TmainForm.EEPROMSwitchClick(Sender: TObject): integer;
 var
   arg: array[0..10] of string;
 begin
   EEPROMSwitch.LedValue := False;
   if targetVendorSerial.Text = '' then exit;
 
-  if busyFlag1 then
+  if busyFlag then
   begin
     exit;
   end;
@@ -607,27 +598,28 @@ begin
   arg[2] := '-d';
   arg[3] := DebugLevel;
   arg[4] := '';
-  RunM1Tfc('eeprom', arg, EEPROMSwitch);
+  testRet := RunM1Tfc('eeprom', arg, EEPROMSwitch);
+  Result := testRet;
 end;
 
 procedure TmainForm.LedTimerTimer(Sender: TObject);
 var
-  led: ^TindLed;
+  test: TestRecord;
 begin
   if LedTimer.Tag = 1 then
   begin
     LedTimer.Tag := 0;
     exit;
   end;
-  for led in Leds do
+  for test in Tests do
   begin
-    if led^.tag = 1 then
+    if test.led^.tag = 1 then
     begin
-      if not led^.LedValue then
+      if not test.led^.LedValue then
       begin
-        if led^.LedColorOff = clYellow then led^.LedColorOff := clGray
+        if test.led^.LedColorOff = clYellow then test.led^.LedColorOff := clGray
         else
-          led^.LedColorOff := clYellow;
+          test.led^.LedColorOff := clYellow;
       end;
 
     end;
@@ -655,7 +647,7 @@ begin
   Led.tag := 1;
   retValue := -1;
   Uid := '';
-  busyFlag1 := True;
+  busyFlag := True;
   AProcess := TProcess.Create(nil);
   AProcess.Executable := 'm1tfd1.cli';
   AProcess.Parameters.Add(command);
@@ -712,7 +704,7 @@ begin
   end;
   AProcess.Free;
   AProcess := nil;
-  busyFlag1 := False;
+  busyFlag := False;
   Led.tag := 0;
   Led.LedValue := False;
   if (retValue = 0) and not TermnateTest then
@@ -729,7 +721,7 @@ begin
   Result := retValue;
 end;
 
-procedure TmainForm.MacProgSwitchClick(Sender: TObject);
+function TmainForm.MacProgSwitchClick(Sender: TObject): integer;
 var
   arg: array[0..8] of string;
   retValue: integer;
@@ -739,7 +731,7 @@ begin
   MacProgSwitch.LedValue := False;
   if targetVendorSerial.Text = '' then exit;
 
-  if busyFlag1 then
+  if busyFlag then
   begin
     exit;
   end;
@@ -761,9 +753,14 @@ begin
     tmpString := MemoCopyTxt;
     Inc(tmpInt, 16);
     Uid := copy(tmpString, tmpInt, 17);
+    testRet := normalExit;
   end
   else
+  begin
     Uid := '';
+    testRet := retValue;
+  end;
+  Result := retValue;
 end;
 
 procedure TmainForm.Memo1DblClick(Sender: TObject);
@@ -773,7 +770,7 @@ end;
 
 procedure TmainForm.Commission(Sender: TObject);
 begin
-  if busyFlag1 then exit;
+  if busyFlag then exit;
 
   if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
@@ -830,7 +827,7 @@ begin
 end;
 
 
-procedure TmainForm.AppsCheckwitchClick_Wrapper(Sender: TObject);
+procedure TmainForm.AppsCheckSwitchClick_Wrapper(Sender: TObject);
 begin
   if TestMode <> 'None' then
   begin
@@ -919,37 +916,28 @@ end;
 
 procedure TmainForm.RunTests(testingMode: ansistring);
 var
-  ledCount: integer;
-  led: ^TindLed;
-  testRet: integer;
+  test: TestRecord;
 begin
-  TestMode := testingMode;
-  for ledCount := 0 to Length(Leds) - 1 do
+  for test in Tests do
   begin
-    led := Leds[ledCount];
-    case led^.Name of
-      'ICT_TEST': begin
-        testRet := ICTTestSwitchClick(led^);
-        if testRet <> NormalExit then break;
-      end;
-       'MAC_PROG': begin
-        testRet := MacProgSwitchClick(led^);
-        if testRet <> NormalExit then break;
-    end;
-       'FLAH_PROG': begin
-        testRet := FlashSwitchClick(led^);
-        if testRet <> NormalExit then break;
-    end;
+    testRet := NormalExit;
+    test.methodPtr;
+    if testRet <> NormalExit then break; // testRet is global since method is procedure
+
   end;
 
   if (testRet <> NormalExit) then
   begin
     InterruptMenuItemClick(self);
   end;
+
   TestMode := 'None';
   exit;
-{---------------------------------------------------------------------}
 
+end;
+
+{---------------------------------------------------------------------}
+  {
   if (TermnateTest) then
   begin
     ResetLeds;
@@ -1072,7 +1060,5 @@ begin
     DoCleanupCmd;
   end;
   ClearbusyFlag1;
-end;
-
-
+  }
 end.
