@@ -127,7 +127,7 @@ type
 
     function RunM1Tfc(command: string; arg: array of string; var Led: TindLed): integer;
     function CheckSerialBarcodeScan(serial: ansistring): boolean;
-    procedure RunTests(tMode: TestingMode);
+    procedure RunTests(tMode: TestingMode; modeStr : AnsiString);
   public
     newData: string;
     procedure DoCleanupCmd();
@@ -364,10 +364,10 @@ begin
     exit;
   end;
   Memo1.Clear;
-  Memo1.Lines.Add(log('info', targetVendorSerial.Text, 'Commission new board'));
+  Memo1.Lines.Add(log('info', targetVendorSerial.Text, 'Re-Test board'));
   ResetLeds;
   ColorProgress1.progress := 0;
-  RunTests(TestingMode.re_test);
+  RunTests(TestingMode.re_test, 'Re-test');
 end;
 
 procedure TmainForm.OpenLogExecute(Sender: TObject);
@@ -771,10 +771,10 @@ begin
     exit;
   end;
   Memo1.Clear;
-  Memo1.Lines.Add(log('info', targetVendorSerial.Text, 'Commission new board'));
+  Memo1.Lines.Add(log('info', targetVendorSerial.Text, 'Commission board'));
   ResetLeds;
   ColorProgress1.progress := 0;
-  RunTests(TestingMode.commission);
+  RunTests(TestingMode.commission, 'commission');
 end;
 
 procedure TmainForm.QuitMenuItemClick(Sender: TObject);
@@ -900,10 +900,11 @@ begin
   FlashSwitchClick(Sender);
 end;
 
-procedure TmainForm.RunTests(tMode: TestingMode);
+procedure TmainForm.RunTests(tMode: TestingMode; modeStr : AnsiString);
 var
   test: TestRecord;
   testReturnStatus: integer;
+  testModeStr: ansistring;
 begin
   TestMode := tMode;
   ResetLeds;
@@ -930,8 +931,7 @@ begin
   begin
     DoLabelError;
   end
-  else Memo1.Lines.Add(logger.log('info', 'Success! All Done', textToSee));
-
+  else Memo1.Lines.Add(logger.log('info', modeStr, 'Success! All Done'));
   TestMode := TestingMode.none;
 end;
 
