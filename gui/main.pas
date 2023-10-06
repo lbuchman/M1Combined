@@ -88,7 +88,7 @@ type
     procedure OpenLogExecute(Sender: TObject);
     procedure PublishLogMenuItemClick(Sender: TObject);
     procedure Panel1DblClick(Sender: TObject);
-    function DoLabelSwitchClick(Sender: TObject)  : Integer;
+    function DoLabelSwitchClick(Sender: TObject): integer;
     function FlashSwitchClick(Sender: TObject): integer;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -190,7 +190,7 @@ begin
   Application.ProcessMessages;
 end;
 
-function TmainForm.DoLabelSwitchClick(Sender: TObject) : Integer;
+function TmainForm.DoLabelSwitchClick(Sender: TObject): integer;
 var
   arg: array[0..8] of string;
 begin
@@ -214,7 +214,7 @@ begin
   end;
 
   testRet := RunM1Tfc('makelabel', arg, DoLabelSwitch);
-  result := testRet;
+  Result := testRet;
 end;
 
 procedure TmainForm.DoLabelError();
@@ -441,7 +441,7 @@ begin
   arg[3] := DebugLevel;
   arg[4] := '';
   testRet := RunM1Tfc('flash', arg, FlashSwitch);
-    result := testRet;
+  Result := testRet;
 end;
 
 function TmainForm.MakeTestRecord(testName: ansistring; progressValue: integer;
@@ -466,10 +466,13 @@ begin
   Tests[0] := MakeTestRecord('ICT', 5, TMethodPtr(@ICTTestSwitchClick), @ICTTestSwitch);
   Tests[1] := MakeTestRecord('MAC', 3, TMethodPtr(@MacProgSwitchClick), @MacProgSwitch);
   Tests[2] := MakeTestRecord('Flash', 40, TMethodPtr(@FlashSwitchClick), @FlashSwitch);
-  Tests[3] := MakeTestRecord('Func', 43, TMethodPtr(@FuncTestSwitchClick), @FuncTestSwitch);
+  Tests[3] := MakeTestRecord('Func', 43, TMethodPtr(@FuncTestSwitchClick),
+    @FuncTestSwitch);
   Tests[4] := MakeTestRecord('EEPROM', 5, TMethodPtr(@EEPROMSwitchClick), @EEPROMSwitch);
-  Tests[5] := MakeTestRecord('Apps', 3, TMethodPtr(@AppsCheckSwitchClick), @AppsCheckSwitch);
-  Tests[6] := MakeTestRecord('Label', 8, TMethodPtr(@DoLabelSwitchClick), @DoLabelSwitch);
+  Tests[5] := MakeTestRecord('Apps', 3, TMethodPtr(@AppsCheckSwitchClick),
+    @AppsCheckSwitch);
+  Tests[6] := MakeTestRecord('Label', 8, TMethodPtr(@DoLabelSwitchClick),
+    @DoLabelSwitch);
 
   LedTimer.Enabled := True;
   DebugLevel := '1';
@@ -503,7 +506,7 @@ begin
   arg[3] := DebugLevel;
   arg[4] := '';
   testRet := RunM1Tfc('functest', arg, FuncTestSwitch);
-  result := testRet;
+  Result := testRet;
 end;
 
 procedure TmainForm.ResetLeds;
@@ -571,7 +574,7 @@ begin
   arg[3] := DebugLevel;
   arg[4] := '';
   testRet := RunM1Tfc('pingM1apps', arg, AppsCheckSwitch);
-  result := testRet;
+  Result := testRet;
 end;
 
 function TmainForm.EEPROMSwitchClick(Sender: TObject): integer;
@@ -593,7 +596,7 @@ begin
   arg[3] := DebugLevel;
   arg[4] := '';
   testRet := RunM1Tfc('eeprom', arg, EEPROMSwitch);
-  result := testRet;
+  Result := testRet;
 end;
 
 procedure TmainForm.LedTimerTimer(Sender: TObject);
@@ -630,7 +633,7 @@ var
   Buffer: array[0..bufferSize] of byte;
   textToSee: ansistring;
   tmpInt: integer;
-  testbool : Boolean;
+  testbool: boolean;
   MemoCopyTxt: string;
 begin
   if command = 'cleanup' then
@@ -686,7 +689,8 @@ begin
   end;
 
   if AProcess.ExitStatus <> 0 then retValue := AProcess.ExitStatus
-  else retValue := AProcess.ExitCode;
+  else
+    retValue := AProcess.ExitCode;
 
   if (retValue = ProcessExecError) then
   begin
@@ -753,11 +757,12 @@ begin
     Uid := copy(tmpString, tmpInt, 17);
     testRet := normalExit;
   end
-  else begin
+  else
+  begin
     Uid := '';
     testRet := retValue;
-    end;
-   result := retValue;
+  end;
+  Result := retValue;
 end;
 
 procedure TmainForm.Memo1DblClick(Sender: TObject);
@@ -788,12 +793,10 @@ end;
 
 procedure TmainForm.FuncTestSwitchClick_Wrapper(Sender: TObject);
 begin
-  if TestMode <> TestingMode.none then
+  if DebugLevel <> '2' then
   begin
-    if DebugLevel <> '2' then
-    begin
-      exit;
-    end;
+    TindLed(Sender).LedValue := false;
+    exit;
   end;
   TindLed(Sender).LedValue := False;
   if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
@@ -806,12 +809,10 @@ end;
 
 procedure TmainForm.ICTTestSwitchClick_Wrapper(Sender: TObject);
 begin
-  if TestMode <> TestingMode.none then
+  if DebugLevel <> '2' then
   begin
-    if DebugLevel <> '2' then
-    begin
-      exit;
-    end;
+    TindLed(Sender).LedValue := false;
+    exit;
   end;
   TindLed(Sender).LedValue := False;
   if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
@@ -825,12 +826,10 @@ end;
 
 procedure TmainForm.AppsCheckSwitchClick_Wrapper(Sender: TObject);
 begin
-  if TestMode <> TestingMode.none then
+  if DebugLevel <> '2' then
   begin
-    if DebugLevel <> '2' then
-    begin
-      exit;
-    end;
+    TindLed(Sender).LedValue := false;
+    exit;
   end;
   TindLed(Sender).LedValue := False;
   if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
@@ -843,13 +842,12 @@ end;
 
 procedure TmainForm.EEPROMSwitchClick_Wrapper(Sender: TObject);
 begin
-  if TestMode <> TestingMode.none then
+  if DebugLevel <> '2' then
   begin
-    if DebugLevel <> '2' then
-    begin
-      exit;
-    end;
+    TindLed(Sender).LedValue := false;
+    exit;
   end;
+
   TindLed(Sender).LedValue := False;
   if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
@@ -861,13 +859,12 @@ end;
 
 procedure TmainForm.MacProgSwitchClick_Wrapper(Sender: TObject);
 begin
-  if TestMode <> TestingMode.none then
+  if DebugLevel <> '2' then
   begin
-    if DebugLevel <> '2' then
-    begin
-      exit;
-    end;
+    TindLed(Sender).LedValue := false;
+    exit;
   end;
+
   TindLed(Sender).LedValue := False;
   if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
@@ -882,6 +879,7 @@ begin
 
   if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
+    TindLed(Sender).LedValue := false;
     exit;
   end;
   Panel1DblClick(Sender);
@@ -890,13 +888,12 @@ end;
 
 procedure TmainForm.FlashSwitchClick_Wrapper(Sender: TObject);
 begin
-  if TestMode <> TestingMode.none then
+  if DebugLevel <> '2' then
   begin
-    if DebugLevel <> '2' then
-    begin
-      exit;
-    end;
+    TindLed(Sender).LedValue := false;
+    exit;
   end;
+
   TindLed(Sender).LedValue := False;
   if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
@@ -913,7 +910,7 @@ end;
 procedure TmainForm.RunTests(tMode: TestingMode);
 var
   test: TestRecord;
-  testReturnStatus : Integer;
+  testReturnStatus: integer;
 begin
   TestMode := tMode;
   for test in Tests do
@@ -921,141 +918,18 @@ begin
     testRet := NormalExit;
     test.methodPtr(self);
     testReturnStatus := testRet;
-    if testReturnStatus <> NormalExit then break; // testRet is global since method is procedure
+    if testReturnStatus <> NormalExit then break;
+    // testRet is global since method is procedure
   end;
 
   ResetLeds;
   if TestMode = TestingMode.commission then DoCleanupCmd;
-  if (testReturnStatus <> NormalExit) And (testReturnStatus <> ProcessTerminated) then
+  if (testReturnStatus <> NormalExit) and (testReturnStatus <> ProcessTerminated) then
   begin
-      DoLabelError;
+    DoLabelError;
   end;
 
   TestMode := TestingMode.none;
 end;
-  {---------------------------------------------------------------------}
-  {
-  if (TermnateTest) then
-  begin
-    ResetLeds;
-    TermnateTest := False;
-  end;
 
-  // ICT
-  ICTTestSwitchClick(self);
-  AddToProgressBar(5);
-  if (TermnateTest) then
-  begin
-    ResetLeds;
-    TermnateTest := False;
-    MainForm.DoLabelError;
-    SetTestStatusFailed;
-    // if not reTestMode then DoCleanupCmd;
-    exit;
-  end;
-
-  if not (TestMode = 'fdf') then
-  begin
-    // MAC
-    MacProgSwitchClick(self);
-    AddToProgressBar(3);
-    if (TermnateTest) then
-    begin
-      ResetLeds;
-      DoLabelError;
-      TermnateTest := False;
-      SetTestStatusFailed;
-      if not (TestMode = 'fdf') then DoCleanupCmd;
-      exit;
-    end;
-
-    // Flash
-    FlashSwitchClick(self);
-    AddToProgressBar(40);
-    if (TermnateTest) then
-    begin
-      ResetLeds;
-      DoLabelError;
-      TermnateTest := False;
-      SetTestStatusFailed;
-      if not (TestMode = 'fdf') then DoCleanupCmd;
-      exit;
-    end;
-
-  end
-  else
-  begin
-    AddToProgressBar(43);
-  end;
-
-  // Func Test
-  FuncTestSwitchClick(self);
-  AddToProgressBar(40);
-  if (TermnateTest) then
-  begin
-    ResetLeds;
-    DoLabelError;
-    TermnateTest := False;
-    SetTestStatusFailed;
-    if not (TestMode = 'fdf') then DoCleanupCmd;
-    exit;
-  end;
-
-  // EEPROM
-  if not (TestMode = 'fdf') then
-  begin
-    EEPROMSwitchClick(self);
-    AddToProgressBar(5);
-    if (TermnateTest) then
-    begin
-      ResetLeds;
-      DoLabelError;
-      TermnateTest := False;
-      SetTestStatusFailed;
-      if not (TestMode = 'fdf') then DoCleanupCmd;
-      exit;
-    end;
-  end
-  else
-    AddToProgressBar(3);
-
-  // APPs check
-  AppsCheckSwitchClick(self);
-  AddToProgressBar(3);
-  if (TermnateTest) then
-  begin
-    MainForm.ResetLeds;
-    DoLabelError;
-    TermnateTest := False;
-    SetTestStatusFailed;
-    if not (TestMode = 'fdf') then DoCleanupCmd;
-    exit;
-  end;
-
-  // Print Label
-  if not (TestMode = 'fdf') then
-  begin
-    DoLabelSwitchClick(self);
-    AddToProgressBar(8);
-    if (TermnateTest) then
-    begin
-      MainForm.ResetLeds;
-      MainForm.DoLabelError;
-      TermnateTest := False;
-      SetTestStatusFailed;
-      if not (TestMode = 'fdf') then DoCleanupCmd;
-      exit;
-    end;
-  end
-  else
-  begin
-    AddToProgressBar(8);
-  end;
-  SetTestStatusOk;
-  if not (TestMode = 'fdf') then
-  begin
-    DoCleanupCmd;
-  end;
-  ClearbusyFlag1;
-  }
 end.

@@ -236,7 +236,7 @@ program.command('pingM1apps')
                 return;
             }
             logfile.info('--------------------------------------------');
-            logfile.info('checking ports 80 ...');
+            logfile.info('checking port 80 ...');
             db = sqliteDriver.initialize(logfile);
             await delay(5);
             await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
@@ -374,9 +374,13 @@ program.command('makelabel')
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
 
             await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
-
+            let dbError = db.getErrorCode(options.serial);
+            if (dbError && dbError.length) {
+                // eslint-disable-next-line no-param-reassign
+                options.error = true;
+            }
             if (options.error) {
-                const dbError = db.getErrorCode(options.serial);
+                dbError = db.getErrorCode(options.serial);
                 if (!dbError || !dbError.length) throw new Error('Not printing the label, no errors in the database');
                 const uiD = '0';
                 await utils.printLabel(uiD, options.serial, configData.vendorSite, dbError, logger);

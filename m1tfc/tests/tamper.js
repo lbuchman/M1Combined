@@ -6,7 +6,6 @@
 const testBoardLink = require('../src/testBoardLink');
 const targetICTLink = require('../src/m1ICTLink');
 const delay = require('delay');
-const exitCodes = require('../src/exitCodes');
 const errorCodes = require('../bin/errorCodes');
 
 const tamperSensor = {
