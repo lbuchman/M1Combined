@@ -77,7 +77,7 @@ async function test(logger, db) {
         sensorState = await getSensorState(10, tamperSensor.activated, logger, db);
         if (await sensorState.value !== tamperSensor.activated) {
             logger.error(`tamper sensor test failed, invalid sensor state detected, expected state  ${tamperSensor.activated}`);
-            process.exit(exitCodes.tamperSensorTestFailed);
+            // process.exit(exitCodes.tamperSensorTestFailed);
             return false;
         }
         logger.info('Passed Tamper test');

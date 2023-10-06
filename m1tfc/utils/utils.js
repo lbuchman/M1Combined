@@ -199,10 +199,10 @@ function checkDbRecord(records, full) {
     const record = records[0];
     if (!record) throw new Error('Failed, Invalid DB record');
     if (!record.vendorSerial) throw new Error('Failed, vendorSerial is not defined.');
-    if (!record.ictTestPassed) throw new Error('Failed, ICT test status is not defined');
-    if (!record.functionalTestPassed) throw new Error('Failed, Functional test status is not defined');
-    if (!record.flashProgrammed) throw new Error('Failed, Flash status is not defined');
-    if (!record.uid) throw new Error('Failed, MAC address status is not defined');
+    if (!record.ictTestPassed) throw new Error('Failed, Must pass ICT test to program EEPROM');
+    if (!record.functionalTestPassed) throw new Error('Failed, Must pass Functional test to program EEPROM');
+    if (!record.flashProgrammed) throw new Error('Failed, Must pass Flash Programming to program EEPROM');
+    if (!record.uid) throw new Error('Failed, Must pass MAC Programming to program EEPROM');
     if (full) {
         if (!record.secret) throw new Error('Failed, EEPROM secret status is not defined');
         if (!record.boardS2Serial) throw new Error('Failed, EEPROM programming status is not defined');
