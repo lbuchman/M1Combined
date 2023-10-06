@@ -11,8 +11,9 @@ uses
   configurationjson, jsonparser, ColorProgress, MSSQLConn;
 
 const
+  ProcessTerminated = -9;
   NormalExit = 0;
-  ConfigFileMissing = 1;
+  ProcessExecError = 1;
   MacMissing = 2;
   CommandFailed = 3;
   IctTestFailed = 4;
@@ -27,7 +28,7 @@ const
 
 
 type
-  TMethodPtr = procedure of object;
+  TMethodPtr = procedure(Sender: TObject) of object;
 
 
 type
@@ -94,7 +95,7 @@ type
     procedure OpenLogExecute(Sender: TObject);
     procedure PublishLogMenuItemClick(Sender: TObject);
     procedure Panel1DblClick(Sender: TObject);
-    function DoLabelSwitchClick(Sender: TObject): integer;
+    function DoLabelSwitchClick(Sender: TObject)  : Integer;
     function FlashSwitchClick(Sender: TObject): integer;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -119,7 +120,6 @@ type
     procedure FlashSwitchClick_Wrapper(Sender: TObject);
     procedure AppsCheckSwitchClick_Wrapper(Sender: TObject);
   private
-    TermnateTest: boolean;
     TestMode: ansistring;
     AProcess: TProcess;
     Uid: string;
@@ -130,7 +130,6 @@ type
     busyFlag: boolean;
     configuration: TConfigration;
     Tests: array[0..6] of TestRecord;
-    MemoCopyTxt: string;
     DebugLevel: string;
 
     function RunM1Tfc(command: string; arg: array of string; var Led: TindLed): integer;
@@ -192,7 +191,7 @@ begin
   Application.ProcessMessages;
 end;
 
-function TmainForm.DoLabelSwitchClick(Sender: TObject): integer;
+function TmainForm.DoLabelSwitchClick(Sender: TObject) : Integer;
 var
   arg: array[0..8] of string;
 begin
@@ -216,7 +215,7 @@ begin
   end;
 
   testRet := RunM1Tfc('makelabel', arg, DoLabelSwitch);
-  Result := testRet;
+  result := testRet;
 end;
 
 procedure TmainForm.DoLabelError();
@@ -443,7 +442,7 @@ begin
   arg[3] := DebugLevel;
   arg[4] := '';
   testRet := RunM1Tfc('flash', arg, FlashSwitch);
-  Result := testRet;
+    result := testRet;
 end;
 
 function TmainForm.MakeTestRecord(testName: ansistring; progressValue: integer;
@@ -468,16 +467,13 @@ begin
   Tests[0] := MakeTestRecord('ICT', 5, TMethodPtr(@ICTTestSwitchClick), @ICTTestSwitch);
   Tests[1] := MakeTestRecord('MAC', 3, TMethodPtr(@MacProgSwitchClick), @MacProgSwitch);
   Tests[2] := MakeTestRecord('Flash', 40, TMethodPtr(@FlashSwitchClick), @FlashSwitch);
-  Tests[3] := MakeTestRecord('Func', 43, TMethodPtr(@FuncTestSwitchClick),
-    @FuncTestSwitch);
+  Tests[3] := MakeTestRecord('Func', 43, TMethodPtr(@FuncTestSwitchClick), @FuncTestSwitch);
   Tests[4] := MakeTestRecord('EEPROM', 5, TMethodPtr(@EEPROMSwitchClick), @EEPROMSwitch);
-  Tests[5] := MakeTestRecord('Apps', 3, TMethodPtr(@AppsCheckSwitchClick),
-    @AppsCheckSwitch);
-  Tests[6] := MakeTestRecord('Label', 8, TMethodPtr(@DoLabelSwitchClick),
-    @DoLabelSwitch);
+  Tests[5] := MakeTestRecord('Apps', 3, TMethodPtr(@AppsCheckSwitchClick), @AppsCheckSwitch);
+  Tests[6] := MakeTestRecord('Label', 8, TMethodPtr(@DoLabelSwitchClick), @DoLabelSwitch);
 
   LedTimer.Enabled := True;
-  DebugLevel := '2';
+  DebugLevel := '1';
   Memo1.Font.Size := 12;
 
   pid := IntToStr(system.GetProcessID);
@@ -508,7 +504,7 @@ begin
   arg[3] := DebugLevel;
   arg[4] := '';
   testRet := RunM1Tfc('functest', arg, FuncTestSwitch);
-  Result := testRet;
+  result := testRet;
 end;
 
 procedure TmainForm.ResetLeds;
@@ -553,10 +549,9 @@ procedure TmainForm.InterruptMenuItemClick(Sender: TObject);
 begin
   if (aProcess <> nil) and (aProcess.Running) then
   begin
-    aProcess.Terminate(-1);
+    aProcess.Terminate(100);
     Memo1.Lines.Add(log('warn', targetVendorSerial.Text, 'Terminated'));
   end;
-  TermnateTest := True;
 end;
 
 function TmainForm.AppsCheckSwitchClick(Sender: TObject): integer;
@@ -577,7 +572,7 @@ begin
   arg[3] := DebugLevel;
   arg[4] := '';
   testRet := RunM1Tfc('pingM1apps', arg, AppsCheckSwitch);
-  Result := testRet;
+  result := testRet;
 end;
 
 function TmainForm.EEPROMSwitchClick(Sender: TObject): integer;
@@ -599,7 +594,7 @@ begin
   arg[3] := DebugLevel;
   arg[4] := '';
   testRet := RunM1Tfc('eeprom', arg, EEPROMSwitch);
-  Result := testRet;
+  result := testRet;
 end;
 
 procedure TmainForm.LedTimerTimer(Sender: TObject);
@@ -636,13 +631,14 @@ var
   Buffer: array[0..bufferSize] of byte;
   textToSee: ansistring;
   tmpInt: integer;
+  testbool : Boolean;
+  MemoCopyTxt: string;
 begin
   if command = 'cleanup' then
   begin
 
     Led.tag := 1;
   end;
-  TermnateTest := False;
   MemoCopyTxt := '';
   Led.tag := 1;
   retValue := -1;
@@ -690,13 +686,15 @@ begin
     Memo1.Lines.Text := Memo1.Lines.Text + textToSee;
   end;
 
-  retValue := AProcess.ExitCode;
-  if (retValue = 1) then
+  if AProcess.ExitStatus <> 0 then retValue := AProcess.ExitStatus
+  else retValue := AProcess.ExitCode;
+
+  if (retValue = ProcessExecError) then
   begin
     Memo1.Lines.Add('Abnormal termination nodejs executable not found or crashed');
     Led.LedColorOff := clRed;
   end;
-  if (retValue > 1) then
+  if (retValue > ProcessExecError) then
   begin
     Led.LedColorOff := clRed;
     InterruptMenuItemClick(self);
@@ -707,18 +705,18 @@ begin
   busyFlag := False;
   Led.tag := 0;
   Led.LedValue := False;
-  if (retValue = 0) and not TermnateTest then
+  if (retValue = 0) then
   begin
     Led.LedColorOff := clLime;
   end;
-  if TermnateTest then
+  if retValue = ProcessTerminated then
   begin
     Led.LedColorOff := clRed;
     Led.Tag := 0;
-    retValue := 1;
   end;
-  // memo1.Lines.Add(logger.log('info', command, 'Run Time - ' + IntToStr(logger.getEpochTime() - startTime)));
+
   Result := retValue;
+  testRet := Result;
 end;
 
 function TmainForm.MacProgSwitchClick(Sender: TObject): integer;
@@ -727,6 +725,7 @@ var
   retValue: integer;
   tmpInt: integer;
   tmpString: string;
+  MemoCopyTxt: string;
 begin
   MacProgSwitch.LedValue := False;
   if targetVendorSerial.Text = '' then exit;
@@ -755,12 +754,11 @@ begin
     Uid := copy(tmpString, tmpInt, 17);
     testRet := normalExit;
   end
-  else
-  begin
+  else begin
     Uid := '';
     testRet := retValue;
-  end;
-  Result := retValue;
+    end;
+   result := retValue;
 end;
 
 procedure TmainForm.Memo1DblClick(Sender: TObject);
@@ -921,7 +919,7 @@ begin
   for test in Tests do
   begin
     testRet := NormalExit;
-    test.methodPtr;
+    test.methodPtr(self);
     if testRet <> NormalExit then break; // testRet is global since method is procedure
 
   end;
@@ -935,8 +933,7 @@ begin
   exit;
 
 end;
-
-{---------------------------------------------------------------------}
+  {---------------------------------------------------------------------}
   {
   if (TermnateTest) then
   begin
