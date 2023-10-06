@@ -23,11 +23,13 @@ const
   ConfigVendorSiteMissing = 9;
   OtpIsNotBlank = 10;
   EepromIsntBlank = 11;
+  TestTerminated = 12;
 
 type
   Test = record
     Name: string;
-    Leds: array[0..6] of ^TindLed;
+    Leds: ^TindLed;
+    ProgressValue: integer;
   end;
 
 
@@ -79,7 +81,6 @@ type
     LedTimer: TTimer;
     procedure AbountMenuItemClick(Sender: TObject);
     procedure Action2Execute(Sender: TObject);
-    procedure BarcodeScanEditTimerTimer(Sender: TObject);
     procedure EnableSerialNumberExecute(Sender: TObject);
     procedure LogsMenuItemClick(Sender: TObject);
     procedure Memo1Change(Sender: TObject);
@@ -95,7 +96,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FuncTestSwitchClick(Sender: TObject);
-    procedure ICTTestSwitchClick(Sender: TObject);
+    function ICTTestSwitchClick(Sender: TObject): integer;
     procedure EEPROMSwitchClick(Sender: TObject);
     procedure EEPROMSwitchClick_Wrapper(Sender: TObject);
     procedure AppsCheckSwitchClick(Sender: TObject);
@@ -110,7 +111,7 @@ type
     procedure Debuglevel_0_Execute(Sender: TObject);
     procedure FuncTestSwitchClick_Wrapper(Sender: TObject);
     procedure ICTTestSwitchClick_Wrapper(Sender: TObject);
-    procedure MacProgSwitchClick_Wrapper(Sender: TObject);
+    function MacProgSwitchClick_Wrapper(Sender: TObject) : integer;
     procedure DoLabelSwitchClick_Wrapper(Sender: TObject);
     procedure FlashSwitchClick_Wrapper(Sender: TObject);
     procedure AppsCheckwitchClick_Wrapper(Sender: TObject);
@@ -126,6 +127,7 @@ type
     busyFlag1: boolean;
     configuration: TConfigration;
     Leds: array[0..6] of ^TindLed;
+    Tests: array[0..6] of Test;
     MemoCopyTxt: string;
     DebugLevel: string;
 
@@ -182,8 +184,8 @@ end;
 
 procedure TmainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-   InterruptMenuItemClick(self);
-   Application.ProcessMessages;
+  InterruptMenuItemClick(self);
+  Application.ProcessMessages;
 end;
 
 procedure TmainForm.DoLabelSwitchClick(Sender: TObject);
@@ -331,51 +333,6 @@ begin
   end;
   MainForm.Text := ret;
   Result := True;
-end;
-
-procedure TmainForm.BarcodeScanEditTimerTimer(Sender: TObject);
-var
-  serial: ansistring;
-  str: ansistring;
-  intN: integer;
-  ret: ansistring;
-begin
-  serial := targetVendorSerial.Text;
-  try
-    str := AnsiMidStr(serial, 1, 2);
-    case str of
-      '30': ret := 'M1-3200';
-    end;
-
-    str := AnsiMidStr(serial, 3, 2);
-    intN := StrToInt(str);
-    if (intN > 22) and (intN < 47) then
-    begin
-      ret += ' Y-20' + str;
-    end;
-
-    str := AnsiMidStr(serial, 5, 2);
-    intN := StrToInt(str);
-    if (intN <= 53) and (intN >= 0) then
-    begin
-      ret += ' W-' + str;
-    end;
-
-    str := AnsiMidStr(serial, 7, 4);
-    intN := StrToInt(str);
-    if intN <= 1000 then
-    begin
-      ret += ' S-' + str;
-    end;
-  except
-    On E: EConvertError do
-    begin
-
-    end;
-
-  end;
-  MainForm.Text := ret;
-
 end;
 
 procedure TmainForm.AbountMenuItemClick(Sender: TObject);
@@ -574,7 +531,7 @@ begin
   end;
 end;
 
-procedure TmainForm.ICTTestSwitchClick(Sender: TObject);
+function TmainForm.ICTTestSwitchClick(Sender: TObject): integer;
 var
   arg: array[0..6] of string;
 var
@@ -599,7 +556,7 @@ begin
 
   arg[6] := '';
   ret := RunM1Tfc('ict', arg, ICTTestSwitch);
-  if (ret <> NormalExit) then InterruptMenuItemClick(self);
+  Result := ret;
 end;
 
 procedure TmainForm.InterruptMenuItemClick(Sender: TObject);
@@ -609,7 +566,7 @@ begin
     aProcess.Terminate(-1);
     Memo1.Lines.Add(log('warn', targetVendorSerial.Text, 'Terminated'));
   end;
-  TermnateTest := true;
+  TermnateTest := True;
 end;
 
 procedure TmainForm.AppsCheckSwitchClick(Sender: TObject);
@@ -964,17 +921,34 @@ procedure TmainForm.RunTests(testingMode: ansistring);
 var
   ledCount: integer;
   led: ^TindLed;
+  testRet: integer;
 begin
   TestMode := testingMode;
   for ledCount := 0 to Length(Leds) - 1 do
   begin
     led := Leds[ledCount];
-    led^.OnClick(led^);
-    if TermnateTest then break;
+    case led^.Name of
+      'ICT_TEST': begin
+        testRet := ICTTestSwitchClick(led^);
+        if testRet <> NormalExit then break;
+      end;
+       'MAC_PROG': begin
+        testRet := MacProgSwitchClick(led^);
+        if testRet <> NormalExit then break;
+    end;
+       'FLAH_PROG': begin
+        testRet := FlashSwitchClick(led^);
+        if testRet <> NormalExit then break;
+    end;
   end;
 
+  if (testRet <> NormalExit) then
+  begin
+    InterruptMenuItemClick(self);
+  end;
   TestMode := 'None';
   exit;
+{---------------------------------------------------------------------}
 
   if (TermnateTest) then
   begin
