@@ -72,10 +72,8 @@ type
     StaticText9: TStaticText;
     targetVendorSerial: TEdit;
     LogsOpenDialog1: TOpenDialog;
-    Timer1: TTimer;
     TestTumer: TTimer;
     LedTimer: TTimer;
-    BarcodeScanEditTimer: TTimer;
     procedure AbountMenuItemClick(Sender: TObject);
     procedure Action2Execute(Sender: TObject);
     procedure BarcodeScanEditTimerTimer(Sender: TObject);
@@ -102,7 +100,6 @@ type
     procedure Memo1DblClick(Sender: TObject);
     procedure Commission(Sender: TObject);
     procedure QuitMenuItemClick(Sender: TObject);
-    procedure Timer1Timer(Sender: TObject);
     procedure Debuglevel_2_Execute(Sender: TObject);
     procedure Debuglevel_1_Execute(Sender: TObject);
     procedure Debuglevel_0_Execute(Sender: TObject);
@@ -123,17 +120,12 @@ type
     busyFlag: boolean;
     busyFlag1: boolean;
     previouseScanInput: string;
-    newSerialNumberIsAvailable: boolean;
-    newSerialNumber: string;
     configuration: TConfigration;
-    SaveWidth: integer;
     Leds: array[0..6] of ^TindLed;
     MemoCopyTxt: string;
     DebugLevel: string;
-    lastCommand: string;
     function RunM1Tfc(command: string; arg: array of string; var Led: TindLed): integer;
-    function CheckSerial(): boolean;
-    function myIPAddress(): string;
+    function CheckSerialBarcodeScan(serial: ansistring): boolean;
   public
     newData: string;
     procedure DoCleanupCmd();
@@ -159,8 +151,10 @@ type
     procedure DoLabelError;
     procedure SetTestStatusFailed;
     procedure SetTestStatusOk;
-    function CheckSerialBarcodeScan(serial ; AnsiString) : AnsiString;
   end;
+
+type
+  BarcodeException = class(Exception);
 
 var
   mainForm: TmainForm;
@@ -311,29 +305,6 @@ begin
   RunM1Tfc('cleanup', arg, fakeLed);
 end;
 
-function TmainForm.myIPAddress(): string;
-var
-  theProcess: TProcess;
-  AddressString: ansistring;
-begin
-  try
-    theProcess := TProcess.Create(nil);
-    theProcess.Executable := 'hostname';
-    theProcess.Parameters.Add('-I');
-    theProcess.Options := [poUsePipes, poWaitOnExit];
-    theProcess.Execute;
-    if theProcess.Output.NumBytesAvailable > 0 then
-    begin
-      SetLength(AddressString{%H-}, theProcess.Output.NumBytesAvailable);
-      theProcess.Output.ReadBuffer(AddressString[1],
-        theProcess.Output.NumBytesAvailable);
-    end;
-    Result := AddressString;
-  finally
-    theProcess.Free;
-  end;
-end;
-
 procedure TmainForm.Debuglevel_0_Execute(Sender: TObject);
 begin
   // targetVendorSerial.ReadOnly := True;
@@ -365,53 +336,65 @@ begin
   // BarcodeScanEditTimer.Enabled := True;
 end;
 
- procedure TmainForm.CheckSerialBarcodeScan(serial ; AnsiString) : AnsiString;
+function TmainForm.CheckSerialBarcodeScan(serial: ansistring): boolean;
 var
   str: ansistring;
   intN: integer;
   ret: ansistring;
 begin
   serial := targetVendorSerial.Text;
+  ret := '?';
   try
     str := AnsiMidStr(serial, 1, 2);
-    case str of
-      '30': ret := 'M1-3200';
-    end;
+    if str = '30' then
+    begin
+      ret := 'M1-3200';
+    end
+    else
+      raise BarcodeException.Create('Invalid Barcode Scan');
 
     str := AnsiMidStr(serial, 3, 2);
     intN := StrToInt(str);
     if (intN > 22) and (intN < 47) then
     begin
       ret += ' Y-20' + str;
-    end;
+    end
+    else
+      raise BarcodeException.Create('Invalid Barcode Scan');
 
     str := AnsiMidStr(serial, 5, 2);
     intN := StrToInt(str);
     if (intN <= 53) and (intN >= 0) then
     begin
       ret += ' W-' + str;
-    end;
+    end
+    else
+      raise BarcodeException.Create('Invalid Barcode Scan');
 
     str := AnsiMidStr(serial, 7, 4);
     intN := StrToInt(str);
     if intN <= 1000 then
     begin
       ret += ' S-' + str;
-    end;
+    end
+    else
+      raise BarcodeException.Create('Invalid Barcode Scan');
   except
-     On E: EConvertError do
-     begin
-
-     end;
+    on e: BarcodeException do
+    begin
+      ShowMessage('Invalid Barcode Scan');
+      result := False;
+      exit(false);
+    end;
 
   end;
   MainForm.Text := ret;
-
+  result := True;
 end;
 
 procedure TmainForm.BarcodeScanEditTimerTimer(Sender: TObject);
 var
-  serial : ansistring;
+  serial: ansistring;
   str: ansistring;
   intN: integer;
   ret: ansistring;
@@ -444,10 +427,10 @@ begin
       ret += ' S-' + str;
     end;
   except
-     On E: EConvertError do
-     begin
+    On E: EConvertError do
+    begin
 
-     end;
+    end;
 
   end;
   MainForm.Text := ret;
@@ -487,7 +470,7 @@ procedure TmainForm.Re_TestMenuItem1Click(Sender: TObject);
 begin
   if busyFlag1 then exit;
 
-  if not checkSerial() then
+  if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
     exit;
   end;
@@ -614,16 +597,11 @@ begin
     finally
       Free;
     end;
-  ipaddresses := myIPAddress();
-  // mainForm.Caption := mainForm.Caption + ' My IP: ' + ipaddresses;
 end;
 
 procedure TmainForm.FormShow(Sender: TObject);
 begin
-  // Debuglevel_0_Execute(Sender);
   DebugLevel := '1';
-  SaveWidth := Width;
-  Constraints.MaxWidth := Width;
 end;
 
 procedure TmainForm.FuncTestSwitchClick(Sender: TObject);
@@ -653,24 +631,6 @@ var
   input: string;
 
 begin
-end;
-
-procedure TmainForm.Timer1Timer(Sender: TObject);
-begin
-  if busyFlag then
-  begin
-    exit;
-  end;
-  if newSerialNumberIsAvailable then
-  begin
-    if busyFlag then
-    begin
-      exit;
-    end;
-    Commission(Sender);
-    busyFlag := False;
-    newSerialNumberIsAvailable := False;
-  end;
 end;
 
 procedure TmainForm.ResetLeds;
@@ -805,7 +765,6 @@ begin
 
     Led.tag := 1;
   end;
-  lastCommand := command;
   provisionThread.ResetTest();
   startTime := logger.getEpochTime();
   MemoCopyTxt := '';
@@ -882,7 +841,6 @@ begin
     Led.Tag := 0;
     retValue := 1;
   end;
-  newSerialNumberIsAvailable := False;
   // memo1.Lines.Add(logger.log('info', command, 'Run Time - ' + IntToStr(logger.getEpochTime() - startTime)));
   Result := retValue;
 end;
@@ -933,7 +891,7 @@ procedure TmainForm.Commission(Sender: TObject);
 begin
   if busyFlag1 then exit;
 
-  if not checkSerial() then
+  if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
     exit;
   end;
@@ -980,22 +938,6 @@ begin
   EEPROMSwitchClick(self);
 end;
 
-function TmainForm.checkSerial(): boolean;
-var
-  serial: integer;
-begin
-  try
-    serial := StrToInt(TargetvendorSerial.Text);
-    Result := True;
-  except
-    On E: EConvertError do
-    begin
-      ShowMessage('Scan the bar code from M1-3200');
-      Result := False;
-    end;
-  end;
-end;
-
 procedure TmainForm.FuncTestSwitchClick_Wrapper(Sender: TObject);
 begin
   if DebugLevel <> '2' then
@@ -1003,9 +945,8 @@ begin
     TindLed(Sender).LedValue := False;
     exit;
   end;
-  if TargetVendorSerial.Text = '' then
+  if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
-    ShowMessage('Barcode Scan is Missing');
     exit;
   end;
   Panel1DblClick(Sender);
@@ -1039,9 +980,9 @@ begin
     TindLed(Sender).LedValue := False;
     exit;
   end;
-  if TargetVendorSerial.Text = '' then
+  if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
-    ShowMessage('Barcode Scan is Missing');
+    exit;
   end;
   Panel1DblClick(Sender);
   AppsCheckSwitchClick(Sender);
@@ -1055,9 +996,9 @@ begin
     TindLed(Sender).LedValue := False;
     exit;
   end;
-  if TargetVendorSerial.Text = '' then
+  if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
-    ShowMessage('Barcode Scan is Missing');
+    exit;
   end;
   Panel1DblClick(Sender);
   EEPROMSwitchClick(Sender);
@@ -1069,6 +1010,10 @@ begin
   if DebugLevel <> '2' then
   begin
     TindLed(Sender).LedValue := False;
+    exit;
+  end;
+  if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
+  begin
     exit;
   end;
   if TargetVendorSerial.Text = '' then
@@ -1083,9 +1028,9 @@ end;
 procedure TmainForm.DoLabelSwitchClick_Wrapper(Sender: TObject);
 begin
 
-  if TargetVendorSerial.Text = '' then
+  if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
-    //  ShowMessage('Barcode Scan is Missing');
+    exit;
   end;
   Panel1DblClick(Sender);
   DoLabelSwitchClick(Sender);
@@ -1097,6 +1042,11 @@ begin
   if DebugLevel <> '2' then
   begin
     TindLed(Sender).LedValue := False;
+    exit;
+  end;
+
+    if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
+  begin
     exit;
   end;
   if TargetVendorSerial.Text = '' then

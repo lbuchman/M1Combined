@@ -1,7 +1,7 @@
 object mainForm: TmainForm
-  Left = 440
+  Left = 585
   Height = 1382
-  Top = 596
+  Top = 375
   Width = 2875
   BorderWidth = 2
   ClientHeight = 1339
@@ -1490,6 +1490,8 @@ object mainForm: TmainForm
       Top = 20
       Width = 382
       Alignment = taCenter
+      MaxLength = 10
+      NumbersOnly = True
       TabOrder = 0
     end
     object Label1: TLabel
@@ -1866,12 +1868,6 @@ object mainForm: TmainForm
       TabOrder = 7
     end
   end
-  object Timer1: TTimer
-    Interval = 100
-    OnTimer = Timer1Timer
-    Left = 2439
-    Top = 10
-  end
   object LogsOpenDialog1: TOpenDialog
     DefaultExt = '.*.log'
     Filter = 'log|*.log'
@@ -1960,10 +1956,5 @@ object mainForm: TmainForm
       OnExecute = QuitMenuItemClick
       ShortCut = 16465
     end
-  end
-  object BarcodeScanEditTimer: TTimer
-    OnTimer = BarcodeScanEditTimerTimer
-    Left = 229
-    Top = 82
   end
 end
