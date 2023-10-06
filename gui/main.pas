@@ -929,7 +929,8 @@ begin
   if (testReturnStatus <> NormalExit) and (testReturnStatus <> ProcessTerminated) then
   begin
     DoLabelError;
-  end;
+  end
+  else Memo1.Lines.Add(logger.log('info', 'Success! All Done', textToSee));
 
   TestMode := TestingMode.none;
 end;
