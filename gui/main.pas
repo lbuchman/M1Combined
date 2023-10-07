@@ -154,6 +154,44 @@ implementation
 
 { TmainForm }
 
+procedure TmainForm.FormCreate(Sender: TObject);
+var
+  pid: string;
+begin
+  printError := False;
+  testStatus := True;
+  ClearBusyFlag;
+  doOnes := True;
+  configuration := ConfigurationGet;
+
+  Tests[0] := MakeTestRecord('ICT', 5, TMethodPtr(@ICTTestSwitchClick),
+    @ICTTestSwitch, True);
+  Tests[1] := MakeTestRecord('MAC', 3, TMethodPtr(@MacProgSwitchClick),
+    @MacProgSwitch, True);
+  Tests[2] := MakeTestRecord('Flash', 40, TMethodPtr(@FlashSwitchClick),
+    @FlashSwitch, False);
+  Tests[3] := MakeTestRecord('Func', 43, TMethodPtr(@FuncTestSwitchClick),
+    @FuncTestSwitch, True);
+  Tests[4] := MakeTestRecord('EEPROM', 5, TMethodPtr(@EEPROMSwitchClick),
+    @EEPROMSwitch, True);
+  Tests[5] := MakeTestRecord('Apps', 3, TMethodPtr(@AppsCheckSwitchClick),
+    @AppsCheckSwitch, True);
+  Tests[6] := MakeTestRecord('Label', 8, TMethodPtr(@DoLabelSwitchClick),
+    @DoLabelSwitch, True);
+
+  LedTimer.Enabled := True;
+  DebugLevel := '1';
+  Memo1.Font.Size := 12;
+
+  pid := IntToStr(system.GetProcessID);
+  with TStringList.Create do
+    try
+      Add(pid);
+      SaveToFile(GetEnvironmentVariable('HOME') + '/m1mtf/m1tfd1app.pid');
+    finally
+      Free;
+    end;
+end;
 procedure TmainForm.SetTestStatusFailed;
 begin
   testStatus := False;
@@ -454,44 +492,6 @@ begin
   Result.doRetest := doRetest;
 end;
 
-procedure TmainForm.FormCreate(Sender: TObject);
-var
-  pid: string;
-begin
-  printError := False;
-  testStatus := True;
-  ClearBusyFlag;
-  doOnes := True;
-  configuration := ConfigurationGet;
-
-  Tests[0] := MakeTestRecord('ICT', 5, TMethodPtr(@ICTTestSwitchClick),
-    @ICTTestSwitch, True);
-  Tests[1] := MakeTestRecord('MAC', 3, TMethodPtr(@MacProgSwitchClick),
-    @MacProgSwitch, True);
-  Tests[2] := MakeTestRecord('Flash', 40, TMethodPtr(@FlashSwitchClick),
-    @FlashSwitch, False);
-  Tests[3] := MakeTestRecord('Func', 43, TMethodPtr(@FuncTestSwitchClick),
-    @FuncTestSwitch, True);
-  Tests[4] := MakeTestRecord('EEPROM', 5, TMethodPtr(@EEPROMSwitchClick),
-    @EEPROMSwitch, True);
-  Tests[5] := MakeTestRecord('Apps', 3, TMethodPtr(@AppsCheckSwitchClick),
-    @AppsCheckSwitch, True);
-  Tests[6] := MakeTestRecord('Label', 8, TMethodPtr(@DoLabelSwitchClick),
-    @DoLabelSwitch, True);
-
-  LedTimer.Enabled := True;
-  DebugLevel := '1';
-  Memo1.Font.Size := 12;
-
-  pid := IntToStr(system.GetProcessID);
-  with TStringList.Create do
-    try
-      Add(pid);
-      SaveToFile(GetEnvironmentVariable('HOME') + '/m1mtf/m1tfd1app.pid');
-    finally
-      Free;
-    end;
-end;
 
 function TmainForm.FuncTestSwitchClick(Sender: TObject): integer;
 var
@@ -816,7 +816,6 @@ begin
   ICTTestSwitchClick(Sender);
 end;
 
-
 procedure TmainForm.AppsCheckSwitchClick_Wrapper(Sender: TObject);
 begin
   if DebugLevel <> '2' then
@@ -904,7 +903,6 @@ procedure TmainForm.RunTests(tMode: TestingMode; modeStr : AnsiString);
 var
   test: TestRecord;
   testReturnStatus: integer;
-  testModeStr: ansistring;
 begin
   TestMode := tMode;
   ResetLeds;
