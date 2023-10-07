@@ -934,7 +934,8 @@ begin
   begin
     DoLabelError;
   end
-  else Memo1.Lines.Add(logger.log('info', modeStr, 'Success! All Done'));
+  else
+  if (testReturnStatus = NormalExit) then Memo1.Lines.Add(logger.log('info', modeStr, 'Success! All Done'));
   TestMode := TestingMode.none;
 end;
 
