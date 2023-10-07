@@ -13,6 +13,7 @@ const utils = require('../utils/utils');
 const M1TermLink = require('../src/m1TermLink');
 const SshClient = require('../utils/SshClient');
 const ProgramMac = require('../tests/programMAC');
+const errorCodes = require('../bin/errorCodes');
 
 const sRamSize = '128K';
 const sramFIle = '/dev/mtd0';
@@ -28,6 +29,7 @@ module.exports = class FuncTest {
         this.logger = log;
         this.serial = serial;
         this.config = config;
+        this.db = sqliteDriver.initialize(this.logger);
     }
 
     /**
@@ -82,6 +84,7 @@ module.exports = class FuncTest {
             this.logger.info('Verifying MAC address');
             const link = await client.execCommand('ip link show eth0 | grep link/ether', 2000);
             if (!link.toLowerCase().includes(macValue.mac.toLowerCase())) {
+                /* eslint-disable dot-notation */
                 throw new Error('Invalid MAC Address, check OTP');
             }
             this.logger.info('MAC address as expected');
@@ -130,7 +133,15 @@ module.exports = class FuncTest {
             this.logger.info('WD test passed');
             await delay(300);
             this.logger.debug('Comparing SPI RAM, after reboot');
-            if (!isM1TestFileFlagSet) await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
+            if (!isM1TestFileFlagSet) {
+                try {
+                    await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
+                }
+                catch (err) {
+                    this.db.updateErrorCode(this.serial, errorCodes.codes['SPI_RAM'].errorCode, 'E');
+                    throw err;
+                }
+            }
             this.logger.info('SPI RAM test passed');
 
             try {
@@ -194,11 +205,30 @@ module.exports = class FuncTest {
             process.exit(exitCodes.normalExit);
         }
         catch (err) {
+            const dbError = this.exceptionToErrorCode(err.message);
+            this.db.updateErrorCode(this.serial, errorCodes.codes[dbError.error].errorCode, dbError.sufx);
+
             this.logger.error(err.message);
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();
             await delay(100);
             process.exit(exitCodes.functTestFailed);
+        }
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    exceptionToErrorCode(errStr) {
+        switch (errStr) {
+            case 'RTC check failed': return { error: 'RTC', sufx: 'E' };
+            case 'Target did not reboot': return { error: 'WDT', sufx: 'E' };
+            case 'USB Host port pen Drive test failed': return { error: 'PEN_DRIVE', sufx: 'E' };
+            case 'Invalid MAC Address, check OTP': return { error: 'MAC_CMP_ERR', sufx: 'E' };
+            case 'A: Target is not pingable, down or not flashed?': return { error: 'UUT_ETHER', sufx: 'TE' };
+            case 'No login promt, did M1-3200 boot?': return { error: 'UUT_TERM', sufx: 'TE' };
+            case 'ssh reconnect failed': return { error: 'SSH_RECON', sufx: 'TE' };
+            case 'timeout waiting for DFU device': return { error: 'DFU_STM', sufx: 'TE' };
+            default:
+                return 'FUNC_EXCEPT';
         }
     }
 };

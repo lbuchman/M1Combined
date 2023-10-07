@@ -1,7 +1,7 @@
 'use strict';
 
 const errorCodes = {
-    EXCEPT: { errorCode: '0000EXCEPTION', test: 'ICT', desc: 'see logs' },
+    ICT_EXCEPT: { errorCode: 'ICT-EXCEPTION', test: 'ICT', desc: 'could be lots of reasons, see logs' },
     TP025: { errorCode: '000000000TP25', test: 'ICT', desc: 'value is out of tolerance' },
     TP33: { errorCode: '000000000TP33', test: 'ICT', desc: 'value is out of tolerance' },
     TP35: { errorCode: '000000000TP35', test: 'ICT', desc: 'value is out of tolerance' },
@@ -41,7 +41,17 @@ const errorCodes = {
     STM: { errorCode: '000000USB-DFU', test: 'ICT', desc: 'failed to program M1 STM, failed DFU' },
     APP80: { errorCode: '00000APP-PING', test: 'APP', desc: 'the UUT do not reply to app ping. UUT sw init issue in func test' },
     FLASH: { errorCode: '0000000000FLASH', test: 'FLASH', desc: 'program FLASH failed' },
-    MAC: { errorCode: '000000PROG-AMC', test: 'MAC', desc: 'program MAC failed' }
+    MAC: { errorCode: '000000PROG-AMC', test: 'MAC', desc: 'program MAC failed' },
+    MAC_CMP_ERR: { errorCode: '000MAC_CMP_ERR', test: 'FUNC', desc: 'MAC does not match expected MAC' },
+    PEN_DRIVE: { errorCode: '00000PEN_DRIVE', test: 'FUNC', desc: 'Pen drive failed' },
+    RTC: { errorCode: '00000000000RTC', test: 'FUNC', desc: 'RTC failed' },
+    SPI_RAM: { errorCode: '0000000SPI_RAM', test: 'FUNC', desc: 'SPI RAM failed' },
+    FUNC_EXCEPT: { errorCode: 'FUN-EXCEPTION', test: 'FUNC', desc: 'could be lots of reasons, see logs' },
+    WDT: { errorCode: '0000000000WDT', test: 'FUNC', desc: 'watch dog failed' },
+    UUT_ETHER: { errorCode: '0000UUT_ETHER', test: 'FUNC', desc: 'UUT not pingable, see logs' },
+    UUT_TERM: { errorCode: '00000UUT_TERM', test: 'FUNC', desc: 'UUT terminal login error, see logs' },
+    SSH_RECON: { errorCode: '00000SH_RECON', test: 'FUNC', desc: 'ssh connection to UUT error, see logs' },
+    DFU_STM: { errorCode: '000000DFU_STM', test: 'FUNC', desc: 'prog. STM file over DFU error' }
 };
 
 exports.codes = errorCodes;

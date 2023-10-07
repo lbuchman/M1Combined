@@ -114,7 +114,7 @@ program.command('ict')
             logfile.error(err);
             // logfile.error(err.stack);
             /* eslint-disable dot-notation */
-            db.updateErrorCode(options.serial, errorCodes.codes['EXCEPTION'].errorCode, 'T');
+            db.updateErrorCode(options.serial, errorCodes.codes['ICT_EXCEPT'].errorCode, 'TE');
             await delay(100);
             process.exit(exitCodes.commandFailed);
         }
