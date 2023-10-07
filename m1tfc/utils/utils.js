@@ -218,7 +218,7 @@ function macToUid(mac) {
 async function printLabel(mac, serial, tsId, dbError, logger) {
     const labelPath = '/tmp/label.txt';
     const pngPath = '/tmp/label.png';
-    let convertCmd = `convert -size 306x200 xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
+    let convertCmd = `convert -size 306x150 xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
     const pritnLabelCmd = `brother_ql print -l 29 ${pngPath}`;
 
     let labelTxt;
