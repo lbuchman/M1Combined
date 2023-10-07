@@ -99,7 +99,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["makelabel",  "-d", "2", "-s", "3023200042" ]
+            "args": ["makelabel",  "-d", "2", "-s", "3023200042", "-e" ]
         }
     ]
 }

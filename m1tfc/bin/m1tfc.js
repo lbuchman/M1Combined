@@ -424,12 +424,15 @@ program.command('makelabel')
             }
         }
         catch (err) {
-            if (err.message && !err.message.includes('Not printing the label')) {
+            if (err.message && !err.message === 'Not printing the label, no errors in the database') {
                 logfile.error(err.message);
+            }
+            else {
+                await buzzer.buzzerBeepFailed();
             }
             // logfile.debug(err.stack);
             await delay(100);
-            await buzzer.buzzerBeepFailed();
+           
             await testBoardLink.targetPower(false);
             await testBoardLink.batteryOn(false);
             process.exit(exitCodes.commandFailed);
