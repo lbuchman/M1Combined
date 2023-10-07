@@ -868,6 +868,11 @@ end;
 
 procedure TmainForm.DoLabelSwitchClick_Wrapper(Sender: TObject);
 begin
+  if DebugLevel <> '2' then
+  begin
+    TindLed(Sender).LedValue := False;
+    exit;
+  end;
 
   if not CheckSerialBarcodeScan(targetVendorSerial.Text) then
   begin
