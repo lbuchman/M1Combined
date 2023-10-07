@@ -1,10 +1,10 @@
 object mainForm: TmainForm
-  Left = 560
-  Height = 1382
-  Top = 417
+  Left = 1295
+  Height = 1451
+  Top = 349
   Width = 2875
   BorderWidth = 2
-  ClientHeight = 1339
+  ClientHeight = 1408
   ClientWidth = 2875
   DesignTimePPI = 196
   Font.Height = -31
@@ -1445,7 +1445,7 @@ object mainForm: TmainForm
   LCLVersion = '2.2.6.0'
   object Memo1: TMemo
     Left = 2
-    Height = 991
+    Height = 1060
     Top = 346
     Width = 2871
     Align = alClient

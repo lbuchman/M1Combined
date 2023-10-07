@@ -381,7 +381,10 @@ program.command('makelabel')
             }
             if (options.error) {
                 dbError = db.getErrorCode(options.serial);
-                if (!dbError || !dbError.length) throw new Error('Not printing the label, no errors in the database');
+                if (!dbError || !dbError.length) {
+                    const undefErrorCode = errorCodes.codes['ERR_UNDEF'].errorCode;
+                    dbError = [undefErrorCode];
+                }
                 const uiD = '0';
                 await utils.printLabel(uiD, options.serial, configData.vendorSite, dbError, logger);
                 await testBoardLink.targetPower(false);
@@ -432,7 +435,7 @@ program.command('makelabel')
             }
             // logfile.debug(err.stack);
             await delay(100);
-           
+
             await testBoardLink.targetPower(false);
             await testBoardLink.batteryOn(false);
             process.exit(exitCodes.commandFailed);
