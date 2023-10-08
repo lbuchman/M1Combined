@@ -1,7 +1,7 @@
 'use strict';
 
-
 const targetICTLink = require('../src/m1ICTLink');
+const errorCodes = require('../bin/errorCodes');
 
 async function testDDRDatabus(logger) {
     try {
@@ -59,11 +59,23 @@ async function testDDRtest(ddrblocks, logger) {
     return true;
 }
 
-async function testDDR3Test(ddrblocks, logger) {
+async function testDDR3Test(ddrblocks, logger, db) {
     let ret = true;
-    if (!await testDDRDatabus(logger)) ret = false;
-    if (!await testDDRAddrbus(logger)) ret = false;
-    if (!await testDDRtest(ddrblocks, logger)) ret = false;
+    if (!await testDDRDatabus(logger)) {
+        ret = false;
+        /* eslint-disable dot-notation */
+        db.updateErrorCode(process.env.serial, errorCodes.codes['DDR3Bus'].errorCode, 'E');
+    }
+    if (!await testDDRAddrbus(logger)) {
+        ret = false;
+        /* eslint-disable dot-notation */
+        db.updateErrorCode(process.env.serial, errorCodes.codes['DDR3ABus'].errorCode, 'E');
+    }
+    if (!await testDDRtest(ddrblocks, logger)) {
+        ret = false;
+        /* eslint-disable dot-notation */
+        db.updateErrorCode(process.env.serial, errorCodes.codes['DDR3'].errorCode, 'E');
+    }
     return ret;
 }
 

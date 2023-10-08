@@ -1,10 +1,12 @@
 'use strict';
 
 const utils = require('../utils/utils');
+const errorCodes = require('../bin/errorCodes');
 
 const targetICTLink = require('../src/m1ICTLink');
 const testBoardLink = require('../src/testBoardLink');
 
+let db;
 
 const ribbonCableSelectPins = [
     { name: 'aioS0', port: 'd', pin: 5, pinNameOnTestBoard: 'J5.18' },
@@ -37,7 +39,8 @@ async function runRibbonCableTestStaticVoltages(tolerance, logger) {
             // eslint-disable-next-line no-await-in-loop
             const ret = await testBoardLink.sendCommand(`getiopin ${testBoardIoDef[count].pinId}`);
             if (!ret.status) {
-                logger.error(`Test Board control command failed on pinName=${ribbonCableSelectPins[count].pinNameOnTestBoard}, ${ret.error}`);
+                logger.error(`Test Board control command failed on pinName=${testBoardIoDef[count].pinName}, ${ret.error}`);
+                db.updateErrorCode(process.env.serial, errorCodes.codes[testBoardIoDef[count].pinName].errorCode, 'T');
                 retValue = false;
                 freturn = false;
             }
@@ -48,6 +51,7 @@ async function runRibbonCableTestStaticVoltages(tolerance, logger) {
                 logger.error(`Failed: Voltage is out of tolerance, pinName=${testBoardIoDef[count].pinName}, value=${ret.value}, reqValue=${testBoardIoDef[count].reqValue}`);
                 retValue = false;
                 freturn = false;
+                db.updateErrorCode(process.env.serial, errorCodes.codes[testBoardIoDef[count].pinName].errorCode, 'E');
             }
             else {
                 logger.info(`Passed pinName=${testBoardIoDef[count].pinName}, actual = ${ret.value}V, expected = ${testBoardIoDef[count].reqValue}V `);
@@ -68,6 +72,7 @@ async function runRibbonCableTestAddressSelectResetPins(settoLevel, floatpins, l
     let freturn = true;
     let ret;
     let count = 0;
+    logger.info(`Testing ribbon cable address select lines for value - ${settoLevel}V`);
     try {
         // eslint-disable-next-line no-plusplus
         for (count = 0; count < ribbonCableSelectPins.length; count++) { // canot use forEach or map because callbacks will bring in concurrency
@@ -79,6 +84,7 @@ async function runRibbonCableTestAddressSelectResetPins(settoLevel, floatpins, l
                     logger.error(`Target Board control command <confgpio> failed on pin ${ribbonCableSelectPins[count].port}.${ribbonCableSelectPins[count].pin}, ${ret.error}`);
                     retValue = false;
                     freturn = false;
+                    db.updateErrorCode(process.env.serial, errorCodes.codes[ribbonCableSelectPins[count].pinNameOnTestBoard].errorCode, 'T');
                 }
 
                 // eslint-disable-next-line no-await-in-loop
@@ -87,6 +93,7 @@ async function runRibbonCableTestAddressSelectResetPins(settoLevel, floatpins, l
                     logger.error(`Target Board control command <setgpio> failed on pin ${ribbonCableSelectPins[count].port}.${ribbonCableSelectPins[count].pin}, ${ret.error}`);
                     retValue = false;
                     freturn = false;
+                    db.updateErrorCode(process.env.serial, errorCodes.codes[ribbonCableSelectPins[count].pinNameOnTestBoard].errorCode, 'E');
                 }
             }
             // eslint-disable-next-line no-await-in-loop
@@ -94,12 +101,14 @@ async function runRibbonCableTestAddressSelectResetPins(settoLevel, floatpins, l
             if (!ret.status) {
                 logger.error(`Test Board control command failed on pinName=${ribbonCableSelectPins[count].pinNameOnTestBoard}, ${ret.error}`);
                 retValue = false;
+                db.updateErrorCode(process.env.serial, errorCodes.codes[ribbonCableSelectPins[count].pinNameOnTestBoard].errorCode, 'T');
             }
 
             if (!retValue || !utils.testLogicalValue(ret.value, 3.3, settoLevel)) {
                 logger.error(`Failed: Incorrect voltage level on Pin=${ribbonCableSelectPins[count].pinNameOnTestBoard}, Value=${ret.value} 1ogValue=${settoLevel}`);
                 retValue = false;
                 freturn = false;
+                db.updateErrorCode(process.env.serial, errorCodes.codes[ribbonCableSelectPins[count].pinNameOnTestBoard].errorCode, 'E');
             }
             else {
                 logger.info(`Passed pinName=${ribbonCableSelectPins[count].pinNameOnTestBoard}, actual = ${ret.value}`);
@@ -129,6 +138,7 @@ async function testI2Cpins(pins, logger, settoLevel) {
             ret = await testBoardLink.sendCommand(`setiopin ${testBoardLink.findPinIdByName(pins[count].pinNameOnTestBoard)} ${settoLevel}`);
             if (!ret.status) {
                 logger.error(`Test Board Command failed on pinName=${pins[count].pinNameOnTestBoard}, ${ret.error}`);
+                db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'T');
                 retValue = false;
             }
 
@@ -136,6 +146,7 @@ async function testI2Cpins(pins, logger, settoLevel) {
             ret = await targetICTLink.sendCommand(`confgpio ${pins[count].port} ${pins[count].pin} input none`);
             if (!ret.status) {
                 retValue = false;
+                db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'T');
                 logger.error(`Target Board control command failed on ${pins[count].name}`);
             }
 
@@ -144,10 +155,12 @@ async function testI2Cpins(pins, logger, settoLevel) {
             if (!ret.status) {
                 retValue = false;
                 logger.error(`Target Board Command failed on ${pins[count].name}`);
+                db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'T');
             }
 
             if (ret.value !== settoLevel) {
                 logger.error(`Test Failed: Incorrect voltage level on Pin=${pins[count].pinNameOnTestBoard}, expected ${settoLevel}, actual=${ret.value}`);
+                db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'E');
                 retValue = false;
             }
             else {
@@ -172,20 +185,23 @@ async function testRs422(logger) {
         const ret = await targetICTLink.sendCommand('testrs422');
         if (!ret.status) {
             logger.error(`Failed Ribbon Rs422 echo test error: ${ret.error}`);
-            return false;
+            throw new Error('Ribbon RS422 echo test failed');
         }
         logger.info('Passed Ribbon RS422 echo test ');
     }
     catch (err) {
         logger.error('Failed Ribbon RS422 echo test');
-        logger.error(err);
+        /* eslint-disable dot-notation */
+        db.updateErrorCode(process.env.serial, errorCodes.codes['RS422'].errorCode, 'E');
+        // logger.error(err);
         // logger.debug(err.stack);
         return false;
     }
     return true;
 }
 
-async function runRibbonCableTest(tolerance, logger) {
+async function runRibbonCableTest(tolerance, logger, db_) {
+    db = db_;
     let retValue = true;
     const i2cTestCases = [0, 1, 0, 1];
     // eslint-disable-next-line no-restricted-syntax
@@ -201,6 +217,7 @@ async function runRibbonCableTest(tolerance, logger) {
     }
     logger.info('Passed I2C Master test');
     if (!await runRibbonCableTestAddressSelectResetPins(1, false, logger)) retValue = false;
+    if (!await runRibbonCableTestAddressSelectResetPins(0, false, logger)) retValue = false;
     if (!await runRibbonCableTestStaticVoltages(tolerance, logger)) retValue = false;
     if (!await testRs422(logger).catch(() => { retValue = false; })) retValue = false;
     if (!retValue) {

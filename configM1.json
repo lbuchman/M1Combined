@@ -1,9 +1,12 @@
 {
-  "ictFWFilePath" : "/home/lbuchman/fw/fsbl.stm32",
-  "layoutFilePath" : "/home/lbuchman/fw/stm32mp15-lenels2-m1/flashlayout_st-ls2m1-image-core/trusted//FlashLayout_emmc_stm32mp151f-ls2m1-trusted.tsv",
-  "programmingCommand" : "STM32_Programmer_CLI",
-  "m1SerialDev" : "/dev/m1term",
-  "testBoardTerminalDev" : "/dev/teensylink",
-  "m1TfcExecutable" : "m1tfcd.cli",
-  "vendorSite" : "F1"
+    "conString": "DefaultEndpointsProtocol=https;AccountName=lenels2production;AccountKey=QYLAhAvw4SowA6HJqBm2CTkR3Q36PWxfFUPDhqZ4yEyK6lJNb02GEwS/Z/kF8+qMEPs6VAzSnHHt+AStrIr3VQ==;EndpointSuffix=core.windows.net",
+    "memTestSize1MBBlocks" : 10,
+    "forceEppromOverwrite": false,
+    "vendorSite": "p1",
+    "skipTestpointCheck": false,
+    "flashDisable":  false,
+    "progMAC": true,
+    "progEEPROM":  true,
+    "makeLabel": true,
+    "funcTestDisable": false
 }

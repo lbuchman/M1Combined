@@ -14,7 +14,8 @@ CREATE TABLE records (
 					  functionalTestPassed  Integer,
 					  flashProgrammed  Integer,
 					  cpuSerial Text,
-					  cloudPushed Integer
+					  cloudPushed Integer.
+					  errorcode Text
 					);
 
 CREATE TABLE UID    ( 

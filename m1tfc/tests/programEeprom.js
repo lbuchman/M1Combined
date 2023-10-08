@@ -53,7 +53,7 @@ module.exports = class IctTestRunner {
       */
     async print(programmer) {
         try {
-            this.logger.info('reading I2C EEPROM ...');
+            this.logger.debug('reading I2C EEPROM ...');
             await common.initializeTestFixture(programmer, true, this.stm32, this.m1Dev, this.logger);
             return eeprom.printEEPRomData(this.logger, console);
         }
@@ -75,7 +75,7 @@ module.exports = class IctTestRunner {
       */
     async get(programmer) {
         try {
-            this.logger.info('reading I2C EEPROM ...');
+            this.logger.debug('reading I2C EEPROM ...');
             await common.initializeTestFixture(programmer, true, this.stm32, this.m1Dev, this.logger);
             return eeprom.getEEPRomData(this.logger, console);
         }

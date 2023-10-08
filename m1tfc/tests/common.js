@@ -53,7 +53,7 @@ async function getICTFWRev(retries) {
     throw new Error('cannot get rev from M1 ict fw');
 }
 
-async function programStm(programmer, programSTM, stm32, m1Dev, logger) {
+async function programStm(programmer, stm32, m1Dev, logger) {
     logger.debug('Programming UUT ICT FW into SRAM...');
     await waitDFU(programmer, logger);
     await delay(300);
@@ -78,16 +78,16 @@ async function initializeTestFixture(programmer, programSTM, stm32, m1Dev, logge
     logger.debug('Setting UUT power off');
     await testBoardLink.targetPower(false);
     await testBoardLink.batteryOn(false);
-    await delay(500);
+    await delay(2000);
     await m1boot.activateDFU();
-    await delay(100);
+    await delay(1000);
     await testBoardLink.batteryOn(true);
     await testBoardLink.targetPower(true);
-    await delay(500);
+    await delay(2000);
 
     if (programSTM && programmer) {
         await waitDFU(programmer, logger);
-        await delay(300); // not sure why but prog will fail without delay
+        await delay(3000); // not sure why but prog will fail without delay
         logger.debug('Programming UUT ICT FW into SRAM...');
         os.executeShellCommand(`${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`, logger, true);
         await delay(100);

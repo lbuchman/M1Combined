@@ -69,9 +69,65 @@ class DBClass {
     }
 
     /**
+       * @public
+       *
+       */
+    resetErrorCode(serial) {
+        try {
+            if (!this.db) throw new Error('DB file is not open');
+            const update = this.db.prepare('UPDATE records set errorcode = ? WHERE vendorSerial = ?');
+            const ret = update.run(JSON.stringify([]), serial);
+            if (ret.changes === 0) {
+                throw new Error('DB is not updated');
+            }
+        }
+        catch (err) {
+            throw new Error(`updateErrorCode() call failed error: ${err.message}`);
+        }
+    }
+
+    /**
     * @public
     *
     */
+    updateErrorCode(serial, errorCode, sufix) {
+        try {
+            const newError = `${sufix}${errorCode}`;
+            if (!this.db) throw new Error('DB file is not open');
+            const valueNow = this.getErrorCode(serial);
+            if (valueNow.includes(newError)) return;
+            valueNow.push(newError);
+
+            const update = this.db.prepare('UPDATE records set errorcode = ? WHERE vendorSerial = ?');
+            const ret = update.run(JSON.stringify(valueNow), serial);
+            if (ret.changes === 0) {
+                throw new Error('DB is not updated');
+            }
+        }
+        catch (err) {
+            throw new Error(`updateErrorCode() call failed error: ${err.message}`);
+        }
+    }
+
+    /**
+    * @public
+    *
+    */
+    getErrorCode(serial) {
+        if (!this.db) throw new Error('DB file is not open, cannot get next MAC');
+        const select = this.db.prepare('SELECT errorcode  FROM records  where vendorSerial = ?');
+        const retValue = select.all(serial);
+        if (retValue && retValue[0] && retValue[0].errorcode) {
+            const ret = retValue[0].errorcode;
+            return JSON.parse(ret);
+        }
+        return [];
+    }
+    /**
+    * @public
+    *
+    */
+
     updateLastUsedMac(mac) {
         if (!this.db) throw new Error('DB file is not open, cannot get next MAC');
         const insert = this.db.prepare('INSERT INTO uid (uid) VALUES (?)');
@@ -194,10 +250,11 @@ class DBClass {
         }
     }
 
+
     /**
-    * @public
-    *
-    */
+        * @public
+        *
+        */
     updateIctStatus(serial, status) {
         try {
             if (!this.db) throw new Error('DB file is not open');

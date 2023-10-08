@@ -3,6 +3,7 @@
 const lodash = require('lodash');
 const testBoardLink = require('../src/testBoardLink');
 const targetICTLink = require('../src/m1ICTLink');
+const errorCodes = require('../bin/errorCodes');
 
 const statusLed = {
     ledBlue: { port: 'b', pin: 1, pinNameOnTestBoard: 'J8.2', onState: 1, offState: 0, maxVoltage: -2.6, minVoltage: -3.3 },
@@ -53,7 +54,8 @@ async function initLed() {
     }
 }
 
-async function test(logger) {
+async function test(logger, db) {
+    let ret = true;
     try {
         await initLed(logger);
         await setLedActive(statusLed.ledBlue, statusLed.ledRed, logger);
@@ -61,26 +63,29 @@ async function test(logger) {
 
         if (!lodash.inRange(ledVoltage, statusLed.ledBlue.minVoltage, statusLed.ledBlue.maxVoltage)) {
             logger.error(`Led test failed, expected voltage range ${statusLed.ledBlue.minVoltage} - ${statusLed.ledBlue.maxVoltage}, actual ${ledVoltage}`);
-            return false;
+            db.updateErrorCode(process.env.serial, errorCodes.codes[statusLed.ledBlue.pinNameOnTestBoard].errorCode, 'E');
+            ret = false;
         }
 
         setLedActive(statusLed.ledRed, statusLed.ledBlue, logger);
         ledVoltage = await getLedVoltages(logger);
         if (!lodash.inRange(ledVoltage, statusLed.ledRed.minVoltage, statusLed.ledRed.maxVoltage)) {
             logger.error(`Led test failed, expected voltage range ${statusLed.ledBlue.minVoltage} - ${statusLed.ledBlue.maxVoltage}, actual ${ledVoltage}`);
-            return false;
+            db.updateErrorCode(process.env.serial, errorCodes.codes[statusLed.ledRed.pinNameOnTestBoard].errorCode, 'E');
+            ret = false;
         }
 
-        logger.info('Passed Led test');
+        if (ret) logger.info('Passed Led test');
+        else logger.error('Led test failed');
+        return ret;
     }
     catch (err) {
         logger.error('Failed Led test');
         logger.error(err);
+        db.updateErrorCode(process.env.serial, errorCodes.codes[statusLed.ledBlue.pinNameOnTestBoard].errorCode, 'T');
         // logger.debug(err.stack);
         return false;
     }
-
-    return true;
 }
 
 module.exports = {

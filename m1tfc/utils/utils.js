@@ -199,10 +199,10 @@ function checkDbRecord(records, full) {
     const record = records[0];
     if (!record) throw new Error('Failed, Invalid DB record');
     if (!record.vendorSerial) throw new Error('Failed, vendorSerial is not defined.');
-    if (!record.ictTestPassed) throw new Error('Failed, ICT test status is not defined');
-    if (!record.functionalTestPassed) throw new Error('Failed, Functional test status is not defined');
-    if (!record.flashProgrammed) throw new Error('Failed, Flash status is not defined');
-    if (!record.uid) throw new Error('Failed, MAC address status is not defined');
+    if (!record.ictTestPassed) throw new Error('Failed, Must pass ICT test to program EEPROM');
+    if (!record.functionalTestPassed) throw new Error('Failed, Must pass Functional test to program EEPROM');
+    // if (!record.flashProgrammed) throw new Error('Failed, Must pass Flash Programming to program EEPROM');
+    if (!record.uid) throw new Error('Failed, Must pass MAC Programming to program EEPROM');
     if (full) {
         if (!record.secret) throw new Error('Failed, EEPROM secret status is not defined');
         if (!record.boardS2Serial) throw new Error('Failed, EEPROM programming status is not defined');
@@ -215,33 +215,27 @@ function macToUid(mac) {
     return `0000${mac.split(':').join('')}`;
 }
 
-async function printLabel(mac, serial, logger) {
+async function printLabel(mac, serial, tsId, dbError, logger) {
     const labelPath = '/tmp/label.txt';
     const pngPath = '/tmp/label.png';
-    const convertCmd = `convert -size 306x200 xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
+    let convertCmd = `convert -size 306x150 xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
     const pritnLabelCmd = `brother_ql print -l 29 ${pngPath}`;
 
-    const labelTxt = `text 1,1 "\nM1-3200\n${serial}\n${macToUid(mac)}\n${mac}\n"`;
-    await fs.writeFile(labelPath, labelTxt);
+    let labelTxt;
 
-    await os.executeShellCommand(convertCmd, logger, false, false);
-    try {
-        await os.executeShellCommand(pritnLabelCmd, logger, false, false);
+    if (dbError.length) {
+        convertCmd = `convert -size 306x${150 + 25 * (dbError.length + 1)} xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
+        labelTxt = `text 1,1 "\nFailed\nM1-3200\n${serial}${tsId}\n`;
+        dbError.forEach((item) => {
+            labelTxt += `${item}\n`;
+        });
+        labelTxt += '"';
     }
-    catch (err) {
-        throw new Error(`command to print Label failed. Is printer on?: ${pritnLabelCmd}`);
+    else {
+        labelTxt = `text 1,1 "\nM1-3200\n${serial}${tsId}\n${macToUid(mac)}\n${mac}\n"`;
     }
-}
 
-async function printCustomLabel(lines, logger) {
-    const labelPath = '/tmp/label.txt';
-    const pngPath = '/tmp/label.png';
-    const convertCmd = `convert -size 306x200 xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
-    const pritnLabelCmd = `brother_ql print -l 29 ${pngPath}`;
-
-    const labelTxt = `text 1,1 "\nM1-3200\nTesting Failed\n${lines[0]}\n"`;
     await fs.writeFile(labelPath, labelTxt);
-
     await os.executeShellCommand(convertCmd, logger, false, false);
     try {
         await os.executeShellCommand(pritnLabelCmd, logger, false, false);
@@ -270,6 +264,5 @@ module.exports = {
     printLabel,
     getCPUSerial,
     macToUid,
-    isString,
-    printCustomLabel
+    isString
 };

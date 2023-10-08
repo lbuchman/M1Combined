@@ -14,5 +14,6 @@ module.exports = {
     otpIsNotBlank: 10,
     eepromIsNotBlank: 11,
     notAllTestsPassed: 12,
-    functTestFailed: 13
+    functTestFailed: 13,
+    invalidArgument: 14
 };

@@ -67,7 +67,7 @@ module.exports = class M1TermLink {
         await delay(1000);
         await this.executeCommand('/etc/init.d/sshd stop', 0);
         await delay(1000);
-        await this.executeCommand('/usr/sbin/sshd -o MaxSessions=10 -o UsePAM=no -o MaxAuthTries=10', 0);
+        await this.executeCommand('/usr/sbin/sshd -h /var/run/ssh/ssh_host_rsa_key -o MaxSessions=10 -o UsePAM=no -o MaxAuthTries=10', 0);
         await delay(1000);
     }
 

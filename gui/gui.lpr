@@ -10,19 +10,19 @@ uses
   laz_synapse,
   main,
   provision,
-  macUtils,
-  scannerClient,
   logForm,
   logger,
-  configurationJson;
+  configurationJson,
+  about;
 
 {$R *.res}
 
 begin
   RequireDerivedFormResource := True;
-  Application.Scaled:=True;
+  Application.Scaled := True;
   Application.Initialize;
   Application.CreateForm(TmainForm, mainForm);
   Application.CreateForm(TLoggerForm, LoggerForm);
+  Application.CreateForm(TaboutForm, aboutForm);
   Application.Run;
 end.

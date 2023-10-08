@@ -25,10 +25,12 @@ process.env.SNAP_DATA = '/var/snap/m1tfd1/current';
 const publicKey = path.join(process.env.SNAP_DATA, 'public.key');
 const debuglevel = '2';
 
+if (!process.env.VERSION) process.env.VERSION = '123456';
+
 program
     .name('m1cli')
     .description('CLI utility retrieve M1-3200 manufacturing logs')
-    .version('0.2.0');
+    .version(process.env.SNAP_VERSION);
 
 program.command('update')
     .description('download and update software and firmware i the test fixture')
@@ -108,6 +110,7 @@ program.command('update')
 program.command('synclogs')
     .description('sync logs into Cloud AS')
     .action(async () => {
+        console.error('1234'); 
         const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
         const matches = glob.sync(`${configData.m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
         const logfile = logger.getLogger('m1cli', 'synclogs', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
@@ -125,11 +128,17 @@ program.command('synclogs')
         }
 
         logfile.info('Download complete files uploaded:');
-        const syncedLogsDir = `${configData.m1mtfDir}/logs/syncedlogs`;
+        const syncedLogsDir = `${configData.m1mtfDir}/syncedlogs`;
         mkdirp.sync(syncedLogsDir);
+        await os.executeShellCommand(`chown lenel: ${syncedLogsDir}`, logfile);
         matches.forEach((item) => {
             logfile.info(path.basename(item));
-            fs.moveSync(item, path.join(`${syncedLogsDir}`, path.basename(item)));
+            try {
+               fs.moveSync(item, path.join(`${syncedLogsDir}`, path.basename(item)));
+            }
+            catch (err) {
+               logfile.error(err.message); 
+            }
         });
     });
 
