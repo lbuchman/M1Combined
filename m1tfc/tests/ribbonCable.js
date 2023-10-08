@@ -135,15 +135,7 @@ async function testI2Cpins(pins, logger, settoLevel) {
         // eslint-disable-next-line no-plusplus
         for (count = 0; count < pins.length; count++) { // canot use forEach or map because callbacks will bring in concurrency
             // eslint-disable-next-line no-await-in-loop
-            ret = await testBoardLink.sendCommand(`setiopin ${testBoardLink.findPinIdByName(pins[count].pinNameOnTestBoard)} ${settoLevel}`);
-            if (!ret.status) {
-                logger.error(`Test Board Command failed on pinName=${pins[count].pinNameOnTestBoard}, ${ret.error}`);
-                db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'T');
-                retValue = false;
-            }
-
-            // eslint-disable-next-line no-await-in-loop
-            ret = await targetICTLink.sendCommand(`confgpio ${pins[count].port} ${pins[count].pin} input none`);
+            ret = await targetICTLink.sendCommand(`confgpio ${pins[count].port} ${pins[count].pin} output none`);
             if (!ret.status) {
                 retValue = false;
                 db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'T');
@@ -151,13 +143,21 @@ async function testI2Cpins(pins, logger, settoLevel) {
             }
 
             // eslint-disable-next-line no-await-in-loop
-            ret = await targetICTLink.sendCommand(`getgpio ${pins[count].port} ${pins[count].pin}`);
+            ret = await targetICTLink.sendCommand(`setgpio ${pins[count].port} ${pins[count].pin} ${settoLevel}`);
             if (!ret.status) {
                 retValue = false;
                 logger.error(`Target Board Command failed on ${pins[count].name}`);
                 db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'T');
             }
 
+            // eslint-disable-next-line no-await-in-loop
+            ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(pins[count].pinNameOnTestBoard)}`);
+            if (!ret.status) {
+                logger.error(`Test Board Command failed on pinName=${pins[count].pinNameOnTestBoard}, ${ret.error}`);
+                db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'T');
+                retValue = false;
+            }
+            if (ret.value > 3) ret.value = 1;
             if (ret.value !== settoLevel) {
                 logger.error(`Test Failed: Incorrect voltage level on Pin=${pins[count].pinNameOnTestBoard}, expected ${settoLevel}, actual=${ret.value}`);
                 db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'E');
