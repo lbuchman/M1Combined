@@ -65,7 +65,7 @@ module.exports = class FuncTest {
             await delay(100);
             await testBoardLink.targetPower(true);
             await testBoardLink.batteryOn(true);
-            db.updateSerial(this.serial);
+            this.db.updateSerial(this.serial);
             this.logger.info('Waiting for the target to boot');
 
             const m1TermLink = new M1TermLink(this.logger);
