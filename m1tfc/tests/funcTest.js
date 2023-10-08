@@ -109,19 +109,27 @@ module.exports = class FuncTest {
                 this.logger.info('Connected to Target');
             }
 
-
-            this.logger.debug('Testing I2C Master/Slave connectivity');
-            const i2cBus1Test = await client.execCommand('i2cdetect -y 1 | grep "50 51 52 UU 54 55 56 57"', 2000);
-            if (!i2cBus1Test) {
-                this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus1'].errorCode, dbError.sufx);
+            this.logger.debug('Testing I2C Bus 1 Master/Slave connectivity');
+            try {
+                await client.execCommand('i2cdetect -y 1 | grep "50 51 52 UU 54 55 56 57"');
+                this.logger.info('I2C Bus 1 test passed');
+            }
+            catch (err) {
+                this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus1'].errorCode, 'E');
                 this.logger.error('I2C Bus 1 test failed');
             }
-            const i2cBus02Test = await client.execCommand('i2cdetect -y 0 | grep "70 -- -- -- -- -- -- --"', 2000);
-            if (!i2cBus02Test) {
-                this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus02'].errorCode, dbError.sufx);
+
+            this.logger.debug('Testing I2C Bus 0,2 Master/Slave connectivity');
+            try {
+                await client.execCommand('i2cdetect -y 0 | grep "70 -- -- -- -- -- -- --"');
+                this.logger.info('I2C Bus 0,2 test passed');
+            }
+            catch (err) {
+                this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus02'].errorCode, 'E');
                 this.logger.error('I2C Bus 0 & 2 test failed');
             }
-            this.logger.info('I2C test passed');
+
+
             await client.execCommand(`dd if=/dev/urandom of=${controlFIle} bs=${sRamSize} count=1`);
             await client.execCommand(`dd if=${controlFIle} of=${sramFIle} bs=${sRamSize} count=1`);
             await client.execCommand('sync');
