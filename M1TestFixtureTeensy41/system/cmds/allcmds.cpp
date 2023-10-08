@@ -127,6 +127,26 @@ shellFunc setIoPin = [](int arg_cnt, char **args, Stream & stream) -> int {
     return 1;
 };
 
+shellFunc configiopin = [](int arg_cnt, char **args, Stream & stream) -> int {
+    if(!checkArgument(3, arg_cnt, args, (char*) "{ \"cmd\": \"%s\",  \"arg\": \"pinId pinconfig [ from 0, In, Out, IN_PUP, IN_PDW, OUT_OD, In_Dis]\", \"desc\": \"config io pin for input or output\" },\n\r", stream)) {
+        return 1;
+    }
+
+    int pinConfig = atoi((args[2]));
+
+    pinIdDefinition pinId = pioEngine->isPinValid(atoi(args[1]));
+
+    if(pinId == pinIdDefinition::END_OF_LIST) {
+        stream.printf("\t{\"cmd\": \"%s\", \"status\": \"false\", \"error\": \"invalid argument - pinId\" }\n\r", args[0]);
+        return 1;
+    }
+    pioEngine->configIoPin(int2pinIdDefinition(pinId), pinConfig);
+
+    stream.printf("\t{\"cmd\": \"%s\", \"status\": true }\n\r", args[0]);
+    return 1;
+};
+
+
 shellFunc batteryon = [](int arg_cnt, char **args, Stream & stream) -> int {
     if(!checkArgument(1, arg_cnt, args, (char*) "{ \"cmd\": \"%s\", \"arg\": \"null\"},\n\r", stream)) {
         return 1;
@@ -391,6 +411,7 @@ shellFunc dmesg = [](int arg_cnt, char **args, Stream & stream) -> int {
 
 std::map<String, shellFunc> shellFunctions = {
     { "setiopin", setIoPin },
+    { "configiopin", configiopin },
     { "date", date },
     { "dmesg", dmesg },
     { "epoch", epoch },

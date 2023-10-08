@@ -59,9 +59,9 @@ class TioEngine {
             { pinIdDefinition::SwitchTargetPower, new TIOPin(nullptr, pinIdDefinition::SwitchTargetPower, 35, 0, INPUT_PULLUP, "SwitchTargetPower", 1, "SwitchTargetPower", 0.0, 0, 0, 0, groupdDefinition::NotDefinedGroup)},
             { pinIdDefinition::BootSwitch, new TIOPin(nullptr, pinIdDefinition::BootSwitch, 40, 0, INPUT_PULLUP, "BootSwitch", 2, "BootSwitch", 0.0, 0, 0, 0, groupdDefinition::NotDefinedGroup)},
             { pinIdDefinition::BatCellBat, new TIOPin(adc->adc1, pinIdDefinition::BatCellBat, A15, 0, INPUT_ANALOG_NOMUX, "BatCellBat", 0, "BatCellBat", BatCellScale, 2.8, 3.0, 3.3, groupdDefinition::PowerGroup)},
-            { pinIdDefinition::I2C_SDA, new TIOPin(adc->adc0, pinIdDefinition::I2C_SDA, 18, 0, OUTPUT, "J5.3", 3, "I2C_SDA", V033Scale, 3.3, 3.1, 3.5, groupdDefinition::RibbonCableGroupDynamic)},
+            { pinIdDefinition::I2C_SDA, new TIOPin(nullptr, pinIdDefinition::I2C_SDA, 18, 0, INPUT, "J5.3", 3, "I2C_SDA", V033Scale, 3.3, 3.1, 3.5, groupdDefinition::RibbonCableGroupDynamic)},
             { pinIdDefinition::P6V_2, new TIOPin(adc->adc0, pinIdDefinition::P6V_2, A0, 2, INPUT_ANALOG_MUX, "J5.5", 5, "P6V_2", V06Scale, 6.0, 5.8, 6.2, groupdDefinition::RibbonCableGroupStatic)},
-            { pinIdDefinition::I2C_SCL, new TIOPin(adc->adc0, pinIdDefinition::I2C_SCL, 19, 0, OUTPUT, "J5.6", 6, "I2C_SCL", V033Scale, 3.3, 3.1, 3.5, groupdDefinition::RibbonCableGroupDynamic)},
+            { pinIdDefinition::I2C_SCL, new TIOPin(nullptr, pinIdDefinition::I2C_SCL, 19, 0, INPUT, "J5.6", 6, "I2C_SCL", V033Scale, 3.3, 3.1, 3.5, groupdDefinition::RibbonCableGroupDynamic)},
             { pinIdDefinition::P6V_3, new TIOPin(adc->adc0, pinIdDefinition::P6V_3, A0, 3, INPUT_ANALOG_MUX, "J5.7", 7, "P6V_3", V06Scale, 6.0, 5.8, 6.2, groupdDefinition::RibbonCableGroupStatic)},
             { pinIdDefinition::P6V_1, new TIOPin(adc->adc0, pinIdDefinition::P6V_1, A0, 1, INPUT_ANALOG_MUX, "J5.8", 8, "P6V_1", V06Scale, 6.0, 5.8, 6.2, groupdDefinition::RibbonCableGroupStatic)},
             { pinIdDefinition::P12V_1, new TIOPin(adc->adc0, pinIdDefinition::P12V_1, A0, 4, INPUT_ANALOG_MUX, "J5.13", 13, "P12V_1", V12Scale, 11.8, 11.5, 12.5, groupdDefinition::RibbonCableGroupStatic)},
@@ -228,6 +228,17 @@ class TioEngine {
 
             item->second->set_pin(state);
         }
+
+        void configIoPin(pinIdDefinition _pinId, int config) {
+            auto item = ioPins.find(_pinId);
+
+            if(item == ioPins.end()) {
+                return;
+            }
+
+            item->second->pinConfig(config);
+        }
+
 
         bool isIoOutput(pinIdDefinition _pinId) {
             auto item = ioPins.find(_pinId);

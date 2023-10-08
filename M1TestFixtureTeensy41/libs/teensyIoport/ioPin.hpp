@@ -41,11 +41,16 @@ class TIOPin {
         TIOPin() = delete;
         TIOPin(ADC_Module* _adc, pinIdDefinition _pinId, uint8_t _pin, uint8_t _muxChannel, uint8_t _pinType, String _pinName, uint8_t _pinNumber, String _pinDesc, double _calib, double _reqValue, float _minValue, float _maxValue, groupdDefinition _group = groupdDefinition::NotDefinedGroup): adc(_adc), pinId(_pinId), pin(_pin), muxChannel(int2muxSelection(_muxChannel)), pinType(_pinType), pinName(_pinName), pinNumber(_pinNumber), pinDesc(_pinDesc), calib(_calib), reqValue(_reqValue), minValue(_minValue), maxValue(_maxValue), group(_group) {
             plogger->info(plogger->printHeader, (char*) __FILE__, __LINE__, "Adding IO-> pin:  pinName %s(%d), hw pin: %2d, muxChannel: %d, pin type: (%d), minValue = %f, maxValue = %f", pinName.c_str(), pinIdDefinition2Int(pinId), pin, muxChannel, pinType, minValue, maxValue);
+            Serial.printf("pin = %d to mode %d\n\r, pin, mode");
             pinMode(pin, pinType & 0x03);
             pinMode(ADChSel0, OUTPUT);
             pinMode(ADChSel1, OUTPUT);
             pinMode(ADChSel2, OUTPUT);
         };
+
+        void pinConfig(int mode) {
+            pinMode(pin, mode);
+        }
 
         uint8_t get_pin() {
             return pin;
