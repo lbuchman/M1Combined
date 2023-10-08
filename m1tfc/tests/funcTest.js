@@ -86,7 +86,7 @@ module.exports = class FuncTest {
                 /* eslint-disable dot-notation */
                 throw new Error('Invalid MAC Address, check OTP');
             }
-            this.logger.info('MAC address as expected');
+            this.logger.info(`MAC address is ${macValue.mac.toLowerCase()} as expected`);
             let isM1TestFileFlagSet;
             try {
                 isM1TestFileFlagSet = await client.execCommand(`ls ${M1TestFileFlag}`);
@@ -212,7 +212,7 @@ module.exports = class FuncTest {
 
             await client.execCommand(`touch ${M1TestFileFlag}`);
             this.logger.info(`Creating file ${M1TestFileFlag}`);
-            db.updateFuncTestStatus(this.serial, utils.boolToInt(true));
+            this.db.updateFuncTestStatus(this.serial, utils.boolToInt(true));
             this.logger.info('Functional test passed');
             await client.execCommand('halt');
             await delay('sync');
@@ -222,7 +222,7 @@ module.exports = class FuncTest {
         }
         catch (err) {
             const dbError = this.exceptionToErrorCode(err.message);
-            this.db.updateErrorCode(this.serial, errorCodes.codes[dbError.error].errorCode, dbError.sufx);
+            this.db.updateErrorCode(this.serial, errorCodes.codes[dbError].errorCode, dbError.sufx);
 
             this.logger.error(err.message);
             // if (err.stack) this.logger.debug(err.stack);
