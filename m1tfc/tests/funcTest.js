@@ -53,7 +53,7 @@ module.exports = class FuncTest {
             const macProgram = new ProgramMac(this.config, this.serial, this.logger);
             const macValue = await macProgram.getMac(programmer, false);
             const macAddress = macValue.mac;
-            if (macAddress === '00:00:00:00:00:00') {
+            if (!macAddress || macAddress === '00:00:00:00:00:00') {
                 throw new Error('MAC Address is not programmed');
             }
             this.logger.info(`MAC: ${macAddress}`);
@@ -65,7 +65,6 @@ module.exports = class FuncTest {
             await delay(100);
             await testBoardLink.targetPower(true);
             await testBoardLink.batteryOn(true);
-            db = sqliteDriver.initialize(this.logger);
             db.updateSerial(this.serial);
             this.logger.info('Waiting for the target to boot');
 
@@ -244,6 +243,7 @@ module.exports = class FuncTest {
             case 'No login promt, did M1-3200 boot?': return { error: 'UUT_TERM', sufx: 'TE' };
             case 'ssh reconnect failed': return { error: 'SSH_RECON', sufx: 'TE' };
             case 'timeout waiting for DFU device': return { error: 'DFU_STM', sufx: 'TE' };
+            case 'MAC Address is not programmed': return { error: 'NO_OTP_MAC', sufx: 'E' };
             default:
                 return 'FUNC_EXCEPT';
         }
