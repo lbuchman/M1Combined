@@ -52,6 +52,9 @@ const errorCodes = {
     UUT_TERM: { errorCode: '00000UUT_TERM', test: 'FUNC', desc: 'UUT terminal login error, see logs' },
     SSH_RECON: { errorCode: '0000SSH_RECON', test: 'FUNC', desc: 'ssh connection to UUT error, see logs' },
     DFU_STM: { errorCode: '000000DFU_STM', test: 'FUNC', desc: 'Program bootstrap STM file over DFU error' },
+    I2CBus1: { errorCode: '00000I2C_BUS1', test: 'FUNC', desc: 'I2C Bus 1 test failed' },
+    I2CBus02: { errorCode: '0000I2C_BUS02', test: 'FUNC', desc: 'I2C Bus 0,2 test failed' },
+    NO_OTP_MAC: { errorCode: '000NO_OTP_MAC', test: 'FUNC', desc: 'MAC Address is not programmed' },
     ERR_UNDEF: { errorCode: '0000ERR_UNDEF', test: 'Label', desc: 'Undefined error, i.e. no error code in the DB' }
 };
 

@@ -53,7 +53,7 @@ module.exports = class FuncTest {
             const macProgram = new ProgramMac(this.config, this.serial, this.logger);
             const macValue = await macProgram.getMac(programmer, false);
             const macAddress = macValue.mac;
-            if (macAddress === '00:00:00:00:00:00') {
+            if (!macAddress || macAddress === '00:00:00:00:00:00') {
                 throw new Error('MAC Address is not programmed');
             }
             this.logger.info(`MAC: ${macAddress}`);
@@ -65,8 +65,7 @@ module.exports = class FuncTest {
             await delay(100);
             await testBoardLink.targetPower(true);
             await testBoardLink.batteryOn(true);
-            db = sqliteDriver.initialize(this.logger);
-            db.updateSerial(this.serial);
+            this.db.updateSerial(this.serial);
             this.logger.info('Waiting for the target to boot');
 
             const m1TermLink = new M1TermLink(this.logger);
@@ -87,7 +86,7 @@ module.exports = class FuncTest {
                 /* eslint-disable dot-notation */
                 throw new Error('Invalid MAC Address, check OTP');
             }
-            this.logger.info('MAC address as expected');
+            this.logger.info(`MAC address is ${macValue.mac.toLowerCase()} as expected`);
             let isM1TestFileFlagSet;
             try {
                 isM1TestFileFlagSet = await client.execCommand(`ls ${M1TestFileFlag}`);
@@ -109,10 +108,27 @@ module.exports = class FuncTest {
                 this.logger.info('Connected to Target');
             }
 
+            this.logger.debug('Testing I2C Bus 1 Master/Slave connectivity');
+            try {
+                await client.execCommand('i2cdetect -y 1 | grep "50 51 52 UU 54 55 56 57"');
+                this.logger.info('I2C Bus 1 test passed');
+            }
+            catch (err) {
+                this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus1'].errorCode, 'E');
+                this.logger.error('I2C Bus 1 test failed');
+            }
 
-            this.logger.debug('Testing I2C Master/Slave connectivity');
-            await client.execCommand('i2cdetect -y 1 | grep "50 51 52 UU 54 55 56 57"', 2000);
-            this.logger.info('I2C test passed');
+            this.logger.debug('Testing I2C Bus 0,2 Master/Slave connectivity');
+            try {
+                await client.execCommand('i2cdetect -y 0 | grep "70 -- -- -- -- -- -- --"');
+                this.logger.info('I2C Bus 0,2 test passed');
+            }
+            catch (err) {
+                this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus02'].errorCode, 'E');
+                this.logger.error('I2C Bus 0 & 2 test failed');
+            }
+
+
             await client.execCommand(`dd if=/dev/urandom of=${controlFIle} bs=${sRamSize} count=1`);
             await client.execCommand(`dd if=${controlFIle} of=${sramFIle} bs=${sRamSize} count=1`);
             await client.execCommand('sync');
@@ -196,7 +212,7 @@ module.exports = class FuncTest {
 
             await client.execCommand(`touch ${M1TestFileFlag}`);
             this.logger.info(`Creating file ${M1TestFileFlag}`);
-            db.updateFuncTestStatus(this.serial, utils.boolToInt(true));
+            this.db.updateFuncTestStatus(this.serial, utils.boolToInt(true));
             this.logger.info('Functional test passed');
             await client.execCommand('halt');
             await delay('sync');
@@ -206,7 +222,7 @@ module.exports = class FuncTest {
         }
         catch (err) {
             const dbError = this.exceptionToErrorCode(err.message);
-            this.db.updateErrorCode(this.serial, errorCodes.codes[dbError.error].errorCode, dbError.sufx);
+            this.db.updateErrorCode(this.serial, errorCodes.codes[dbError].errorCode, dbError.sufx);
 
             this.logger.error(err.message);
             // if (err.stack) this.logger.debug(err.stack);
@@ -227,6 +243,7 @@ module.exports = class FuncTest {
             case 'No login promt, did M1-3200 boot?': return { error: 'UUT_TERM', sufx: 'TE' };
             case 'ssh reconnect failed': return { error: 'SSH_RECON', sufx: 'TE' };
             case 'timeout waiting for DFU device': return { error: 'DFU_STM', sufx: 'TE' };
+            case 'MAC Address is not programmed': return { error: 'NO_OTP_MAC', sufx: 'E' };
             default:
                 return 'FUNC_EXCEPT';
         }
