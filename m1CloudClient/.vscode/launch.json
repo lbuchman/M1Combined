@@ -50,7 +50,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1CloudClient.js",
-            "args": ["uploadfw", "-c", "/home/lbuchman/myGitHub/M1Combined/tfcroncli/m1client_42dbae8_amd64.snap", "-t", "/home/lbuchman/fw/m1firmware.txz", "-m", "/home/lbuchman/fw/fsbl.stm32", "-s", "/home/lbuchman/myGitHub/M1Combined/m1tfd1_AAB45432_amd64.snap"]
+            "args": ["uploadfw", "-c", "/home/lenel/M1Combined/tfcroncli/m1client_d64e2ee_amd64.snap", "-t", "/home/lenel/m1mtf/m1firmware.txz", "-m", "/home/lenel/m1mtf//fsbl.stm32", "-s", "/home/lenel/M1Combined/m1tfd1_3bbbb6ac_amd64.snap"]
         }
     ]
 }

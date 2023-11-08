@@ -9,6 +9,6 @@ Missing
 2. USB drive flash
 3. M1 bat switch pins check
 
- m1CloudClient-linux uploadfw -t /home/lbuchman/data/m1mtf/m1firmware.txz  -m /home/lbuchman//data/m1mtf//fsbl.stm32  -s  /home/lbuchman/data/myGitHub/M1Combined/m1tfd1_912a4654_amd64.snap -c /home/lbuchman//data/myGitHub/M1Combined/tfcroncli/m1client_8af40c74_amd64.snap
+m1CloudClient-linux uploadfw -t /home/lenel/m1mtf/m1firmware.txz  -m /home/lenel/m1mtf//fsbl.stm32  -s  /home/lenel/M1Combined/m1tfd1_912a4654_amd64.snap -c /home/lenel/M1Combined/tfcroncli/m1client_8af40c74_amd64.snap
 
 
