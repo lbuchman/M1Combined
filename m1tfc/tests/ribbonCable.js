@@ -154,10 +154,14 @@ async function testI2Cpins(pins, logger, settoLevel) {
 
             // eslint-disable-next-line no-await-in-loop
             ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(pins[count].pinNameOnTestBoard)}`);
-            if (ret.status) {
+            if (!ret.status) {
                 logger.error(`Test Board Command failed on pinName=${pins[count].pinNameOnTestBoard}, ${ret.error}`);
                 db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'T');
                 retValue = false;
+                return false;
+            }
+            if (ret.value === undefined) {
+                db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'E');
                 return false;
             }
             if (ret.value > 3) ret.value = 1;
@@ -173,13 +177,13 @@ async function testI2Cpins(pins, logger, settoLevel) {
         if (!retValue) {
             return false;
         }
+        return true;
     }
     catch (err) {
         logger.error(err);
         // logger.debug(err.stack);
         return false;
     }
-    return true;
 }
 
 async function testRs422(logger) {
