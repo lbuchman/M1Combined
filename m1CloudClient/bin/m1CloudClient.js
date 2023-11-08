@@ -8,10 +8,14 @@ const azure = require('azure-storage');
 const path = require('path');
 const azureOp = require('../src/azureOp');
 
-const conString = 'DefaultEndpointsProtocol=https;AccountName=lenels2production;AccountKey=QYLAhAvw4SowA6HJqBm2CTkR3Q36PWxfFUPDhqZ4yEyK6lJNb02GEwS/Z/kF8+qMEPs6VAzSnHHt+AStrIr3VQ==;EndpointSuffix=core.windows.net';
 const logContainer = 'm1-3200-logs';
 const secretsContainer = 'm1-3200-secrets';
 const firmwareContainer = 'firmware';
+
+function getConnectionString() {
+    const config = fs.readJSONSync('/var/snap/m1tfd1/current/config.json');
+    return config.conString;
+}
 
 program
     .name('m1cli')
@@ -29,7 +33,7 @@ program.command('uploadfw')
         const logfile = console;
         logfile.info('Updating files on the Cloud ...');
         try {
-            const blobSvc = azure.createBlobService(conString);
+            const blobSvc = azure.createBlobService(getConnectionString());
             const now = new Date();
             const manifestFile = [];
             const files = [];
@@ -76,7 +80,7 @@ program.command('getsecrets')
     .action(async (timeStamp) => {
         const logfile = console;
         try {
-            const blobSvc = azure.createBlobService(conString);
+            const blobSvc = azure.createBlobService(getConnectionString());
             const entries = await azureOp.getList(blobSvc, secretsContainer, [], timeStamp, null);
             if (!entries && !entries.length) {
                 logfile.info('No files to download');
@@ -103,7 +107,7 @@ program.command('getlog')
     .action(async (str, options) => {
         const logfile = console;
         try {
-            const blobSvc = azure.createBlobService(conString);
+            const blobSvc = azure.createBlobService(getConnectionString());
             const ret = await azureOp.getFileFullname(blobSvc, `${logContainer}-${options.teststation}`, str);
             if (ret.length === 0) {
                 logfile.info('no such log is available');
@@ -136,7 +140,7 @@ program.command('listsecrets')
             return;
         }
         try {
-            const blobSvc = azure.createBlobService(conString);
+            const blobSvc = azure.createBlobService(getConnectionString());
             const entries = await azureOp.getList(blobSvc, secretsContainer, [], date, null);
             entries.forEach((element) => {
                 logfile.log(element.name);
@@ -159,7 +163,7 @@ program.command('listlogs')
             return;
         }
         try {
-            const blobSvc = azure.createBlobService(conString);
+            const blobSvc = azure.createBlobService(getConnectionString());
             const entries = await azureOp.getList(blobSvc, `${logContainer}-${options.teststation}`, [], date, null);
             entries.forEach((element) => {
                 logfile.log(element.name);
