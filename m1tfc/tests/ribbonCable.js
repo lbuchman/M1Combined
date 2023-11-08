@@ -140,6 +140,7 @@ async function testI2Cpins(pins, logger, settoLevel) {
                 retValue = false;
                 db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'T');
                 logger.error(`Target Board control command failed on ${pins[count].name}`);
+                return false;
             }
 
             // eslint-disable-next-line no-await-in-loop
@@ -148,24 +149,25 @@ async function testI2Cpins(pins, logger, settoLevel) {
                 retValue = false;
                 logger.error(`Target Board Command failed on ${pins[count].name}`);
                 db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'T');
+                return false;
             }
 
             // eslint-disable-next-line no-await-in-loop
             ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(pins[count].pinNameOnTestBoard)}`);
-            if (!ret.status) {
+            if (ret.status) {
                 logger.error(`Test Board Command failed on pinName=${pins[count].pinNameOnTestBoard}, ${ret.error}`);
                 db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'T');
                 retValue = false;
+                return false;
             }
             if (ret.value > 3) ret.value = 1;
             if (ret.value !== settoLevel) {
                 logger.error(`Test Failed: Incorrect voltage level on Pin=${pins[count].pinNameOnTestBoard}, expected ${settoLevel}, actual=${ret.value}`);
                 db.updateErrorCode(process.env.serial, errorCodes.codes[pins[count].pinNameOnTestBoard].errorCode, 'E');
                 retValue = false;
+                return false;
             }
-            else {
-                logger.debug(`Passed pinName=${pins[count].pinNameOnTestBoard}, actual = ${ret.value}, ${settoLevel} `);
-            }
+            logger.debug(`Passed pinName=${pins[count].pinNameOnTestBoard}, actual = ${ret.value}, ${settoLevel} `);
         }
 
         if (!retValue) {
