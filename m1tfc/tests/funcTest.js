@@ -222,7 +222,7 @@ module.exports = class FuncTest {
         }
         catch (err) {
             const dbError = this.exceptionToErrorCode(err.message);
-            this.db.updateErrorCode(this.serial, errorCodes.codes[dbError].errorCode, dbError.sufx);
+            this.db.updateErrorCode(this.serial, errorCodes.codes[dbError].error, dbError.sufx);
 
             this.logger.error(err.message);
             // if (err.stack) this.logger.debug(err.stack);
@@ -244,6 +244,7 @@ module.exports = class FuncTest {
             case 'ssh reconnect failed': return { error: 'SSH_RECON', sufx: 'TE' };
             case 'timeout waiting for DFU device': return { error: 'DFU_STM', sufx: 'TE' };
             case 'MAC Address is not programmed': return { error: 'NO_OTP_MAC', sufx: 'E' };
+            case 'not mounted': return { error: 'PEN_DRIVE', sufx: 'E' };
             default:
                 return 'FUNC_EXCEPT';
         }
