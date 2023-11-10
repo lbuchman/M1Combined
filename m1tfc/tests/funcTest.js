@@ -222,7 +222,7 @@ module.exports = class FuncTest {
         }
         catch (err) {
             const dbError = this.exceptionToErrorCode(err.message);
-            this.db.updateErrorCode(this.serial, errorCodes.codes[dbError].error, dbError.sufx);
+            this.db.updateErrorCode(this.serial, errorCodes.codes[dbError.error].errorCode, dbError.sufx);
 
             this.logger.error(err.message);
             // if (err.stack) this.logger.debug(err.stack);
