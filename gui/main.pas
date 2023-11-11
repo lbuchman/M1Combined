@@ -925,11 +925,16 @@ begin
     test.methodPtr(self);
     AddToProgressBar(test.progressValue);
     testReturnStatus := testRet;
-    if testReturnStatus <> NormalExit then break;
+    if testReturnStatus <> NormalExit then begin
+     // Memo1.Lines.Add(logger.log('info', modeStr, 'Test return status - false'));
+      break;
+    end;
     // testReturnStatus is global since method is procedure
+
   end;
 
   if TestMode = TestingMode.commission then DoCleanupCmd;
+
   if (testReturnStatus <> NormalExit) and (testReturnStatus <> ProcessTerminated) then
   begin
     DoLabelError;

@@ -19,7 +19,7 @@ uses
 
 begin
   RequireDerivedFormResource := True;
-  Application.Scaled := True;
+  Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TmainForm, mainForm);
   Application.CreateForm(TLoggerForm, LoggerForm);
