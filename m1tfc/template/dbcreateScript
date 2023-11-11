@@ -13,8 +13,8 @@ CREATE TABLE records (
 					  ictTestPassed  Integer,
 					  functionalTestPassed  Integer,
 					  flashProgrammed  Integer,
-					  cpuSerial Text,
-					  cloudPushed Integer.
+					  cpuSerial Text UNIQUE,
+					  cloudPushed Integer,
 					  errorcode Text
 					);
 
