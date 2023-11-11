@@ -415,7 +415,7 @@ program.command('makelabel')
                 logfile.debug('Sending data to the printer');
                 if (eepromData.serial.substring(3).slice(0, -2) !== options.serial) {
                     db.updateErrorCode(options.serial, errorCodes.codes['SERIAL_MISSMATH'].errorCode, 'E');
-                    throw new Error(`serial number ${options.serial} does not match EEPROM value ${eepromData.serial.substring(3)}`);
+                    throw new Error(`serial number ${options.serial} does not match EEPROM value ${eepromData.serial.substring(3).slice(0, -2)}`);
                 }
 
                 await utils.printLabel(uid, eepromData.serial.substring(3), configData.vendorSite, [], logger);

@@ -938,6 +938,7 @@ begin
   if (testReturnStatus <> NormalExit) and (testReturnStatus <> ProcessTerminated) then
   begin
     DoLabelError;
+    resetLeds;
   end
   else
   if (testReturnStatus = NormalExit) then Memo1.Lines.Add(logger.log('info', modeStr, 'Success! All Done'));
