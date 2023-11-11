@@ -382,7 +382,7 @@ program.command('makelabel')
             if (options.error) {
                 dbError = db.getErrorCode(options.serial);
                 if (!dbError.length) {
-                    dbError = ['0000ERR_NONE'];
+                    dbError = ['0000ERR_UNDEF'];
                 }
                 const uiD = '0';
                 await utils.printLabel(uiD, options.serial, configData.vendorSite, dbError, logger);
@@ -414,6 +414,7 @@ program.command('makelabel')
 
                 logfile.debug('Sending data to the printer');
                 if (eepromData.serial.substring(3).slice(0, -2) !== options.serial) {
+                    db.updateErrorCode(options.serial, errorCodes.codes['SERIAL_MISSMATH'].errorCode, 'E');
                     throw new Error(`serial number ${options.serial} does not match EEPROM value ${eepromData.serial.substring(3)}`);
                 }
 

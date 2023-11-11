@@ -21,7 +21,6 @@ const controlFIle = '/home/s2user/eeprom1';
 const wdScript = '/home/s2user/wd';
 const M1TestFileFlag = '/home/s2user/testpassed';
 
-let db;
 let client;
 
 module.exports = class FuncTest {
@@ -246,7 +245,7 @@ module.exports = class FuncTest {
             case 'MAC Address is not programmed': return { error: 'NO_OTP_MAC', sufx: 'E' };
             case 'not mounted': return { error: 'PEN_DRIVE', sufx: 'E' };
             default:
-                return 'FUNC_EXCEPT';
+                return { error: 'FUNC_EXCEPT', sufx: 'T' };
         }
     }
 };

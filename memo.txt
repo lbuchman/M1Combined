@@ -12,3 +12,4 @@ Missing
 m1CloudClient-linux uploadfw -t /home/lenel/m1mtf/m1firmware.txz  -m /home/lenel/m1mtf//fsbl.stm32  -s  /home/lenel/M1Combined/m1tfd1_912a4654_amd64.snap -c /home/lenel/M1Combined/tfcroncli/m1client_8af40c74_amd64.snap
 
 
+INSERT INTO uid (uid) values("58:FC:C8:0F:42:40");
