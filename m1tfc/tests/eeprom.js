@@ -70,12 +70,12 @@ function getSerialN(serial, vendorSite) {
     return `${serial}${vendorSite}`;
 }
 
-async function updateEEPRom(serial, eeeproverwrite, vendorSite, logger) {
+async function updateEEPRom(serial, eepromoverwrite, vendorSite, logger) {
     const db = sqliteDriver.initialize(logger);
     const dbRecord = db.getRecord(serial);
     utils.checkDbRecord(dbRecord, false);
     db.updateSerial(serial);
-    const overwrite = eeeproverwrite ? 1 : 0;
+    const overwrite = eepromoverwrite ? 1 : 0;
     logger.info('Updating I2C EEPROM Data ...');
     const ret = await targetICTLink.sendCommand(`writeeepromdata SN=${getSerialN(serial, vendorSite)} SK=${getSecret(32)} ${overwrite}`);
     if (!ret.status) {
