@@ -302,7 +302,7 @@ program.command('cleanup')
             if (options.failed) {
                 errSuf = 'E';
             }
-            const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${options.vendorSite}${errSuf}.txz`;
+            const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${configData.vendorSite}${errSuf}.txz`;
             await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
             // console.info(`logfile to created  ${tarFile}`);
             await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, false);
