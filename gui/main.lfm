@@ -1,7 +1,7 @@
 object mainForm: TmainForm
-  Left = 965
+  Left = 787
   Height = 1451
-  Top = 349
+  Top = 287
   Width = 2875
   BorderWidth = 2
   ClientHeight = 1408
@@ -1491,7 +1491,7 @@ object mainForm: TmainForm
       MaxLength = 10
       NumbersOnly = True
       TabOrder = 0
-      Text = '3923200042'
+      Text = '3023370015'
     end
     object Label1: TLabel
       Left = 1351

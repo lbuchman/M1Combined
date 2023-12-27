@@ -298,11 +298,11 @@ program.command('cleanup')
             else {
                 uid = utils.macToUid(mac);
             }
-            let errSuf = '';
-            if (options.failed) {
-                errSuf = 'E';
-            }
-            const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${errSuf}.txz`;
+            // let errSuf = '';
+            // if (options.failed) {
+            //    errSuf = 'E';
+            // }
+            const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${options.vendorSite}.txz`;
             await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
             // console.info(`logfile to created  ${tarFile}`);
             await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, false);

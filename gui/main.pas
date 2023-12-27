@@ -933,7 +933,7 @@ begin
 
   end;
 
-  if TestMode = TestingMode.commission then DoCleanupCmd;
+  { if TestMode = TestingMode.commission then } DoCleanupCmd;
 
   if (testReturnStatus <> NormalExit) and (testReturnStatus <> ProcessTerminated) then
   begin
