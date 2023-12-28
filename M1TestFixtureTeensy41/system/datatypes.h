@@ -98,7 +98,7 @@ enum class pinIdDefinition : uint8_t {
     M1Boot1          = 46,
     Sol1             = 47,
     Sol2             = 48,
-    Sol3             = 49,
+    LeverSensor      = 49,
     END_OF_LIST      = 50
 };
 

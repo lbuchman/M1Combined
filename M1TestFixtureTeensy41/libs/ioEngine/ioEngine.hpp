@@ -88,7 +88,7 @@ class TioEngine {
             { pinIdDefinition::Buzz, new TIOPin(nullptr, pinIdDefinition::Buzz, 4, 0, OUTPUT, "Buzz", 0, "Buzz", 0, 1.0, 0, 0)},
             { pinIdDefinition::Sol1, new TIOPin(nullptr, pinIdDefinition::Sol1, 9, 0, OUTPUT, "Sol1", 0, "Sol1", 0, 1.0, 0, 0)},
             { pinIdDefinition::Sol2, new TIOPin(nullptr, pinIdDefinition::Sol2, 10, 0, OUTPUT, "Sol2", 0, "Sol2", 0, 1.0, 0, 0)},
-            { pinIdDefinition::Sol3, new TIOPin(nullptr, pinIdDefinition::Sol3, 11, 0, OUTPUT, "Sol3", 0, "Sol3", 0, 1.0, 0, 0)}
+            { pinIdDefinition::LeverSensor, new TIOPin(nullptr, pinIdDefinition::LeverSensor, 11, 0, INPUT_PULLUP, "LeverSensor", 0, "LeverSensor", 0, 1.0, 0, 0)}
         };
         bool beeperPulse;
         int  beeperCount;
