@@ -180,7 +180,8 @@ begin
     @DoLabelSwitch, True);
 
   LedTimer.Enabled := True;
-  DebugLevel := '1';
+  debugLevel := GetEnvironmentVariable('m1tfdebug');
+  if debugLevel <> '1' then DebugLevel := '0';
   Memo1.Font.Size := 12;
 
   pid := IntToStr(system.GetProcessID);
