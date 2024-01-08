@@ -57,7 +57,7 @@ module.exports = class IctTestRunner {
             }
             catch (err) {
                 /* eslint-disable dot-notation */
-                this.db.updateErrorCode(process.env.serial, errorCodes.codes['STM'].errorCode, 'ET');
+                this.db.updateErrorCode(process.env.serial, errorCodes.codes['STM'].errorCode, 'E');
                 throw err;
             }
             if (!skipTestpointCheck) await regulators.testDDRVoltage(this.tolerance, this.logger, this.db);
