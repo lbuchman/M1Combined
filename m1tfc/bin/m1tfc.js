@@ -12,6 +12,7 @@ const config = require('../utils/config');
 const exitCodes = require('../src/exitCodes');
 const m1boot = require('../tests/m1boot');
 const os = require('../utils/os');
+const fs = require('fs-extra');
 const Eeprom = require('../tests/programEeprom');
 const FlashEmmc = require('../tests/flashEmmc');
 const FuncTest = require('../tests/funcTest');
@@ -205,7 +206,8 @@ program.command('flash')
             process.env.fwDir = configData.m1fwBase;
             logfile = logger.getLogger(options.serial, '   eMMC', options.serial, configData.m1mtfDir, options.debug);
             logfile.info('--------------------------------------------');
-            logfile.info('Flashing eMMC ...');
+            const revisionFile = fs.readFileSync(`${configData.m1fwBase}/VERSION`);
+            logfile.info(`Flashing eMMC revision: ${revisionFile.toString()}`);
             const flashEmmc = new FlashEmmc(configData.layoutFilePath, options.serial, logfile);
             await flashEmmc.init(configData.testBoardTerminalDev, configData.serialBaudrate);
             await flashEmmc.run(configData.programmingCommand, configData.layoutFilePath);
