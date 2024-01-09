@@ -98,7 +98,7 @@ program.command('ict')
             const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
-            logfile.info(`Coin Cell Battery level:  ${options.cellBatTol}`);
+            // logfile.info(`Coin Cell Battery level:  ${options.cellBatTol}`);
             if ((options.cellBatTol !== 'new') && (options.cellBatTol !== 'used')) await errorAndExit('cellBatTol argument  -b option is not valid', logfile);
             process.env.cellBatTol = options.cellBatTol;
             let skipTestpointCheck = false;

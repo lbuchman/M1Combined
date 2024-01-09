@@ -49,6 +49,7 @@ module.exports = class IctTestRunner {
         let ret = true;
         try {
             await common.initializeTestFixture(programmer, false, this.stm32, this.m1Dev, this.logger, this.db);
+            await regulators.checkLeverState(this.logger, this.db);
             if (!skipTestpointCheck) this.logger.info('Testing test points ...');
             if (!skipTestpointCheck) await regulators.test(this.tolerance, this.logger, this.db);
             await regulators.cellBatTest(this.logger, this.db);
