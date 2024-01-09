@@ -114,7 +114,7 @@ class DBClass {
     *
     */
     getErrorCode(serial) {
-        if (!this.db) throw new Error('DB file is not open, cannot get next MAC');
+        if (!this.db) throw new Error('DB file is not open, cannot get next getErrorCode()');
         const select = this.db.prepare('SELECT errorcode  FROM records  where vendorSerial = ?');
         const retValue = select.all(serial);
         if (retValue && retValue[0] && retValue[0].errorcode) {

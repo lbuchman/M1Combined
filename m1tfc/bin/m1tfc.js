@@ -114,7 +114,7 @@ program.command('ict')
             logfile.error(err);
             // logfile.error(err.stack);
             /* eslint-disable dot-notation */
-            db.updateErrorCode(options.serial, errorCodes.codes['ICT_EXCEPT'].errorCode, 'TE');
+            db.updateErrorCode(options.serial, errorCodes.codes['ICT_EXCEPT'].errorCode, 'E');
             await delay(100);
             process.exit(exitCodes.commandFailed);
         }
@@ -302,7 +302,7 @@ program.command('cleanup')
             if (options.failed) {
                 errSuf = 'E';
             }
-            const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${errSuf}.txz`;
+            const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${configData.vendorSite}${errSuf}.txz`;
             await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
             // console.info(`logfile to created  ${tarFile}`);
             await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, false);
@@ -381,9 +381,8 @@ program.command('makelabel')
             }
             if (options.error) {
                 dbError = db.getErrorCode(options.serial);
-                if (!dbError || !dbError.length) {
-                    const undefErrorCode = errorCodes.codes['ERR_UNDEF'].errorCode;
-                    dbError = [undefErrorCode];
+                if (!dbError.length) {
+                    dbError = ['0000ERR_UNDEF'];
                 }
                 const uiD = '0';
                 await utils.printLabel(uiD, options.serial, configData.vendorSite, dbError, logger);
@@ -414,11 +413,13 @@ program.command('makelabel')
                 }
 
                 logfile.debug('Sending data to the printer');
-                if (eepromData.serial.substring(3).slice(0, -2) !== options.serial) {
-                    throw new Error(`serial number ${options.serial} does not match EEPROM value ${eepromData.serial.substring(3)}`);
+                const eepromSerial = eepromData.serial.substring(3).slice(0, -2);
+                if (eepromSerial !== options.serial) {
+                    db.updateErrorCode(options.serial, errorCodes.codes['SERIAL_MISSMATH'].errorCode, 'E');
+                    throw new Error(`serial number ${options.serial} does not match EEPROM value ${eepromData.serial.substring(3).slice(0, -2)}`);
                 }
 
-                await utils.printLabel(uid, eepromData.serial.substring(3), configData.vendorSite, [], logger);
+                await utils.printLabel(uid, eepromData.serial.substring(3).slice(0), '', [], logger);
                 logfile.debug('Label is printed');
                 await testBoardLink.targetPower(false);
                 await testBoardLink.batteryOn(false);
@@ -427,13 +428,11 @@ program.command('makelabel')
             }
         }
         catch (err) {
-            if (err.message && !err.message === 'Not printing the label, no errors in the database') {
+            if (err.message) {
                 logfile.error(err.message);
             }
-            else {
-                await buzzer.buzzerBeepFailed();
-            }
-            // logfile.debug(err.stack);
+
+            await buzzer.buzzerBeepFailed();
             await delay(100);
 
             await testBoardLink.targetPower(false);

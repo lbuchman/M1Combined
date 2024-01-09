@@ -87,7 +87,17 @@ int setupFw() {
     static Task targetPowerSwitch(TASK_MILLISECOND * 100, TASK_FOREVER, "targetPowerSwitch Task", [](void) -> void {
         int powerSwitchValue = round(pioEngine->getIoPinValue(pinIdDefinition::SwitchTargetPower));
         int bootPinSwitchValue = round(pioEngine->getIoPinValue(pinIdDefinition::BootSwitch) / 3);
-
+        int LeverSensor = round(pioEngine->getIoPinValue(pinIdDefinition::LeverSensor) / 3);
+        
+        if (LeverSensor) {
+             pioEngine->setIoPin(pinIdDefinition::TargetPwrControl, 0);
+             pioEngine->setIoPin(pinIdDefinition::BatEnable, 0);
+             pioEngine->setIoPin(pinIdDefinition::Sol2, 0);
+             return;
+        }
+        
+        pioEngine->setIoPin(pinIdDefinition::Sol2, 1);
+        
         if(powerSwitchValue == 0) {
             if(powerSwitchValue != targetPowerSwitchValue) {
                 int powerPinValue = pioEngine->getIoPinValue(pinIdDefinition::TargetPwrControl);

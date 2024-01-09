@@ -78,7 +78,6 @@ function checkFilesHash(manifestFile, dir) {
         hashSum.update(fileBuffer);
         if (hashSum.digest('hex') !== item.hash) throw new Error(`Hash missmatch, file ${item.filename} hash`);
     });
-
 }
 
 module.exports = {

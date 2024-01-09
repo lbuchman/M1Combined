@@ -15,7 +15,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["ict", "-d", "2", "-s", "3023200042", "-b", "used"]
+            "args": ["ict", "-d", "2", "-s", "3023370015", "-b", "used"]
         },
         {
             "type": "pwa-node",
@@ -63,7 +63,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["eeprom", "-d", "2", "-s", "3023200042" ]
+            "args": ["eeprom", "-d", "2", "-s", "3023370015" ]
         },
         {
             "type": "pwa-node",
@@ -99,7 +99,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["makelabel",  "-d", "2", "-s", "3023200042", "-e" ]
+            "args": ["makelabel",  "-d", "2", "-s", "3023370015" ]
         }
     ]
 }
