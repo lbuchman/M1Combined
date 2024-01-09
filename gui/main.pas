@@ -16,7 +16,7 @@ const
   ProcessExecError = 1;
   OtpIsNotBlank = 10;
   EepromIsntBlank = 11;
-
+  FW_Dir = '/home/lenel/m1mtf/stm32mp15-lenels2-m1/VERSION';
 
 type
   TMethodPtr = procedure(Sender: TObject) of object;
@@ -149,6 +149,7 @@ var
   mainForm: TmainForm;
 
 implementation
+
 
 {$R *.lfm}
 
@@ -464,6 +465,7 @@ end;
 function TmainForm.FlashSwitchClick(Sender: TObject): integer;
 var
   arg: array[0..8] of string;
+  revFile : TStringList;
 begin
   FlashSwitch.LedValue := False;
   if targetVendorSerial.Text = '' then exit;
@@ -472,6 +474,13 @@ begin
   begin
     exit;
   end;
+   with TStringList.Create do
+    try
+      LoadFromFile(FW_Dir);
+      Memo1.Lines.Add(logger.log('info', 'eMMC', 'Programming FW Rev: ' + Text));
+    finally
+      Free;
+    end;
 
   FlashSwitch.LedValue := False;
   arg[0] := '-s';
