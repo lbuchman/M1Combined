@@ -94,6 +94,20 @@ program.command('ict')
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.m1mtfDir, options.debug);
             db = sqliteDriver.initialize(logfile);
+            const devices = [
+                { name: '/dev/usb/lp11', desc: 'Label Printer' },
+                { name: '/dev/ttyACM01', desc: 'Testboard Teensy' },
+                { name: '/dev/ttyUSB01', desc: 'M1 Terminal Serial Converter' }
+            ];
+            devices.forEach(async (deviceFile) => {
+                const exists = fs.existsSync(deviceFile.name);
+                if (!exists) {
+                    await errorAndExit(`${deviceFile.desc} is not found. Check connections and retry the test.`, logfile);
+                }
+            });
+
+            await delay(500);
+
             if (!options.cellBatTol) await errorAndExit('must define cellBatTol', logfile);
             logfile.info(`Executing ICT command ${configData.ictFWFilePath} ...`);
             const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
