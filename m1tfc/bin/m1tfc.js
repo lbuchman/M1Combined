@@ -99,6 +99,11 @@ program.command('ict')
                 { name: '/dev/ttyACM01', desc: 'Testboard Teensy' },
                 { name: '/dev/ttyUSB01', desc: 'M1 Terminal Serial Converter' }
             ];
+
+            if (process.env.m1tfdebug !== 1) {
+                devices.splice(0, 1);
+            }
+
             devices.forEach(async (deviceFile) => {
                 const exists = fs.existsSync(deviceFile.name);
                 if (!exists) {
