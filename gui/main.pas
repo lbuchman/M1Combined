@@ -41,7 +41,7 @@ type
   { TmainForm }
 
   TmainForm = class(TForm)
-    Label2: TLabel;
+    SyncFailedLabel: TLabel;
     Re_Test: TAction;
     StopTestClick: TAction;
     QuitClick: TAction;
@@ -82,7 +82,8 @@ type
     targetVendorSerial: TEdit;
     LogsOpenDialog1: TOpenDialog;
     TestTumer: TTimer;
-    LedTimer: TTimer;
+    SyncLelLedTimer: TTimer;
+    SyncLabelLedTimer: TTimer;
     procedure AbountMenuItemClick(Sender: TObject);
     procedure Action2Execute(Sender: TObject);
     procedure LogsMenuItemClick(Sender: TObject);
@@ -100,7 +101,7 @@ type
     procedure EEPROMSwitchClick_Wrapper(Sender: TObject);
     function AppsCheckSwitchClick(Sender: TObject): integer;
     procedure InterruptMenuItemClick(Sender: TObject);
-    procedure LedTimerTimer(Sender: TObject);
+    procedure LedsTimer(Sender: TObject);
     function MacProgSwitchClick(Sender: TObject): integer;
     procedure Memo1DblClick(Sender: TObject);
     procedure Commission(Sender: TObject);
@@ -114,6 +115,7 @@ type
     procedure DoLabelSwitchClick_Wrapper(Sender: TObject);
     procedure FlashSwitchClick_Wrapper(Sender: TObject);
     procedure AppsCheckSwitchClick_Wrapper(Sender: TObject);
+    procedure SyncLabelLedTimerTimer(Sender: TObject);
   private
     TestMode: TestingMode;
     AProcess: TProcess;
@@ -165,7 +167,7 @@ begin
   ClearBusyFlag;
   doOnes := True;
   configuration := ConfigurationGet;
-
+  SyncFailedLabel.Font.Color := clRed;
   Tests[0] := MakeTestRecord('ICT', 5, TMethodPtr(@ICTTestSwitchClick),
     @ICTTestSwitch, True);
   Tests[1] := MakeTestRecord('MAC', 3, TMethodPtr(@MacProgSwitchClick),
@@ -181,7 +183,7 @@ begin
   Tests[6] := MakeTestRecord('Label', 8, TMethodPtr(@DoLabelSwitchClick),
     @DoLabelSwitch, True);
 
-  LedTimer.Enabled := True;
+  SyncLelLedTimer.Enabled := True;
   debugLevel := GetEnvironmentVariable('m1tfdebug');
   if debugLevel <> '1' then DebugLevel := '0';
   Memo1.Font.Size := 12;
@@ -240,7 +242,7 @@ begin
   if busyFlag then
   begin
     DoLabelSwitch.LedValue := False;
-    exit;
+    exit(testRet);   ;
   end;
 
   arg[0] := '-s';
@@ -466,7 +468,6 @@ end;
 function TmainForm.FlashSwitchClick(Sender: TObject): integer;
 var
   arg: array[0..8] of string;
-  revFile : TStringList;
 begin
   FlashSwitch.LedValue := False;
   if targetVendorSerial.Text = '' then exit;
@@ -509,11 +510,11 @@ var
   arg: array[0..8] of string;
 begin
   FuncTestSwitch.LedValue := False;
-  if targetVendorSerial.Text = '' then exit;
+  if targetVendorSerial.Text = '' then exit(testRet);   ;
 
   if busyFlag then
   begin
-    exit;
+    exit(testRet);   ;
   end;
   FuncTestSwitch.LedValue := False;
   arg[0] := '-s';
@@ -545,7 +546,7 @@ begin
 
   if busyFlag then
   begin
-    exit;
+    exit(testRet);   ;
   end;
 
   ICTTestSwitch.LedValue := False;
@@ -580,7 +581,7 @@ begin
 
   if busyFlag then
   begin
-    exit;
+    exit(testRet);
   end;
 
   EEPROMSwitch.LedValue := False;
@@ -598,11 +599,11 @@ var
   arg: array[0..10] of string;
 begin
   EEPROMSwitch.LedValue := False;
-  if targetVendorSerial.Text = '' then exit;
+  if targetVendorSerial.Text = '' then exit(testRet);
 
   if busyFlag then
   begin
-    exit;
+    exit(testRet);
   end;
 
   EEPROMSwitch.LedValue := False;
@@ -615,13 +616,13 @@ begin
   Result := testRet;
 end;
 
-procedure TmainForm.LedTimerTimer(Sender: TObject);
+procedure TmainForm.LedsTimer(Sender: TObject);
 var
   test: TestRecord;
 begin
-  if LedTimer.Tag = 1 then
+  if SyncLelLedTimer.Tag = 1 then
   begin
-    LedTimer.Tag := 0;
+    SyncLelLedTimer.Tag := 0;
     exit;
   end;
   for test in Tests do
@@ -649,7 +650,6 @@ var
   Buffer: array[0..bufferSize] of byte;
   textToSee: ansistring;
   tmpInt: integer;
-  testbool: boolean;
   MemoCopyTxt: string;
 begin
   if command = 'cleanup' then
@@ -743,10 +743,10 @@ var
   retValue: integer;
 begin
   MacProgSwitch.LedValue := False;
-  if targetVendorSerial.Text = '' then exit;
+  if targetVendorSerial.Text = '' then exit(testRet);   ;
   if busyFlag then
   begin
-    exit;
+    exit(-1);
   end;
 
   MacProgSwitch.LedValue := False;
@@ -841,6 +841,17 @@ begin
   end;
   Panel1DblClick(Sender);
   AppsCheckSwitchClick(Sender);
+end;
+
+procedure TmainForm.SyncLabelLedTimerTimer(Sender: TObject);
+begin
+  if TTimer(Sender).tag = 0 then begin
+    exit;
+    SyncFailedLabel.Visible := False;
+  end;
+  if SyncFailedLabel.Visible = False then SyncFailedLabel.Visible := True
+  else SyncFailedLabel.Visible := False;
+
 end;
 
 procedure TmainForm.EEPROMSwitchClick_Wrapper(Sender: TObject);

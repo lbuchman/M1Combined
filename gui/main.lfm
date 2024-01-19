@@ -1866,12 +1866,12 @@ object mainForm: TmainForm
       ParentFont = False
       TabOrder = 7
     end
-    object Label2: TLabel
-      Left = 8
+    object SyncFailedLabel: TLabel
+      Left = 24
       Height = 37
-      Top = 26
-      Width = 380
-      Caption = 'Backup Sync Failed, '
+      Top = 24
+      Width = 779
+      Caption = 'Cloud Sync Failed 7days, contact LenelS2 '
       Font.Height = -31
       Font.Name = 'Monospace'
       Font.Style = [fsBold]
@@ -1885,10 +1885,10 @@ object mainForm: TmainForm
     Left = 2303
     Top = 10
   end
-  object LedTimer: TTimer
+  object SyncLelLedTimer: TTimer
     Enabled = False
-    Interval = 400
-    OnTimer = LedTimerTimer
+    Interval = 500
+    OnTimer = LedsTimer
     Left = 491
     Top = 137
   end
@@ -1966,5 +1966,12 @@ object mainForm: TmainForm
       OnExecute = QuitMenuItemClick
       ShortCut = 16465
     end
+  end
+  object SyncLabelLedTimer: TTimer
+    Tag = 1
+    Interval = 500
+    OnTimer = SyncLabelLedTimerTimer
+    Left = 224
+    Top = 152
   end
 end
