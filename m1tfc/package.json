@@ -33,6 +33,7 @@
     "serialport": "^10.5.0",
     "simple-tcpscan": "^1.0.0",
     "sprintf-js": "^1.1.2",
+    "systeminformation": "^5.21.22",
     "time-stamp": "^2.2.0",
     "winston": "^3.8.2"
   },
