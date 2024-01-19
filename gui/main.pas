@@ -41,6 +41,7 @@ type
   { TmainForm }
 
   TmainForm = class(TForm)
+    Label2: TLabel;
     Re_Test: TAction;
     StopTestClick: TAction;
     QuitClick: TAction;
@@ -353,7 +354,7 @@ begin
 
     str := AnsiMidStr(serial, 7, 4);
     intN := StrToInt(str);
-    if intN <= 1000 then
+    if (intN <= 9999) and (Length(str) = 4) then
     begin
       ret += ' S-' + str;
     end
