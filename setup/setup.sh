@@ -9,6 +9,7 @@ TESTSTATION=$4
 # Interface names may not match so mkake sure netplan names are correct
 # Mate disable screen timeout
 # sshd no password login
+# verify autossh service has correct port
 
 
 
