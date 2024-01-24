@@ -109,7 +109,7 @@ program.command('ict')
                 if (interfaces.find(o => o.iface === 'enp0s31f6') === undefined) {
                     await errorAndExit('Internet Ethernet jack is not plugged. Check connection and retry the test.', logfile);
                 }
-                if (interfaces.find(o => o.iface === 'enp1s0') === undefined) {
+                if (interfaces.find(o => o.ip4 === '192.168.1.100') === undefined) {
                     await errorAndExit('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.', logfile);
                 }  
             }
