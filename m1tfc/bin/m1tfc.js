@@ -100,17 +100,17 @@ program.command('ict')
                 { name: '/dev/ttyUSB0', desc: 'M1 Terminal Serial Converter' }
             ];
 
-            if ((process.env.m1tfdebug === undefined) || (process.env.m1tfdebug === 0)) {
+            if (options.debug === '0') {
                 const printerStatus = await os.executeShellCommand('lsusb | grep "QL-810W"', logfile);
                 if (!printerStatus) await errorAndExit('Label Printer is not plugged. Check connection and retry the test.', logfile);
-
             }
 
             const interfaces = await si.networkInterfaces();
             if (interfaces.find(o => o.iface === 'enp0s31f6') === undefined) {
                 await errorAndExit('Internet Ethernet jack is not plugged. Check connection and retry the test.', logfile);
             }
-            if (interfaces.find(o => o.ip4 === '192.168.1.100') === undefined) {
+
+            if (interfaces.find(o => o.ip4 === '192.168.0.100') === undefined) {
                 await errorAndExit('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.', logfile);
             }
 
