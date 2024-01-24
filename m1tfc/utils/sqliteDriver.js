@@ -78,7 +78,7 @@ class DBClass {
             const update = this.db.prepare('UPDATE records set errorcode = ? WHERE vendorSerial = ?');
             const ret = update.run(JSON.stringify([]), serial);
             if (ret.changes === 0) {
-                throw new Error('DB is not updated');
+                // throw new Error('DB is not updated');
             }
         }
         catch (err) {
@@ -101,7 +101,7 @@ class DBClass {
             const update = this.db.prepare('UPDATE records set errorcode = ? WHERE vendorSerial = ?');
             const ret = update.run(JSON.stringify(valueNow), serial);
             if (ret.changes === 0) {
-                throw new Error('DB is not updated');
+                // throw new Error('DB is not updated');
             }
         }
         catch (err) {
@@ -261,7 +261,7 @@ class DBClass {
             const update = this.db.prepare('UPDATE records set ictTestPassed = ? WHERE vendorSerial = ?');
             const ret = update.run(status, serial);
             if (ret.changes === 0) {
-                throw new Error('DB is not updated');
+                // throw new Error('DB is not updated');
             }
         }
         catch (err) {
