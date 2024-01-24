@@ -5,7 +5,11 @@ HOSTNAME=$2
 STARTMAC=$3
 TESTSTATION=$4
 
-# Todo need to set test station ID in config.json,   Interface names may not match
+# Todo need to set test station ID in config.json,   
+# Interface names may not match
+# Mate disable screen timeout
+# sshd no password login
+
 
 usage() {
         echo "usage: $0 SSHPORT HOSTNAME<m1testf?> STARTMAC<00:0F:A6:00:00:00> <test Station ID>"
@@ -85,18 +89,18 @@ echo "40  3  * * *   root /snap/bin/m1client syncsecrets" >> /etc/crontab
 echo "40  4  * * *   root /snap/bin/m1client backupdb" >> /etc/crontab
 echo "40  6  * * *   root sudo sed -i '/root snap install/d'" >> /etc/crontab
 echo "50  3  * * *   root find //home/lenel/m1mtf/synclogs -type f -mtime +365 -delete" >> /etc/crontab
-echo "10  4  * * *   root find /home/lenel/m1mtf/logs -type d -mtime +14 -delete" >> /etc/crontab
-echo "10  4  * * *   root find /home/lenel/m1mtf/m1cli -type f -mtime +7 -delete" >> /etc/crontab
+echo "10  4  * * *   root find /home/lenel/m1mtf/logs -type d -mtime +365 -delete" >> /etc/crontab
+echo "10  4  * * *   root find /home/lenel/m1mtf/m1cli -type f -mtime +365 -delete" >> /etc/crontab
 
 snap install --classic --dangerous  m1client.snap 
 snap install --classic --dangerous  m1tfd1.snap
 cp config.json public.key /var/snap/m1tfd1/current
-sed -i 's/20007/'"${SSHPORT}"'/'  /var/snap/m1tfd1/current
+sed -i 's/20007/'"${SSHPORT}"'/'  /var/snap/m1tfd1/current/config.json
 
 #### $TESTSTATION
 
 echo $HOSTNAME > /etc/hostname
-sed -i 's/F333/'"${$TESTSTATION}"'/' /etc/hosts
+#sed -i 's/F333/'"${$TESTSTATION}"'/' /etc/hosts
 sudo chown lenel: * -R /home/lenel
 sudo systemctl enable autossh.service
 chown lenel: -R  /home/lenel/m1mtf
