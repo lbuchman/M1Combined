@@ -96,23 +96,24 @@ program.command('ict')
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.m1mtfDir, options.debug);
             db = sqliteDriver.initialize(logfile);
             const devices = [
-                { name: '/dev/usb/lp1', desc: 'Label Printer' },
                 { name: '/dev/ttyACM0', desc: 'Testboard Teensy' },
                 { name: '/dev/ttyUSB0', desc: 'M1 Terminal Serial Converter' }
             ];
 
-            if (process.env.m1tfdebug === 1) {
-                devices.splice(0, 1);
+            if ((process.env.m1tfdebug === undefined) || (process.env.m1tfdebug === 0)) {
+                const printerStatus = await os.executeShellCommand('lsusb | grep "QL-810W"', logfile);
+                if (!printerStatus) await errorAndExit('Label Printer is not plugged. Check connection and retry the test.', logfile);
+
             }
-            else {
-                const interfaces = await si.networkInterfaces();
-                if (interfaces.find(o => o.iface === 'enp0s31f6') === undefined) {
-                    await errorAndExit('Internet Ethernet jack is not plugged. Check connection and retry the test.', logfile);
-                }
-                if (interfaces.find(o => o.ip4 === '192.168.1.100') === undefined) {
-                    await errorAndExit('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.', logfile);
-                }  
+
+            const interfaces = await si.networkInterfaces();
+            if (interfaces.find(o => o.iface === 'enp0s31f6') === undefined) {
+                await errorAndExit('Internet Ethernet jack is not plugged. Check connection and retry the test.', logfile);
             }
+            if (interfaces.find(o => o.ip4 === '192.168.1.100') === undefined) {
+                await errorAndExit('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.', logfile);
+            }
+
 
             devices.forEach(async (deviceFile) => {
                 const exists = fs.existsSync(deviceFile.name);
@@ -334,9 +335,9 @@ program.command('cleanup')
                 errSuf = 'E';
             }
             const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${configData.vendorSite}${errSuf}.txz`;
-            await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
+            await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.m1mtfDir}/logs/${options.serial} .`, logfile, false);
             // console.info(`logfile to created  ${tarFile}`);
-            await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, false);
+            await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, logfile, false);
             await delay(100);
         }
         catch (err) {
