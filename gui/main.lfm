@@ -1,7 +1,7 @@
 object mainForm: TmainForm
-  Left = 749
+  Left = 790
   Height = 1451
-  Top = 276
+  Top = 318
   Width = 2875
   BorderWidth = 2
   ClientHeight = 1408
@@ -1910,9 +1910,21 @@ object mainForm: TmainForm
       ShortCut = 16467
       OnClick = InterruptMenuItemClick
     end
-    object PublishLogMenuItem: TMenuItem
-      Caption = 'Push Logs'
-      OnClick = PublishLogMenuItemClick
+    object CloudMenuItem: TMenuItem
+      Caption = 'Cloud'
+      OnClick = CloudMenuItemClick
+      object PushLogsMenuItem: TMenuItem
+        Caption = 'Push Logs'
+        OnClick = PushLogsMenuItemClick
+      end
+      object PushSecretsMenuItem: TMenuItem
+        Caption = 'Push Secrets'
+        OnClick = PushSecretsMenuItemClick
+      end
+      object UpdateMeMenuItem: TMenuItem
+        Caption = 'Update Me'
+        OnClick = UpdateMeMenuItemClick
+      end
     end
     object AbountMenuItem: TMenuItem
       Caption = 'About'

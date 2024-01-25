@@ -46,6 +46,9 @@ type
   { TmainForm }
 
   TmainForm = class(TForm)
+    UpdateMeMenuItem: TMenuItem;
+    PushSecretsMenuItem: TMenuItem;
+    PushLogsMenuItem: TMenuItem;
     SyncFailedLabel: TLabel;
     Re_Test: TAction;
     StopTestClick: TAction;
@@ -71,7 +74,7 @@ type
     MacProgSwitch: TindLed;
     MainMenu1: TMainMenu;
     Memo1: TMemo;
-    PublishLogMenuItem: TMenuItem;
+    CloudMenuItem: TMenuItem;
     StartTestMenuItem: TMenuItem;
     StaticText12: TStaticText;
     StopTestMenu: TMenuItem;
@@ -91,7 +94,10 @@ type
     SyncLabelLedTimer: TTimer;
     procedure AbountMenuItemClick(Sender: TObject);
     procedure Action2Execute(Sender: TObject);
+    procedure CloudMenuItemClick(Sender: TObject);
     procedure LogsMenuItemClick(Sender: TObject);
+    procedure PushLogsMenuItemClick(Sender: TObject);
+    procedure PushSecretsMenuItemClick(Sender: TObject);
     procedure Re_TestMenuItem1Click(Sender: TObject);
     procedure OpenLogExecute(Sender: TObject);
     procedure PublishLogMenuItemClick(Sender: TObject);
@@ -121,6 +127,7 @@ type
     procedure FlashSwitchClick_Wrapper(Sender: TObject);
     procedure AppsCheckSwitchClick_Wrapper(Sender: TObject);
     procedure SyncLabelLedTimerTimer(Sender: TObject);
+    procedure UpdateMeMenuItemClick(Sender: TObject);
   private
     TestMode: TestingMode;
     AProcess: TProcess;
@@ -420,6 +427,11 @@ begin
 
 end;
 
+procedure TmainForm.CloudMenuItemClick(Sender: TObject);
+begin
+
+end;
+
 procedure TmainForm.LogsMenuItemClick(Sender: TObject);
 var
   homeEnv: string;
@@ -432,6 +444,86 @@ begin
   begin
     Memo1.Lines.LoadFromFile(LogsOpenDialog1.Filename);
   end;
+end;
+
+procedure TmainForm.PushLogsMenuItemClick(Sender: TObject);
+const
+  bufferSize = 1024 * 16;
+var
+  aLocalProcess: TProcess;
+  Buffer: array[0..bufferSize] of byte;
+  BytesRead: longint;
+  textToSee: ansistring;
+begin
+  aLocalProcess := TProcess.Create(nil);
+  aLocalProcess.Executable := '/snap/bin/m1client';
+  aLocalProcess.Parameters.Add('synclogs');
+  aLocalProcess.Options := aLocalProcess.Options + [poUsePipes];
+  aLocalProcess.Execute;
+
+  while aLocalProcess.Running do
+  begin
+    Sleep(50);
+    continue;
+  end;
+
+  Buffer[0] := 0;
+  BytesRead := aLocalProcess.Output.NumBytesAvailable;
+  if BytesRead > (bufferSize - 1) then
+  begin
+    exit;
+  end;
+  BytesRead := aLocalProcess.Output.Read(Buffer, BytesRead);
+  if BytesRead >= bufferSize then Buffer[bufferSize - 1] := 0
+  else
+    Buffer[BytesRead] := 0;
+
+  Sleep(50);
+  textToSee := '';
+  SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
+  Memo1.Lines.Add(logger.log('info', 'pushlogs', textToSee));
+  aLocalProcess.Free;
+  aLocalProcess := nil;
+end;
+
+procedure TmainForm.PushSecretsMenuItemClick(Sender: TObject);
+const
+  bufferSize = 1024 * 16;
+var
+  aLocalProcess: TProcess;
+  Buffer: array[0..bufferSize] of byte;
+  BytesRead: longint;
+  textToSee: ansistring;
+begin
+  aLocalProcess := TProcess.Create(nil);
+  aLocalProcess.Executable := '/snap/bin/m1client';
+  aLocalProcess.Parameters.Add('syncsecrets');
+  aLocalProcess.Options := aLocalProcess.Options + [poUsePipes];
+  aLocalProcess.Execute;
+
+  while aLocalProcess.Running do
+  begin
+    Sleep(50);
+    continue;
+  end;
+
+  Buffer[0] := 0;
+  BytesRead := aLocalProcess.Output.NumBytesAvailable;
+  if BytesRead > (bufferSize - 1) then
+  begin
+    exit;
+  end;
+  BytesRead := aLocalProcess.Output.Read(Buffer, BytesRead);
+  if BytesRead >= bufferSize then Buffer[bufferSize - 1] := 0
+  else
+    Buffer[BytesRead] := 0;
+
+  Sleep(50);
+  textToSee := '';
+  SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
+  Memo1.Lines.Add(logger.log('info', 'pushlogs', textToSee));
+  aLocalProcess.Free;
+  aLocalProcess := nil;
 end;
 
 procedure TmainForm.Re_TestMenuItem1Click(Sender: TObject);
@@ -907,6 +999,46 @@ begin
   else
     SyncFailedLabel.Visible := False;
 
+end;
+
+procedure TmainForm.UpdateMeMenuItemClick(Sender: TObject);
+const
+  bufferSize = 1024 * 16;
+var
+  aLocalProcess: TProcess;
+  Buffer: array[0..bufferSize] of byte;
+  BytesRead: longint;
+  textToSee: ansistring;
+begin
+  aLocalProcess := TProcess.Create(nil);
+  aLocalProcess.Executable := '/snap/bin/m1client';
+  aLocalProcess.Parameters.Add('update');
+  aLocalProcess.Options := aLocalProcess.Options + [poUsePipes];
+  aLocalProcess.Execute;
+
+  while aLocalProcess.Running do
+  begin
+    Sleep(50);
+    continue;
+  end;
+
+  Buffer[0] := 0;
+  BytesRead := aLocalProcess.Output.NumBytesAvailable;
+  if BytesRead > (bufferSize - 1) then
+  begin
+    exit;
+  end;
+  BytesRead := aLocalProcess.Output.Read(Buffer, BytesRead);
+  if BytesRead >= bufferSize then Buffer[bufferSize - 1] := 0
+  else
+    Buffer[BytesRead] := 0;
+
+  Sleep(50);
+  textToSee := '';
+  SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
+  Memo1.Lines.Add(logger.log('info', 'pushlogs', textToSee));
+  aLocalProcess.Free;
+  aLocalProcess := nil;
 end;
 
 procedure TmainForm.EEPROMSwitchClick_Wrapper(Sender: TObject);
