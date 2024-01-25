@@ -46,7 +46,6 @@ type
   { TmainForm }
 
   TmainForm = class(TForm)
-    UpdateMeMenuItem: TMenuItem;
     PushSecretsMenuItem: TMenuItem;
     PushLogsMenuItem: TMenuItem;
     SyncFailedLabel: TLabel;

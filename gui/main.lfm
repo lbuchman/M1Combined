@@ -1921,10 +1921,6 @@ object mainForm: TmainForm
         Caption = 'Push Secrets'
         OnClick = PushSecretsMenuItemClick
       end
-      object UpdateMeMenuItem: TMenuItem
-        Caption = 'Update Me'
-        OnClick = UpdateMeMenuItemClick
-      end
     end
     object AbountMenuItem: TMenuItem
       Caption = 'About'
