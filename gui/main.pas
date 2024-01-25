@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   Menus, Buttons, ComCtrls, ActnList, MaskEdit, SpinEx, IndLed, BCMDButton,
-  strutils, BCListBox, Process, logger, about,
+  strutils, BCListBox, Process, logger, about, DateUtils,
   configurationjson, jsonparser, ColorProgress, MSSQLConn;
 
 const
@@ -17,6 +17,11 @@ const
   OtpIsNotBlank = 10;
   EepromIsntBlank = 11;
   FW_Dir = '/home/lenel/m1mtf/stm32mp15-lenels2-m1/VERSION';
+  App_Dir = '/home/lenel/m1mtf/';
+  Interval7Days = (24 * 60 * 60 * 7);
+  UpdateFwTimeStamp = 'UpdateFwTimeStamp.txt';
+  UpdateSycretsTimeStamp = 'UpdateSycretsTimeStamp.txt';
+  UpdateLogsTimeStamp = 'UpdateLogsTimeStamp.txt';
 
 type
   TMethodPtr = procedure(Sender: TObject) of object;
@@ -128,9 +133,10 @@ type
     Tests: array[0..6] of TestRecord;
     DebugLevel: string;
 
+    function GetDateTimeFromFile(filename: string): TDateTime;
     function RunM1Tfc(command: string; arg: array of string; var Led: TindLed): integer;
     function CheckSerialBarcodeScan(serial: ansistring): boolean;
-    procedure RunTests(tMode: TestingMode; modeStr : AnsiString);
+    procedure RunTests(tMode: TestingMode; modeStr: ansistring);
   public
     newData: string;
     procedure DoCleanupCmd();
@@ -157,6 +163,33 @@ implementation
 {$R *.lfm}
 
 { TmainForm }
+
+function TmainForm.GetDateTimeFromFile(filename: string): TDateTime;
+var
+  myDateTimeVariable: TDateTime;
+  FS: TFormatSettings;
+  dateTimeFromFile: string;
+  filePath: string;
+  stringList: TStringList;
+begin
+  dateTimeFromFile := '2023-01-24 21:20:08';
+  stringList := TStringList.Create;
+  try
+    filePath := App_Dir + filename;
+    stringList.LoadFromFile(filePath);
+    dateTimeFromFile := stringList.Text;
+  except
+    on E: Exception do dateTimeFromFile := '2023-01-24 21:20:08';
+  end;
+  stringList.Free;
+  FS := DefaultFormatSettings;
+  FS.DateSeparator := '-';
+  FS.ShortDateFormat := 'yyyy-mm-dd';
+  FS.ShortTimeFormat := 'hh:mm:ss';
+  myDateTimeVariable := strtodatetime(dateTimeFromFile, FS);
+  Result := myDateTimeVariable;
+end;
+
 
 procedure TmainForm.FormCreate(Sender: TObject);
 var
@@ -197,6 +230,7 @@ begin
       Free;
     end;
 end;
+
 procedure TmainForm.SetTestStatusFailed;
 begin
   testStatus := False;
@@ -242,7 +276,8 @@ begin
   if busyFlag then
   begin
     DoLabelSwitch.LedValue := False;
-    exit(testRet);   ;
+    exit(testRet);
+    ;
   end;
 
   arg[0] := '-s';
@@ -476,7 +511,7 @@ begin
   begin
     exit;
   end;
-   with TStringList.Create do
+  with TStringList.Create do
     try
       LoadFromFile(FW_Dir);
       Memo1.Lines.Add(logger.log('info', 'eMMC', 'Programming FW Rev: ' + Text));
@@ -510,11 +545,13 @@ var
   arg: array[0..8] of string;
 begin
   FuncTestSwitch.LedValue := False;
-  if targetVendorSerial.Text = '' then exit(testRet);   ;
+  if targetVendorSerial.Text = '' then exit(testRet);
+  ;
 
   if busyFlag then
   begin
-    exit(testRet);   ;
+    exit(testRet);
+    ;
   end;
   FuncTestSwitch.LedValue := False;
   arg[0] := '-s';
@@ -546,7 +583,8 @@ begin
 
   if busyFlag then
   begin
-    exit(testRet);   ;
+    exit(testRet);
+    ;
   end;
 
   ICTTestSwitch.LedValue := False;
@@ -743,7 +781,8 @@ var
   retValue: integer;
 begin
   MacProgSwitch.LedValue := False;
-  if targetVendorSerial.Text = '' then exit(testRet);   ;
+  if targetVendorSerial.Text = '' then exit(testRet);
+  ;
   if busyFlag then
   begin
     exit(-1);
@@ -844,13 +883,29 @@ begin
 end;
 
 procedure TmainForm.SyncLabelLedTimerTimer(Sender: TObject);
+var
+  epochTime: int64;
+  epochTimeNow: int64;
+  blinkMe: boolean;
 begin
-  if TTimer(Sender).tag = 0 then begin
-    exit;
+  blinkMe := False;
+  epochTimeNow := DateTimeToUnix(Now, False);
+  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateFwTimeStamp));
+  if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
+  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateSycretsTimeStamp));
+  if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
+  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateLogsTimeStamp));
+  if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
+
+  if not blinkMe then
+  begin
     SyncFailedLabel.Visible := False;
+    exit;
   end;
+
   if SyncFailedLabel.Visible = False then SyncFailedLabel.Visible := True
-  else SyncFailedLabel.Visible := False;
+  else
+    SyncFailedLabel.Visible := False;
 
 end;
 
@@ -926,7 +981,7 @@ begin
   FlashSwitchClick(Sender);
 end;
 
-procedure TmainForm.RunTests(tMode: TestingMode; modeStr : AnsiString);
+procedure TmainForm.RunTests(tMode: TestingMode; modeStr: ansistring);
 var
   test: TestRecord;
   testReturnStatus: integer;
@@ -947,8 +1002,9 @@ begin
     test.methodPtr(self);
     AddToProgressBar(test.progressValue);
     testReturnStatus := testRet;
-    if testReturnStatus <> NormalExit then begin
-     // Memo1.Lines.Add(logger.log('info', modeStr, 'Test return status - false'));
+    if testReturnStatus <> NormalExit then
+    begin
+      // Memo1.Lines.Add(logger.log('info', modeStr, 'Test return status - false'));
       break;
     end;
     // testReturnStatus is global since method is procedure
@@ -963,7 +1019,8 @@ begin
     resetLeds;
   end
   else
-  if (testReturnStatus = NormalExit) then Memo1.Lines.Add(logger.log('info', modeStr, 'Success! All Done'));
+  if (testReturnStatus = NormalExit) then
+    Memo1.Lines.Add(logger.log('info', modeStr, 'Success! All Done'));
   TestMode := TestingMode.none;
 end;
 

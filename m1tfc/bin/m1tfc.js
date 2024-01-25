@@ -396,7 +396,7 @@ program.command('makelabel')
         const logfile = logger.getLogger(options.serial, '  label', options.serial, configData.m1mtfDir, options.debug);
         const db = sqliteDriver.initialize(logfile);
         if (!configData.makeLabel) {
-            logfile.error('Make Label is disabled');
+            logfile.info('Make Label is disabled');
             await delay(100);
             process.exit(exitCodes.normalExit);
         }

@@ -10,7 +10,7 @@ TESTSTATION=$4
 # Mate disable screen timeout
 # sshd no password login
 # verify autossh service has correct port
-
+#disable power mng in the control centre
 
 
 usage() {
