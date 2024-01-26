@@ -90,6 +90,7 @@ program.command('ict')
         const configData = await config(configuration);
         let logfile;
         let db;
+        let startStatusOk = true;
         try {
             process.env.coinCellDebug = config.coinCellDebug;
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
@@ -97,33 +98,40 @@ program.command('ict')
             db = sqliteDriver.initialize(logfile);
             const devices = [
                 { name: '/dev/ttyACM0', desc: 'Testboard Teensy' },
-                { name: '/dev/ttyUSB0', desc: 'M1 Terminal Serial Converter' }
+                { name: '/dev/ttyUSB0', desc: 'M1-3200 Terminal Serial Converter' }
             ];
 
-            if (options.debug === '0') {
+            if (configData.makeLabel) {
                 const printerStatus = await os.executeShellCommand('lsusb | grep "QL-810W"', logfile);
-                if (!printerStatus) await errorAndExit('Label Printer is not plugged. Check connection and retry the test.', logfile);
+                if (!printerStatus) {
+                    startStatusOk = false;
+                    logfile.error('Label Printer is not detected. Check connections and power and retry the test.');
+                }
             }
-
             const interfaces = await si.networkInterfaces();
             if (interfaces.find(o => o.iface === 'enp0s31f6') === undefined) {
-                await errorAndExit('Internet Ethernet jack is not plugged. Check connection and retry the test.', logfile);
+                startStatusOk = false;
+                logfile.error('Internet Ethernet jack is not plugged. Check connection and retry the test.');
             }
 
             if (interfaces.find(o => o.ip4 === '192.168.0.100') === undefined) {
-                await errorAndExit('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.', logfile);
+                startStatusOk = false;
+                logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
             }
 
 
             devices.forEach(async (deviceFile) => {
                 const exists = fs.existsSync(deviceFile.name);
                 if (!exists) {
-                    await errorAndExit(`${deviceFile.desc} is not found. Check connections and retry the test.`, logfile);
+                    startStatusOk = false;
+                    logfile.error(`${deviceFile.desc} is not found. Check connections and retry the test.`);
                 }
             });
 
-            await delay(500);
-
+            if (!startStatusOk) {
+                await delay(500);
+                process.exit(exitCodes.commandFailed);
+            }
             if (!options.cellBatTol) await errorAndExit('must define cellBatTol', logfile);
             logfile.info(`Executing ICT command ${configData.ictFWFilePath} ...`);
             const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
