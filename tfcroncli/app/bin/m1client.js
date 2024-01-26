@@ -146,11 +146,11 @@ program.command('synclogs')
         matches.forEach((item) => {
             logfile.info(path.basename(item));
             try {
-               fs.moveSync(item, path.join(`${syncedLogsDir}`, path.basename(item)));
+                fs.moveSync(item, path.join(`${syncedLogsDir}`, path.basename(item)));
             }
             catch (err) {
-               noError = false;
-               logfile.error(err.message); 
+                noError = false;
+                logfile.error(err.message);
             }
         });
         if (noError)  fs.writeFileSync(`${configData.m1mtfDir}/${UpdateLogsTimeStamp}`, dateNow);
@@ -160,7 +160,7 @@ program.command('synclogs')
 program.command('backupdb')
     .description('backup DB to the cloud')
     .action(async () => {
-        const dateNow = os.getDate();
+        // const dateNow = os.getDate();
         const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
         const logfile = logger.getLogger('m1cli', 'backupdb', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         const dbFile = path.join(configData.m1mtfDir, 'tf.db');
@@ -218,7 +218,8 @@ program.command('syncsecrets')
             const db = secrets.initialize(configData.m1mtfDir, logfile);
             const records = db.getRecords();
             if (!records.length) {
-                logfile.info('nothing to do');
+                logfile.info('no secrets to sync');
+                fs.writeFileSync(`${configData.m1mtfDir}/${UpdateSycretsTimeStamp}`, dateNow);
                 return;
             }
             let firstLine = true;

@@ -86,6 +86,7 @@ type
     StaticText7: TStaticText;
     StaticText8: TStaticText;
     StaticText9: TStaticText;
+    CheckCloudUpdateTimer: TTimer;
     targetVendorSerial: TEdit;
     LogsOpenDialog1: TOpenDialog;
     TestTumer: TTimer;
@@ -93,6 +94,7 @@ type
     SyncLabelLedTimer: TTimer;
     procedure AbountMenuItemClick(Sender: TObject);
     procedure Action2Execute(Sender: TObject);
+    procedure CheckCloudUpdateTimerTimer(Sender: TObject);
     procedure CloudMenuItemClick(Sender: TObject);
     procedure LogsMenuItemClick(Sender: TObject);
     procedure PushLogsMenuItemClick(Sender: TObject);
@@ -133,6 +135,7 @@ type
     testStatus: boolean;
     testRet: integer;
     printError: boolean;
+    blinkMe: boolean;
     doOnes: boolean;
     busyFlag: boolean;
     configuration: TConfigration;
@@ -426,6 +429,22 @@ begin
 
 end;
 
+procedure TmainForm.CheckCloudUpdateTimerTimer(Sender: TObject);
+var
+  epochTime: int64;
+  epochTimeNow: int64;
+begin
+  blinkMe := False;
+  epochTimeNow := DateTimeToUnix(Now, False);
+  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateFwTimeStamp));
+  if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
+  // epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateSycretsTimeStamp));
+  // if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
+  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateLogsTimeStamp));
+  if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
+
+end;
+
 procedure TmainForm.CloudMenuItemClick(Sender: TObject);
 begin
 
@@ -455,7 +474,8 @@ var
   textToSee: ansistring;
 begin
   aLocalProcess := TProcess.Create(nil);
-  aLocalProcess.Executable := '/snap/bin/m1client';
+  aLocalProcess.Executable := 'sudo';
+  aLocalProcess.Parameters.Add('/snap/bin/m1client');
   aLocalProcess.Parameters.Add('synclogs');
   aLocalProcess.Options := aLocalProcess.Options + [poUsePipes];
   aLocalProcess.Execute;
@@ -495,7 +515,8 @@ var
   textToSee: ansistring;
 begin
   aLocalProcess := TProcess.Create(nil);
-  aLocalProcess.Executable := '/snap/bin/m1client';
+  aLocalProcess.Executable := 'sudo';
+  aLocalProcess.Parameters.Add('/snap/bin/m1client');
   aLocalProcess.Parameters.Add('syncsecrets');
   aLocalProcess.Options := aLocalProcess.Options + [poUsePipes];
   aLocalProcess.Execute;
@@ -974,20 +995,7 @@ begin
 end;
 
 procedure TmainForm.SyncLabelLedTimerTimer(Sender: TObject);
-var
-  epochTime: int64;
-  epochTimeNow: int64;
-  blinkMe: boolean;
 begin
-  blinkMe := False;
-  epochTimeNow := DateTimeToUnix(Now, False);
-  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateFwTimeStamp));
-  if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
-  // epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateSycretsTimeStamp));
-  // if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
-  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateLogsTimeStamp));
-  if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
-
   if not blinkMe then
   begin
     SyncFailedLabel.Visible := False;
