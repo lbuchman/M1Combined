@@ -983,8 +983,8 @@ begin
   epochTimeNow := DateTimeToUnix(Now, False);
   epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateFwTimeStamp));
   if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
-  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateSycretsTimeStamp));
-  if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
+  // epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateSycretsTimeStamp));
+  // if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
   epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateLogsTimeStamp));
   if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
 
