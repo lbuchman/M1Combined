@@ -806,6 +806,7 @@ var
   textToSee: ansistring;
   tmpInt: integer;
   MemoCopyTxt: string;
+  ExitStatus : Integer;
 begin
   if command = 'cleanup' then
   begin
@@ -857,8 +858,8 @@ begin
     SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
     Memo1.Lines.Text := Memo1.Lines.Text + textToSee;
   end;
-
-  if AProcess.ExitStatus <> 0 then retValue := AProcess.ExitStatus
+  ExitStatus := AProcess.ExitStatus;
+  if ExitStatus <> 0 then retValue := ExitStatus
   else
     retValue := AProcess.ExitCode;
 
@@ -872,7 +873,9 @@ begin
     Led.LedColorOff := clRed;
     InterruptMenuItemClick(self);
     Led.Tag := 0;
+    retValue := AProcess.ExitCode;
   end;
+
   AProcess.Free;
   AProcess := nil;
   Led.tag := 0;
@@ -1155,7 +1158,7 @@ begin
 
   end;
 
-  { if TestMode = TestingMode.commission then } DoCleanupCmd;
+  if  testReturnStatus <> precheckHWFailed then DoCleanupCmd;
 
   if (testReturnStatus <> NormalExit) and (testReturnStatus <> ProcessTerminated) then
   begin
@@ -1165,7 +1168,7 @@ begin
   else
   if (testReturnStatus = NormalExit) then
     Memo1.Lines.Add(logger.log('info', modeStr, 'Success! All Done'));
-  TestMode := TestingMode.none;
+    TestMode := TestingMode.none;
 end;
 
 end.
