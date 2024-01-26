@@ -15,5 +15,6 @@ module.exports = {
     eepromIsNotBlank: 11,
     notAllTestsPassed: 12,
     functTestFailed: 13,
-    invalidArgument: 14
+    invalidArgument: 14,
+    precheckHWFailed: 15
 };

@@ -14,6 +14,7 @@ const
   ProcessTerminated = -9;
   NormalExit = 0;
   ProcessExecError = 1;
+  precheckHWFailed = 15;
   OtpIsNotBlank = 10;
   EepromIsntBlank = 11;
   FW_Dir = '/home/lenel/m1mtf/stm32mp15-lenels2-m1/VERSION';
@@ -1158,7 +1159,7 @@ begin
 
   if (testReturnStatus <> NormalExit) and (testReturnStatus <> ProcessTerminated) then
   begin
-    DoLabelError;
+    if  testReturnStatus <> precheckHWFailed then DoLabelError;
     resetLeds;
   end
   else

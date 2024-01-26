@@ -130,7 +130,7 @@ program.command('ict')
 
             if (!startStatusOk) {
                 await delay(500);
-                process.exit(exitCodes.commandFailed);
+                process.exit(exitCodes.precheckHWFailed);
             }
 
             logfile.info('Starting ICT Test.');
