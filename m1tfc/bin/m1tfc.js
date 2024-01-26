@@ -132,6 +132,9 @@ program.command('ict')
                 await delay(500);
                 process.exit(exitCodes.commandFailed);
             }
+
+            logfile.info('Starting ICT Test.');
+
             if (!options.cellBatTol) await errorAndExit('must define cellBatTol', logfile);
             logfile.info(`Executing ICT command ${configData.ictFWFilePath} ...`);
             const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
