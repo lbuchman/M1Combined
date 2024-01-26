@@ -121,7 +121,6 @@ program.command('synclogs')
     .action(async () => {
         let noError = true;
         const dateNow = os.getDate();
-        console.error('1234'); 
         const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
         const matches = glob.sync(`${configData.m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
         const logfile = logger.getLogger('m1cli', 'synclogs', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
@@ -218,7 +217,7 @@ program.command('syncsecrets')
             const db = secrets.initialize(configData.m1mtfDir, logfile);
             const records = db.getRecords();
             if (!records.length) {
-                logfile.info('no secrets to sync');
+                logfile.info('No secrets to sync');
                 fs.writeFileSync(`${configData.m1mtfDir}/${UpdateSycretsTimeStamp}`, dateNow);
                 return;
             }
@@ -239,7 +238,7 @@ program.command('syncsecrets')
                 firstLine = false;
             });
             if (firstLine) {
-                logfile.info('no secrets to sync');
+                logfile.info('No secrets to sync');
                 fs.writeFileSync(`${configData.m1mtfDir}/${UpdateSycretsTimeStamp}`, dateNow);
                 return;
             }

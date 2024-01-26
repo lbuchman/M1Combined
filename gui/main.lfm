@@ -1983,7 +1983,7 @@ object mainForm: TmainForm
   end
   object CheckCloudUpdateTimer: TTimer
     Tag = 1
-    Interval = 30000
+    Interval = 10000
     OnTimer = CheckCloudUpdateTimerTimer
     Left = 277
     Top = 205

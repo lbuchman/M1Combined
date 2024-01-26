@@ -433,13 +433,17 @@ procedure TmainForm.CheckCloudUpdateTimerTimer(Sender: TObject);
 var
   epochTime: int64;
   epochTimeNow: int64;
+  dateTimeNow : TDateTime;
+  dateTimeFromFile : TDateTime;
 begin
   blinkMe := False;
-  epochTimeNow := DateTimeToUnix(Now, False);
-  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateFwTimeStamp));
-  if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
-  // epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateSycretsTimeStamp));
+  dateTimeNow := Now;
+  epochTimeNow := DateTimeToUnix(dateTimeNow, False);
+  // dateTimeFromFile := GetDateTimeFromFile(UpdateFwTimeStamp);
+  // epochTime := DateTimeToUnix(dateTimeFromFile);
   // if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
+  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateSycretsTimeStamp));
+  if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
   epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateLogsTimeStamp));
   if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
 
