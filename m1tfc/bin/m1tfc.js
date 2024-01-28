@@ -74,10 +74,31 @@ async function errorAndExit(errorStr, log) {
     process.exit(exitCodes.commandFailed);
 }
 
+
 program
-    .name('icttest')
+    .name('m1test')
     .description('CLI utility to test and program M1-3200 boards')
     .version(process.env.SNAP_VERSION);
+
+program.command('m1dfu')
+    .description('Start M1 in DFU mode and program bootstrap FW')
+    .action(async () => {
+        const configData = await config(configuration);
+        const logfile = console;
+        try {
+            process.env.coinCellDebug = config.coinCellDebug;
+            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+            await delay(400);
+            await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
+            process.exit(0);
+        }
+        catch (err) {
+            logfile.error(err);
+            await delay(100);
+            process.exit(exitCodes.commandFailed);
+        }
+    });
 
 program.command('ict')
     .description('Executes ICT test')

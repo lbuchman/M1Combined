@@ -100,6 +100,18 @@
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["makelabel",  "-d", "2", "-s", "3023370015" ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch m1dfu",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["m1dfu"]
         }
     ]
 }

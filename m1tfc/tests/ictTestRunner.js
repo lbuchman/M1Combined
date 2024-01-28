@@ -42,13 +42,14 @@ module.exports = class IctTestRunner {
       *
       * @param
       */
-    async runTest(programmer, serial, ddrblocks, skipTestpointCheck) {
+    async runTest(programmer, serial, ddrblocks, skipTestpointCheck, initAndQuit = true) {
         process.env.serial = serial;
         this.db.updateSerial(serial);
         this.db.resetErrorCode(process.env.serial);
         let ret = true;
         try {
-            await common.initializeTestFixture(programmer, false, this.stm32, this.m1Dev, this.logger, this.db);
+            await common.initializeTestFixture(programmer, initAndQuit, this.stm32, this.m1Dev, this.logger);
+            if (initAndQuit) return;
             await regulators.checkLeverState(this.logger, this.db);
             if (!skipTestpointCheck) this.logger.info('Testing test points ...');
             if (!skipTestpointCheck) await regulators.test(this.tolerance, this.logger, this.db);
