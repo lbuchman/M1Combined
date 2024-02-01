@@ -26,6 +26,7 @@ const { mkdirp } = require('mkdirp');
 const dateTime = require('date-and-time');
 const errorCodes = require('../bin/errorCodes');
 const si = require('systeminformation');
+const targetICTLink = require('../src/m1ICTLink');
 
 // AS name Onguard Testing -> enel2anestingtsm
 
@@ -91,6 +92,54 @@ program.command('m1dfu')
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
+            process.exit(0);
+        }
+        catch (err) {
+            logfile.error(err);
+            await delay(100);
+            process.exit(exitCodes.commandFailed);
+        }
+    });
+
+program.command('tbcmd')
+    .description('execute test board raw command')
+    .option('-c, --command <string>', 'test board command, make sure to inclose the command in ""')
+    .action(async (options) => {
+        const configData = await config(configuration);
+        const logfile = console;
+        try {
+            process.env.coinCellDebug = config.coinCellDebug;
+            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+            await delay(400);
+            const output = await testBoardLink.sendCommand(options.command);
+            logfile.log(JSON.stringify(output));
+            // await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
+            process.exit(0);
+        }
+        catch (err) {
+            logfile.error(err);
+            await delay(100);
+            process.exit(exitCodes.commandFailed);
+        }
+    });
+
+
+program.command('m1cmd')
+    .description('execute M1 bootstrap raw command, make sure to run m1dfu command before ')
+    .option('-c, --command <string>', 'M1-3200 command, make sure to inclose the command in ""')
+    .action(async (options) => {
+        const configData = await config(configuration);
+        const logfile = console;
+        try {
+            process.env.coinCellDebug = config.coinCellDebug;
+            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+            await delay(400);
+            await targetICTLink.initSerial(configData.m1SerialDev, 115200, logfile);
+            const output = await targetICTLink.sendCommand(options.command);
+            logfile.log(JSON.stringify(output));
+            // await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
             process.exit(0);
         }
         catch (err) {
