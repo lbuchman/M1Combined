@@ -42,7 +42,7 @@ module.exports = class IctTestRunner {
       *
       * @param
       */
-    async runTest(programmer, serial, ddrblocks, skipTestpointCheck, initAndQuit = true) {
+    async runTest(programmer, serial, ddrblocks, skipTestpointCheck, initAndQuit = false) {
         process.env.serial = serial;
         this.db.updateSerial(serial);
         this.db.resetErrorCode(process.env.serial);

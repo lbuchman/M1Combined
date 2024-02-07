@@ -230,6 +230,9 @@ program.command('ict')
             await delay(100);
             process.exit(exitCodes.commandFailed);
         }
+        finally {
+            process.exit(exitCodes.normalExit);
+        }
     });
 
 program.command('eeprom')
