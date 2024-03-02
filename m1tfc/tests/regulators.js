@@ -29,9 +29,7 @@ async function checkLeverState(logger, db) {
         db.updateErrorCode(process.env.serial, errorCodes.codes[leverLockVoltage.name].errorCode, 'T');
         throw new Error('Failed: The Cover Lever is Not Locked!!!');
     }
-    else {
-        logger.info(`Passed TP=${ddrVoltage.name} test, Voltage = ${ret.value}V, Expected = ${ddrVoltage.voltage}V`);
-    }
+
     return true;
 }
 
