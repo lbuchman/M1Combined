@@ -563,6 +563,7 @@ begin
   ResetLeds;
   ColorProgress1.progress := 0;
   RunTests(TestingMode.re_test, 'Re-test');
+  targetVendorSerial.Text := '';
 end;
 
 procedure TmainForm.OpenLogExecute(Sender: TObject);
@@ -945,6 +946,7 @@ begin
   ResetLeds;
   ColorProgress1.progress := 0;
   RunTests(TestingMode.commission, 'commission');
+  targetVendorSerial.Text := '';
 end;
 
 procedure TmainForm.QuitMenuItemClick(Sender: TObject);

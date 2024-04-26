@@ -64,7 +64,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["eeprom", "-d", "2", "-s", "3023370015" ]
+            "args": ["eeprom", "-d", "2", "-s", "3023370031" ]
         },
         {
             "type": "pwa-node",
