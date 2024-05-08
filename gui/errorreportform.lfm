@@ -1,0 +1,27 @@
+object ErrorForm: TErrorForm
+  Left = 847
+  Height = 160
+  Top = 270
+  Width = 320
+  BorderStyle = bsDialog
+  ClientHeight = 160
+  ClientWidth = 320
+  Color = clWhite
+  FormStyle = fsStayOnTop
+  OnCreate = FormCreate
+  LCLVersion = '2.2.6.0'
+  object Label1: TLabel
+    Left = 80
+    Height = 23
+    Top = 64
+    Width = 160
+    Caption = 'Testing Failed!'
+    Color = clCaptionText
+    Font.Height = -19
+    Font.Name = 'Sans'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+    Transparent = False
+  end
+end

@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   Menus, Buttons, ComCtrls, ActnList, MaskEdit, SpinEx, IndLed, BCMDButton,
-  strutils, BCListBox, Process, logger, about, DateUtils,
+  strutils, BCListBox, Process, logger, about, DateUtils, errorReportForm,
   configurationjson, jsonparser, ColorProgress, MSSQLConn;
 
 const
@@ -373,6 +373,7 @@ begin
   serial := targetVendorSerial.Text;
   ret := '?';
   try
+    if serial.Length <> 10 then raise BarcodeException.Create('Invalid Barcode Scan');
     str := AnsiMidStr(serial, 1, 2);
     if str = '30' then
     begin
@@ -392,7 +393,7 @@ begin
 
     str := AnsiMidStr(serial, 5, 2);
     intN := StrToInt(str);
-    if (intN <= 53) and (intN >= 0) then
+    if (intN <= 52) and (intN >= 0) then
     begin
       ret += ' W-' + str;
     end
@@ -434,8 +435,8 @@ procedure TmainForm.CheckCloudUpdateTimerTimer(Sender: TObject);
 var
   epochTime: int64;
   epochTimeNow: int64;
-  dateTimeNow : TDateTime;
-  dateTimeFromFile : TDateTime;
+  dateTimeNow: TDateTime;
+  dateTimeFromFile: TDateTime;
 begin
   blinkMe := False;
   dateTimeNow := Now;
@@ -807,7 +808,7 @@ var
   textToSee: ansistring;
   tmpInt: integer;
   MemoCopyTxt: string;
-  ExitStatus : Integer;
+  ExitStatus: integer;
 begin
   if command = 'cleanup' then
   begin
@@ -1160,17 +1161,29 @@ begin
 
   end;
 
-  if  testReturnStatus <> precheckHWFailed then DoCleanupCmd;
+  if testReturnStatus <> precheckHWFailed then
+  begin
+    DoCleanupCmd;
+  end;
 
   if (testReturnStatus <> NormalExit) and (testReturnStatus <> ProcessTerminated) then
   begin
-    if  testReturnStatus <> precheckHWFailed then DoLabelError;
+    if testReturnStatus <> precheckHWFailed then begin
+      DoLabelError;
+      ErrorForm.ShowModal;
+    end;
     resetLeds;
   end
   else
   if (testReturnStatus = NormalExit) then
+  begin
     Memo1.Lines.Add(logger.log('info', modeStr, 'Success! All Done'));
+    ShowMessage('Test Success!');
+  end;
+ // else
+ //   ShowMessage('Test Failed!');
     TestMode := TestingMode.none;
+
 end;
 
 end.
