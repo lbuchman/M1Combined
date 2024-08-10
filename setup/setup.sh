@@ -6,9 +6,15 @@ STARTMAC=$3
 TESTSTATION=$4
 
 # Todo need to set test station ID in config.json,   
+
 # Interface names may not match
 # Mate disable screen timeout
 # sshd no password login
+# Interface names may not match so mkake sure netplan names are correct
+# Mate disable screen timeout
+# sshd no password login
+# verify autossh service has correct port
+#disable power mng in the control centre
 
 
 usage() {

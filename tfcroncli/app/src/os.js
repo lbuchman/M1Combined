@@ -63,7 +63,17 @@ function getFrontendPid() {
     return null;
 }
 
+/**
+ * @private
+ * execute shell command
+ */
+function getDate() {
+    const now = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+    return now;
+}
+
 module.exports = {
     executeShellCommand,
-    getFrontendPid
+    getFrontendPid,
+    getDate
 };

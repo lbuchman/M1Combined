@@ -26,6 +26,7 @@ const { mkdirp } = require('mkdirp');
 const dateTime = require('date-and-time');
 const errorCodes = require('../bin/errorCodes');
 const si = require('systeminformation');
+const targetICTLink = require('../src/m1ICTLink');
 
 // AS name Onguard Testing -> enel2anestingtsm
 
@@ -74,10 +75,79 @@ async function errorAndExit(errorStr, log) {
     process.exit(exitCodes.commandFailed);
 }
 
+
 program
-    .name('icttest')
+    .name('m1test')
     .description('CLI utility to test and program M1-3200 boards')
     .version(process.env.SNAP_VERSION);
+
+program.command('m1dfu')
+    .description('Start M1 in DFU mode and program bootstrap FW')
+    .action(async () => {
+        const configData = await config(configuration);
+        const logfile = console;
+        try {
+            process.env.coinCellDebug = config.coinCellDebug;
+            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+            await delay(400);
+            await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
+            process.exit(0);
+        }
+        catch (err) {
+            logfile.error(err);
+            await delay(100);
+            process.exit(exitCodes.commandFailed);
+        }
+    });
+
+program.command('tbcmd')
+    .description('execute test board raw command')
+    .option('-c, --command <string>', 'test board command, make sure to inclose the command in ""')
+    .action(async (options) => {
+        const configData = await config(configuration);
+        const logfile = console;
+        try {
+            process.env.coinCellDebug = config.coinCellDebug;
+            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+            await delay(400);
+            const output = await testBoardLink.sendCommand(options.command);
+            logfile.log(JSON.stringify(output));
+            // await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
+            process.exit(0);
+        }
+        catch (err) {
+            logfile.error(err);
+            await delay(100);
+            process.exit(exitCodes.commandFailed);
+        }
+    });
+
+
+program.command('m1cmd')
+    .description('execute M1 bootstrap raw command, make sure to run m1dfu command before ')
+    .option('-c, --command <string>', 'M1-3200 command, make sure to inclose the command in ""')
+    .action(async (options) => {
+        const configData = await config(configuration);
+        const logfile = console;
+        try {
+            process.env.coinCellDebug = config.coinCellDebug;
+            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+            await delay(400);
+            await targetICTLink.initSerial(configData.m1SerialDev, 115200, logfile);
+            const output = await targetICTLink.sendCommand(options.command);
+            logfile.log(JSON.stringify(output));
+            // await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
+            process.exit(0);
+        }
+        catch (err) {
+            logfile.error(err);
+            await delay(100);
+            process.exit(exitCodes.commandFailed);
+        }
+    });
 
 program.command('ict')
     .description('Executes ICT test')
@@ -90,38 +160,50 @@ program.command('ict')
         const configData = await config(configuration);
         let logfile;
         let db;
+        let startStatusOk = true;
         try {
             process.env.coinCellDebug = config.coinCellDebug;
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.m1mtfDir, options.debug);
             db = sqliteDriver.initialize(logfile);
             const devices = [
-                { name: '/dev/usb/lp1', desc: 'Label Printer' },
                 { name: '/dev/ttyACM0', desc: 'Testboard Teensy' },
-                { name: '/dev/ttyUSB0', desc: 'M1 Terminal Serial Converter' }
+                { name: '/dev/ttyUSB0', desc: 'M1-3200 Terminal Serial Converter' }
             ];
 
-            if (process.env.m1tfdebug === 1) {
-                devices.splice(0, 1);
-            }
-            else {
-                const interfaces = await si.networkInterfaces();
-                if (interfaces.find(o => o.iface === 'enp0s31f6') === undefined) {
-                    await errorAndExit('Internet Ethernet jack is not plugged. Check connection and retry the test.', logfile);
+            if (configData.makeLabel) {
+                const printerStatus = await os.executeShellCommand('lsusb | grep "QL-810W"', logfile);
+                if (!printerStatus) {
+                    startStatusOk = false;
+                    logfile.error('Label Printer is not detected. Check connections and power and retry the test.');
                 }
-                if (interfaces.find(o => o.iface === 'enp1s0') === undefined) {
-                    await errorAndExit('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.', logfile);
-                }  
             }
+            const interfaces = await si.networkInterfaces();
+            if (interfaces.find(o => o.iface === 'enp0s31f6') === undefined) {
+                startStatusOk = false;
+                logfile.error('Internet Ethernet jack is not plugged. Check connection and retry the test.');
+            }
+
+            if (interfaces.find(o => o.ip4 === '192.168.0.100') === undefined) {
+                startStatusOk = false;
+                logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
+            }
+
 
             devices.forEach(async (deviceFile) => {
                 const exists = fs.existsSync(deviceFile.name);
                 if (!exists) {
-                    await errorAndExit(`${deviceFile.desc} is not found. Check connections and retry the test.`, logfile);
+                    startStatusOk = false;
+                    logfile.error(`${deviceFile.desc} is not found. Check connections and retry the test.`);
                 }
             });
 
-            await delay(500);
+            if (!startStatusOk) {
+                await delay(500);
+                process.exit(exitCodes.precheckHWFailed);
+            }
+
+            logfile.info('Starting ICT Test.');
 
             if (!options.cellBatTol) await errorAndExit('must define cellBatTol', logfile);
             logfile.info(`Executing ICT command ${configData.ictFWFilePath} ...`);
@@ -147,6 +229,9 @@ program.command('ict')
             db.updateErrorCode(options.serial, errorCodes.codes['ICT_EXCEPT'].errorCode, 'E');
             await delay(100);
             process.exit(exitCodes.commandFailed);
+        }
+        finally {
+            process.exit(exitCodes.normalExit);
         }
     });
 
@@ -334,9 +419,9 @@ program.command('cleanup')
                 errSuf = 'E';
             }
             const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${configData.vendorSite}${errSuf}.txz`;
-            await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.m1mtfDir}/logs/${options.serial} .`, false);
+            await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.m1mtfDir}/logs/${options.serial} .`, logfile, false);
             // console.info(`logfile to created  ${tarFile}`);
-            await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, false);
+            await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, logfile, false);
             await delay(100);
         }
         catch (err) {
@@ -395,7 +480,7 @@ program.command('makelabel')
         const logfile = logger.getLogger(options.serial, '  label', options.serial, configData.m1mtfDir, options.debug);
         const db = sqliteDriver.initialize(logfile);
         if (!configData.makeLabel) {
-            logfile.error('Make Label is disabled');
+            logfile.info('Make Label is disabled');
             await delay(100);
             process.exit(exitCodes.normalExit);
         }
