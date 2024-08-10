@@ -57,6 +57,7 @@ const errorCodes = {
     NO_OTP_MAC: { errorCode: '000NO_OTP_MAC', test: 'FUNC', desc: 'MAC Address is not programmed in OTP' },
     SERIAL_MISSMATH: { errorCode: 'SER_MISS_MATCH', test: 'LABEL', desc: 'Serial number provided does not match EEPROM value' },
     FW_MISSMATH: { errorCode: 'FW_MISS_MATCH', test: 'LABEL', desc: 'The UUT programmed FW Rev does not match FW File' },
+    LeverSensor: { errorCode: '-LEVER_LOCK', test: 'ICT', desc: 'The Lock Lever is not locked' },
     ERR_UNDEF: { errorCode: '0000ERR_UNDEF', test: 'Label', desc: 'Undefined error, i.e. no error code available in the DB for this failure' }
 };
 

@@ -19,9 +19,6 @@ procedure TruncateLogFileDelete(config: TConfigration; serialN: string);
 
 implementation
 
-var
-  jData: TJSONData;
-
 function ReadConfigFile(): string;
 var
   strList: TStringList;

@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
     
         {
             "type": "pwa-node",
@@ -63,7 +64,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["eeprom", "-d", "2", "-s", "3023370015" ]
+            "args": ["eeprom", "-d", "2", "-s", "3023370031" ]
         },
         {
             "type": "pwa-node",
@@ -100,6 +101,42 @@
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["makelabel",  "-d", "2", "-s", "3023370015" ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch m1dfu",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["m1dfu"]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch tbcmd",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["tbcmd", "-c", "date"]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch m1cmd",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["m1cmd", "-c", "getfwrev"]
         }
     ]
 }

@@ -7,16 +7,22 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   Menus, Buttons, ComCtrls, ActnList, MaskEdit, SpinEx, IndLed, BCMDButton,
-  strutils, BCListBox, Process, logger, about,
+  strutils, BCListBox, Process, logger, about, DateUtils, errorReportForm,
   configurationjson, jsonparser, ColorProgress, MSSQLConn;
 
 const
   ProcessTerminated = -9;
   NormalExit = 0;
   ProcessExecError = 1;
+  precheckHWFailed = 15;
   OtpIsNotBlank = 10;
   EepromIsntBlank = 11;
-
+  FW_Dir = '/home/lenel/m1mtf/stm32mp15-lenels2-m1/VERSION';
+  App_Dir = '/home/lenel/m1mtf/';
+  Interval7Days = (24 * 60 * 60 * 7);
+  UpdateFwTimeStamp = 'UpdateFwTimeStamp.txt';
+  UpdateSycretsTimeStamp = 'UpdateSycretsTimeStamp.txt';
+  UpdateLogsTimeStamp = 'UpdateLogsTimeStamp.txt';
 
 type
   TMethodPtr = procedure(Sender: TObject) of object;
@@ -41,6 +47,9 @@ type
   { TmainForm }
 
   TmainForm = class(TForm)
+    PushSecretsMenuItem: TMenuItem;
+    PushLogsMenuItem: TMenuItem;
+    SyncFailedLabel: TLabel;
     Re_Test: TAction;
     StopTestClick: TAction;
     QuitClick: TAction;
@@ -65,7 +74,7 @@ type
     MacProgSwitch: TindLed;
     MainMenu1: TMainMenu;
     Memo1: TMemo;
-    PublishLogMenuItem: TMenuItem;
+    CloudMenuItem: TMenuItem;
     StartTestMenuItem: TMenuItem;
     StaticText12: TStaticText;
     StopTestMenu: TMenuItem;
@@ -78,13 +87,19 @@ type
     StaticText7: TStaticText;
     StaticText8: TStaticText;
     StaticText9: TStaticText;
+    CheckCloudUpdateTimer: TTimer;
     targetVendorSerial: TEdit;
     LogsOpenDialog1: TOpenDialog;
     TestTumer: TTimer;
-    LedTimer: TTimer;
+    SyncLelLedTimer: TTimer;
+    SyncLabelLedTimer: TTimer;
     procedure AbountMenuItemClick(Sender: TObject);
     procedure Action2Execute(Sender: TObject);
+    procedure CheckCloudUpdateTimerTimer(Sender: TObject);
+    procedure CloudMenuItemClick(Sender: TObject);
     procedure LogsMenuItemClick(Sender: TObject);
+    procedure PushLogsMenuItemClick(Sender: TObject);
+    procedure PushSecretsMenuItemClick(Sender: TObject);
     procedure Re_TestMenuItem1Click(Sender: TObject);
     procedure OpenLogExecute(Sender: TObject);
     procedure PublishLogMenuItemClick(Sender: TObject);
@@ -99,7 +114,7 @@ type
     procedure EEPROMSwitchClick_Wrapper(Sender: TObject);
     function AppsCheckSwitchClick(Sender: TObject): integer;
     procedure InterruptMenuItemClick(Sender: TObject);
-    procedure LedTimerTimer(Sender: TObject);
+    procedure LedsTimer(Sender: TObject);
     function MacProgSwitchClick(Sender: TObject): integer;
     procedure Memo1DblClick(Sender: TObject);
     procedure Commission(Sender: TObject);
@@ -113,21 +128,25 @@ type
     procedure DoLabelSwitchClick_Wrapper(Sender: TObject);
     procedure FlashSwitchClick_Wrapper(Sender: TObject);
     procedure AppsCheckSwitchClick_Wrapper(Sender: TObject);
+    procedure SyncLabelLedTimerTimer(Sender: TObject);
+    procedure UpdateMeMenuItemClick(Sender: TObject);
   private
     TestMode: TestingMode;
     AProcess: TProcess;
     testStatus: boolean;
     testRet: integer;
     printError: boolean;
+    blinkMe: boolean;
     doOnes: boolean;
     busyFlag: boolean;
     configuration: TConfigration;
     Tests: array[0..6] of TestRecord;
     DebugLevel: string;
 
+    function GetDateTimeFromFile(filename: string): TDateTime;
     function RunM1Tfc(command: string; arg: array of string; var Led: TindLed): integer;
     function CheckSerialBarcodeScan(serial: ansistring): boolean;
-    procedure RunTests(tMode: TestingMode; modeStr : AnsiString);
+    procedure RunTests(tMode: TestingMode; modeStr: ansistring);
   public
     newData: string;
     procedure DoCleanupCmd();
@@ -150,9 +169,37 @@ var
 
 implementation
 
+
 {$R *.lfm}
 
 { TmainForm }
+
+function TmainForm.GetDateTimeFromFile(filename: string): TDateTime;
+var
+  myDateTimeVariable: TDateTime;
+  FS: TFormatSettings;
+  dateTimeFromFile: string;
+  filePath: string;
+  stringList: TStringList;
+begin
+  dateTimeFromFile := '2023-01-24 21:20:08';
+  stringList := TStringList.Create;
+  try
+    filePath := App_Dir + filename;
+    stringList.LoadFromFile(filePath);
+    dateTimeFromFile := stringList.Text;
+  except
+    on E: Exception do dateTimeFromFile := '2023-01-24 21:20:08';
+  end;
+  stringList.Free;
+  FS := DefaultFormatSettings;
+  FS.DateSeparator := '-';
+  FS.ShortDateFormat := 'yyyy-mm-dd';
+  FS.ShortTimeFormat := 'hh:mm:ss';
+  myDateTimeVariable := strtodatetime(dateTimeFromFile, FS);
+  Result := myDateTimeVariable;
+end;
+
 
 procedure TmainForm.FormCreate(Sender: TObject);
 var
@@ -163,7 +210,7 @@ begin
   ClearBusyFlag;
   doOnes := True;
   configuration := ConfigurationGet;
-
+  SyncFailedLabel.Font.Color := clRed;
   Tests[0] := MakeTestRecord('ICT', 5, TMethodPtr(@ICTTestSwitchClick),
     @ICTTestSwitch, True);
   Tests[1] := MakeTestRecord('MAC', 3, TMethodPtr(@MacProgSwitchClick),
@@ -179,7 +226,7 @@ begin
   Tests[6] := MakeTestRecord('Label', 8, TMethodPtr(@DoLabelSwitchClick),
     @DoLabelSwitch, True);
 
-  LedTimer.Enabled := True;
+  SyncLelLedTimer.Enabled := True;
   debugLevel := GetEnvironmentVariable('m1tfdebug');
   if debugLevel <> '1' then DebugLevel := '0';
   Memo1.Font.Size := 12;
@@ -193,6 +240,7 @@ begin
       Free;
     end;
 end;
+
 procedure TmainForm.SetTestStatusFailed;
 begin
   testStatus := False;
@@ -238,7 +286,8 @@ begin
   if busyFlag then
   begin
     DoLabelSwitch.LedValue := False;
-    exit;
+    exit(testRet);
+    ;
   end;
 
   arg[0] := '-s';
@@ -324,6 +373,7 @@ begin
   serial := targetVendorSerial.Text;
   ret := '?';
   try
+    if serial.Length <> 10 then raise BarcodeException.Create('Invalid Barcode Scan');
     str := AnsiMidStr(serial, 1, 2);
     if str = '30' then
     begin
@@ -343,7 +393,7 @@ begin
 
     str := AnsiMidStr(serial, 5, 2);
     intN := StrToInt(str);
-    if (intN <= 53) and (intN >= 0) then
+    if (intN <= 52) and (intN >= 0) then
     begin
       ret += ' W-' + str;
     end
@@ -352,7 +402,7 @@ begin
 
     str := AnsiMidStr(serial, 7, 4);
     intN := StrToInt(str);
-    if intN <= 1000 then
+    if (intN <= 9999) and (Length(str) = 4) then
     begin
       ret += ' S-' + str;
     end
@@ -381,6 +431,31 @@ begin
 
 end;
 
+procedure TmainForm.CheckCloudUpdateTimerTimer(Sender: TObject);
+var
+  epochTime: int64;
+  epochTimeNow: int64;
+  dateTimeNow: TDateTime;
+  dateTimeFromFile: TDateTime;
+begin
+  blinkMe := False;
+  dateTimeNow := Now;
+  epochTimeNow := DateTimeToUnix(dateTimeNow, False);
+  // dateTimeFromFile := GetDateTimeFromFile(UpdateFwTimeStamp);
+  // epochTime := DateTimeToUnix(dateTimeFromFile);
+  // if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
+  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateSycretsTimeStamp));
+  if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
+  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateLogsTimeStamp));
+  if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
+
+end;
+
+procedure TmainForm.CloudMenuItemClick(Sender: TObject);
+begin
+
+end;
+
 procedure TmainForm.LogsMenuItemClick(Sender: TObject);
 var
   homeEnv: string;
@@ -395,6 +470,88 @@ begin
   end;
 end;
 
+procedure TmainForm.PushLogsMenuItemClick(Sender: TObject);
+const
+  bufferSize = 1024 * 16;
+var
+  aLocalProcess: TProcess;
+  Buffer: array[0..bufferSize] of byte;
+  BytesRead: longint;
+  textToSee: ansistring;
+begin
+  aLocalProcess := TProcess.Create(nil);
+  aLocalProcess.Executable := 'sudo';
+  aLocalProcess.Parameters.Add('/snap/bin/m1client');
+  aLocalProcess.Parameters.Add('synclogs');
+  aLocalProcess.Options := aLocalProcess.Options + [poUsePipes];
+  aLocalProcess.Execute;
+
+  while aLocalProcess.Running do
+  begin
+    Sleep(50);
+    continue;
+  end;
+
+  Buffer[0] := 0;
+  BytesRead := aLocalProcess.Output.NumBytesAvailable;
+  if BytesRead > (bufferSize - 1) then
+  begin
+    exit;
+  end;
+  BytesRead := aLocalProcess.Output.Read(Buffer, BytesRead);
+  if BytesRead >= bufferSize then Buffer[bufferSize - 1] := 0
+  else
+    Buffer[BytesRead] := 0;
+
+  Sleep(50);
+  textToSee := '';
+  SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
+  Memo1.Lines.Add(logger.log('info', 'pushlogs', textToSee));
+  aLocalProcess.Free;
+  aLocalProcess := nil;
+end;
+
+procedure TmainForm.PushSecretsMenuItemClick(Sender: TObject);
+const
+  bufferSize = 1024 * 16;
+var
+  aLocalProcess: TProcess;
+  Buffer: array[0..bufferSize] of byte;
+  BytesRead: longint;
+  textToSee: ansistring;
+begin
+  aLocalProcess := TProcess.Create(nil);
+  aLocalProcess.Executable := 'sudo';
+  aLocalProcess.Parameters.Add('/snap/bin/m1client');
+  aLocalProcess.Parameters.Add('syncsecrets');
+  aLocalProcess.Options := aLocalProcess.Options + [poUsePipes];
+  aLocalProcess.Execute;
+
+  while aLocalProcess.Running do
+  begin
+    Sleep(50);
+    continue;
+  end;
+
+  Buffer[0] := 0;
+  BytesRead := aLocalProcess.Output.NumBytesAvailable;
+  if BytesRead > (bufferSize - 1) then
+  begin
+    exit;
+  end;
+  BytesRead := aLocalProcess.Output.Read(Buffer, BytesRead);
+  if BytesRead >= bufferSize then Buffer[bufferSize - 1] := 0
+  else
+    Buffer[BytesRead] := 0;
+
+  Sleep(50);
+  textToSee := '';
+  SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
+  Memo1.Lines.Add(logger.log('info', 'pushlogs', textToSee));
+  aLocalProcess.Free;
+  aLocalProcess := nil;
+end;
+
 procedure TmainForm.Re_TestMenuItem1Click(Sender: TObject);
 begin
   if busyFlag then exit;
@@ -407,6 +564,7 @@ begin
   ResetLeds;
   ColorProgress1.progress := 0;
   RunTests(TestingMode.re_test, 'Re-test');
+  targetVendorSerial.Text := '';
 end;
 
 procedure TmainForm.OpenLogExecute(Sender: TObject);
@@ -472,6 +630,13 @@ begin
   begin
     exit;
   end;
+  with TStringList.Create do
+    try
+      LoadFromFile(FW_Dir);
+      Memo1.Lines.Add(logger.log('info', 'eMMC', 'Programming FW Rev: ' + Text));
+    finally
+      Free;
+    end;
 
   FlashSwitch.LedValue := False;
   arg[0] := '-s';
@@ -499,11 +664,13 @@ var
   arg: array[0..8] of string;
 begin
   FuncTestSwitch.LedValue := False;
-  if targetVendorSerial.Text = '' then exit;
+  if targetVendorSerial.Text = '' then exit(testRet);
+  ;
 
   if busyFlag then
   begin
-    exit;
+    exit(testRet);
+    ;
   end;
   FuncTestSwitch.LedValue := False;
   arg[0] := '-s';
@@ -535,7 +702,8 @@ begin
 
   if busyFlag then
   begin
-    exit;
+    exit(testRet);
+    ;
   end;
 
   ICTTestSwitch.LedValue := False;
@@ -570,7 +738,7 @@ begin
 
   if busyFlag then
   begin
-    exit;
+    exit(testRet);
   end;
 
   EEPROMSwitch.LedValue := False;
@@ -588,11 +756,11 @@ var
   arg: array[0..10] of string;
 begin
   EEPROMSwitch.LedValue := False;
-  if targetVendorSerial.Text = '' then exit;
+  if targetVendorSerial.Text = '' then exit(testRet);
 
   if busyFlag then
   begin
-    exit;
+    exit(testRet);
   end;
 
   EEPROMSwitch.LedValue := False;
@@ -605,13 +773,13 @@ begin
   Result := testRet;
 end;
 
-procedure TmainForm.LedTimerTimer(Sender: TObject);
+procedure TmainForm.LedsTimer(Sender: TObject);
 var
   test: TestRecord;
 begin
-  if LedTimer.Tag = 1 then
+  if SyncLelLedTimer.Tag = 1 then
   begin
-    LedTimer.Tag := 0;
+    SyncLelLedTimer.Tag := 0;
     exit;
   end;
   for test in Tests do
@@ -639,8 +807,8 @@ var
   Buffer: array[0..bufferSize] of byte;
   textToSee: ansistring;
   tmpInt: integer;
-  testbool: boolean;
   MemoCopyTxt: string;
+  ExitStatus: integer;
 begin
   if command = 'cleanup' then
   begin
@@ -692,8 +860,8 @@ begin
     SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
     Memo1.Lines.Text := Memo1.Lines.Text + textToSee;
   end;
-
-  if AProcess.ExitStatus <> 0 then retValue := AProcess.ExitStatus
+  ExitStatus := AProcess.ExitStatus;
+  if ExitStatus <> 0 then retValue := ExitStatus
   else
     retValue := AProcess.ExitCode;
 
@@ -707,7 +875,9 @@ begin
     Led.LedColorOff := clRed;
     InterruptMenuItemClick(self);
     Led.Tag := 0;
+    retValue := AProcess.ExitCode;
   end;
+
   AProcess.Free;
   AProcess := nil;
   Led.tag := 0;
@@ -733,10 +903,11 @@ var
   retValue: integer;
 begin
   MacProgSwitch.LedValue := False;
-  if targetVendorSerial.Text = '' then exit;
+  if targetVendorSerial.Text = '' then exit(testRet);
+  ;
   if busyFlag then
   begin
-    exit;
+    exit(-1);
   end;
 
   MacProgSwitch.LedValue := False;
@@ -776,6 +947,7 @@ begin
   ResetLeds;
   ColorProgress1.progress := 0;
   RunTests(TestingMode.commission, 'commission');
+  targetVendorSerial.Text := '';
 end;
 
 procedure TmainForm.QuitMenuItemClick(Sender: TObject);
@@ -831,6 +1003,60 @@ begin
   end;
   Panel1DblClick(Sender);
   AppsCheckSwitchClick(Sender);
+end;
+
+procedure TmainForm.SyncLabelLedTimerTimer(Sender: TObject);
+begin
+  if not blinkMe then
+  begin
+    SyncFailedLabel.Visible := False;
+    exit;
+  end;
+
+  if SyncFailedLabel.Visible = False then SyncFailedLabel.Visible := True
+  else
+    SyncFailedLabel.Visible := False;
+
+end;
+
+procedure TmainForm.UpdateMeMenuItemClick(Sender: TObject);
+const
+  bufferSize = 1024 * 16;
+var
+  aLocalProcess: TProcess;
+  Buffer: array[0..bufferSize] of byte;
+  BytesRead: longint;
+  textToSee: ansistring;
+begin
+  aLocalProcess := TProcess.Create(nil);
+  aLocalProcess.Executable := '/snap/bin/m1client';
+  aLocalProcess.Parameters.Add('update');
+  aLocalProcess.Options := aLocalProcess.Options + [poUsePipes];
+  aLocalProcess.Execute;
+
+  while aLocalProcess.Running do
+  begin
+    Sleep(50);
+    continue;
+  end;
+
+  Buffer[0] := 0;
+  BytesRead := aLocalProcess.Output.NumBytesAvailable;
+  if BytesRead > (bufferSize - 1) then
+  begin
+    exit;
+  end;
+  BytesRead := aLocalProcess.Output.Read(Buffer, BytesRead);
+  if BytesRead >= bufferSize then Buffer[bufferSize - 1] := 0
+  else
+    Buffer[BytesRead] := 0;
+
+  Sleep(50);
+  textToSee := '';
+  SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
+  Memo1.Lines.Add(logger.log('info', 'pushlogs', textToSee));
+  aLocalProcess.Free;
+  aLocalProcess := nil;
 end;
 
 procedure TmainForm.EEPROMSwitchClick_Wrapper(Sender: TObject);
@@ -905,7 +1131,7 @@ begin
   FlashSwitchClick(Sender);
 end;
 
-procedure TmainForm.RunTests(tMode: TestingMode; modeStr : AnsiString);
+procedure TmainForm.RunTests(tMode: TestingMode; modeStr: ansistring);
 var
   test: TestRecord;
   testReturnStatus: integer;
@@ -926,24 +1152,38 @@ begin
     test.methodPtr(self);
     AddToProgressBar(test.progressValue);
     testReturnStatus := testRet;
-    if testReturnStatus <> NormalExit then begin
-     // Memo1.Lines.Add(logger.log('info', modeStr, 'Test return status - false'));
+    if testReturnStatus <> NormalExit then
+    begin
+      // Memo1.Lines.Add(logger.log('info', modeStr, 'Test return status - false'));
       break;
     end;
     // testReturnStatus is global since method is procedure
 
   end;
 
-  { if TestMode = TestingMode.commission then } DoCleanupCmd;
+  if testReturnStatus <> precheckHWFailed then
+  begin
+    DoCleanupCmd;
+  end;
 
   if (testReturnStatus <> NormalExit) and (testReturnStatus <> ProcessTerminated) then
   begin
-    DoLabelError;
+    if testReturnStatus <> precheckHWFailed then begin
+      DoLabelError;
+      ErrorForm.ShowModal;
+    end;
     resetLeds;
   end
   else
-  if (testReturnStatus = NormalExit) then Memo1.Lines.Add(logger.log('info', modeStr, 'Success! All Done'));
-  TestMode := TestingMode.none;
+  if (testReturnStatus = NormalExit) then
+  begin
+    Memo1.Lines.Add(logger.log('info', modeStr, 'Success! All Done'));
+    ShowMessage('Test Success!');
+  end;
+ // else
+ //   ShowMessage('Test Failed!');
+    TestMode := TestingMode.none;
+
 end;
 
 end.

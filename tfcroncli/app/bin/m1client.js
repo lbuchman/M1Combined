@@ -25,6 +25,10 @@ process.env.SNAP_DATA = '/var/snap/m1tfd1/current';
 const publicKey = path.join(process.env.SNAP_DATA, 'public.key');
 const debuglevel = '2';
 
+const UpdateFwTimeStamp = 'UpdateFwTimeStamp.txt';
+const UpdateSycretsTimeStamp = 'UpdateSycretsTimeStamp.txt';
+const UpdateLogsTimeStamp = 'UpdateLogsTimeStamp.txt'; 
+
 if (!process.env.VERSION) process.env.VERSION = '123456';
 
 program
@@ -33,13 +37,14 @@ program
     .version(process.env.SNAP_VERSION);
 
 program.command('update')
-    .description('download and update software and firmware i the test fixture')
+    .description('download and update software and firmware on the test fixture')
     .option('-f, --force', 'force update')
     .action(async (options) => {
         let logfile;
         let dir;
         let blobSvc;
         try {
+            const dateNow = os.getDate();
             const str = '/root snap install/d';
             os.executeShellCommand(`sudo sed -i '${str}' /etc/crontab`, logfile);
             const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
@@ -61,6 +66,7 @@ program.command('update')
             }
             if (lodash.isEqual(newManifestFile, localManifestFile)) {
                 logfile.info('No new firmware to update');
+                fs.writeFileSync(`${configData.m1mtfDir}/${UpdateFwTimeStamp}`, dateNow);
                 return;
             }
             logfile.info('New FW is available');
@@ -96,6 +102,9 @@ program.command('update')
                 }
             });
             await Promise.all(promises);
+            logfile.info(`${configData.m1mtfDir}/${UpdateFwTimeStamp}`);
+            fs.writeFileSync(`${configData.m1mtfDir}/${UpdateFwTimeStamp}`, dateNow);
+
             await os.executeShellCommand(`cp -f ${path.join(dir, 'tmp', 'manifestFile.json')} ${path.join(dir, 'tmp', 'manifestFileLocal.json')}`, logfile);
             logfile.info('Done');
         }
@@ -110,13 +119,15 @@ program.command('update')
 program.command('synclogs')
     .description('sync logs into Cloud AS')
     .action(async () => {
-        console.error('1234'); 
+        let noError = true;
+        const dateNow = os.getDate();
         const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
         const matches = glob.sync(`${configData.m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
         const logfile = logger.getLogger('m1cli', 'synclogs', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         const blobSvc = azure.createBlobService(configData.conString);
         if (!matches.length) {
             logfile.info('No log files to upload');
+            fs.writeFileSync(`${configData.m1mtfDir}/${UpdateLogsTimeStamp}`, dateNow);
             return;
         }
         try {
@@ -134,17 +145,21 @@ program.command('synclogs')
         matches.forEach((item) => {
             logfile.info(path.basename(item));
             try {
-               fs.moveSync(item, path.join(`${syncedLogsDir}`, path.basename(item)));
+                fs.moveSync(item, path.join(`${syncedLogsDir}`, path.basename(item)));
             }
             catch (err) {
-               logfile.error(err.message); 
+                noError = false;
+                logfile.error(err.message);
             }
         });
+        if (noError)  fs.writeFileSync(`${configData.m1mtfDir}/${UpdateLogsTimeStamp}`, dateNow);
+
     });
 
 program.command('backupdb')
     .description('backup DB to the cloud')
     .action(async () => {
+        // const dateNow = os.getDate();
         const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
         const logfile = logger.getLogger('m1cli', 'backupdb', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         const dbFile = path.join(configData.m1mtfDir, 'tf.db');
@@ -189,6 +204,7 @@ function getEncryptedSecretBase32(buffer) {
 program.command('syncsecrets')
     .description('sync M1-3200 secrets into Cloud AS')
     .action(async () => {
+        const dateNow = os.getDate();
         const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
         const logfile = logger.getLogger('m1cli', 'syncsecrets', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         secrets.initialize(configData.m1mtfDir, logfile);
@@ -201,7 +217,8 @@ program.command('syncsecrets')
             const db = secrets.initialize(configData.m1mtfDir, logfile);
             const records = db.getRecords();
             if (!records.length) {
-                logfile.info('nothing to do');
+                logfile.info('No secrets to sync');
+                fs.writeFileSync(`${configData.m1mtfDir}/${UpdateSycretsTimeStamp}`, dateNow);
                 return;
             }
             let firstLine = true;
@@ -221,7 +238,8 @@ program.command('syncsecrets')
                 firstLine = false;
             });
             if (firstLine) {
-                logfile.info('no secrets to sync');
+                logfile.info('No secrets to sync');
+                fs.writeFileSync(`${configData.m1mtfDir}/${UpdateSycretsTimeStamp}`, dateNow);
                 return;
             }
             await azureOp.syncFiles(blobSvc, secretsContainer, [filename]);
@@ -230,7 +248,7 @@ program.command('syncsecrets')
             records.forEach((board) => {
                 db.updateRecord(board.vendorSerial);
             });
-
+            fs.writeFileSync(`${configData.m1mtfDir}/${UpdateSycretsTimeStamp}`, dateNow);
             logfile.info('Done');
         }
         catch (err) {

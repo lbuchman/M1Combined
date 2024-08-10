@@ -1,13 +1,12 @@
 object mainForm: TmainForm
-  Left = 787
-  Height = 977
-  Top = 287
-  Width = 1936
+  Left = 870
+  Height = 710
+  Top = 511
+  Width = 1408
   BorderWidth = 2
-  ClientHeight = 944
-  ClientWidth = 1936
-  DesignTimePPI = 132
-  Font.Height = -21
+  ClientHeight = 687
+  ClientWidth = 1408
+  Font.Height = -15
   Font.Name = 'Monospace'
   Icon.Data = {
     5FB20000000001000100000000000100200049B200001600000089504E470D0A
@@ -1445,9 +1444,9 @@ object mainForm: TmainForm
   LCLVersion = '2.2.6.0'
   object Memo1: TMemo
     Left = 2
-    Height = 708
-    Top = 234
-    Width = 1932
+    Height = 515
+    Top = 170
+    Width = 1404
     Align = alClient
     OnDblClick = Memo1DblClick
     ReadOnly = True
@@ -1457,12 +1456,12 @@ object mainForm: TmainForm
   end
   object Panel2: TPanel
     Left = 2
-    Height = 42
-    Top = 192
-    Width = 1932
+    Height = 30
+    Top = 140
+    Width = 1404
     Align = alTop
     Color = clBtnShadow
-    Font.Height = -22
+    Font.Height = -16
     Font.Name = 'Sans'
     ParentColor = False
     ParentFont = False
@@ -1470,46 +1469,45 @@ object mainForm: TmainForm
   end
   object Panel1: TPanel
     Left = 2
-    Height = 190
+    Height = 138
     Top = 2
-    Width = 1932
+    Width = 1404
     Align = alTop
     BevelWidth = 4
     BorderStyle = bsSingle
-    ClientHeight = 188
-    ClientWidth = 1930
+    ClientHeight = 136
+    ClientWidth = 1402
     Color = 45537
     ParentColor = False
     TabOrder = 0
     OnDblClick = Panel1DblClick
     object TargetVendorSerial: TEdit
-      Left = 629
-      Height = 32
-      Top = 13
-      Width = 257
+      Left = 458
+      Height = 27
+      Top = 10
+      Width = 187
       Alignment = taCenter
       MaxLength = 10
       NumbersOnly = True
       TabOrder = 0
-      Text = '3023370015'
     end
     object Label1: TLabel
-      Left = 910
-      Height = 27
-      Top = 20
-      Width = 170
+      Left = 662
+      Height = 19
+      Top = 15
+      Width = 122
       Caption = 'Barcode Scan'
-      Font.Height = -22
+      Font.Height = -16
       Font.Name = 'Sans'
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
     end
     object ICTTestSwitch: TindLed
-      Left = 7
-      Height = 42
-      Top = 65
-      Width = 42
+      Left = 5
+      Height = 30
+      Top = 47
+      Width = 30
       Color = 8691968
       OnClick = ICTTestSwitchClick_Wrapper
       LedValue = False
@@ -1538,22 +1536,22 @@ object mainForm: TmainForm
       Transparent = True
     end
     object StaticText6: TStaticText
-      Left = 62
-      Height = 28
-      Top = 71
-      Width = 50
+      Left = 45
+      Height = 20
+      Top = 51
+      Width = 36
       Caption = 'ICT'
-      Font.Height = -21
+      Font.Height = -15
       Font.Name = 'Sans'
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 1
     end
     object MacProgSwitch: TindLed
-      Left = 255
-      Height = 42
-      Top = 65
-      Width = 42
+      Left = 186
+      Height = 30
+      Top = 47
+      Width = 30
       OnClick = MacProgSwitchClick_Wrapper
       LedValue = False
       Bevels = <      
@@ -1581,22 +1579,22 @@ object mainForm: TmainForm
       Transparent = True
     end
     object StaticText8: TStaticText
-      Left = 308
-      Height = 28
-      Top = 71
-      Width = 128
+      Left = 224
+      Height = 20
+      Top = 51
+      Width = 93
       Caption = 'MAC Prog'
-      Font.Height = -21
+      Font.Height = -15
       Font.Name = 'Sans'
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 2
     end
     object FlashSwitch: TindLed
-      Left = 501
-      Height = 42
-      Top = 65
-      Width = 42
+      Left = 364
+      Height = 30
+      Top = 47
+      Width = 30
       OnClick = FlashSwitchClick_Wrapper
       LedValue = False
       Bevels = <      
@@ -1624,34 +1622,34 @@ object mainForm: TmainForm
       Transparent = True
     end
     object StaticText10: TStaticText
-      Left = 554
-      Height = 28
-      Top = 71
-      Width = 75
+      Left = 403
+      Height = 20
+      Top = 51
+      Width = 54
       Caption = 'Flash'
-      Font.Height = -21
+      Font.Height = -15
       Font.Name = 'Sans'
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 3
     end
     object StaticText7: TStaticText
-      Left = 794
-      Height = 28
-      Top = 71
-      Width = 118
+      Left = 577
+      Height = 20
+      Top = 51
+      Width = 86
       Caption = 'Func Test'
-      Font.Height = -21
+      Font.Height = -15
       Font.Name = 'Sans'
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 4
     end
     object FuncTestSwitch: TindLed
-      Left = 743
-      Height = 42
-      Top = 65
-      Width = 42
+      Left = 540
+      Height = 30
+      Top = 47
+      Width = 30
       OnClick = FuncTestSwitchClick_Wrapper
       LedValue = False
       Bevels = <      
@@ -1679,10 +1677,10 @@ object mainForm: TmainForm
       Transparent = True
     end
     object EEPROMSwitch: TindLed
-      Left = 994
-      Height = 42
-      Top = 65
-      Width = 42
+      Left = 723
+      Height = 30
+      Top = 47
+      Width = 30
       OnClick = EEPROMSwitchClick_Wrapper
       LedValue = False
       Bevels = <      
@@ -1710,22 +1708,22 @@ object mainForm: TmainForm
       Transparent = True
     end
     object StaticText9: TStaticText
-      Left = 1043
-      Height = 28
-      Top = 71
-      Width = 108
+      Left = 758
+      Height = 20
+      Top = 51
+      Width = 78
       Caption = 'EEPROM'
-      Font.Height = -21
+      Font.Height = -15
       Font.Name = 'Sans'
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 5
     end
     object DoLabelSwitch: TindLed
-      Left = 1503
-      Height = 42
-      Top = 65
-      Width = 42
+      Left = 1093
+      Height = 30
+      Top = 47
+      Width = 30
       OnClick = DoLabelSwitchClick_Wrapper
       LedValue = False
       Bevels = <      
@@ -1753,12 +1751,12 @@ object mainForm: TmainForm
       Transparent = True
     end
     object StaticText11: TStaticText
-      Left = 1552
-      Height = 28
-      Top = 71
-      Width = 143
+      Left = 1128
+      Height = 20
+      Top = 51
+      Width = 104
       Caption = 'Make Label'
-      Font.Height = -21
+      Font.Height = -15
       Font.Name = 'Sans'
       Font.Style = [fsBold]
       ParentFont = False
@@ -1766,9 +1764,9 @@ object mainForm: TmainForm
     end
     object ColorProgress1: TColorProgress
       Left = 4
-      Height = 42
-      Top = 142
-      Width = 1922
+      Height = 30
+      Top = 102
+      Width = 1394
       Align = alBottom
       BackColor = clAppWorkspace
       Color = clBtnHighlight
@@ -1777,13 +1775,13 @@ object mainForm: TmainForm
       Progress = 0
     end
     object DevModeLabel: TLabel
-      Left = 1457
-      Height = 32
-      Top = 15
-      Width = 40
+      Left = 1059
+      Height = 23
+      Top = 11
+      Width = 29
       Caption = 'D0'
       Color = 45537
-      Font.Height = -26
+      Font.Height = -19
       Font.Name = 'Sans'
       Font.Style = [fsBold]
       ParentColor = False
@@ -1792,10 +1790,10 @@ object mainForm: TmainForm
       Visible = False
     end
     object FakeLed: TindLed
-      Left = 652
-      Height = 42
-      Top = 57
-      Width = 42
+      Left = 474
+      Height = 30
+      Top = 42
+      Width = 30
       Visible = False
       OnClick = DoLabelSwitchClick
       LedValue = False
@@ -1824,10 +1822,10 @@ object mainForm: TmainForm
       Transparent = True
     end
     object AppsCheckSwitch: TindLed
-      Left = 1245
-      Height = 42
-      Top = 65
-      Width = 42
+      Left = 906
+      Height = 30
+      Top = 47
+      Width = 30
       OnClick = AppsCheckSwitchClick_Wrapper
       LedValue = False
       Bevels = <      
@@ -1855,34 +1853,46 @@ object mainForm: TmainForm
       Transparent = True
     end
     object StaticText12: TStaticText
-      Left = 1293
-      Height = 28
-      Top = 71
-      Width = 145
+      Left = 940
+      Height = 20
+      Top = 51
+      Width = 106
       Caption = 'Apps Check'
-      Font.Height = -21
+      Font.Height = -15
       Font.Name = 'Sans'
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 7
     end
+    object SyncFailedLabel: TLabel
+      Left = 12
+      Height = 18
+      Top = 12
+      Width = 414
+      Caption = 'Cloud Sync Failed for 7 days, contact LenelS2 '
+      Font.Height = -15
+      Font.Name = 'Monospace'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
   end
   object LogsOpenDialog1: TOpenDialog
     DefaultExt = '.*.log'
     Filter = 'log|*.log'
-    Left = 1551
-    Top = 7
+    Left = 1128
+    Top = 5
   end
-  object LedTimer: TTimer
+  object SyncLelLedTimer: TTimer
     Enabled = False
-    Interval = 400
-    OnTimer = LedTimerTimer
-    Left = 331
-    Top = 92
+    Interval = 500
+    OnTimer = LedsTimer
+    Left = 241
+    Top = 67
   end
   object MainMenu1: TMainMenu
-    Left = 62
-    Top = 208
+    Left = 45
+    Top = 151
     object StartTestMenuItem: TMenuItem
       Caption = 'Commission'
       ShortCut = 16451
@@ -1898,9 +1908,17 @@ object mainForm: TmainForm
       ShortCut = 16467
       OnClick = InterruptMenuItemClick
     end
-    object PublishLogMenuItem: TMenuItem
-      Caption = 'Push Logs'
-      OnClick = PublishLogMenuItemClick
+    object CloudMenuItem: TMenuItem
+      Caption = 'Cloud'
+      OnClick = CloudMenuItemClick
+      object PushLogsMenuItem: TMenuItem
+        Caption = 'Push Logs'
+        OnClick = PushLogsMenuItemClick
+      end
+      object PushSecretsMenuItem: TMenuItem
+        Caption = 'Push Secrets'
+        OnClick = PushSecretsMenuItemClick
+      end
     end
     object AbountMenuItem: TMenuItem
       Caption = 'About'
@@ -1913,8 +1931,8 @@ object mainForm: TmainForm
     end
   end
   object ActionList1: TActionList
-    Left = 339
-    Top = 246
+    Left = 246
+    Top = 179
     object DebugLevel0: TAction
       Caption = 'Set Production Mode'
       OnExecute = Debuglevel_0_Execute
@@ -1954,5 +1972,19 @@ object mainForm: TmainForm
       OnExecute = QuitMenuItemClick
       ShortCut = 16465
     end
+  end
+  object SyncLabelLedTimer: TTimer
+    Tag = 1
+    Interval = 500
+    OnTimer = SyncLabelLedTimerTimer
+    Left = 109
+    Top = 74
+  end
+  object CheckCloudUpdateTimer: TTimer
+    Tag = 1
+    Interval = 10000
+    OnTimer = CheckCloudUpdateTimerTimer
+    Left = 136
+    Top = 100
   end
 end

@@ -13,7 +13,7 @@ uses
   logForm,
   logger,
   configurationJson,
-  about;
+  about, errorReportForm;
 
 {$R *.res}
 
@@ -24,5 +24,6 @@ begin
   Application.CreateForm(TmainForm, mainForm);
   Application.CreateForm(TLoggerForm, LoggerForm);
   Application.CreateForm(TaboutForm, aboutForm);
+  Application.CreateForm(TErrorForm, ErrorForm);
   Application.Run;
 end.

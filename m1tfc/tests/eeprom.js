@@ -89,6 +89,11 @@ async function updateEEPRom(serial, eepromoverwrite, vendorSite, logger) {
             }
             delete eepromData.status;
             logger.info('The EEPROM Data is valid');
+            const eepromSerial = eepromData.serial.substring(3).slice(0, -2);
+            if (eepromSerial !== serial) {
+                db.updateErrorCode(serial, errorCodes.codes['SERIAL_MISSMATH'].errorCode, 'E');
+                throw new Error(`serial number ${serial} does not match EEPROM value ${eepromData.serial.substring(3).slice(0, -2)}`);
+            }
             db.updateEepromData(serial, eepromData.secret, eepromData.serial);
         }
 

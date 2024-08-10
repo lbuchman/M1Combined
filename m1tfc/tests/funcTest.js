@@ -161,7 +161,7 @@ module.exports = class FuncTest {
 
             try {
                 if (!skipUSBPenDriveTest) {
-                    const result = await client.execCommand('cat /proc/mounts | grep /dev/sda1');
+                    const result = await client.execCommand('cat /proc/mounts | grep /dev/sda');
                     this.logger.info('USB Host port pen Drive test passed');
                     if (!result) throw new Error('not mounted');
                 }

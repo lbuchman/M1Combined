@@ -4,7 +4,7 @@ const testBoardLink = require('../src/testBoardLink');
 const errorCodes = require('../bin/errorCodes');
 
 const ddrVoltage = { name: 'TP31', voltage: 1.35 };
-
+const leverLockVoltage = { name: 'LeverSensor', voltage: 0 };
 const testPoints = [
     { name: 'TP025', voltage: 5 },
     { name: 'TP33', voltage: 2.8 },
@@ -18,6 +18,20 @@ const testPoints = [
 ];
 
 const coinCellBattery = { name: 'BatCellBat', minVoltage: 3.1, maxVoltage: 3.7 };
+
+
+async function checkLeverState(logger, db) {
+    const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(leverLockVoltage.name)}`);
+    if (!ret.status) {
+        throw new Error(`Test Board control command failed on pinName=${leverLockVoltage.name}, ${ret.error}`);
+    }
+    if ((Math.abs(ret.value - leverLockVoltage.voltage)) > 0.2) {
+        db.updateErrorCode(process.env.serial, errorCodes.codes[leverLockVoltage.name].errorCode, 'T');
+        throw new Error('Failed: The Cover Lever is Not Locked!!!');
+    }
+
+    return true;
+}
 
 async function testDDRVoltage(tolerance, logger, db) {
     const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(ddrVoltage.name)}`);
@@ -90,5 +104,6 @@ async function test(tolerance, logger, db) {
 module.exports = {
     test,
     testDDRVoltage,
-    cellBatTest
+    cellBatTest,
+    checkLeverState
 };

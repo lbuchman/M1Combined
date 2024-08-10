@@ -1,0 +1,5 @@
+MANIFEST_VERSION = openstlinux-6.1-yocto-mickledore-mpu-v24.06.26
+KERNEL_DT = ./DeviceTree/MNPlusBootSrtrap3/kernel
+OPTEE_DT = ./DeviceTree/MNPlusBootSrtrap3/optee-os
+UBOOT_DT = ./DeviceTree/MNPlusBootSrtrap3/u-boot
+TFA_DT = ./DeviceTree/MNPlusBootSrtrap3/tf-a
