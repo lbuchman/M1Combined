@@ -1,0 +1,2 @@
+/home/lbuchman/STM32CubeIDE/workspace_1.16.1/MNPlusBootSrtrap3/Common/System/system_stm32mp1xx.c:131:6:SystemInit	4	static
+/home/lbuchman/STM32CubeIDE/workspace_1.16.1/MNPlusBootSrtrap3/Common/System/system_stm32mp1xx.c:201:6:SystemCoreClockUpdate	32	static
