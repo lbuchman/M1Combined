@@ -1,3 +1,0 @@
-../arduinoPort/fcvt.c:44:14:cvt	72	static
-../arduinoPort/fcvt.c:114:7:ecvtbuf	40	static
-../arduinoPort/fcvt.c:122:7:fcvtbuf	40	static

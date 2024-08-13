@@ -1,3 +1,0 @@
-../arduinoPort/argvp.cpp:7:5:int isspace(int)	16	static
-../arduinoPort/argvp.cpp:19:14:char* splitArgv(char**, char**)	24	static
-../arduinoPort/argvp.cpp:78:7:char* parseStrToArgcArgvInsitu(char*, int, int*, char**)	24	static
