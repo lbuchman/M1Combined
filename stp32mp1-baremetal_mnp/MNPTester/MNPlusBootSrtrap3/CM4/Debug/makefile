@@ -9,6 +9,8 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include testFixture/subdir.mk
+-include arduinoPort/subdir.mk
 -include Drivers/STM32MP1xx_HAL_Driver/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
@@ -85,8 +87,8 @@ all: main-build
 main-build: MNPlusBootSrtrap3_CM4.elf secondary-outputs
 
 # Tool invocations
-MNPlusBootSrtrap3_CM4.elf MNPlusBootSrtrap3_CM4.map: $(OBJS) $(USER_OBJS) /home/lbuchman/data/myGitHub/M1Combined/stp32mp1-baremetal_mnp/MNPTester/MNPlusBootSrtrap3/CM4/STM32MP151FAAX_RAM.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "MNPlusBootSrtrap3_CM4.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/lbuchman/data/myGitHub/M1Combined/stp32mp1-baremetal_mnp/MNPTester/MNPlusBootSrtrap3/CM4/STM32MP151FAAX_RAM.ld" --specs=nosys.specs -Wl,-Map="MNPlusBootSrtrap3_CM4.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+MNPlusBootSrtrap3_CM4.elf MNPlusBootSrtrap3_CM4.map: $(OBJS) $(USER_OBJS) /home/lbuchman/myGitHub/M1Combined/stp32mp1-baremetal_mnp/MNPTester/MNPlusBootSrtrap3/CM4/STM32MP151FAAX_RAM.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-g++ -o "MNPlusBootSrtrap3_CM4.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/lbuchman/myGitHub/M1Combined/stp32mp1-baremetal_mnp/MNPTester/MNPlusBootSrtrap3/CM4/STM32MP151FAAX_RAM.ld" --specs=nosys.specs -Wl,-Map="MNPlusBootSrtrap3_CM4.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

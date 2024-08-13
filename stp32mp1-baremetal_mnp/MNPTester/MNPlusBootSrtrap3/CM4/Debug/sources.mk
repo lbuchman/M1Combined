@@ -42,4 +42,6 @@ Common/System \
 Core/Src \
 Core/Startup \
 Drivers/STM32MP1xx_HAL_Driver \
+arduinoPort \
+testFixture \
 

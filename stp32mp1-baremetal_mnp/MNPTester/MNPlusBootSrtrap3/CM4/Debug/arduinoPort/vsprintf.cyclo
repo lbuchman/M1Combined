@@ -1,0 +1,11 @@
+../arduinoPort/vsprintf.c:19:8:strnlen	3
+../arduinoPort/vsprintf.c:25:12:skip_atoi	3
+../arduinoPort/vsprintf.c:31:14:number	27
+../arduinoPort/vsprintf.c:97:14:eaddr	8
+../arduinoPort/vsprintf.c:117:14:iaddr	10
+../arduinoPort/vsprintf.c:153:13:cfltcvt	23
+../arduinoPort/vsprintf.c:238:13:forcdecpt	7
+../arduinoPort/vsprintf.c:259:13:cropzeros	10
+../arduinoPort/vsprintf.c:272:14:flt	21
+../arduinoPort/vsprintf.c:326:5:vsprintf	49
+../arduinoPort/vsprintf.c:510:5:sprintf	1

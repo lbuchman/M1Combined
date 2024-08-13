@@ -1,0 +1,11 @@
+../arduinoPort/vsprintf.c:19:8:strnlen	24	static
+../arduinoPort/vsprintf.c:25:12:skip_atoi	24	static
+../arduinoPort/vsprintf.c:31:14:number	104	static
+../arduinoPort/vsprintf.c:97:14:eaddr	64	static
+../arduinoPort/vsprintf.c:117:14:iaddr	64	static
+../arduinoPort/vsprintf.c:153:13:cfltcvt	328	static
+../arduinoPort/vsprintf.c:238:13:forcdecpt	24	static
+../arduinoPort/vsprintf.c:259:13:cropzeros	24	static
+../arduinoPort/vsprintf.c:272:14:flt	320	static
+../arduinoPort/vsprintf.c:326:5:vsprintf	80	static
+../arduinoPort/vsprintf.c:510:5:sprintf	28	static
