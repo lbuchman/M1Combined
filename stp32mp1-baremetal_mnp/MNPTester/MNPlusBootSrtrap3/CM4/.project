@@ -42,6 +42,16 @@
 			<locationURI>PARENT-4-PROJECT_LOC/STM32Cube/Repository/STM32Cube_FW_MP1_V1.6.0/Drivers/STM32MP1xx_HAL_Driver/Src/stm32mp1xx_hal.c</locationURI>
 		</link>
 		<link>
+			<name>Drivers/STM32MP1xx_HAL_Driver/stm32mp1xx_hal_adc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-6-PROJECT_LOC/STM32Cube/Repository/STM32Cube_FW_MP1_V1.6.0/Drivers/STM32MP1xx_HAL_Driver/Src/stm32mp1xx_hal_adc.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32MP1xx_HAL_Driver/stm32mp1xx_hal_adc_ex.c</name>
+			<type>1</type>
+			<locationURI>PARENT-6-PROJECT_LOC/STM32Cube/Repository/STM32Cube_FW_MP1_V1.6.0/Drivers/STM32MP1xx_HAL_Driver/Src/stm32mp1xx_hal_adc_ex.c</locationURI>
+		</link>
+		<link>
 			<name>Drivers/STM32MP1xx_HAL_Driver/stm32mp1xx_hal_cortex.c</name>
 			<type>1</type>
 			<locationURI>PARENT-4-PROJECT_LOC/STM32Cube/Repository/STM32Cube_FW_MP1_V1.6.0/Drivers/STM32MP1xx_HAL_Driver/Src/stm32mp1xx_hal_cortex.c</locationURI>
@@ -115,6 +125,11 @@
 			<name>Drivers/STM32MP1xx_HAL_Driver/stm32mp1xx_hal_uart_ex.c</name>
 			<type>1</type>
 			<locationURI>PARENT-4-PROJECT_LOC/STM32Cube/Repository/STM32Cube_FW_MP1_V1.6.0/Drivers/STM32MP1xx_HAL_Driver/Src/stm32mp1xx_hal_uart_ex.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32MP1xx_HAL_Driver/stm32mp1xx_ll_adc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-6-PROJECT_LOC/STM32Cube/Repository/STM32Cube_FW_MP1_V1.6.0/Drivers/STM32MP1xx_HAL_Driver/Src/stm32mp1xx_ll_adc.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

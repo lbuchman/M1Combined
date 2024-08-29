@@ -53,10 +53,33 @@
 
 &pinctrl {
 
-	m4_uart4_pins_mx: m4_uart4_mx-0 {
+	m4_adc_pins_mx: m4_adc_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('D', 1, RSVD)>, /* UART4_TX */
-					 <STM32_PINMUX('H', 14, RSVD)>; /* UART4_RX */
+			pinmux = <STM32_PINMUX('F', 11, ANALOG)>, /* ADC1_INP2 */
+					 <STM32_PINMUX('F', 12, ANALOG)>; /* ADC1_INP6 */
+		};
+	};
+
+	m4_uart5_pins_mx: m4_uart5_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('B', 5, RSVD)>, /* UART5_RX */
+					 <STM32_PINMUX('B', 6, RSVD)>, /* UART5_TX */
+					 <STM32_PINMUX('C', 8, RSVD)>; /* UART5_DE */
+		};
+	};
+
+	m4_uart8_pins_mx: m4_uart8_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('E', 0, RSVD)>, /* UART8_RX */
+					 <STM32_PINMUX('E', 1, RSVD)>, /* UART8_TX */
+					 <STM32_PINMUX('E', 14, RSVD)>; /* UART8_DE */
+		};
+	};
+
+	m4_usart3_pins_mx: m4_usart3_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 8, RSVD)>, /* USART3_TX */
+					 <STM32_PINMUX('D', 9, RSVD)>; /* USART3_RX */
 		};
 	};
 
@@ -115,6 +138,15 @@
 	/* USER CODE END dmamux1 */
 };
 
+&m4_adc{
+	pinctrl-names = "default";
+	pinctrl-0 = <&m4_adc_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN m4_adc */
+	/* USER CODE END m4_adc */
+};
+
 &m4_dma2{
 	status = "okay";
 
@@ -122,13 +154,31 @@
 	/* USER CODE END m4_dma2 */
 };
 
-&m4_uart4{
+&m4_uart5{
 	pinctrl-names = "default";
-	pinctrl-0 = <&m4_uart4_pins_mx>;
+	pinctrl-0 = <&m4_uart5_pins_mx>;
 	status = "okay";
 
-	/* USER CODE BEGIN m4_uart4 */
-	/* USER CODE END m4_uart4 */
+	/* USER CODE BEGIN m4_uart5 */
+	/* USER CODE END m4_uart5 */
+};
+
+&m4_uart8{
+	pinctrl-names = "default";
+	pinctrl-0 = <&m4_uart8_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN m4_uart8 */
+	/* USER CODE END m4_uart8 */
+};
+
+&m4_usart3{
+	pinctrl-names = "default";
+	pinctrl-0 = <&m4_usart3_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN m4_usart3 */
+	/* USER CODE END m4_usart3 */
 };
 
 &mdma1{
