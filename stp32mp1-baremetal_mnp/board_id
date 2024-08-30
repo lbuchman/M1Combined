@@ -1,0 +1,19 @@
+Hi Leo,
+
+Good catch… 
+I neglected to bump the ID REV bits to REV D for the M1 V3 with RMII 50Mhz OSC.
+The present M1 V3 is at REV C
+
+[PCB_ID5:PCB_ID3] =>  000      (M1 V3)
+
+[PCB_ID2:PCB_ID0] =>  011      (REV D)
+
+(Refer to ID BIT DEFINITION Table on page 20 of schematics)
+
+Schematics updated.
+
+Any questions let me know.
+
+Thanks,
+Tom
+
