@@ -8,6 +8,8 @@
 #ifndef INIT_HH
 #define INIT_HH
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
  extern "C" {
 #endif

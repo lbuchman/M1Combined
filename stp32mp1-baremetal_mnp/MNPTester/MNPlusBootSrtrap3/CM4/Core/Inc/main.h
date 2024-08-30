@@ -73,14 +73,22 @@ void Error_Handler(void);
 #define LAddr2_GPIO_Port GPIOK
 #define RP2_Wg_D1_Pin GPIO_PIN_15
 #define RP2_Wg_D1_GPIO_Port GPIOJ
+#define LED_POEP_Pin GPIO_PIN_4
+#define LED_POEP_GPIO_Port GPIOD
 #define RD2_OSDP_Tx_Pin GPIO_PIN_1
 #define RD2_OSDP_Tx_GPIO_Port GPIOE
+#define nPoE_PSE_Pin GPIO_PIN_0
+#define nPoE_PSE_GPIO_Port GPIOK
 #define RP2_OSDP_Te_Pin GPIO_PIN_12
 #define RP2_OSDP_Te_GPIO_Port GPIOE
+#define LED_POE_Pin GPIO_PIN_6
+#define LED_POE_GPIO_Port GPIOC
 #define ConsoleA7_Tx_Pin GPIO_PIN_8
 #define ConsoleA7_Tx_GPIO_Port GPIOD
 #define ConsoleA7_Rx_Pin GPIO_PIN_9
 #define ConsoleA7_Rx_GPIO_Port GPIOD
+#define LedCPU_Pin GPIO_PIN_3
+#define LedCPU_GPIO_Port GPIOC
 #define Adc1_pin6_Pin GPIO_PIN_12
 #define Adc1_pin6_GPIO_Port GPIOF
 #define LDDR0_Pin GPIO_PIN_10
@@ -101,6 +109,8 @@ void Error_Handler(void);
 #define RP1_OSDP_Rx_GPIO_Port GPIOB
 #define LEN_L_Pin GPIO_PIN_10
 #define LEN_L_GPIO_Port GPIOG
+#define M4_RUN_L_Pin GPIO_PIN_6
+#define M4_RUN_L_GPIO_Port GPIOF
 #define STRIKE1_KICKER_EN_Pin GPIO_PIN_8
 #define STRIKE1_KICKER_EN_GPIO_Port GPIOB
 

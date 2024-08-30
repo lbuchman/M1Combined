@@ -55,8 +55,7 @@
 
 	m4_adc_pins_mx: m4_adc_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('A', 6, ANALOG)>, /* ADC1_INP3 */
-					 <STM32_PINMUX('F', 11, ANALOG)>, /* ADC1_INP2 */
+			pinmux = <STM32_PINMUX('F', 11, ANALOG)>, /* ADC1_INP2 */
 					 <STM32_PINMUX('F', 12, ANALOG)>; /* ADC1_INP6 */
 		};
 	};

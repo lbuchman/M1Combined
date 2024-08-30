@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "../../testFixture/init.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -105,13 +106,13 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
-
+  setup(IS_ENGINEERING_BOOT_MODE());
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
-
+	run(IS_ENGINEERING_BOOT_MODE());
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -418,13 +419,16 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LAddr2_GPIO_Port, LAddr2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_POEP_GPIO_Port, LED_POEP_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(RP2_OSDP_Te_GPIO_Port, RP2_OSDP_Te_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, LDDR0_Pin|STRIKE2_KICKER_EN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, LED_POE_Pin|LedCPU_Pin|RP2_Wg_D0_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(RP2_Wg_D0_GPIO_Port, RP2_Wg_D0_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOF, LDDR0_Pin|STRIKE2_KICKER_EN_Pin|M4_RUN_L_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOG, LAddr1_Pin|LEN_L_Pin, GPIO_PIN_RESET);
@@ -445,11 +449,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(RP1_Beeper_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : RP1_Wg_D1_Pin */
-  GPIO_InitStruct.Pin = RP1_Wg_D1_Pin;
+  /*Configure GPIO pins : RP1_Wg_D1_Pin nPoE_PSE_Pin */
+  GPIO_InitStruct.Pin = RP1_Wg_D1_Pin|nPoE_PSE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(RP1_Wg_D1_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOK, &GPIO_InitStruct);
 
   /*Configure GPIO pins : Ldat_Pin RP2_Beeper_Pin */
   GPIO_InitStruct.Pin = Ldat_Pin|RP2_Beeper_Pin;
@@ -471,6 +475,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(RP2_Wg_D1_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : LED_POEP_Pin */
+  GPIO_InitStruct.Pin = LED_POEP_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_POEP_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : RP2_OSDP_Te_Pin */
   GPIO_InitStruct.Pin = RP2_OSDP_Te_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -478,19 +489,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(RP2_OSDP_Te_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LDDR0_Pin STRIKE2_KICKER_EN_Pin */
-  GPIO_InitStruct.Pin = LDDR0_Pin|STRIKE2_KICKER_EN_Pin;
+  /*Configure GPIO pins : LED_POE_Pin LedCPU_Pin RP2_Wg_D0_Pin */
+  GPIO_InitStruct.Pin = LED_POE_Pin|LedCPU_Pin|RP2_Wg_D0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LDDR0_Pin STRIKE2_KICKER_EN_Pin M4_RUN_L_Pin */
+  GPIO_InitStruct.Pin = LDDR0_Pin|STRIKE2_KICKER_EN_Pin|M4_RUN_L_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : RP2_Wg_D0_Pin */
-  GPIO_InitStruct.Pin = RP2_Wg_D0_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(RP2_Wg_D0_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LAddr1_Pin LEN_L_Pin */
   GPIO_InitStruct.Pin = LAddr1_Pin|LEN_L_Pin;

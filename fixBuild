@@ -1,7 +1,0 @@
-1. 
-
-It would be better to change main Kakefile line 43 and replace = to =?, in this case 
-Need specific toolchain
-2. Need Go compiler
-3. Need gpg keys and debian keys, debkeys.tar dir -> /mnt/vendor/s2sys-misc/security/
-4. Comment line in Makefile, compare files
