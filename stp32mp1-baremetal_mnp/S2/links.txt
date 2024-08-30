@@ -1,0 +1,13 @@
+https://visualgdb.com/tutorials/arm/stm32/stm32mp1/
+https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-EV1/Develop_on_Arm%C2%AE_Cortex%C2%AE-M4
+https://community.st.com/t5/stm32-mpus-products/stm32mp1-a7-and-m4-communication/td-p/133161
+https://github.com/embeddedcrab/stm32mp1_multicore_comm
+https://github.com/embeddedcrab/stm32mp1_multicore_comm/tree/master/stm-apps/cm4/M4A7Comm/remoteproc
+https://www.youtube.com/watch?v=YIhzzgJmop0
+https://wiki.st.com/stm32mpu/wiki/ETZPC_internal_peripheral
+https://www.youtube.com/playlist?list=PLnMKNibPkDnFp5YvrvWjgfjrOs0Vi34Mt
+https://wiki.st.com/stm32mpu/wiki/How_to_assign_an_internal_peripheral_to_an_execution_context
+
+https://wiki.st.com/stm32mpu/wiki/STM32MP157x-DKx_-_hardware_description
+
+https://www.youtube.com/watch?v=HX9rO8IukeI
