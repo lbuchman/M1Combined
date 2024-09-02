@@ -70,6 +70,12 @@ int main() {
         Uart<Board::MNP_Rd2UART> mnpRd2Rs485(Board::MNP_Rd2UARTRX, Board::MNP_Rd2UARTTX, Board::MNP_Rd2UARTDE, 115200);
         Board::MNP_Rd2Te.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
 
+        Board::LADR0.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+        Board::LADR1.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+        Board::LADR2.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+        Board::LEN_L.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+        Board::Ldat.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+
     }
     else {
         Uart<Board::Rx422UART> rs422Port(Board::Rx422UartRX, Board::Rx422UartTX, Board::Rx422UartTX, 115200);
@@ -173,7 +179,10 @@ int main() {
     serialTerminal.cmdAdd("testrd1rs485", "test mnp reader 1 rs485 loopback test, needs rs485 slave to be connected in echo mode", [](int arg_cnt, char **args) -> void {
         (void) arg_cnt;
         (void) args;
-
+        if (!STM32MP1Disco::PCB_ID5.read()) {
+           stream.printf("{ \"status\": false,  \"error\": \"unsupported HW }\n\r");
+           return;
+        }
         uint32_t UartAddress = STM32MP1Disco::MNP_Rd1UART;
         Board::MNP_Rd1Te.high();
 
@@ -201,7 +210,10 @@ int main() {
   serialTerminal.cmdAdd("testrd2rs485", "test mnp reader 2 rs485 loopback test, needs rs485 slave to be connected in echo mode", [](int arg_cnt, char **args) -> void {
         (void) arg_cnt;
         (void) args;
-
+        if (!STM32MP1Disco::PCB_ID5.read()) {
+           stream.printf("{ \"status\": false,  \"error\": \"unsupported HW }\n\r");
+           return;
+        }
         uint32_t UartAddress = STM32MP1Disco::MNP_Rd2UART;
         Board::MNP_Rd2Te.high();
 
@@ -366,13 +378,41 @@ int main() {
         stream.printf("{ \"status\": true, \"pcbId\": %d }\n\r", pcbId);
     });
 
+ serialTerminal.cmdAdd("latchctl", "control led and rly latch, arg addrd value(0 or 1)", [](int arg_cnt, char **args) -> void {
+        (void) arg_cnt;
+        (void) args;
+        char ret;
+        int count;
+        if(arg_cnt != 3) {
+            stream.printf("{ \"status\": false, \"error\": \"invalid argument required 2 parameters, got %d, type help followed by enter for help\" }\n\r", arg_cnt);
+            return;
+        }
+
+        int address = atoi(args[1]);
+        int data = atoi(args[2]);
+        if (address & 1) Board::LADR0.high();
+        else Board::LADR0.low();
+        if (address & 2) Board::LADR1.high();
+        else Board::LADR1.low();
+        if (address & 4) Board::LADR2.high();
+        else Board::LADR2.low();
+        if (data) Board::Ldat.high();
+        else Board::Ldat.low();
+        udelay(5);
+        Board::LEN_L.low();
+        udelay(5);
+        Board::LEN_L.high();
+
+        stream.printf("{ \"status\": true, \"count\": %d }\n\r", count);
+    });
+
 
     serialTerminal.cmdAdd("testrs422", "send char and recive reply", [](int arg_cnt, char **args) -> void {
         (void) arg_cnt;
         (void) args;
         char ret;
         int count;
-        if (STM32MP1Disco::PCB_ID3.read()) {
+        if (STM32MP1Disco::PCB_ID5.read()) {
            stream.printf("{ \"status\": false,  \"error\": \"unsupported HW }\n\r");
            return;
         }

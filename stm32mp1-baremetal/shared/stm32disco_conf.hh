@@ -51,14 +51,12 @@ constexpr PinConf PCB_ID5{GPIO::G, PinNum::_2};
 
 #define RP1_Wg_D1_Pin GPIO_PIN_3
 #define RP1_Wg_D1_GPIO_Port GPIOK
-#define Ldat_Pin GPIO_PIN_14
-#define Ldat_GPIO_Port GPIOJ
+
 #define RP2_Beeper_Pin GPIO_PIN_12
 #define RP2_Beeper_GPIO_Port GPIOJ
 #define RD2_OSDP_rx_Pin GPIO_PIN_0
 #define RD2_OSDP_rx_GPIO_Port GPIOE
-#define LAddr2_Pin GPIO_PIN_5
-#define LAddr2_GPIO_Port GPIOK
+
 #define RP2_Wg_D1_Pin GPIO_PIN_15
 #define RP2_Wg_D1_GPIO_Port GPIOJ
 
@@ -80,17 +78,23 @@ constexpr PinConf PCB_ID5{GPIO::G, PinNum::_2};
 #define RP1_OSDP_Tx_GPIO_Port GPIOB
 #define RP2_Wg_D0_Pin GPIO_PIN_2
 #define RP2_Wg_D0_GPIO_Port GPIOC
-#define LAddr1_Pin GPIO_PIN_7
-#define LAddr1_GPIO_Port GPIOG
+
 #define RP1_OSDP_Te_Pin GPIO_PIN_12
 #define RP1_OSDP_Te_GPIO_Port GPIOB
 #define RP1_OSDP_Rx_Pin GPIO_PIN_5
 #define RP1_OSDP_Rx_GPIO_Port GPIOB
-#define LEN_L_Pin GPIO_PIN_10
-#define LEN_L_GPIO_Port GPIOG
+
 
 #define STRIKE1_KICKER_EN_Pin GPIO_PIN_8
 #define STRIKE1_KICKER_EN_GPIO_Port GPIOB
+
+
+constexpr PinConf LADR0{GPIO::F, PinNum::_0};
+constexpr PinConf LADR1{GPIO::G, PinNum::_7};
+constexpr PinConf LADR2{GPIO::K, PinNum::_5};
+constexpr PinConf LEN_L{GPIO::G, PinNum::_10};
+constexpr PinConf Ldat{GPIO::J, PinNum::_14};
+
 
 /*
 constexpr uint32_t ConsoleUART = UART7_BASE;
