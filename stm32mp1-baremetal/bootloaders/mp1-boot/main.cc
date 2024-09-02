@@ -19,8 +19,11 @@
 #include "ddr/stm32mp15-osd32mp1-ddr3-1x4Gb.dtsi"
 #include "eeprom24aa02.hh"
 #include "MD5.h"
+#include "stm32mp1xx_hal.h"
+
 
 static int logEnabled = 0;
+
 
 Serial stream;
 SerialTerminal serialTerminal;
@@ -33,7 +36,11 @@ bool checkEEPROMBlank();
 #define EEPROM_START_ADDRESS 0x0
 #define EEPROM_START_ADDRESS_EXT 0x70
 
+int pcbId;
+
+
 int main() {
+
     Board::LED_RUN ledRun;
     Board::LED_CPU ledCpu;
     Board::LED_DBG_LED1 led_debug1;
@@ -41,29 +48,50 @@ int main() {
     Board::LED_DBG_LED3 led_debug3;
     Board::LED_DBG_LED4 led_debug4;
 
-
     auto clockspeed = SystemClocks::init_core_clocks(Board::HSE_Clock_Hz, Board::MPU_MHz);
     security_init();
 
     Uart<Board::ConsoleUART> console(Board::UartRX, Board::UartTX, Board::UartTX, 115200);
-    Uart<Board::Rx422UART> rs422Port(Board::Rx422UartRX, Board::Rx422UartTX, Board::Rx422UartTX, 115200);
-    Uart<Board::Rx485UART> rx485Port(Board::Rx485UartRX, Board::Rx485UartTX, Board::Rx485UartDE, 115200);
 
-    for(int count = 0; count < 32; count++) {
-        udelay(1000);
-        Uart<Board::ConsoleUART>::readChar();
+    Board::PCB_ID0.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+    Board::PCB_ID1.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+    Board::PCB_ID2.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+    Board::PCB_ID3.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+    Board::PCB_ID4.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+    Board::PCB_ID5.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+
+    pcbId = Board::PCB_ID3.readBit(3) | Board::PCB_ID4.readBit(4) | Board::PCB_ID5.readBit(5);
+    pcbId |= Board::PCB_ID0.readBit(0) | Board::PCB_ID1.readBit(1) | Board::PCB_ID2.readBit(2);
+
+    if (Board::PCB_ID5.read()) { // true for MNP, otherwise M1
+        Uart<Board::MNP_Rx485UART> mnpRs485(Board::MNP_Rx485UartRX, Board::MNP_Rx485UartTX, Board::MNP_Rx485UartDE, 115200);
+        Uart<Board::MNP_Rd1UART> mnpRd1Rs485(Board::MNP_Rd1UARTRX, Board::MNP_Rd1UARTTX, Board::MNP_Rd1UARTDE, 115200);
+        Board::MNP_Rd1Te.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+        Uart<Board::MNP_Rd2UART> mnpRd2Rs485(Board::MNP_Rd2UARTRX, Board::MNP_Rd2UARTTX, Board::MNP_Rd2UARTDE, 115200);
+        Board::MNP_Rd2Te.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+
     }
+    else {
+        Uart<Board::Rx422UART> rs422Port(Board::Rx422UartRX, Board::Rx422UartTX, Board::Rx422UartTX, 115200);
+        Uart<Board::Rx485UART> rx485Port(Board::Rx485UartRX, Board::Rx485UartTX, Board::Rx485UartDE, 115200);
 
-    for(int count = 0; count < 32; count++) {
-        Uart<Board::Rx422UART>::putchar(0x30);
-        udelay(1000);
-        Uart<Board::Rx422UART>::readChar();
-    }
+        for(int count = 0; count < 32; count++) {
+            udelay(1000);
+            Uart<Board::ConsoleUART>::readChar();
+        }
 
-    for(int count = 0; count < 32; count++) {
-        Uart<Board::Rx485UART>::putchar(0x20);
-        udelay(1000);
-        Uart<Board::Rx485UART>::readChar();
+        for(int count = 0; count < 32; count++) {
+            Uart<Board::Rx422UART>::putchar(0x30);
+            udelay(1000);
+            Uart<Board::Rx422UART>::readChar();
+        }
+
+        for(int count = 0; count < 32; count++) {
+            Uart<Board::Rx485UART>::putchar(0x20);
+            udelay(1000);
+            Uart<Board::Rx485UART>::readChar();
+        }
+
     }
 
 
@@ -111,6 +139,71 @@ int main() {
     serialTerminal.cmdAdd("testrs485", "test rs485 loopback test, needs rs485 slave to be connected in echo mode", [](int arg_cnt, char **args) -> void {
         (void) arg_cnt;
         (void) args;
+
+        uint32_t UartAddress;
+        if (STM32MP1Disco::PCB_ID5.read()) {
+            UartAddress = STM32MP1Disco::MNP_Rx485UART;
+        }
+        else {
+            UartAddress = STM32MP1Disco::Rx485UART;
+        }
+
+        while(Uart<Board::Rx485UART>::available()) Uart<Board::Rx485UART>::readChar();
+        for(int count = 0x30; count < 0x33; count++) {
+            Uart<Board::Rx485UART>::putchar(count);
+            int timeout = 10;
+
+            while(timeout > 0 && !Uart<Board::Rx485UART>::available()) {
+                timeout -= 1;
+                udelay(1000);
+            };
+
+            char ret = Uart<Board::Rx485UART>::readChar();
+
+            if(ret != count) {
+                stream.printf("{ \"status\": false,  \"error\": \"no reply match send = %d rec = %d\" }\n\r", count, ret);
+                return;
+            }
+
+            udelay(5000);
+        }
+        stream.printf("{ \"status\": true }\n\r", fwRev);
+    });
+
+    serialTerminal.cmdAdd("testrd1rs485", "test mnp reader 1 rs485 loopback test, needs rs485 slave to be connected in echo mode", [](int arg_cnt, char **args) -> void {
+        (void) arg_cnt;
+        (void) args;
+
+        uint32_t UartAddress = STM32MP1Disco::MNP_Rd1UART;
+        Board::MNP_Rd1Te.high();
+
+        while(Uart<Board::Rx485UART>::available()) Uart<Board::Rx485UART>::readChar();
+        for(int count = 0x30; count < 0x33; count++) {
+            Uart<Board::Rx485UART>::putchar(count);
+            int timeout = 10;
+
+            while(timeout > 0 && !Uart<Board::Rx485UART>::available()) {
+                timeout -= 1;
+                udelay(1000);
+            };
+
+            char ret = Uart<Board::Rx485UART>::readChar();
+
+            if(ret != count) {
+                stream.printf("{ \"status\": false,  \"error\": \"no reply match send = %d rec = %d\" }\n\r", count, ret);
+                return;
+            }
+
+            udelay(5000);
+        }
+        stream.printf("{ \"status\": true }\n\r", fwRev);
+    });
+  serialTerminal.cmdAdd("testrd2rs485", "test mnp reader 2 rs485 loopback test, needs rs485 slave to be connected in echo mode", [](int arg_cnt, char **args) -> void {
+        (void) arg_cnt;
+        (void) args;
+
+        uint32_t UartAddress = STM32MP1Disco::MNP_Rd2UART;
+        Board::MNP_Rd2Te.high();
 
         while(Uart<Board::Rx485UART>::available()) Uart<Board::Rx485UART>::readChar();
         for(int count = 0x30; count < 0x33; count++) {
@@ -254,11 +347,35 @@ int main() {
         stream.printf("{ \"status\": true }\n\r");
     });
 
+
+    serialTerminal.cmdAdd("timenow", "prints the systime", [](int arg_cnt, char **args) -> void {
+        (void) arg_cnt;
+        (void) args;
+        char ret;
+        int count;
+
+        stream.printf("{ \"status\": true, \"timenow\": %d }\n\r", millis());
+    });
+
+    serialTerminal.cmdAdd("pcbid", "returns pcb id and rev", [](int arg_cnt, char **args) -> void {
+        (void) arg_cnt;
+        (void) args;
+        char ret;
+        int count;
+
+        stream.printf("{ \"status\": true, \"pcbId\": %d }\n\r", pcbId);
+    });
+
+
     serialTerminal.cmdAdd("testrs422", "send char and recive reply", [](int arg_cnt, char **args) -> void {
         (void) arg_cnt;
         (void) args;
         char ret;
         int count;
+        if (STM32MP1Disco::PCB_ID3.read()) {
+           stream.printf("{ \"status\": false,  \"error\": \"unsupported HW }\n\r");
+           return;
+        }
 
         Uart<Board::Rx422UART>::readChar();
         char testBufferTx[6] = "1abr5";
@@ -303,7 +420,12 @@ int main() {
     serialTerminal.cmdAdd("ddrdatbus", "Test the data bus wiring in a memory region by performing a walking 1's test at a fixed address within that region, arg: <offset from mem base hex> <memsize hex>", ddrdatbus);
 
     int patternLdDbg1[] = {200, 100, 200, 500};
+    int patternLdDbg2[] = {200, 200, 500};
+     int patternLdDbg4[] = {500, 400, 100};
     led_debug1.setPatternSingle(patternLdDbg1, 4);
+    led_debug2.setPatternSingle(patternLdDbg2, 3);
+    led_debug3.setPatternSingle(patternLdDbg1, 4);
+    led_debug4.setPatternSingle(patternLdDbg4, 3);
     ledRun.setBlinkSingle(100);
     int pattern[] = {50, 100, 50, 500};
     ledCpu.setPatternSingle(pattern, 4);
@@ -311,7 +433,6 @@ int main() {
 
     while(1) {
         udelay(dlytime);
-        systemtimeUsec += dlytime;
         serialTerminal.cmdPoll();
         led_debug1.update();
         ledRun.update();
@@ -319,6 +440,18 @@ int main() {
         led_debug3.update();
         led_debug4.update();
         ledCpu.update();
+        if (Board::PCB_ID5.read()) {
+         Board::LED_POEP led_POEP;
+         Board::LED_POE led_POE;
+         static bool ones = true;
+         if (ones) {
+             led_POEP.setPatternSingle(patternLdDbg4, 3);
+             led_POE.setPatternSingle(patternLdDbg1, 4);
+             ones = false;
+         }
+         led_POEP.update();
+         led_POE.update();
+        }
     }
 }
 

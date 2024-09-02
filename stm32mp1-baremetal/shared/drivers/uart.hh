@@ -21,7 +21,7 @@ public:
 	{
 		txpin.init(PinMode::Alt);
 		rxpin.init(PinMode::Alt);
-        if constexpr (BASE_ADDR == UART8_BASE) {
+        if constexpr ((BASE_ADDR == UART8_BASE) || (BASE_ADDR == UART4_BASE) || (BASE_ADDR == UART5_BASE)) {
             depin.init(PinMode::Alt);
         }
 		init(baudrate);
@@ -146,6 +146,8 @@ private:
 	{
 		if constexpr (BASE_ADDR == UART4_BASE)
 			RCC->MP_APB1ENSETR = RCC->MP_APB1ENSETR | RCC_MP_APB1ENSETR_UART4EN;
+		if constexpr (BASE_ADDR == UART5_BASE)
+			RCC->MP_APB1ENSETR = RCC->MP_APB1ENSETR | RCC_MP_APB1ENSETR_UART5EN;
 		if constexpr (BASE_ADDR == USART6_BASE)
 			RCC->MP_APB2ENSETR = RCC->MP_APB2ENSETR | RCC_MP_APB2ENSETR_USART6EN;
         if constexpr (BASE_ADDR == USART3_BASE)

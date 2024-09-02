@@ -151,6 +151,14 @@ struct PinConf {
 		return LL_GPIO_IsInputPinSet(port_, pin_);
 	}
 
+	bool readBit(int binPos) const
+	{
+		auto port_ = reinterpret_cast<GPIO_TypeDef *>(gpio);
+		auto pin_ = static_cast<uint16_t>(pin);
+		if (LL_GPIO_IsInputPinSet(port_, pin_)) return 1 << binPos;
+		return 0;
+	}
+
 	static constexpr uint32_t bit_to_num(PinNum PINx)
 	{
 		return PINx == PinNum::_0  ? 0 :

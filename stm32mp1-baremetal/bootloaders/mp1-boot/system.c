@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
+#include "stm32mp1xx_hal.h"
 
 int systemtimeUsec = 0;
 
@@ -33,5 +34,6 @@ pid_t _getpid(void) { return 0; };
  * 
  */
 uint32_t millis() {
-    return systemtimeUsec / 1000;
+    // return systemtimeUsec / 1000;
+    return HAL_GetTick();
 }
