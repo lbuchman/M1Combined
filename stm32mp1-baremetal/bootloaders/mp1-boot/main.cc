@@ -74,7 +74,29 @@ int main() {
         Board::LADR1.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
         Board::LADR2.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
         Board::LEN_L.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+        Board::LEN_L.high();
         Board::Ldat.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+
+        Board::RP1_Beeper.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+        Board::RP1_Wg_D1.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+        Board::RP1_Wg_D0.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+        Board::STRIKE1_KICKER_EN.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+
+
+        Board::RP2_Beeper.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+        Board::RP2_Wg_D1.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+        Board::RP2_Wg_D0.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+        Board::STRIKE2_KICKER_EN.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+
+        Board::nPoE_PSE.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+
+
+        Board::Adc1_In1.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+        Board::Adc1_In2.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+        Board::Adc1_In3.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+        Board::Adc1_In4.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
+
+
 
     }
     else {

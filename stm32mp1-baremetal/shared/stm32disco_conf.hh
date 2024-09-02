@@ -49,45 +49,23 @@ constexpr PinConf PCB_ID3{GPIO::G, PinNum::_4};
 constexpr PinConf PCB_ID4{GPIO::I, PinNum::_11};
 constexpr PinConf PCB_ID5{GPIO::G, PinNum::_2};
 
-#define RP1_Wg_D1_Pin GPIO_PIN_3
-#define RP1_Wg_D1_GPIO_Port GPIOK
+constexpr PinConf RP1_Wg_D1{GPIO::K, PinNum::_3};
+constexpr PinConf RP1_Wg_D0{GPIO::F, PinNum::_9};
+constexpr PinConf RP2_Beeper{GPIO::J, PinNum::_12};
+constexpr PinConf RP1_Beeper{GPIO::H, PinNum::_11};
+constexpr PinConf RP2_Wg_D1{GPIO::J, PinNum::_15};
+constexpr PinConf nPoE_PSE{GPIO::K, PinNum::_0};
+constexpr PinConf STRIKE2_KICKER_EN{GPIO::F, PinNum::_15};
 
-#define RP2_Beeper_Pin GPIO_PIN_12
-#define RP2_Beeper_GPIO_Port GPIOJ
-#define RD2_OSDP_rx_Pin GPIO_PIN_0
-#define RD2_OSDP_rx_GPIO_Port GPIOE
-
-#define RP2_Wg_D1_Pin GPIO_PIN_15
-#define RP2_Wg_D1_GPIO_Port GPIOJ
-
-#define RD2_OSDP_Tx_Pin GPIO_PIN_1
-#define RD2_OSDP_Tx_GPIO_Port GPIOE
-#define nPoE_PSE_Pin GPIO_PIN_0
-#define nPoE_PSE_GPIO_Port GPIOK
-#define RP2_OSDP_Te_Pin GPIO_PIN_12
-#define RP2_OSDP_Te_GPIO_Port GPIOE
-#define Adc1_pin6_Pin GPIO_PIN_12
-#define Adc1_pin6_GPIO_Port GPIOF
-#define LDDR0_Pin GPIO_PIN_10
-#define LDDR0_GPIO_Port GPIOF
-#define STRIKE2_KICKER_EN_Pin GPIO_PIN_15
-#define STRIKE2_KICKER_EN_GPIO_Port GPIOF
-#define Adc1_Pin2_Pin GPIO_PIN_11
-#define Adc1_Pin2_GPIO_Port GPIOF
-#define RP1_OSDP_Tx_Pin GPIO_PIN_6
-#define RP1_OSDP_Tx_GPIO_Port GPIOB
-#define RP2_Wg_D0_Pin GPIO_PIN_2
-#define RP2_Wg_D0_GPIO_Port GPIOC
-
-#define RP1_OSDP_Te_Pin GPIO_PIN_12
-#define RP1_OSDP_Te_GPIO_Port GPIOB
-#define RP1_OSDP_Rx_Pin GPIO_PIN_5
-#define RP1_OSDP_Rx_GPIO_Port GPIOB
+constexpr PinConf RP2_Wg_D0{GPIO::C, PinNum::_2};
+constexpr PinConf STRIKE1_KICKER_EN{GPIO::B, PinNum::_8};
 
 
-#define STRIKE1_KICKER_EN_Pin GPIO_PIN_8
-#define STRIKE1_KICKER_EN_GPIO_Port GPIOB
 
+constexpr PinConf Adc1_In1{GPIO::A, PinNum::_0};
+constexpr PinConf Adc1_In2{GPIO::A, PinNum::_1};
+constexpr PinConf Adc1_In3{GPIO::F, PinNum::_11};
+constexpr PinConf Adc1_In4{GPIO::F, PinNum::_12};
 
 constexpr PinConf LADR0{GPIO::F, PinNum::_0};
 constexpr PinConf LADR1{GPIO::G, PinNum::_7};
