@@ -1,0 +1,8 @@
+/opt/st/stm32cubeide_1.16.0/plugins/com.st.stm32cube.ide.mcu.externaltools.openocd.linux64_2.3.200.202404091248/tools/bin/openocd "-f" "MNPlusBootSrtrap3_CM4.cfg" "-s" "/home/lbuchman/data/myGitHub/M1Combined/stp32mp1-baremetal_mnp/MNPTester/MNPlusBootSrtrap3/CM4" "-s" "/opt/st/stm32cubeide_1.16.0/plugins/com.st.stm32cube.ide.mcu.debug.openocd_2.2.100.202406131243/resources/openocd/st_scripts" "-s" "/opt/st/stm32cubeide_1.16.0/plugins/com.st.stm32cube.ide.mpu.debug.openocd_2.1.200.202405171325/resources/openocd/st_scripts" "-c" "gdb_report_data_abort enable" "-c" "gdb_port 3333" "-c" "tcl_port 6666" "-c" "telnet_port 4444"
+
+0x1000931c
+
+ target extended-remote localhost:3333
+ load
+ thbreak main
+ continue
