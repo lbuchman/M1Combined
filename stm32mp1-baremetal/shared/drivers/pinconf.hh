@@ -2,6 +2,8 @@
 #include "rcc.hh"
 #include "stm32mp1xx.h"
 #include "stm32mp1xx_ll_gpio.h"
+#include "serial.h"
+extern Serial stream;
 
 enum class GPIO : uint32_t {
 	A = GPIOA_BASE,
@@ -151,7 +153,7 @@ struct PinConf {
 		return LL_GPIO_IsInputPinSet(port_, pin_);
 	}
 
-	bool readBit(int binPos) const
+	int readBit(int binPos) const
 	{
 		auto port_ = reinterpret_cast<GPIO_TypeDef *>(gpio);
 		auto pin_ = static_cast<uint16_t>(pin);

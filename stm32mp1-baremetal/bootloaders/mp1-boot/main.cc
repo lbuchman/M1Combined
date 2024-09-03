@@ -60,8 +60,12 @@ int main() {
     Board::PCB_ID4.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
     Board::PCB_ID5.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
 
-    pcbId = Board::PCB_ID3.readBit(3) | Board::PCB_ID4.readBit(4) | Board::PCB_ID5.readBit(5);
-    pcbId |= Board::PCB_ID0.readBit(0) | Board::PCB_ID1.readBit(1) | Board::PCB_ID2.readBit(2);
+    int pcbIdH = Board::PCB_ID3.readBit(3) | Board::PCB_ID4.readBit(4) | Board::PCB_ID5.readBit(5);
+    stream.printf("pcbIdH = 0x%x\n\r",pcbIdH );
+    int pcbIdL = Board::PCB_ID0.readBit(0) | Board::PCB_ID1.readBit(1) | Board::PCB_ID2.readBit(2);
+    stream.printf("pcbIdL = 0x%x\n\r",pcbIdL);
+    pcbId = pcbIdH | pcbIdL;
+    stream.printf("pcbId = 0x%x\n\r",pcbId);
 
     if (Board::PCB_ID5.read()) { // true for MNP, otherwise M1
         Uart<Board::MNP_Rx485UART> mnpRs485(Board::MNP_Rx485UartRX, Board::MNP_Rx485UartTX, Board::MNP_Rx485UartDE, 115200);
