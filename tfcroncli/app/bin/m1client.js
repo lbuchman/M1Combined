@@ -18,8 +18,8 @@ const config = require('../src/config');
 const os = require('../src/os');
 const logger = require('../src/logger');
 
-const logContainer = 'm1-3200-logs';
-const secretsContainer = 'm1-3200-secrets';
+let logContainer = '-logs';
+let secretsContainer = '-secrets';
 const firmwareContainer = 'firmware';
 process.env.SNAP_DATA = '/var/snap/m1tfd1/current';
 const publicKey = path.join(process.env.SNAP_DATA, 'public.key');
@@ -49,6 +49,8 @@ program.command('update')
             os.executeShellCommand(`sudo sed -i '${str}' /etc/crontab`, logfile);
             const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
             dir = configData.m1mtfDir;
+            logContainer = `${configData.productName}-logs`;
+            secretsContainer = `${configData.productName}-secrets`;
             logfile = logger.getLogger('m1cli', 'update', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
             logfile.info('Checking for SW & FW update ...');
             blobSvc = azure.createBlobService(configData.conString);

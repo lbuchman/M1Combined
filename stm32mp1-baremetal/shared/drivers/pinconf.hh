@@ -2,8 +2,7 @@
 #include "rcc.hh"
 #include "stm32mp1xx.h"
 #include "stm32mp1xx_ll_gpio.h"
-#include "serial.h"
-extern Serial stream;
+
 
 enum class GPIO : uint32_t {
 	A = GPIOA_BASE,

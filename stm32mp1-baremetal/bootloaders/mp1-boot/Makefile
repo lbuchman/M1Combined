@@ -60,7 +60,6 @@ SD_DISK_DEV ?= /dev/disk4
 image: $(BIN)
 	python3 fsbl_header.py $(BUILDDIR)/$(BINARYNAME).bin $(BUILDDIR)/$(BINARYNAME).stm32
 	@ls -l $(BUILDDIR)/$(BINARYNAME).stm32
-	cp $(BUILDDIR)/$(BINARYNAME).stm32 /home/lbuchman/fw
 
 load: image
 	@read -p "What is the disk device (Enter for $(SD_DISK_DEV)): " DISK && \
