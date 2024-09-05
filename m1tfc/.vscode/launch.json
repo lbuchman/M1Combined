@@ -28,7 +28,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["mnpcmd", "printio", "RLY4_EN", "1" ]
+            "args": ["mnpcmd", "read", "IN4_ADC", "0" ]
         },
         {
             "type": "pwa-node",

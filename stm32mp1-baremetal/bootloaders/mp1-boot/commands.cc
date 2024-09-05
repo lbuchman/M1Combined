@@ -126,7 +126,7 @@ void getgpio(int arg_cnt, char **args) {
         return;
     };
     int value = PinConf{port, pin, PinAF::AFNone}.read();
-    stream.printf("{ \"status\": true, \"value\": %d, \"port\": %d, \"pin\": %d }\n\r", value, port, pin);
+    stream.printf("{ \"status\": true, \"value\": %d, \"port\": \"%s\", \"pin\": \"%s\" }\n\r", value, args[1], args[2]);
 };
 
 /*

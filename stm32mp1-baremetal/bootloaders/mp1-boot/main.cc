@@ -53,6 +53,7 @@ int main() {
 
     Uart<Board::ConsoleUART> console(Board::UartRX, Board::UartTX, Board::UartTX, 115200);
 
+
     Board::PCB_ID0.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
     Board::PCB_ID1.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
     Board::PCB_ID2.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
@@ -64,10 +65,11 @@ int main() {
     stream.printf("pcbIdH = 0x%x\n\r",pcbIdH );
     int pcbIdL = Board::PCB_ID0.readBit(0) | Board::PCB_ID1.readBit(1) | Board::PCB_ID2.readBit(2);
     stream.printf("pcbIdL = 0x%x\n\r",pcbIdL);
+    stream.printf("pcbIdH = 0x%x\n\r",pcbIdH);
     pcbId = pcbIdH | pcbIdL;
     stream.printf("pcbId = 0x%x\n\r",pcbId);
 
-    if (Board::PCB_ID5.read()) { // true for MNP, otherwise M1
+    if (!Board::PCB_ID5.read()) { // true for MNP, otherwise M1
         Uart<Board::MNP_Rx485UART> mnpRs485(Board::MNP_Rx485UartRX, Board::MNP_Rx485UartTX, Board::MNP_Rx485UartDE, 115200);
         Uart<Board::MNP_Rd1UART> mnpRd1Rs485(Board::MNP_Rd1UARTRX, Board::MNP_Rd1UARTTX, Board::MNP_Rd1UARTDE, 115200);
         Board::MNP_Rd1Te.init(PinMode::Output, PinPull::None, PinPolarity::Normal);

@@ -164,7 +164,7 @@ program.command('m1cmd')
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             await targetICTLink.initSerial(configData.m1SerialDev, 115200, logfile);
-
+            logfile.log(JSON.stringify(command));
             const output = await targetICTLink.sendCommand(command);
             logfile.log(JSON.stringify(output));
             // await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);

@@ -49,7 +49,6 @@ program.command('update')
             os.executeShellCommand(`sudo sed -i '${str}' /etc/crontab`, logfile);
             const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
             dir = configData.m1mtfDir;
-            logContainer = `${configData.productName}-logs`;
             secretsContainer = `${configData.productName}-secrets`;
             logfile = logger.getLogger('m1cli', 'update', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
             logfile.info('Checking for SW & FW update ...');
@@ -133,6 +132,7 @@ program.command('synclogs')
             return;
         }
         try {
+            logContainer = `${configData.productName}-logs-${configData.vendorSite}`;
             await azureOp.syncFiles(blobSvc, `${logContainer}-${configData.vendorSite.toLowerCase()}`, matches);
         }
         catch (err) {
