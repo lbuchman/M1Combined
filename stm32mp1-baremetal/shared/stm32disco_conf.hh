@@ -39,7 +39,6 @@ constexpr uint32_t ConsoleUART = UART4_BASE;
 constexpr PinConf UartRX{GPIO::B, PinNum::_2, PinAF::AF_8};
 constexpr PinConf UartTX{GPIO::G, PinNum::_11, PinAF::AF_6};
 #else
-constexpr PinConf nPoEP_PSE{GPIO::D, PinNum::_5};
 constexpr PinConf RP1_Beeper_Pin{GPIO::H, PinNum::_11};
 
 constexpr PinConf PCB_ID0{GPIO::H, PinNum::_2};
@@ -55,6 +54,7 @@ constexpr PinConf RP2_Beeper{GPIO::J, PinNum::_12};
 constexpr PinConf RP1_Beeper{GPIO::H, PinNum::_11};
 constexpr PinConf RP2_Wg_D1{GPIO::J, PinNum::_15};
 constexpr PinConf nPoE_PSE{GPIO::K, PinNum::_0};
+constexpr PinConf nPoEP_PSE{GPIO::D, PinNum::_5};
 constexpr PinConf STRIKE2_KICKER_EN{GPIO::F, PinNum::_15};
 
 constexpr PinConf RP2_Wg_D0{GPIO::C, PinNum::_2};

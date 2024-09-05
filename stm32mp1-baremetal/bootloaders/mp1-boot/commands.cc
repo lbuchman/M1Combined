@@ -157,7 +157,8 @@ void pulsegpio(int arg_cnt, char **args)  {
     };
 
     int value = atoi(args[3]);
-
+    PinConf{port, pin}.low();
+    udelay(1000);
     PinConf{port, pin}.high();
     udelay(value);
     PinConf{port, pin}.low();

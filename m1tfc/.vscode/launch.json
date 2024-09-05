@@ -21,6 +21,18 @@
         {
             "type": "pwa-node",
             "request": "launch",
+            "name": "Launch mnpcmd",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["mnpcmd", "printio", "RLY4_EN", "1" ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
             "name": "Launch cleanUp",
             "skipFiles": [
                 "<node_internals>/**"

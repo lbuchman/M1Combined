@@ -20,6 +20,7 @@ const common = require('../tests/common');
 const sqliteDriver = require('../utils/sqliteDriver');
 const utils = require('../utils/utils');
 const buzzer = require('../tests/buzzer');
+const mnpHwIo = require('../tests/mnpHW.js');
 const testBoardLink = require('../src/testBoardLink');
 const { mkdirp } = require('mkdirp');
 // const azure = require('azure-storage');
@@ -151,6 +152,31 @@ program.command('m1cmd')
         }
     });
 
+    program.command('mnpcmd <action> [sigNameOrTestpont] [value]')
+    .description('execute mnp io command to read or set io,action can be read or write or printio make sure to execute m1dfu command before this command')
+    .action(async (readOrWrite, name, value) => {
+        const configData = await config(configuration);
+        const logfile = console;
+        try {
+            const command = mnpHwIo.getCommand(readOrWrite, name, value, logfile);
+            process.env.coinCellDebug = config.coinCellDebug;
+            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+            await delay(400);
+            await targetICTLink.initSerial(configData.m1SerialDev, 115200, logfile);
+
+            const output = await targetICTLink.sendCommand(command);
+            logfile.log(JSON.stringify(output));
+            // await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
+            process.exit(0);
+        }
+        catch (err) {
+            if (err.message === 'No Error') return;
+            logfile.error(err);
+            await delay(100);
+            process.exit(exitCodes.commandFailed);
+        }
+    });   
 program.command('ict')
     .description('Executes ICT test')
     .option('-s, --serial <string>', 'vendor serial number')

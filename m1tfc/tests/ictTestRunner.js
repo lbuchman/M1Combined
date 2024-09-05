@@ -64,7 +64,7 @@ module.exports = class IctTestRunner {
             }
             if (!skipTestpointCheck) await regulators.testDDRVoltage(this.tolerance, this.logger, this.db);
             if (!process.env.productName) {
-            this.logger.info('Testing Ribbon cable pins ...');
+                this.logger.info('Testing Ribbon cable pins ...');
                 if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger, this.db)) ret = false;
             }
             if (!process.env.skipBatteryTest) {

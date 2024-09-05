@@ -93,7 +93,7 @@ int main() {
         Board::STRIKE2_KICKER_EN.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
 
         Board::nPoE_PSE.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
-
+        Board::nPoEP_PSE.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
 
         Board::Adc1_In1.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
         Board::Adc1_In2.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
