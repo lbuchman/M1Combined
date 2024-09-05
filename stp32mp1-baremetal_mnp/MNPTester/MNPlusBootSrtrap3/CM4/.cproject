@@ -75,7 +75,7 @@
 									<listOptionValue builtIn="false" value="/home/lbuchman/STM32Cube/Repository/STM32Cube_FW_MP1_V1.6.0/Drivers/STM32MP1xx_HAL_Driver/Inc/Legacy"/>
 									<listOptionValue builtIn="false" value="/home/lbuchman/STM32Cube/Repository/STM32Cube_FW_MP1_V1.6.0/Drivers/CMSIS/Device/ST/STM32MP1xx/Include"/>
 									<listOptionValue builtIn="false" value="/home/lbuchman/STM32Cube/Repository/STM32Cube_FW_MP1_V1.6.0/Drivers/CMSIS/Include"/>
-									<listOptionValue builtIn="false" value="/home/lbuchman/myGitHub/M1Combined/stp32mp1-baremetal_mnp/MNPTester/MNPlusBootSrtrap3/CM4/arduinoPort"/>
+									<listOptionValue builtIn="false" value="/home/lenel/myGitHub/M1Combined/stp32mp1-baremetal_mnp/MNPTester/MNPlusBootSrtrap3/CM4/arduinoPort"/>
 								</option>
 								<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.languagestandard.854524098" name="Language standard" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.languagestandard" useByScannerDiscovery="true" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.languagestandard.value.isocpp17" valueType="enumerated"/>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp.1116872650" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp"/>

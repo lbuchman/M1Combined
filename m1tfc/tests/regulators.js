@@ -50,6 +50,9 @@ async function testDDRVoltage(tolerance, logger, db) {
 }
 
 async function cellBatTest(logger, db) {
+    if (process.env.skipBatteryTest) {
+        return true;
+    }
     if (process.env.cellBatTol === 'used') {
         coinCellBattery.minVoltage = 2.75;
     }

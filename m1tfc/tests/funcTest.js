@@ -48,7 +48,7 @@ module.exports = class FuncTest {
     async run(programmer, tsv, login, password, m1term, skipUSBPenDriveTest, baudrate) {
         try {
             const ipAddress = process.env.m1defaultIP;
-            this.logger.info('Verifying MAC address');
+            this.logger.info('Cheking MAC address');
             const macProgram = new ProgramMac(this.config, this.serial, this.logger);
             const macValue = await macProgram.getMac(programmer, false);
             const macAddress = macValue.mac;
@@ -180,7 +180,7 @@ module.exports = class FuncTest {
             await client.execCommand('hwclock -w --noadjfile --utc');
             // await client.execCommand('rm -f /etc/adjtime /etc/timestamp');
             this.logger.info('Sync clocks to PC');
-            this.logger.info(`M1 clock is set to ${pcDateTime.toISOString()}`);
+            this.logger.info(`Clock is set to ${pcDateTime.toISOString()}`);
             // this.logger.info('Enabling M1 apps');
             // await client.execCommand('update-rc.d s2nnweb defaults 81');
             // await client.execCommand('update-rc.d s2nn defaults 80');

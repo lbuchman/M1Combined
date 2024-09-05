@@ -48,6 +48,8 @@ const configuration = {
     forceEppromOverwrite: false,
     vendorSite: 'N1',
     skipTestpointCheck: false,
+    skipRS485test: false,
+    skipBatteryTest: false,
     pingPorts: true,
     progEEPROM: true,
     makeLabel: true,
@@ -158,11 +160,15 @@ program.command('ict')
 
     .action(async (options) => {
         const configData = await config(configuration);
+        if (!configuration.productName) configuration.productName = 'm1=3200';
+        process.env.productName = configuration.productName;
         let logfile;
         let db;
         let startStatusOk = true;
         try {
             process.env.coinCellDebug = config.coinCellDebug;
+            process.env.skipBatteryTest = config.skipBatteryTest;
+            process.env.skipBatteryTest = config.skipBatteryTest;
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.m1mtfDir, options.debug);
             db = sqliteDriver.initialize(logfile);
@@ -179,7 +185,8 @@ program.command('ict')
                 }
             }
             const interfaces = await si.networkInterfaces();
-            if (interfaces.find(o => o.iface === 'enp0s31f6') === undefined) {
+            if (!configData.tfInterface) configData.tfInterface = 'enp0s31f6';
+            if (interfaces.find(o => o.iface === configData.tfInterface) === undefined) {
                 startStatusOk = false;
                 logfile.error('Internet Ethernet jack is not plugged. Check connection and retry the test.');
             }

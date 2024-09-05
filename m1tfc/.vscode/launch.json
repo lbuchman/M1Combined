@@ -16,7 +16,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["ict", "-d", "2", "-s", "3023370015", "-b", "used"]
+            "args": ["ict", "-d", "2", "-s", "3023340011", "-b", "used"]
         },
         {
             "type": "pwa-node",
@@ -40,7 +40,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["progmac",    "-d", "2", "-s", "3023200042" ]
+            "args": ["progmac",    "-d", "2", "-s", "3023370036"]
         },
         {
             "type": "pwa-node",
@@ -88,7 +88,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["functest",  "-d", "2", "-s", "3023180042" ]
+            "args": ["functest",  "-d", "2", "-s", "3023370036" ]
         },
         {
             "type": "pwa-node",
@@ -100,7 +100,7 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["makelabel",  "-d", "2", "-s", "3023370015" ]
+            "args": ["makelabel",  "-d", "2", "-s", "label" ]
         },
         {
             "type": "pwa-node",
