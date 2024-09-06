@@ -1,0 +1,21 @@
+object LoggerForm: TLoggerForm
+  Left = 308
+  Height = 601
+  Top = 742
+  Width = 1147
+  Caption = 'Logger'
+  DesignTimePPI = 144
+  Menu = MainMenu1
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDblClick = FormDblClick
+  LCLVersion = '2.2.0.4'
+  object MainMenu1: TMainMenu
+    Left = 262
+    Top = 240
+    object MenuItem1: TMenuItem
+      Caption = '&Clear'
+      OnClick = MenuItem1Click
+    end
+  end
+end

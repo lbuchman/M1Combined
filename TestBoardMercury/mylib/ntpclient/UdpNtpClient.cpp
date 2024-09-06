@@ -175,9 +175,8 @@ void ntpInit() {
 }
 
 
-String epochToString(time_t t)
-{
-   const char *str = ctime(&t);
-   return str;
+String epochToString(time_t t) {
+    const char *str = ctime(&t);
+    return str;
 }
 

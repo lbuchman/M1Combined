@@ -202,8 +202,6 @@ void boardInit() {
         return 1;
     };
 
-    ShellFunctor::getInstance().add("setlight", setlight);
-    ShellFunctor::getInstance().add("trypwm", trypwm);
     ShellFunctor::getInstance().add("reboot", reboot);
     ShellFunctor::getInstance().add("dmesg", dmesg);
     ShellFunctor::getInstance().add("watchdogtest", watchdogtest);

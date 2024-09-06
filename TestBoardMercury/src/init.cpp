@@ -14,11 +14,13 @@
 #include <logger.hpp>
 #include <persistent.hpp>
 #include <networking.hpp>
-#include <humidityContr.hpp>
 #include <cmd.h>
 #include <utility.h>
 #include <board.h>
 #include <tcpTerminal.hpp>
+#include <reader.hpp>
+#include <relays.hpp>
+#include <inputs.hpp>
 
 #define NO_NETWORK_LED_INT 1500000
 #define OK_NETWORK_LED_INT 500000
@@ -28,8 +30,27 @@ Scheduler ts;
 
 #define Rev "0.62"
 
+readerPins rd1Pins = { {10, OUTPUT, 0, 0}, {9, OUTPUT, 0, 0}, {5, INPUT_PULLUP, 0, 0}, {11, INPUT_PULLUP, 0, 0}, {40, INPUT_PULLUP, 0, 0} };
+readerPins rd2Pins = { {26, OUTPUT, 0, 0}, {32, OUTPUT, 0, 0}, {12, INPUT_PULLUP, 0, 0}, {30, INPUT_PULLUP, 0, 0}, {39, INPUT_PULLUP, 0, 0} };
+int Rs485TermPin = 31; // no need for termination, set to low
+int Rd1Rs485De = 6; // no need for termination, set to low
+int Rd2Rs485De = 27;
+int rl1pin = 23;
+int rl2pin = 3;
+int rl3pin = 33;
+int rl4pin = 37;
+int sp1pin = 14;
+int sp2pin = 18;
+int sp3pin = 19;
+int sp4pin = 15;
 
 int main() {
+    pinMode(Rd1Rs485De, OUTPUT);
+    digitalWrite(Rd1Rs485De, LOW);
+    pinMode(Rd2Rs485De, OUTPUT);
+    digitalWrite(Rd2Rs485De, LOW);
+    pinMode(Rs485TermPin, OUTPUT);
+    digitalWrite(Rs485TermPin, LOW);
     pinMode(WATCHDOG_LED, OUTPUT);
     LoggerSerialDev.begin(LoggerSerialBaudRate);
     ShellFunctor& cshell = ShellFunctor::getInstance();
@@ -59,62 +80,26 @@ int main() {
     tCPTerminal.begin();
     UdpTerminal udpTerminal(cshell, 4111, ts);
     udpTerminal.begin();
-
-#if 0
-    shellFunc getdevicedata = [&](int arg_cnt, char **args, Stream & stream) -> int {
-        if(!checkArgument(2, arg_cnt, args, (char*) "\t{ \"cmd\": \"%s\", \"desc\": \"returns device data\" },\n\r", stream)) {
-            return 1;
-        }
-
-
-        int tag = atoi(args[1]);
-        HumidityContr& thermostat = *allControllers[tag];
-
-        JsonDocument  doc;
-        JsonObject  jsonDocument = doc.to<JsonObject>();
-        jsonDocument["cmd"] = args[0];
-        jsonDocument["sensorOk"] = thermostat.getSensorStatus();
-        jsonDocument["name"] = thermostat.getDevName();
-        jsonDocument["tag"] = tag;
-        jsonDocument["isOn"] = thermostat.isOn();
-        jsonDocument["kwattused"] = thermostat.getKwattUsed();
-        jsonDocument["humidity"] = thermostat.getHumidity();
-        jsonDocument["lastPowerResetDateTime"] = thermostat.getLastPowerResetDateTime();
-        jsonDocument["temp"] = thermostat.getTemp();
-        serializeJsonPretty(jsonDocument, stream);
-        return 1;
-    };
-
-
-    shellFunc sethumidsettings = [&](int arg_cnt, char **args, Stream & stream) -> int {
-        if(!checkArgument(8, arg_cnt, args, (char*) "\t{ \"cmd\": \"%s\",  \"arg\": \"device [0 - 3] int(Device Watt) deviceName sensorIp sensorPort valuemin valueMax\", \"desc\": \"set humidity device name, power in Watt, sensor Ip in dot to notation, sensorPort, min and max humidity, loggerIP, loggingInterval\" },\n\r", stream)) {
-            return 1;
-        }
-
-
-        int tag = atoi(args[1]);
-
-        if((tag > 3) || (tag < 0)) {
-            stream.printf("\t{\"cmd\": \"%s\", \"status\": \"false\", \"error\": \"invalid device index\" }\n\r", args[0]);
-            return 1;
-        }
-
-        TDevice& deviceData = allControllers[tag]->getDeviceData();
-
-
-        strcpy(deviceData.name, args[3]);
-        deviceData.devicePowerWatt = atoi(args[2]);
-        deviceData.tag = tag;
-        deviceData.sensorIp = str2Ip(args[4]);
-        deviceData.sensorPort  = atoi(args[5]);
-        deviceData.minValue = atoi(args[6]);
-        deviceData.maxValue = atoi(args[7]);
-        devicedata2eeprom(deviceData, tag);
-        stream.printf("\t{\"cmd\": \"%s\", \"device\": %d, \"status\": true }\n\r", args[0], tag);
-
-        return 1;
-    };
-#endif
+    Reader reader1(ts, rd1Pins, "rd1");
+    Reader reader2(ts, rd2Pins, "rd2");
+    Relay  rl1(ts, rl1pin, "rl1");
+    Relay  rl2(ts, rl2pin, "rl2");
+    Relay  rl3(ts, rl3pin, "rl3");
+    Relay  rl4(ts, rl4pin, "rl4");
+    Input  sp_i1(ts, sp1pin, "si1");
+    Input  sp_i2(ts, sp2pin, "si2");
+    Input  sp_i3(ts, sp3pin, "si3");
+    Input  sp_i4(ts, sp4pin, "si4");
+    reader1.begin();
+    reader2.begin();
+    rl1.begin();
+    rl2.begin();
+    rl3.begin();
+    rl4.begin();
+    sp_i1.begin();
+    sp_i2.begin();
+    sp_i3.begin();
+    sp_i4.begin();
 
     while(true) {
         ts.execute();

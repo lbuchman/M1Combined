@@ -36,7 +36,7 @@ shellFunc setmac = [](int arg_cnt, char **args, Stream & stream) -> int {
     memcpy(netConfig.mac, mac, 6);
 
     network2eeprom(netConfig);
-    
+
     stream.printf("\t{\"cmd\": \"%s\", \"status\": true }\n\r", args[0]);
     return 1;
 };
@@ -100,6 +100,11 @@ bool startNetwork(unsigned long timeout, unsigned long responseTimeout) {
 
     logger().info(logger().printHeader, (char*) __FILE__, __LINE__, "Configuring ethernet adapter DHCP, MAC = %s ...", macToString(netConfig.mac).c_str());
 
+        IPAddress ip(192, 168, 0, 60);
+        IPAddress myDns(192, 168, 0, 6);
+        Ethernet.begin(netConfig.mac, ip, myDns);
+        return true;
+
     if(Ethernet.begin(netConfig.mac, timeout, responseTimeout) == 0) {
         logger().info(logger().printHeader, (char*) __FILE__, __LINE__, "Failed to configure Ethernet using DHCP");
         retStatus = false;
@@ -114,6 +119,9 @@ bool startNetwork(unsigned long timeout, unsigned long responseTimeout) {
         }
     }
     else {
+        IPAddress ip(192, 168, 0, 60);
+        IPAddress myDns(192, 168, 0, 6);
+        Ethernet.begin(netConfig.mac, ip, myDns);
         retStatus = true;
     }
 

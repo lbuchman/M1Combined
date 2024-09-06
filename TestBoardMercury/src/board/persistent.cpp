@@ -42,10 +42,9 @@ static TDevice deviceData[4] = {
     { 1234, 3, 0x1302A8C0, 10000, 0, 50, 55, 3600, 180, 550, AOutput8, 0, "basement" }
 };
 
-static String epochToString(time_t t)
-{
-   const char *str = ctime(&t);
-   return str;
+static String epochToString(time_t t) {
+    const char *str = ctime(&t);
+    return str;
 }
 
 void printDeviceConfig(TDevice &data, char* cmd, Stream & stream) {
@@ -380,14 +379,6 @@ void persistentDataInit() {
         deviceData[3] = data;
     }
 
-    ShellFunctor::getInstance().add("savedevdata", savedevdata);
-    ShellFunctor::getInstance().add("printdevdata", printdevdata);
-    ShellFunctor::getInstance().add("printdevdataepprom", printdevdataeeprom);
-    ShellFunctor::getInstance().add("updatethermsensor", updatethermsensor);
-    ShellFunctor::getInstance().add("updatethermminmax", updatethermminmax);
-    ShellFunctor::getInstance().add("updatethermtiming", updatethermtiming);
-    ShellFunctor::getInstance().add("updatethermname", updatethermname);
-    ShellFunctor::getInstance().add("updatemac", updatethermname);
 }
 
 bool checkCRC8(uint8_t* buffer, int size,  uint8_t expectedCRC8) {
@@ -395,8 +386,8 @@ bool checkCRC8(uint8_t* buffer, int size,  uint8_t expectedCRC8) {
     uint32_t crc8 = fastcrc.smbus(buffer, size);
 
     if(crc8 != expectedCRC8) {
-       logger().error(logger().printHeader, (char*) __FILE__, __LINE__, "Invalid CRC8, expected = 0x%x,actual 0x%x, datasize = %d", expectedCRC8, crc8, size);
-       return false;
+        logger().error(logger().printHeader, (char*) __FILE__, __LINE__, "Invalid CRC8, expected = 0x%x,actual 0x%x, datasize = %d", expectedCRC8, crc8, size);
+        return false;
     }
 
     return true;
@@ -421,6 +412,7 @@ void network2eeprom(TNetworkConfig data) {
     FastCRC8 fastcrc;
 
     uint32_t crc8 = fastcrc.smbus((uint8_t*)&data, sizeof(data) - 1);
+
     if(crc8 == 0) {
         data.randomNumber = random(0xFFFFFFFF);
         crc8 = fastcrc.smbus((uint8_t*)&data, sizeof(data) - 1);
@@ -431,7 +423,7 @@ void network2eeprom(TNetworkConfig data) {
     EEPROM.put(EEPROM_REGION_SIZE * netSettingsTag, data);
     netConfig = data;
     getNetworkDataFromEpprom();
-     
+
 };
 
 
@@ -471,7 +463,10 @@ TDevice& getDeviceData(int32_t tag) {
 };
 
 void devicedata2eeprom(TDevice data, int32_t tag) {
-    if (tag < 0) return;
+    if(tag < 0) {
+        return;
+    }
+
     data.tag = tag;
     FastCRC8 fastcrc;
     uint32_t crc8 = fastcrc.smbus((uint8_t*)&data, sizeof(data) - 1);
@@ -482,7 +477,7 @@ void devicedata2eeprom(TDevice data, int32_t tag) {
     }
 
     data.crc = crc8;
-    logger().info(logger().printHeader, (char*) __FILE__, __LINE__, "Write EEPROM at address 0x%x, tag = %d, crc = 0x%x", EEPROM_REGION_SIZE * tag, tag, data.crc );
+    logger().info(logger().printHeader, (char*) __FILE__, __LINE__, "Write EEPROM at address 0x%x, tag = %d, crc = 0x%x", EEPROM_REGION_SIZE * tag, tag, data.crc);
     EEPROM.put(EEPROM_REGION_SIZE * tag, data);
 };
 

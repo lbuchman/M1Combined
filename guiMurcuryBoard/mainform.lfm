@@ -1,0 +1,61 @@
+object MainAppForm: TMainAppForm
+  Left = 1387
+  Height = 289
+  Top = 761
+  Width = 768
+  Caption = 'Teensyduino Rev-0.13'
+  ClientHeight = 289
+  ClientWidth = 768
+  DesignTimePPI = 140
+  DoubleBuffered = True
+  Font.CharSet = ANSI_CHARSET
+  Font.Height = -99
+  Font.Name = 'Arial'
+  Font.Quality = fqDraft
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  ParentDoubleBuffered = False
+  Position = poDesktopCenter
+  LCLVersion = '3.4.0.0'
+  Scaled = False
+  Visible = True
+  object BoardIpLabel: TLabel
+    Left = 8
+    Height = 28
+    Top = 0
+    Width = 80
+    Caption = 'Board Ip'
+    Font.Height = -20
+    Font.Name = 'Noto Sans'
+    ParentFont = False
+  end
+  object BoardIpCombo: TComboBox
+    Left = 11
+    Height = 31
+    Top = 39
+    Width = 340
+    AutoSize = False
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ItemHeight = 0
+    ParentFont = False
+    TabOrder = 0
+    OnChange = BoardIpComboChange
+    OnKeyDown = BoardIpComboKeyDown
+  end
+  object UpdateTimer: TTimer
+    OnTimer = UpdateTimerEvent
+    Left = 372
+    Top = 97
+  end
+  object MainFormUpdateTimerTimer: TTimer
+    OnTimer = MainFormUpdateTimer
+    Left = 237
+    Top = 105
+  end
+end

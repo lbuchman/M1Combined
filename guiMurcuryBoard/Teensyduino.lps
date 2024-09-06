@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <Version Value="12"/>
+    <BuildModes Active="Debug"/>
+    <Units Count="24">
+      <Unit0>
+        <Filename Value="Teensyduino.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="33" Y="19"/>
+        <UsageCount Value="202"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="mainform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainAppForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="mainForm"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="137"/>
+        <CursorPos Y="161"/>
+        <UsageCount Value="202"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="blinkled.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="blinkLed"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="22"/>
+        <CursorPos X="19" Y="45"/>
+        <UsageCount Value="200"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="udpserver.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="UDPServer"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="31"/>
+        <CursorPos X="69" Y="50"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="SupervisedInputsForm.pas"/>
+        <ComponentName Value="SupervisedInputs"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="139"/>
+        <CursorPos Y="169"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="outputs.pas"/>
+        <ComponentName Value="Relays"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="50"/>
+        <CursorPos X="6" Y="66"/>
+        <UsageCount Value="201"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="relay.pas"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="16"/>
+        <CursorPos X="27" Y="47"/>
+        <UsageCount Value="206"/>
+        <Loaded Value="True"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="iovalues.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="1"/>
+        <CursorPos X="21" Y="15"/>
+        <UsageCount Value="202"/>
+        <Loaded Value="True"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="simplelog.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="simpleLog"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="138" Y="22"/>
+        <UsageCount Value="200"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="configurationjson.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="configurationJson"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="10"/>
+        <CursorPos X="7" Y="24"/>
+        <UsageCount Value="225"/>
+        <Loaded Value="True"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="configurationform.pas"/>
+        <ComponentName Value="ConfigForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="configurationForm"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="9"/>
+        <CursorPos X="55" Y="9"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="door1.pas"/>
+        <ComponentName Value="Door1Form"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Door1"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="9"/>
+        <CursorPos X="45" Y="9"/>
+        <UsageCount Value="203"/>
+        <Loaded Value="True"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="door2.pas"/>
+        <ComponentName Value="Door2Form"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Door2"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="408"/>
+        <CursorPos Y="422"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="configuration.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="80"/>
+        <CursorPos X="54" Y="84"/>
+        <UsageCount Value="186"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="unit1.pas"/>
+        <UnitName Value="Unit1"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="5" Y="3"/>
+        <UsageCount Value="2"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="loggerform.pas"/>
+        <ComponentName Value="LoggerForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="LoggerForm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="10"/>
+        <CursorPos Y="54"/>
+        <UsageCount Value="128"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="door.pas"/>
+        <ComponentName Value="Door1Form"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="76"/>
+        <CursorPos X="3" Y="80"/>
+        <UsageCount Value="114"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="../../../../merchwrig.ini"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="35"/>
+        <UsageCount Value="114"/>
+        <DefaultSyntaxHighlighter Value="Ini"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="bdtfRestApi.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="88"/>
+        <CursorPos Y="114"/>
+        <UsageCount Value="4"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="/usr/share/lazarus/2.2.0/lcl/stdctrls.pp"/>
+        <UnitName Value="StdCtrls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="501"/>
+        <CursorPos X="14" Y="520"/>
+        <UsageCount Value="14"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="SupervisedInputsForm.lfm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4"/>
+        <CursorPos X="12" Y="5"/>
+        <UsageCount Value="65"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="/usr/share/lazarus/2.2.0/lcl/include/control.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3570"/>
+        <CursorPos Y="3591"/>
+        <UsageCount Value="86"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="/usr/share/fpcsrc/3.2.2/packages/fcl-json/src/fpjson.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3894"/>
+        <CursorPos X="33" Y="3916"/>
+        <UsageCount Value="111"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="configurationform.lfm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="61"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit23>
+    </Units>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="39" TopLine="12"/>
+      </Position1>
+      <Position2>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="41" TopLine="14"/>
+      </Position2>
+      <Position3>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="42" TopLine="14"/>
+      </Position3>
+      <Position4>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="43" TopLine="16"/>
+      </Position4>
+      <Position5>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="44" TopLine="17"/>
+      </Position5>
+      <Position6>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="59" TopLine="32"/>
+      </Position6>
+      <Position7>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="58" TopLine="31"/>
+      </Position7>
+      <Position8>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="57" TopLine="30"/>
+      </Position8>
+      <Position9>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="56" TopLine="29"/>
+      </Position9>
+      <Position10>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="55" TopLine="28"/>
+      </Position10>
+      <Position11>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="54" TopLine="27"/>
+      </Position11>
+      <Position12>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="53" TopLine="26"/>
+      </Position12>
+      <Position13>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="52" TopLine="25"/>
+      </Position13>
+      <Position14>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="51" TopLine="24"/>
+      </Position14>
+      <Position15>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="50" TopLine="23"/>
+      </Position15>
+      <Position16>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="155" Column="13" TopLine="137"/>
+      </Position16>
+      <Position17>
+        <Filename Value="configurationjson.pas"/>
+        <Caret Line="19" Column="27"/>
+      </Position17>
+      <Position18>
+        <Filename Value="configurationjson.pas"/>
+        <Caret Line="61" Column="29" TopLine="31"/>
+      </Position18>
+      <Position19>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="148" TopLine="137"/>
+      </Position19>
+      <Position20>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="149" TopLine="137"/>
+      </Position20>
+      <Position21>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="150" TopLine="137"/>
+      </Position21>
+      <Position22>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="152" TopLine="137"/>
+      </Position22>
+      <Position23>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="151" TopLine="137"/>
+      </Position23>
+      <Position24>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="153" TopLine="137"/>
+      </Position24>
+      <Position25>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="154" TopLine="137"/>
+      </Position25>
+      <Position26>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="155" TopLine="137"/>
+      </Position26>
+      <Position27>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="156" TopLine="137"/>
+      </Position27>
+      <Position28>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="157" TopLine="137"/>
+      </Position28>
+      <Position29>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="161" TopLine="137"/>
+      </Position29>
+      <Position30>
+        <Filename Value="mainform.pas"/>
+        <Caret Line="156" TopLine="137"/>
+      </Position30>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes Count="1" ActiveMode="default">
+        <Mode0 Name="default"/>
+      </Modes>
+    </RunParams>
+    <HistoryLists Count="1">
+      <List0 Name="LaunchingApplication" Type="File" Count="1">
+        <Item1 Value="/usr/bin/konsole -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </List0>
+    </HistoryLists>
+  </ProjectSession>
+  <Debugging>
+    <BreakPoints>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="mainform.pas"/>
+        <Line Value="148"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="mainform.pas"/>
+        <Line Value="161"/>
+      </Item>
+    </BreakPoints>
+    <Watches>
+      <Item>
+        <Expression Value="cmd"/>
+      </Item>
+      <Item>
+        <Expression Value="filePath"/>
+      </Item>
+      <Item>
+        <Expression Value="value"/>
+      </Item>
+    </Watches>
+  </Debugging>
+</CONFIG>

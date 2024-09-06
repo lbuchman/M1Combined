@@ -4,10 +4,10 @@
 #cmake -DRPI2=1 -DCMAKE_TOOLCHAIN_FILE=../arm-linux-gnueabihf.cmake ..
 
 cmake_minimum_required(VERSION 3.20)
-set(PROJECT_NAME HomeAutomation)
+set(PROJECT_NAME mnptester)
 
 include(ExternalProject)
-project (HomeAutomation)
+project(mnptester)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 

@@ -1,0 +1,708 @@
+object ConfigForm: TConfigForm
+  Left = 1104
+  Height = 691
+  Top = 499
+  Width = 1152
+  Caption = 'Settings'
+  ClientHeight = 691
+  ClientWidth = 1152
+  DesignTimePPI = 160
+  Font.CharSet = ANSI_CHARSET
+  Font.Height = -6147
+  Font.Name = 'Arial'
+  Font.Quality = fqDraft
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnShow = FormShow
+  LCLVersion = '2.2.0.4'
+  Scaled = False
+  object GroupBox1: TGroupBox
+    Left = 772
+    Height = 456
+    Top = 232
+    Width = 364
+    ClientHeight = 452
+    ClientWidth = 360
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 0
+    object IplLabel: TLabel
+      Left = 17
+      Height = 24
+      Top = 48
+      Width = 19
+      Caption = 'IP'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+    end
+    object NetworkDHCPCkeckBox: TCheckBoxThemed
+      Left = 141
+      Height = 28
+      Top = 8
+      Width = 141
+      Caption = 'DHCP/Static'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 0
+    end
+    object NTPStateCheckBox: TCheckBoxThemed
+      Left = 168
+      Height = 28
+      Top = 242
+      Width = 133
+      Caption = 'NTP On/Off'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 1
+    end
+    object GwlLabel: TLabel
+      Left = 12
+      Height = 24
+      Top = 103
+      Width = 35
+      Caption = 'GW'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+    end
+    object MacklLabel: TLabel
+      Left = 12
+      Height = 24
+      Top = 157
+      Width = 48
+      Caption = 'Mask'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+    end
+    object DnslLabel: TLabel
+      Left = 12
+      Height = 24
+      Top = 204
+      Width = 43
+      Caption = 'DNS'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+    end
+    object UpdateNetworkButton: TButton
+      Left = 149
+      Height = 37
+      Top = 353
+      Width = 108
+      Caption = 'Save'
+      OnClick = UpdateNetworkButtonClick
+      TabOrder = 2
+    end
+    object IpAddressEdit: TEdit
+      Left = 139
+      Height = 38
+      Top = 52
+      Width = 208
+      TabOrder = 3
+    end
+    object GwAddressEdit: TEdit
+      Left = 139
+      Height = 38
+      Top = 97
+      Width = 208
+      TabOrder = 4
+    end
+    object MaskAddressEdit: TEdit
+      Left = 139
+      Height = 38
+      Top = 144
+      Width = 208
+      TabOrder = 5
+    end
+    object DnsAddressEdit: TEdit
+      Left = 139
+      Height = 38
+      Top = 197
+      Width = 208
+      TabOrder = 6
+    end
+    object TimeServerLabel: TLabel
+      Left = 16
+      Height = 24
+      Top = 286
+      Width = 109
+      Caption = 'Time Server'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+    end
+    object TimeServerEdit: TEdit
+      Left = 141
+      Height = 38
+      Top = 272
+      Width = 205
+      TabOrder = 7
+    end
+  end
+  object GroupBox2: TGroupBox
+    Left = 0
+    Height = 167
+    Top = 12
+    Width = 1137
+    ClientHeight = 163
+    ClientWidth = 1133
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -22
+    Font.Name = 'Arial'
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 1
+    object ControllerModelLabel: TLabel
+      Left = 7
+      Height = 24
+      Top = 7
+      Width = 147
+      Caption = 'Controller Model'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+    end
+    object ControllerModelCombo: TComboBox
+      Left = 23
+      Height = 37
+      Top = 37
+      Width = 157
+      AutoSize = False
+      ItemHeight = 31
+      Items.Strings = (
+        'MER-Ser2'
+        'MER-Ser3'
+        'S2-Contr'
+      )
+      OnChange = ControllerModelComboChange
+      ReadOnly = True
+      TabOrder = 0
+    end
+    object MacEdit: TEdit
+      Left = 189
+      Height = 38
+      Top = 37
+      Width = 204
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+      ReadOnly = True
+      TabOrder = 1
+    end
+    object ControllerMaclLabel: TLabel
+      Left = 240
+      Height = 24
+      Top = 7
+      Width = 45
+      Caption = 'MAC'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+    end
+    object ControllerTimeEdit: TEdit
+      Left = 920
+      Height = 38
+      Top = 37
+      Width = 201
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+      ReadOnly = True
+      TabOrder = 2
+    end
+    object ControllerTimelLabel: TLabel
+      Left = 926
+      Height = 24
+      Top = 7
+      Width = 184
+      Caption = 'Controller Date Time'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+    end
+    object UpTimeEdit: TEdit
+      Left = 729
+      Height = 38
+      Top = 37
+      Width = 180
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+      ReadOnly = True
+      TabOrder = 3
+    end
+    object ControllerMaclLabel2: TLabel
+      Left = 780
+      Height = 24
+      Top = 7
+      Width = 75
+      Caption = 'Up Time'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+    end
+    object FwRevEdit: TEdit
+      Left = 402
+      Height = 38
+      Top = 37
+      Width = 184
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+      ReadOnly = True
+      TabOrder = 4
+    end
+    object FwRevLabel: TLabel
+      Left = 428
+      Height = 24
+      Top = 7
+      Width = 36
+      Caption = 'Rev'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+    end
+    object NTPStatusLabel: TLabel
+      Left = 920
+      Height = 24
+      Top = 103
+      Width = 102
+      Caption = 'NTP Status'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+    end
+    object NTPStatusEdit: TEdit
+      Left = 1057
+      Height = 38
+      Top = 93
+      Width = 64
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+      ReadOnly = True
+      TabOrder = 5
+    end
+    object BoardDescEdit: TEdit
+      Left = 23
+      Height = 38
+      Top = 97
+      Width = 767
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 6
+    end
+    object BoardDescSaveButton: TButton
+      Left = 797
+      Height = 37
+      Top = 97
+      Width = 108
+      Caption = 'Save'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      OnClick = BoardDescSaveButtonClick
+      ParentFont = False
+      TabOrder = 7
+    end
+    object SerialcEdit: TEdit
+      Left = 593
+      Height = 38
+      Top = 35
+      Width = 126
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+      ReadOnly = True
+      TabOrder = 8
+    end
+    object SerialLabel: TLabel
+      Left = 632
+      Height = 24
+      Top = 6
+      Width = 52
+      Caption = 'Serial'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -20
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+    end
+  end
+  object GroupBox3: TGroupBox
+    Left = 0
+    Height = 456
+    Top = 232
+    Width = 557
+    ClientHeight = 452
+    ClientWidth = 553
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 2
+    object ADTableStringGrid: TStringGrid
+      Left = 7
+      Height = 337
+      Top = 4
+      Width = 541
+      RowCount = 9
+      TabOrder = 0
+    end
+    object SaveDA2220Button: TButton
+      Left = 97
+      Height = 37
+      Top = 373
+      Width = 108
+      Caption = 'Save'
+      OnClick = SaveDAButtonClick
+      TabOrder = 1
+    end
+  end
+  object PersistButton: TButton
+    Left = 352
+    Height = 37
+    Top = 183
+    Width = 112
+    Caption = 'Apply'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    OnClick = PersistButtonClick
+    ParentFont = False
+    TabOrder = 3
+  end
+  object SaveToFileButton: TButton
+    Left = 477
+    Height = 37
+    Top = 183
+    Width = 157
+    Caption = 'Save EEPROM'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    OnClick = SaveToFileButtonClick
+    ParentFont = False
+    TabOrder = 4
+  end
+  object LoadFromFileButton: TButton
+    Left = 651
+    Height = 37
+    Top = 183
+    Width = 168
+    Caption = 'Load EEPROM'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    OnClick = LoadFromFileButtonClick
+    ParentFont = False
+    TabOrder = 5
+  end
+  object RebootButton: TButton
+    Left = 228
+    Height = 37
+    Top = 183
+    Width = 112
+    Caption = 'Reboot'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    OnClick = RebootButtonClick
+    ParentFont = False
+    TabOrder = 6
+  end
+  object TimeSetButton: TButton
+    Left = 1024
+    Height = 37
+    Top = 183
+    Width = 112
+    Caption = 'Set Time'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    OnClick = TimeSetButtonClick
+    ParentFont = False
+    TabOrder = 7
+  end
+  object UpdateEnableLed: TindLed
+    Left = 840
+    Height = 37
+    Top = 183
+    Width = 37
+    OnClick = UpdateEnableLedClick
+    LedValue = True
+    Bevels = <    
+      item
+        HighlightColor = clBlack
+        ShadowColor = clBlack
+      end    
+      item
+        Width = 3
+      end    
+      item
+        Style = bcLowered
+      end    
+      item
+        HighlightColor = clBlack
+        ShadowColor = clBlack
+      end>
+    LedColorOn = clGreen
+    LedColorOff = clRed
+    LedColorDisabled = 22963
+    ShapeLedColorOn = clGreen
+    ShapeLedColorOff = 16384
+    ShapeLedColorDisabled = 13416
+  end
+  object UpdateDataLabel: TLabel
+    Left = 897
+    Height = 24
+    Top = 187
+    Width = 113
+    Caption = 'Update Data'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
+  end
+  object CalibInputSelect: TSpinEditEx
+    Left = 599
+    Height = 39
+    Top = 425
+    Width = 104
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -22
+    Font.Name = 'Arial'
+    Font.Quality = fqDraft
+    MaxLength = 0
+    ParentFont = False
+    TabOrder = 8
+    MaxValue = 8
+    MinValue = 1
+    NullValue = 0
+    Value = 1
+  end
+  object SpinEditExSpin: TSpinEditEx
+    Left = 599
+    Height = 39
+    Top = 324
+    Width = 108
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -22
+    Font.Name = 'Arial'
+    Font.Quality = fqDraft
+    MaxLength = 0
+    NumbersOnly = True
+    ParentFont = False
+    TabOrder = 9
+    OnChange = SpinEditExSpinChange
+    MaxValue = 100
+    NullValue = 0
+    Value = 0
+  end
+  object PWMSetDataLabel: TLabel
+    Left = 599
+    Height = 24
+    Top = 296
+    Width = 105
+    Caption = 'PWM Value'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
+  end
+  object InputSelectLabel: TLabel
+    Left = 599
+    Height = 24
+    Top = 398
+    Width = 45
+    Caption = 'Input'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
+  end
+  object CalibrateCheckBoxThemed: TCheckBoxThemed
+    Left = 599
+    Height = 30
+    Top = 571
+    Width = 153
+    Caption = 'Calib Enable'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -22
+    Font.Name = 'Arial'
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 10
+  end
+  object PwmValueSelectGroupBox: TPanel
+    Left = 599
+    Height = 40
+    Top = 494
+    Width = 148
+    ClientHeight = 40
+    ClientWidth = 148
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 11
+    object pwm1KRadioButton: TRadioButton
+      Left = 17
+      Height = 28
+      Top = 4
+      Width = 54
+      Caption = '1K'
+      Checked = True
+      TabOrder = 0
+      TabStop = True
+    end
+    object pwm2KRadioButton: TRadioButton
+      Left = 84
+      Height = 28
+      Top = 4
+      Width = 54
+      Caption = '2K'
+      TabOrder = 1
+    end
+  end
+  object DaTablelLabel: TLabel
+    Left = 12
+    Height = 24
+    Top = 192
+    Width = 86
+    Caption = 'D/A Table'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
+  end
+  object AutoCalibtButton: TButton
+    Left = 612
+    Height = 37
+    Top = 628
+    Width = 112
+    Caption = 'Auto Calib'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -20
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    OnClick = AutoCalibtButtonClick
+    ParentFont = False
+    TabOrder = 12
+  end
+  object Timer1: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = Timer1Timer
+    Left = 505
+    Top = 700
+  end
+  object SaveDialog1: TSaveDialog
+    DefaultExt = '.base64'
+    FileName = 'eerom'
+    Filter = 'base64|*.base64'
+    Left = 657
+    Top = 730
+  end
+  object OpenDialog1: TOpenDialog
+    DefaultExt = '.base64'
+    Filter = 'base64|*.base64'
+    Left = 578
+    Top = 711
+  end
+end
