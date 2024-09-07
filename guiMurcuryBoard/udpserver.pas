@@ -44,12 +44,13 @@ end;
 { TUDPServerThread }
 procedure TUDPServerThread.CloseConnection();
 begin
-  FUDPSocket.CloseSocket();
+ // FUDPSocket.CloseSocket();
 end;
 
 procedure TUDPServerThread.OpenConnection(ipaddress: string; port: string);
 begin
   FUDPSocket.Connect(ipaddress, port);
+  Start;
 end;
 
 procedure TUDPServerThread.Execute;
@@ -57,9 +58,9 @@ var
   cmd: string;
   pullCmd: string;
 begin
-  pullCmd := '{ "cmd": "' + 'getiobinary' + '","arg": "' + 'null' + '" }';
-  FUDPSocket := TUDPBlockSocket.Create;
-  FUDPSocket.Bind('0.0.0.0', UDPServerPort);
+  pullCmd := '{ "cmd": "' + 'getalldata' + '","arg": "' + 'null' + '" }';
+  // FUDPSocket := TUDPBlockSocket.Create;
+  // FUDPSocket.Bind('0.0.0.0', UDPServerPort);
   { FLocalIP:= FUDPSocket.ResolveName(FUDPSocket.LocalName);     }
 
   while not Terminated do
@@ -95,6 +96,8 @@ begin
   // piHost := _piHost;
   inherited Create(CreateSuspended);
   // FreeOnTerminate := True;
+  FUDPSocket := TUDPBlockSocket.Create;
+  FUDPSocket.Bind('0.0.0.0', UDPServerPort);
 end;
 
 procedure TUDPServerThread.DeleteFromQueue(cmd: string);
@@ -112,7 +115,6 @@ var
   json: string;
 begin
   json := '{ "cmd": "' + cmd + '", "arg": "' + arg + '" }';
-  // Logger.Memo.Lines.Add(json);
   QueueCommand(json);
 end;
 

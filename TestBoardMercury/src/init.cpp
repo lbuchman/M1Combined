@@ -28,7 +28,7 @@
 using namespace std;
 Scheduler ts;
 
-#define Rev "0.62"
+#define Rev "0.1"
 
 readerPins rd1Pins = { {10, OUTPUT, 0, 0}, {9, OUTPUT, 0, 0}, {5, INPUT_PULLUP, 0, 0}, {11, INPUT_PULLUP, 0, 0}, {40, INPUT_PULLUP, 0, 0} };
 readerPins rd2Pins = { {26, OUTPUT, 0, 0}, {32, OUTPUT, 0, 0}, {12, INPUT_PULLUP, 0, 0}, {30, INPUT_PULLUP, 0, 0}, {39, INPUT_PULLUP, 0, 0} };
@@ -39,6 +39,7 @@ int rl1pin = 23;
 int rl2pin = 3;
 int rl3pin = 33;
 int rl4pin = 37;
+
 int sp1pin = 14;
 int sp2pin = 18;
 int sp3pin = 19;
@@ -58,7 +59,7 @@ int main() {
     sllibMod watchDogLed(WATCHDOG_LED, false);
     logger().warn(logger().printHeader,  __FILE__, __LINE__, "\n\r*************** REBOOT ******************** %d");
     String revBuild = String(Rev) + "" + __DATE__ + "-" + __TIME__;
-    logger().info(logger().printHeader, __FILE__, __LINE__, "House Automation Controller %s. Build Time <%s-%s>", Rev, __DATE__, __TIME__);
+    logger().info(logger().printHeader, __FILE__, __LINE__, "Micronode Plus testing board %s. Build Time <%s-%s>", Rev, __DATE__, __TIME__);
     logger().setLogLevel(logLevel::kLogInfo);
 
     Task watchdogTaskHw(WATCHDOG_INT, TASK_FOREVER, function<void()> ([](void) -> void {
@@ -100,6 +101,17 @@ int main() {
     sp_i2.begin();
     sp_i3.begin();
     sp_i4.begin();
+
+
+    shellFunc getAllData = [&](int arg_cnt, char **args, Stream & stream) -> int {
+        if(!checkArgument(1, arg_cnt, args, (char*) "\t{ \"cmd\": \"%s\", \"arg\": \"none\", \"desc\": \"get all active pins value\" },\n\r", stream)) {
+            return 1;
+        }
+
+        stream.printf("\t{ \"cmd\": \"%s\", \"status\": true, \"values\": [{\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}, {\"pin\": %d, \"value\": %d}]}\n\r", args[0], rl1.getPin(), rl1.getValue(), rl2.getPin(), rl2.getValue(), rl3.getPin(), rl3.getValue(), rl4.getPin(), rl4.getValue(), sp_i1.getPin(), sp_i1.getValue(), sp_i2.getPin(), sp_i2.getValue(), sp_i3.getPin(), sp_i3.getValue(), sp_i4.getPin(), sp_i4.getValue(), reader1.getD0pinN(), reader1.getD0Value(), reader1.getD1PinN(), reader1.getD1Value(), reader1.getRLedPinN(), reader1.getRLedPin(), reader1.getGLedPinN(), reader1.getGLedPin(), reader1.getBzPinN(), reader1.getBzPin(), reader2.getD0pinN(), reader2.getD0Value(), reader2.getD1PinN(), reader2.getD1Value(), reader2.getRLedPinN(), reader2.getRLedPin(), reader2.getGLedPinN(), reader2.getGLedPin(), reader2.getBzPinN(), reader2.getBzPin());
+        return 1;
+    };
+    ShellFunctor::getInstance().add("getalldata", getAllData);
 
     while(true) {
         ts.execute();

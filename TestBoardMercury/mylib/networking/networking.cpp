@@ -84,7 +84,7 @@ void initNetworking(Scheduler& ts, sllibMod& watchDogLed) {
 
         watchDogLed.ledNoDHCPIp();
         ethernetStatus = startNetwork(4000, 3900); // to prevent watchdog reset
-    }), &ts, true);
+    }), &ts, false);
 
     ethernetStatus = startNetwork(4000, 3900); // to prevent watchdog reset
     ShellFunctor::getInstance().add("setntpserver", setntpserver);
@@ -100,10 +100,10 @@ bool startNetwork(unsigned long timeout, unsigned long responseTimeout) {
 
     logger().info(logger().printHeader, (char*) __FILE__, __LINE__, "Configuring ethernet adapter DHCP, MAC = %s ...", macToString(netConfig.mac).c_str());
 
-        IPAddress ip(192, 168, 0, 60);
-        IPAddress myDns(192, 168, 0, 6);
-        Ethernet.begin(netConfig.mac, ip, myDns);
-        return true;
+    IPAddress ip(192, 168, 0, 60);
+    IPAddress myDns(192, 168, 0, 6);
+    Ethernet.begin(netConfig.mac, ip, myDns);
+    return true;
 
     if(Ethernet.begin(netConfig.mac, timeout, responseTimeout) == 0) {
         logger().info(logger().printHeader, (char*) __FILE__, __LINE__, "Failed to configure Ethernet using DHCP");

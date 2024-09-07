@@ -15,17 +15,26 @@ class Relay {
         }
 
         void begin() {
-            ShellFunctor::getInstance().add(prefix + "v", getValue);
+            ShellFunctor::getInstance().add(prefix + "v", getPinValue);
+        }
+
+        int getValue() {
+            return digitalRead(pin);
+        }
+
+        int getPin() {
+            return pin;
         }
 
     private:
         String prefix;
         Scheduler& ts;
         int pin;
-        shellFunc getValue = [this](int arg_cnt, char **args, Stream & stream) -> int {
+        shellFunc getPinValue = [this](int arg_cnt, char **args, Stream & stream) -> int {
             if(!checkArgument(1, arg_cnt, args, (char*) "\t{ \"cmd\": \"%s\",  \"arg\": \"none\", \"desc\": \"read relay input state\" },\n\r", stream)) {
                 return 1;
             }
+
             int value = digitalRead(pin);
             stream.printf("\t{\"cmd\": \"%s\", \"status\": true, \"value\": %d }\n\r", args[0], value);
             return 1;
