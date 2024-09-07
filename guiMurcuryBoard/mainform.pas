@@ -27,6 +27,7 @@ type
   IoLine = record
     itemR: ^TComponent;
     itemW: ^TComponent;
+    itemM: ^TComponent;
     cmdRead: string;
     cmdWrite: string;
     pinType: integer;
@@ -106,9 +107,11 @@ type
     procedure ClearIpsMenuItemClick(Sender: TObject);
     procedure Rd1RD0Click(Sender: TObject);
     procedure Rd1WD0Click(Sender: TObject);
+    procedure SP1Click(Sender: TObject);
     procedure SP1MouseMove(Sender: TObject; Shift: TShiftState; X, Y: integer);
     procedure SP1MouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure sp1vLabelDblClick(Sender: TObject);
     procedure SP2MouseMove(Sender: TObject; Shift: TShiftState; X, Y: integer);
     procedure SP3MouseMove(Sender: TObject; Shift: TShiftState; X, Y: integer);
     procedure SP4MouseMove(Sender: TObject; Shift: TShiftState; X, Y: integer);
@@ -387,6 +390,7 @@ begin
   ioLines[14].pinN := 14;
   ioLines[14].itemR := @SP1;
   ioLines[14].itemW := @Sp1v1;
+  ioLines[14].itemM := @sp1v;
 
   ioLines[15].cmdRead := '';
   ioLines[15].pinType := ANALOG;
@@ -394,6 +398,7 @@ begin
   ioLines[15].pinN := 18;
   ioLines[15].itemR := @SP2;
   ioLines[15].itemW := @Sp2v2;
+  ioLines[15].itemM := @sp2v;
 
 
   ioLines[16].cmdRead := '';
@@ -402,7 +407,7 @@ begin
   ioLines[16].pinN := 19;
   ioLines[16].itemR := @SP3;
   ioLines[16].itemW := @Sp3v3;
-
+  ioLines[16].itemM := @sp3v;
 
 
   ioLines[17].cmdRead := '';
@@ -411,6 +416,7 @@ begin
   ioLines[17].pinN := 15;
   ioLines[17].itemR := @SP4;
   ioLines[17].itemW := @Sp4v4;
+  ioLines[17].itemM := @sp4v;
 
   ioMissmatch := False;
   for count1 := 0 to Pred(Length(ioLines)) do
@@ -548,7 +554,7 @@ var
 begin
     pin := TAdvLed(Sender).tag;
     index := FindIoLine(pin);
-    if index < -1 then exit;
+    if index < 0 then exit;
     ledState := TAdvLed(ioLines[index].itemR^).State;
     if ledState = lsOn then state := '1'
     else state := '0';
@@ -562,9 +568,22 @@ var
 begin
     pin := TCheckBox(Sender).tag;
     index := FindIoLine(pin);
-    if index < -1 then exit;
+    if index < 0 then exit;
     isChecked := TCheckBox(ioLines[index].itemW^).checked;
     SendCommand(ioLines[index].cmdWrite, IntToStr(BoolToInt(isChecked)));
+end;
+
+procedure TMainAppForm.SP1Click(Sender: TObject);
+var
+   pin, index, sliderPos : Integer;
+   value : String;
+begin
+    pin := TComponent(Sender).tag;
+    index := FindIoLine(pin);
+    if index < 0 then exit;
+    value := TLCDDisplay(ioLines[index].itemW^).Lines[0];
+    //TMultiSlider(ioLines[index].itemR^).position := 4.93 * 255 / ;
+
 end;
 
 function TMainAppForm.BoolToInt(value : Boolean) : Integer;
@@ -590,9 +609,24 @@ var pin, index, sliderPos : Integer;
 begin
     pin := TComponent(Sender).tag;
     index := FindIoLine(pin);
-    if index < -1 then exit;
+    if index < 0 then exit;
     sliderPos := TMultiSlider(ioLines[index].itemR^).position;
     SendCommand(ioLines[index].cmdWrite, IntToStr(TMultiSlider(ioLines[index].itemR^).position));
+end;
+
+procedure TMainAppForm.sp1vLabelDblClick(Sender: TObject);
+var
+   pin, index, sliderPos : Integer;
+   value : String;
+begin
+    pin := TComponent(Sender).tag;
+    index := FindIoLine(pin);
+    if index < 0 then exit;
+    value := copy(TLCDDisplay(ioLines[index].itemW^).Lines[0], 0, 4);
+    sliderPos :=  Round(STrToFloat(value) * 255 /4.93);
+    TMultiSlider(ioLines[index].itemR^).position:= sliderPos;
+    TLabel(ioLines[index].itemM^).Caption:= value + 'V';
+
 end;
 
 procedure TMainAppForm.SP2MouseMove(Sender: TObject; Shift: TShiftState; X, Y: integer);

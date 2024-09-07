@@ -341,6 +341,7 @@ object MainAppForm: TMainAppForm
     Font.Quality = fqDraft
     ParentFont = False
     TabOrder = 5
+    OnDblClick = sp1vLabelDblClick
     object SP1: TMultiSlider
       Tag = 14
       Left = 80
@@ -416,6 +417,7 @@ object MainAppForm: TMainAppForm
       ParentFont = False
     end
     object sp1vLabel: TLabel
+      Tag = 14
       Left = 24
       Height = 30
       Top = 37
@@ -427,8 +429,10 @@ object MainAppForm: TMainAppForm
       Font.Quality = fqDraft
       Font.Style = [fsBold]
       ParentFont = False
+      OnDblClick = sp1vLabelDblClick
     end
     object sp1vLabel1: TLabel
+      Tag = 18
       Left = 24
       Height = 30
       Top = 112
@@ -440,8 +444,10 @@ object MainAppForm: TMainAppForm
       Font.Quality = fqDraft
       Font.Style = [fsBold]
       ParentFont = False
+      OnDblClick = sp1vLabelDblClick
     end
     object sp1vLabel2: TLabel
+      Tag = 19
       Left = 24
       Height = 30
       Top = 184
@@ -453,8 +459,10 @@ object MainAppForm: TMainAppForm
       Font.Quality = fqDraft
       Font.Style = [fsBold]
       ParentFont = False
+      OnDblClick = sp1vLabelDblClick
     end
     object sp1vLabel3: TLabel
+      Tag = 15
       Left = 24
       Height = 30
       Top = 253
@@ -466,6 +474,7 @@ object MainAppForm: TMainAppForm
       Font.Quality = fqDraft
       Font.Style = [fsBold]
       ParentFont = False
+      OnDblClick = sp1vLabelDblClick
     end
     object sp2v: TLabel
       Tag = 18

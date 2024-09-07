@@ -22,6 +22,7 @@ uses
 
 begin
   RequireDerivedFormResource := True;
+  Application.Title:='MNPTester';
   Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TMainAppForm, MainAppForm);
