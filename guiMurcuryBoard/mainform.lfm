@@ -1,16 +1,16 @@
 object MainAppForm: TMainAppForm
   Left = 1060
-  Height = 744
+  Height = 844
   Top = 493
-  Width = 595
+  Width = 563
   Caption = 'MNP Tester  Rev-0.1'
-  ClientHeight = 744
-  ClientWidth = 595
+  ClientHeight = 844
+  ClientWidth = 563
   DesignTimePPI = 140
   DoubleBuffered = True
   Font.CharSet = ANSI_CHARSET
-  Font.Height = -210
-  Font.Name = 'Arial'
+  Font.Height = -19
+  Font.Name = 'Sans'
   Font.Quality = fqDraft
   OnClose = FormClose
   OnCreate = FormCreate
@@ -18,7 +18,6 @@ object MainAppForm: TMainAppForm
   ParentDoubleBuffered = False
   Position = poDesktopCenter
   LCLVersion = '3.4.0.0'
-  Scaled = False
   Visible = True
   object BoardIpLabel: TLabel
     Left = 8
@@ -55,8 +54,8 @@ object MainAppForm: TMainAppForm
   object StatusBar1: TStatusBar
     Left = 0
     Height = 29
-    Top = 715
-    Width = 595
+    Top = 815
+    Width = 563
     Panels = <>
   end
   object Label1: TLabel
@@ -326,16 +325,16 @@ object MainAppForm: TMainAppForm
     ParentFont = False
   end
   object Panel4: TPanel
-    Left = 128
-    Height = 224
-    Top = 472
-    Width = 328
+    Left = 56
+    Height = 344
+    Top = 464
+    Width = 472
     BevelInner = bvLowered
     BevelWidth = 4
     BorderWidth = 2
     BorderStyle = bsSingle
-    ClientHeight = 222
-    ClientWidth = 326
+    ClientHeight = 342
+    ClientWidth = 470
     Font.CharSet = ANSI_CHARSET
     Font.Height = -19
     Font.Name = 'Sans'
@@ -344,9 +343,9 @@ object MainAppForm: TMainAppForm
     TabOrder = 5
     object SP1: TMultiSlider
       Tag = 14
-      Left = 64
+      Left = 80
       Height = 27
-      Top = 23
+      Top = 40
       Width = 109
       ColorThumb = clMaroon
       DefaultSize = 28
@@ -359,9 +358,9 @@ object MainAppForm: TMainAppForm
     end
     object SP2: TMultiSlider
       Tag = 18
-      Left = 64
+      Left = 80
       Height = 27
-      Top = 64
+      Top = 112
       Width = 109
       ColorThumb = clMaroon
       DefaultSize = 28
@@ -374,9 +373,9 @@ object MainAppForm: TMainAppForm
     end
     object SP3: TMultiSlider
       Tag = 19
-      Left = 64
+      Left = 80
       Height = 27
-      Top = 112
+      Top = 184
       Width = 109
       ColorThumb = clMaroon
       DefaultSize = 28
@@ -389,9 +388,9 @@ object MainAppForm: TMainAppForm
     end
     object SP4: TMultiSlider
       Tag = 15
-      Left = 64
+      Left = 80
       Height = 27
-      Top = 160
+      Top = 256
       Width = 109
       ColorThumb = clMaroon
       DefaultSize = 28
@@ -404,9 +403,9 @@ object MainAppForm: TMainAppForm
     end
     object sp1v: TLabel
       Tag = 14
-      Left = 184
+      Left = 208
       Height = 30
-      Top = 21
+      Top = 40
       Width = 56
       Caption = '0.00V'
       Font.CharSet = ANSI_CHARSET
@@ -417,9 +416,9 @@ object MainAppForm: TMainAppForm
       ParentFont = False
     end
     object sp1vLabel: TLabel
-      Left = 16
+      Left = 24
       Height = 30
-      Top = 21
+      Top = 37
       Width = 37
       Caption = 'SP1'
       Font.CharSet = ANSI_CHARSET
@@ -430,9 +429,9 @@ object MainAppForm: TMainAppForm
       ParentFont = False
     end
     object sp1vLabel1: TLabel
-      Left = 16
+      Left = 24
       Height = 30
-      Top = 63
+      Top = 112
       Width = 37
       Caption = 'SP2'
       Font.CharSet = ANSI_CHARSET
@@ -443,9 +442,9 @@ object MainAppForm: TMainAppForm
       ParentFont = False
     end
     object sp1vLabel2: TLabel
-      Left = 16
+      Left = 24
       Height = 30
-      Top = 109
+      Top = 184
       Width = 37
       Caption = 'SP3'
       Font.CharSet = ANSI_CHARSET
@@ -456,9 +455,9 @@ object MainAppForm: TMainAppForm
       ParentFont = False
     end
     object sp1vLabel3: TLabel
-      Left = 16
+      Left = 24
       Height = 30
-      Top = 157
+      Top = 253
       Width = 37
       Caption = 'SP4'
       Font.CharSet = ANSI_CHARSET
@@ -470,9 +469,9 @@ object MainAppForm: TMainAppForm
     end
     object sp2v: TLabel
       Tag = 18
-      Left = 184
+      Left = 212
       Height = 30
-      Top = 66
+      Top = 112
       Width = 56
       Caption = '0.00V'
       Font.CharSet = ANSI_CHARSET
@@ -484,9 +483,9 @@ object MainAppForm: TMainAppForm
     end
     object sp3v: TLabel
       Tag = 19
-      Left = 184
+      Left = 208
       Height = 30
-      Top = 109
+      Top = 184
       Width = 56
       Caption = '0.00V'
       Font.CharSet = ANSI_CHARSET
@@ -498,9 +497,9 @@ object MainAppForm: TMainAppForm
     end
     object sp4v: TLabel
       Tag = 15
-      Left = 184
+      Left = 208
       Height = 30
-      Top = 152
+      Top = 253
       Width = 56
       Caption = '0.00V'
       Font.CharSet = ANSI_CHARSET
@@ -510,67 +509,83 @@ object MainAppForm: TMainAppForm
       Font.Style = [fsBold]
       ParentFont = False
     end
-    object sp1v1: TLabel
+    object sp1v1: TLCDDisplay
       Tag = 14
-      Left = 248
-      Height = 30
-      Top = 21
-      Width = 63
-      Caption = '-4.93V'
-      Font.CharSet = ANSI_CHARSET
-      Font.Height = -21
-      Font.Name = 'Sans'
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentFont = False
+      Left = 302
+      Height = 60
+      Top = 20
+      Width = 147
+      DotSize = 3
+      FrameSize = 12
+      DotColorOn = clLime
+      DotColorOff = clBtnText
+      DisplayLineCount = 1
+      DisplayCharCount = 5
+      Lines.Strings = (
+        '3.45V'
+        ' '
+      )
+      DotShape = stRound
     end
-    object sp2v2: TLabel
+    object sp2v2: TLCDDisplay
       Tag = 18
-      Left = 248
-      Height = 30
-      Top = 66
-      Width = 63
-      Caption = '-4.93V'
-      Font.CharSet = ANSI_CHARSET
-      Font.Height = -21
-      Font.Name = 'Sans'
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentFont = False
+      Left = 302
+      Height = 60
+      Top = 90
+      Width = 147
+      DotSize = 3
+      FrameSize = 12
+      DotColorOn = clLime
+      DotColorOff = clBtnText
+      DisplayLineCount = 1
+      DisplayCharCount = 5
+      Lines.Strings = (
+        '3.45V'
+        ' '
+      )
+      DotShape = stRound
     end
-    object sp3v3: TLabel
+    object sp3v3: TLCDDisplay
       Tag = 19
-      Left = 248
-      Height = 30
-      Top = 109
-      Width = 63
-      Caption = '-4.93V'
-      Font.CharSet = ANSI_CHARSET
-      Font.Height = -21
-      Font.Name = 'Sans'
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentFont = False
+      Left = 302
+      Height = 60
+      Top = 160
+      Width = 147
+      DotSize = 3
+      FrameSize = 12
+      DotColorOn = clLime
+      DotColorOff = clBtnText
+      DisplayLineCount = 1
+      DisplayCharCount = 5
+      Lines.Strings = (
+        '3.45V'
+        ' '
+      )
+      DotShape = stRound
     end
-    object sp4v4: TLabel
+    object sp4v4: TLCDDisplay
       Tag = 15
-      Left = 248
-      Height = 30
-      Top = 152
-      Width = 63
-      Caption = '-4.93V'
-      Font.CharSet = ANSI_CHARSET
-      Font.Height = -21
-      Font.Name = 'Sans'
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentFont = False
+      Left = 302
+      Height = 60
+      Top = 230
+      Width = 147
+      DotSize = 3
+      FrameSize = 12
+      DotColorOn = clLime
+      DotColorOff = clBtnText
+      DisplayLineCount = 1
+      DisplayCharCount = 5
+      Lines.Strings = (
+        '3.45V'
+        ' '
+      )
+      DotShape = stRound
     end
   end
   object Label4: TLabel
-    Left = 136
+    Left = 232
     Height = 32
-    Top = 440
+    Top = 432
     Width = 127
     Caption = 'Supervised'
     Font.CharSet = ANSI_CHARSET

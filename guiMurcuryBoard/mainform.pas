@@ -6,8 +6,10 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   ComCtrls, ActnList, Menus, Buttons, EditBtn, switches, AdvLed, indSliders,
-  MKnob, A3nalogGauge, Sensors, IndLed, fpJSON, jsonparser, DateUtils,
-  UDPServer, blinkLed, iovalues, sockets, ConfigurationJson;
+  MKnob, A3nalogGauge, Sensors, IndLed, indLCDDisplay, fpJSON, jsonparser,
+  DateUtils, UDPServer, blinkLed, iovalues, sockets, ConfigurationJson,
+  ECProgressBar, ECSlider, ECEditBtns, ECTriangle, ECSpinCtrls, ECLink,
+  ECScheme;
 
 const
   INPUT = 0;
@@ -47,6 +49,10 @@ type
     Label21: TLabel;
     Label22: TLabel;
     Label9: TLabel;
+    sp1v1: TLCDDisplay;
+    sp2v2: TLCDDisplay;
+    sp3v3: TLCDDisplay;
+    sp4v4: TLCDDisplay;
     Rd1Bz: TAdvLed;
     Ry1: TAdvLed;
     Ry2: TAdvLed;
@@ -77,11 +83,8 @@ type
     MainFormUpdateTimerEvent: TTimer;
     MainFormUpdateTimerTimer: TTimer;
     SP1: TMultiSlider;
-    sp1v1: TLabel;
     sp2v: TLabel;
-    sp2v2: TLabel;
     sp3v: TLabel;
-    sp3v3: TLabel;
     sp4v: TLabel;
     sp1vLabel: TLabel;
     sp1vLabel1: TLabel;
@@ -90,7 +93,6 @@ type
     SP2: TMultiSlider;
     SP3: TMultiSlider;
     SP4: TMultiSlider;
-    sp4v4: TLabel;
     StatusBar1: TStatusBar;
     UpdateTimer: TTimer;
     procedure BoardIpComboChange(Sender: TObject);
@@ -236,7 +238,8 @@ begin
           else begin
               sInVoltage :=  Value * 4.93 / 255;
               sInVoltageStr := Format('%3.2f', [sInVoltage]) + 'V';
-              TLabel(ioLines[index].itemW^).Caption := sInVoltageStr;
+              TLCDDisplay(ioLines[index].itemW^).Lines.Clear;
+              TLCDDisplay(ioLines[index].itemW^).Lines.Add(sInVoltageStr);
           end;
         end;
       end;
