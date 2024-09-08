@@ -13,6 +13,8 @@
 #include <shellFunctor.hpp>
 #include <utility.h>
 
+#define CcnfigNetPin 35
+
 static bool ethernetStatus = false;
 bool startNetwork(unsigned long timeout, unsigned long responseTimeout);
 
@@ -61,6 +63,7 @@ time_t getTeensy3Time() {
 };
 
 void initNetworking(Scheduler& ts, sllibMod& watchDogLed) {
+    pinMode(CcnfigNetPin, INPUT_PULLUP);
     static Task ethernetTask(TASK_SECOND * 3, TASK_FOREVER, std::function<void()>([&](void) -> void { //todo what about renew and ntp update
         static bool ethernetStatus = false;
         static bool runOnes = true;
@@ -92,6 +95,8 @@ void initNetworking(Scheduler& ts, sllibMod& watchDogLed) {
     ShellFunctor::getInstance().add("setmac", setmac);
     setSyncProvider(getTeensy3Time);
     setSyncInterval(24 * 3600);
+
+    if (!digitalRead(CcnfigNetPin)) ethernetTask.enable();
 }
 
 bool startNetwork(unsigned long timeout, unsigned long responseTimeout) {
@@ -100,10 +105,12 @@ bool startNetwork(unsigned long timeout, unsigned long responseTimeout) {
 
     logger().info(logger().printHeader, (char*) __FILE__, __LINE__, "Configuring ethernet adapter DHCP, MAC = %s ...", macToString(netConfig.mac).c_str());
 
-    IPAddress ip(192, 168, 0, 60);
-    IPAddress myDns(192, 168, 0, 6);
-    Ethernet.begin(netConfig.mac, ip, myDns);
-    return true;
+    if (digitalRead(CcnfigNetPin)) {
+        IPAddress ip(192, 168, 0, 60);
+        IPAddress myDns(192, 168, 0, 6);
+        Ethernet.begin(netConfig.mac, ip, myDns);
+        return true;
+    }
 
     if(Ethernet.begin(netConfig.mac, timeout, responseTimeout) == 0) {
         logger().info(logger().printHeader, (char*) __FILE__, __LINE__, "Failed to configure Ethernet using DHCP");
@@ -119,9 +126,6 @@ bool startNetwork(unsigned long timeout, unsigned long responseTimeout) {
         }
     }
     else {
-        IPAddress ip(192, 168, 0, 60);
-        IPAddress myDns(192, 168, 0, 6);
-        Ethernet.begin(netConfig.mac, ip, myDns);
         retStatus = true;
     }
 
