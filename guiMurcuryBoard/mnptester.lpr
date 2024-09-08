@@ -1,4 +1,4 @@
-program Teensyduino;
+program mnptester;
 
 {$mode objfpc}{$H+}
 
