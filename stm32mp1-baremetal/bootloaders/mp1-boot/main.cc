@@ -69,7 +69,7 @@ int main() {
     pcbId = pcbIdH | pcbIdL;
     stream.printf("pcbId = 0x%x\n\r",pcbId);
 
-    if (!Board::PCB_ID5.read()) { // true for MNP, otherwise M1
+    if (Board::PCB_ID5.read()) { // true for MNP, otherwise M1
         Uart<Board::MNP_Rx485UART> mnpRs485(Board::MNP_Rx485UartRX, Board::MNP_Rx485UartTX, Board::MNP_Rx485UartDE, 115200);
         Uart<Board::MNP_Rd1UART> mnpRd1Rs485(Board::MNP_Rd1UARTRX, Board::MNP_Rd1UARTTX, Board::MNP_Rd1UARTDE, 115200);
         Board::MNP_Rd1Te.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
@@ -431,7 +431,7 @@ int main() {
         udelay(5);
         Board::LEN_L.high();
 
-        stream.printf("{ \"status\": true, \"count\": %d }\n\r", count);
+        stream.printf("{ \"status\": true, \"addr\": %d, \"data\": %d  }\n\r", address, data);
     });
 
 

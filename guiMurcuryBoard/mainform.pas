@@ -284,14 +284,14 @@ begin
   ioLines[0].cmdRead := 'rd1rd0';
   ioLines[0].pinType := OUTPUT;
   ioLines[0].cmdWrite := 'rd1d0';
-  ioLines[0].pinN := 10;
+  ioLines[0].pinN := 9;
   ioLines[0].itemW := nil;
   ioLines[0].itemR := @Rd1RD0;
 
   ioLines[1].cmdRead := 'rd1rd1';
   ioLines[1].pinType := OUTPUT;
   ioLines[1].cmdWrite := 'rd1d1';
-  ioLines[1].pinN := 9;
+  ioLines[1].pinN := 10;
   ioLines[1].itemW := nil;
   ioLines[1].itemR := @Rd1RD1;
 
@@ -321,14 +321,14 @@ begin
   ioLines[5].cmdRead := 'rd2rd0';
   ioLines[5].pinType := INPUT;
   ioLines[5].cmdWrite := 'rd2d0';
-  ioLines[5].pinN := 26;
+  ioLines[5].pinN := 32;
   ioLines[5].itemW := nil;
   ioLines[5].itemR := @Rd2RD0;
 
   ioLines[6].cmdRead := 'rd2rd1';
   ioLines[6].pinType := OUTPUT;
   ioLines[6].cmdWrite := 'rd2d1';
-  ioLines[6].pinN := 32;
+  ioLines[6].pinN := 26;
   ioLines[6].itemW := nil;
   ioLines[6].itemR := @Rd2RD1;
 

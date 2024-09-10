@@ -58,11 +58,6 @@
               </Win32>
             </Options>
           </Linking>
-          <Other>
-            <Verbosity>
-              <ShowLineNum Value="True"/>
-            </Verbosity>
-          </Other>
         </CompilerOptions>
       </Item2>
       <Item3 Name="Release">

@@ -46,7 +46,7 @@ constexpr PinConf PCB_ID1{GPIO::D, PinNum::_11};
 constexpr PinConf PCB_ID2{GPIO::J, PinNum::_4};
 constexpr PinConf PCB_ID3{GPIO::G, PinNum::_4};
 constexpr PinConf PCB_ID4{GPIO::I, PinNum::_11};
-constexpr PinConf PCB_ID5{GPIO::G, PinNum::_2};
+constexpr PinConf PCB_ID5{GPIO::Z, PinNum::_0};
 
 constexpr PinConf RP1_Wg_D1{GPIO::K, PinNum::_3};
 constexpr PinConf RP1_Wg_D0{GPIO::F, PinNum::_9};
@@ -67,7 +67,7 @@ constexpr PinConf Adc1_In2{GPIO::A, PinNum::_1};
 constexpr PinConf Adc1_In3{GPIO::F, PinNum::_11};
 constexpr PinConf Adc1_In4{GPIO::F, PinNum::_12};
 
-constexpr PinConf LADR0{GPIO::F, PinNum::_0};
+constexpr PinConf LADR0{GPIO::F, PinNum::_10};
 constexpr PinConf LADR1{GPIO::G, PinNum::_7};
 constexpr PinConf LADR2{GPIO::K, PinNum::_5};
 constexpr PinConf LEN_L{GPIO::G, PinNum::_10};

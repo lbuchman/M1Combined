@@ -12,8 +12,8 @@ const mnpIOMap = [
     { port: 'H', pin: 11, mode: 'output', name: 'WGD1_BPR', testPoint: 'na' },
     // WGD1
     { port: 'C', pin: 2, mode: 'input', name: 'WGD2_D0_3V3', testPoint: 'na' },
-    { port: 'J', pin: 15, mode: 'input', name: 'WGD2_D0WGD2_D1_3V3_3V3', testPoint: 'na' },
-    { port: 'J', pin: 12, mode: 'output', name: 'WGD1_BPR', testPoint: 'na' },
+    { port: 'J', pin: 15, mode: 'input', name: 'WGD2_D1_3V3', testPoint: 'na' },
+    { port: 'J', pin: 12, mode: 'output', name: 'WGD2_BPR', testPoint: 'na' },
     // Rd2 RS485
     { port: 'E', pin: 0, mode: 'output', name: 'Rd2_RS485_2_RX', testPoint: 'TP2103' },
     { port: 'E', pin: 1, mode: 'output', name: 'Rd2_RS485_2_TX', testPoint: 'TP2104' },
@@ -74,7 +74,7 @@ function getCommand(action, signalNameOrTespoint, value, log) {
             return `setgpio ${output[0].port} ${output[0].pin} ${value}`
         case 'latch':
             if (action !== 'write') throw new Error('invalid action for IO line');
-            return `latchctl ${output[0].port} ${output[0].pin} ${value}`
+            return `latchctl ${output[0].port}  ${value}`
     }
     return '';
 }

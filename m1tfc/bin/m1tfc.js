@@ -153,7 +153,7 @@ program.command('m1cmd')
     });
 
     program.command('mnpcmd <action> [sigNameOrTestpont] [value]')
-    .description('execute mnp io command to read or set io,action can be read or write or printio make sure to execute m1dfu command before this command')
+    .description('execute mnp IO commands. \n\tCommands: [read, write, printio] \n\Example:\n\tm1test write WGD1_BPR 1\n\ttm1test read WGD2_D0_3V3 WGD1_BPR 0\n\nuse command printio to list testpoints and signames\n\nMake sure to execute m1dfu command before this command to load the FW')
     .action(async (readOrWrite, name, value) => {
         const configData = await config(configuration);
         const logfile = console;
@@ -247,10 +247,10 @@ program.command('ict')
             if ((options.cellBatTol !== 'new') && (options.cellBatTol !== 'used')) await errorAndExit('cellBatTol argument  -b option is not valid', logfile);
             process.env.cellBatTol = options.cellBatTol;
             let skipTestpointCheck = false;
-            let memTestSize1MBBlocks = 512;
+            let memTestSize1MBBlocks = 512 * 256;
             if (options.debug) {
                 skipTestpointCheck = configData.skipTestpointCheck || false;
-                memTestSize1MBBlocks = configData.memTestSize1MBBlocks || 512;
+                memTestSize1MBBlocks = configData.memTestSize1MBBlocks11 || 512;
             }
             await ictTestRunner.runTest(configData.programmingCommand, options.serial, memTestSize1MBBlocks, skipTestpointCheck);
         }

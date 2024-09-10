@@ -30,8 +30,8 @@ Scheduler ts;
 
 #define Rev "0.1"
 
-readerPins rd1Pins = { {10, OUTPUT, 0, 0}, {9, OUTPUT, 0, 0}, {5, INPUT_PULLUP, 0, 0}, {11, INPUT_PULLUP, 0, 0}, {40, INPUT_PULLUP, 0, 0} };
-readerPins rd2Pins = { {26, OUTPUT, 0, 0}, {32, OUTPUT, 0, 0}, {12, INPUT_PULLUP, 0, 0}, {30, INPUT_PULLUP, 0, 0}, {39, INPUT_PULLUP, 0, 0} };
+readerPins rd1Pins = { {9, OUTPUT, 0, 0}, {10, OUTPUT, 0, 0}, {5, INPUT_PULLUP, 0, 0}, {11, INPUT_PULLUP, 0, 0}, {40, INPUT_PULLUP, 0, 0} };
+readerPins rd2Pins = { {32, OUTPUT, 0, 0}, {26, OUTPUT, 0, 0}, {12, INPUT_PULLUP, 0, 0}, {30, INPUT_PULLUP, 0, 0}, {39, INPUT_PULLUP, 0, 0} };
 int Rs485TermPin = 31; // no need for termination, set to low
 int Rd1Rs485De = 6; // no need for termination, set to low
 int Rd2Rs485De = 27;

@@ -1,10 +1,10 @@
 object mainForm: TmainForm
-  Left = 870
+  Left = 232
   Height = 710
-  Top = 511
+  Top = 136
   Width = 1408
   BorderWidth = 2
-  ClientHeight = 687
+  ClientHeight = 685
   ClientWidth = 1408
   Font.Height = -15
   Font.Name = 'Monospace'
@@ -1444,7 +1444,7 @@ object mainForm: TmainForm
   LCLVersion = '2.2.6.0'
   object Memo1: TMemo
     Left = 2
-    Height = 515
+    Height = 513
     Top = 170
     Width = 1404
     Align = alClient
@@ -1483,7 +1483,7 @@ object mainForm: TmainForm
     OnDblClick = Panel1DblClick
     object TargetVendorSerial: TEdit
       Left = 458
-      Height = 27
+      Height = 35
       Top = 10
       Width = 187
       Alignment = taCenter

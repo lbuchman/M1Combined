@@ -48,7 +48,7 @@ module.exports = class IctTestRunner {
         this.db.resetErrorCode(process.env.serial);
         let ret = true;
         try {
-            await common.initializeTestFixture(programmer, initAndQuit, this.stm32, this.m1Dev, this.logger);
+            await common.initializeTestFixture(programmer, initAndQuit, this.stm32, this.m1Dev, this.logger, initAndQuit);
             if (initAndQuit) return;
             await regulators.checkLeverState(this.logger, this.db);
             if (!skipTestpointCheck) this.logger.info('Testing test points ...');
