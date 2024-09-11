@@ -194,7 +194,6 @@ program.command('ict')
         try {
             process.env.coinCellDebug = config.coinCellDebug;
             process.env.skipBatteryTest = config.skipBatteryTest;
-            process.env.skipBatteryTest = config.skipBatteryTest;
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.m1mtfDir, options.debug);
             db = sqliteDriver.initialize(logfile);
@@ -247,7 +246,7 @@ program.command('ict')
             if ((options.cellBatTol !== 'new') && (options.cellBatTol !== 'used')) await errorAndExit('cellBatTol argument  -b option is not valid', logfile);
             process.env.cellBatTol = options.cellBatTol;
             let skipTestpointCheck = false;
-            let memTestSize1MBBlocks = 512 * 256;
+            let memTestSize1MBBlocks = 10;
             if (options.debug) {
                 skipTestpointCheck = configData.skipTestpointCheck || false;
                 memTestSize1MBBlocks = configData.memTestSize1MBBlocks11 || 512;
