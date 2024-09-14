@@ -249,7 +249,7 @@ program.command('ict')
             let memTestSize1MBBlocks = 10;
             if (options.debug) {
                 skipTestpointCheck = configData.skipTestpointCheck || false;
-                memTestSize1MBBlocks = configData.memTestSize1MBBlocks11 || 512;
+                memTestSize1MBBlocks = configData.memTestSize1MBBlocks || 512;
             }
             await ictTestRunner.runTest(configData.programmingCommand, options.serial, memTestSize1MBBlocks, skipTestpointCheck);
         }

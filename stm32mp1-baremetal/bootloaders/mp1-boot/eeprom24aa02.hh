@@ -19,6 +19,7 @@ class EEPROM24aa02 {
                 if(!i2c.write_register_byte(count, data[count - address])) {
                     return false;
                 }
+
                 udelay(10000);
             }
 
@@ -31,10 +32,14 @@ class EEPROM24aa02 {
             for(int count = address; count < address + datalength; count++) {
                 uint8_t dataChar[1];
                 bool val = i2c.read_register(count, dataChar);
-                               
-                if (!val) return false;
+
+                if(!val) {
+                    return false;
+                }
+
                 data[count - address] = dataChar[0];
             }
+
             return true;
         }
 

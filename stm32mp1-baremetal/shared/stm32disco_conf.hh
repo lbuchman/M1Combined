@@ -84,6 +84,7 @@ constexpr PinConf Rx422UartRX{GPIO::D, PinNum::_9, PinAF::AF_7};
 constexpr PinConf Rx422UartTX{GPIO::D, PinNum::_8, PinAF::AF_7};
 */
 
+constexpr PinConf B9_PORT{GPIO::B, PinNum::_9, PinAF::AF_8};
 
 constexpr uint32_t ConsoleUART = USART3_BASE;
 constexpr PinConf UartRX{GPIO::D, PinNum::_9, PinAF::AF_7};
