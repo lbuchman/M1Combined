@@ -126,6 +126,7 @@ program.command('synclogs')
         const matches = glob.sync(`${configData.m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
         const logfile = logger.getLogger('m1cli', 'synclogs', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         const blobSvc = azure.createBlobService(configData.conString);
+        
         if (!matches.length) {
             logfile.info('No log files to upload');
             fs.writeFileSync(`${configData.m1mtfDir}/${UpdateLogsTimeStamp}`, dateNow);
@@ -133,7 +134,8 @@ program.command('synclogs')
         }
         try {
             logContainer = `${configData.productName}-logs-${configData.vendorSite}`;
-            await azureOp.syncFiles(blobSvc, `${logContainer}-${configData.vendorSite.toLowerCase()}`, matches);
+            logfile.info(`Container: ${logContainer}`);
+            await azureOp.syncFiles(blobSvc, `${logContainer.toLowerCase()}`, matches);
         }
         catch (err) {
             logfile.error(err.message);

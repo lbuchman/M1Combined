@@ -32,8 +32,12 @@ function syncFiles(blobSvc, container, files) {
     const promises = files.map((item) => {
         return new Promise((resolve, reject) => {
             blobSvc.createBlockBlobFromLocalFile(container, path.basename(item), item, (err) => {
-                if (err) reject(err);
-                else resolve();
+                if (err) {
+                    reject(err);
+                }
+                else {
+                     resolve();
+                }
             });
         });
     });
