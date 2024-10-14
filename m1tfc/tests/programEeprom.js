@@ -33,7 +33,7 @@ module.exports = class IctTestRunner {
     async program(programmer, serial, vendorSite, eeepromoverwrite = false) {
         try {
             this.logger.info('Updating I2C EEPROM ...');
-            await common.initializeTestFixture(programmer, true, this.stm32, this.m1Dev, this.logger);
+            await common.initializeTestFixture(programmer, true, this.stm32, this.m1Dev, this.logger, false);
             return await eeprom.updateEEPRom(serial, eeepromoverwrite, vendorSite, this.logger);
         }
         catch (err) {
