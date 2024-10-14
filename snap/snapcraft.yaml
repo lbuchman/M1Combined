@@ -23,7 +23,7 @@ parts:
       source-type: local
       plugin: npm
       npm-include-node: true
-      npm-node-version: 20.9.0
+      npm-node-version: 20.18.0
       stage-packages: 
           - musl
           

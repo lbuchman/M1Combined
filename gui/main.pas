@@ -375,12 +375,18 @@ begin
   try
     if serial.Length <> 10 then raise BarcodeException.Create('Invalid Barcode Scan');
     str := AnsiMidStr(serial, 1, 2);
-    if str = '32' then
-    begin
-      ret := 'MNP';
-    end
+    Case str of
+     '30' : begin
+       WriteLn ('A pressed');
+       ret := 'M1';
+     end;
+     '32' : begin
+       WriteLn ('B pressed');
+       ret := 'MNP';
+     end
     else
       raise BarcodeException.Create('Invalid Barcode Scan');
+    end;
 
     str := AnsiMidStr(serial, 3, 2);
     intN := StrToInt(str);
