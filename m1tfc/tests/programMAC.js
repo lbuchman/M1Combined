@@ -52,7 +52,7 @@ module.exports = class ProgramMac {
             if (!this.config.testNewMac) db.updateCPUSerial(this.serial, cpuSerial);
             if (!this.config.testNewMac && (utils.getWordData(word57, utils.otp57) !== '0x00000000') && (utils.getWordData(word58, utils.otp58) !== '0x00000000')) {
                 const otpToMac = utils.otpToMac(utils.getWordData(word57, utils.otp57), utils.getWordData(word58, utils.otp58));
-                this.logger.warn(`OTP is not blank MAC Address is: ${otpToMac}`);
+                this.logger.info(`OTP is not blank MAC Address is: ${otpToMac}`);
                 const dbRecord = db.getRecordFromMac(otpToMac);
                 if (dbRecord.length) {
                     const entry = dbRecord[0];

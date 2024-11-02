@@ -23,6 +23,9 @@ module.exports = class SerialLink {
         if (this.busy) {
             throw (new Error(`${this.linkName} cmd - ${cmd} faled, serial terminal is busy`));
         }
+        if (!this.serialPort) {
+            throw (new Error('Serial object is NULL'));
+        }
         this.busy = true;
         await this.serialPort.flush();
         this.serialPort.write(`${cmd}\n\r`);
@@ -119,7 +122,7 @@ module.exports = class SerialLink {
     async initSerial(devFile, baud, log, dumpdata = false) {
         this.logger = log;
         this.devFile = devFile;
-        if (this.serialPort) return;
+        if (this.serialPort)  return;
         this.logger.debug(`Opening ${this.linkName} link serial port: ${devFile}`);
         this.serialPort = new SerialPort({ path: devFile, baudRate: parseInt(baud, 10) });
         this.parser = this.serialPort.pipe(this.parser);

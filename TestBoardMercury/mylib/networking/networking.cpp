@@ -13,6 +13,8 @@
 #include <shellFunctor.hpp>
 #include <utility.h>
 
+#define CcnfigNetPin 35
+
 static bool ethernetStatus = false;
 bool startNetwork(unsigned long timeout, unsigned long responseTimeout);
 
@@ -36,7 +38,7 @@ shellFunc setmac = [](int arg_cnt, char **args, Stream & stream) -> int {
     memcpy(netConfig.mac, mac, 6);
 
     network2eeprom(netConfig);
-    
+
     stream.printf("\t{\"cmd\": \"%s\", \"status\": true }\n\r", args[0]);
     return 1;
 };
@@ -61,6 +63,7 @@ time_t getTeensy3Time() {
 };
 
 void initNetworking(Scheduler& ts, sllibMod& watchDogLed) {
+    pinMode(CcnfigNetPin, INPUT_PULLUP);
     static Task ethernetTask(TASK_SECOND * 3, TASK_FOREVER, std::function<void()>([&](void) -> void { //todo what about renew and ntp update
         static bool ethernetStatus = false;
         static bool runOnes = true;
@@ -84,7 +87,7 @@ void initNetworking(Scheduler& ts, sllibMod& watchDogLed) {
 
         watchDogLed.ledNoDHCPIp();
         ethernetStatus = startNetwork(4000, 3900); // to prevent watchdog reset
-    }), &ts, true);
+    }), &ts, false);
 
     ethernetStatus = startNetwork(4000, 3900); // to prevent watchdog reset
     ShellFunctor::getInstance().add("setntpserver", setntpserver);
@@ -92,6 +95,8 @@ void initNetworking(Scheduler& ts, sllibMod& watchDogLed) {
     ShellFunctor::getInstance().add("setmac", setmac);
     setSyncProvider(getTeensy3Time);
     setSyncInterval(24 * 3600);
+
+    if (!digitalRead(CcnfigNetPin)) ethernetTask.enable();
 }
 
 bool startNetwork(unsigned long timeout, unsigned long responseTimeout) {
@@ -99,6 +104,13 @@ bool startNetwork(unsigned long timeout, unsigned long responseTimeout) {
     bool retStatus = false;
 
     logger().info(logger().printHeader, (char*) __FILE__, __LINE__, "Configuring ethernet adapter DHCP, MAC = %s ...", macToString(netConfig.mac).c_str());
+
+    if (digitalRead(CcnfigNetPin)) {
+        IPAddress ip(192, 168, 0, 60);
+        IPAddress myDns(192, 168, 0, 6);
+        Ethernet.begin(netConfig.mac, ip, myDns);
+        return true;
+    }
 
     if(Ethernet.begin(netConfig.mac, timeout, responseTimeout) == 0) {
         logger().info(logger().printHeader, (char*) __FILE__, __LINE__, "Failed to configure Ethernet using DHCP");

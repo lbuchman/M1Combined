@@ -1,0 +1,765 @@
+object MainAppForm: TMainAppForm
+  Left = 1060
+  Height = 579
+  Top = 438
+  Width = 386
+  Caption = 'MNP Tester  Rev-0.1'
+  ClientHeight = 579
+  ClientWidth = 386
+  DoubleBuffered = True
+  Font.CharSet = ANSI_CHARSET
+  Font.Height = -13
+  Font.Name = 'Sans'
+  Font.Quality = fqDraft
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  ParentDoubleBuffered = False
+  Position = poDesktopCenter
+  LCLVersion = '2.2.6.0'
+  Visible = True
+  object BoardIpLabel: TLabel
+    Left = 5
+    Height = 17
+    Top = 0
+    Width = 60
+    Caption = 'Board Ip'
+    Font.Height = -14
+    Font.Name = 'Noto Sans'
+    ParentColor = False
+    ParentFont = False
+  end
+  object BoardIpCombo: TComboBox
+    Left = 8
+    Height = 21
+    Top = 27
+    Width = 233
+    AutoSize = False
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -14
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ItemHeight = 0
+    ItemIndex = 0
+    Items.Strings = (
+      '192.168.0.60'
+    )
+    OnChange = BoardIpComboChange
+    OnKeyDown = BoardIpComboKeyDown
+    ParentFont = False
+    TabOrder = 0
+    Text = '192.168.0.60'
+  end
+  object StatusBar1: TStatusBar
+    Left = 0
+    Height = 19
+    Top = 560
+    Width = 386
+    Panels = <>
+  end
+  object Label1: TLabel
+    Left = 38
+    Height = 19
+    Top = 71
+    Width = 75
+    Caption = 'Reader1'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Sans'
+    Font.Quality = fqDraft
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Panel2: TPanel
+    Left = 274
+    Height = 192
+    Top = 93
+    Width = 93
+    BevelInner = bvLowered
+    BevelWidth = 4
+    BorderWidth = 2
+    BorderStyle = bsSingle
+    ClientHeight = 190
+    ClientWidth = 91
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -13
+    Font.Name = 'Sans'
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 3
+    object Label14: TLabel
+      Left = 40
+      Height = 17
+      Top = 14
+      Width = 20
+      Caption = 'D0'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label15: TLabel
+      Left = 40
+      Height = 17
+      Top = 41
+      Width = 20
+      Caption = 'D1'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label16: TLabel
+      Left = 40
+      Height = 17
+      Top = 93
+      Width = 32
+      Caption = 'rLed'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label17: TLabel
+      Left = 40
+      Height = 17
+      Top = 118
+      Width = 35
+      Caption = 'gLed'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label18: TLabel
+      Left = 40
+      Height = 17
+      Top = 144
+      Width = 17
+      Caption = 'bz'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Rd2RD0: TAdvLed
+      Tag = 32
+      Left = 11
+      Height = 24
+      Top = 12
+      Width = 24
+      Kind = lkGreenLight
+      OnClick = Rd1RD0Click
+    end
+    object Rd2RD1: TAdvLed
+      Tag = 26
+      Left = 11
+      Height = 24
+      Top = 38
+      Width = 24
+      Kind = lkGreenLight
+      OnClick = Rd1RD0Click
+    end
+    object Rd2Rled: TAdvLed
+      Tag = 12
+      Left = 11
+      Height = 24
+      Top = 88
+      Width = 24
+      Kind = lkGreenLight
+    end
+    object Rd2Gled: TAdvLed
+      Tag = 30
+      Left = 11
+      Height = 24
+      Top = 115
+      Width = 24
+      Kind = lkGreenLight
+    end
+    object Rd2Bz: TAdvLed
+      Tag = 39
+      Left = 11
+      Height = 24
+      Top = 142
+      Width = 24
+      Kind = lkGreenLight
+    end
+  end
+  object Label2: TLabel
+    Left = 274
+    Height = 19
+    Top = 71
+    Width = 75
+    Caption = 'Reader2'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Sans'
+    Font.Quality = fqDraft
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Panel3: TPanel
+    Left = 154
+    Height = 154
+    Top = 110
+    Width = 99
+    BevelInner = bvLowered
+    BevelWidth = 4
+    BorderWidth = 2
+    BorderStyle = bsSingle
+    ClientHeight = 152
+    ClientWidth = 97
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -13
+    Font.Name = 'Sans'
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 4
+    object Ry1: TAdvLed
+      Tag = 23
+      Left = 11
+      Height = 24
+      Top = 21
+      Width = 24
+      Kind = lkGreenLight
+    end
+    object Ry2: TAdvLed
+      Tag = 3
+      Left = 11
+      Height = 24
+      Top = 49
+      Width = 24
+      Kind = lkGreenLight
+    end
+    object Ry3: TAdvLed
+      Tag = 33
+      Left = 11
+      Height = 24
+      Top = 80
+      Width = 24
+      Kind = lkGreenLight
+    end
+    object Ry4: TAdvLed
+      Tag = 37
+      Left = 11
+      Height = 24
+      Top = 109
+      Width = 24
+      Kind = lkGreenLight
+    end
+    object Label19: TLabel
+      Left = 40
+      Height = 17
+      Top = 27
+      Width = 31
+      Caption = 'Rly1'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label20: TLabel
+      Left = 40
+      Height = 17
+      Top = 55
+      Width = 31
+      Caption = 'Rly2'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label21: TLabel
+      Left = 40
+      Height = 17
+      Top = 110
+      Width = 31
+      Caption = 'Rly4'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label22: TLabel
+      Left = 40
+      Height = 17
+      Top = 82
+      Width = 31
+      Caption = 'Rly3'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+  end
+  object Label3: TLabel
+    Left = 159
+    Height = 19
+    Top = 88
+    Width = 58
+    Caption = 'Relays'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Sans'
+    Font.Quality = fqDraft
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Panel4: TPanel
+    Left = 38
+    Height = 236
+    Top = 318
+    Width = 324
+    BevelInner = bvLowered
+    BevelWidth = 4
+    BorderWidth = 2
+    BorderStyle = bsSingle
+    ClientHeight = 234
+    ClientWidth = 322
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -13
+    Font.Name = 'Sans'
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 5
+    OnDblClick = sp1vLabelDblClick
+    object SP1: TMultiSlider
+      Tag = 14
+      Left = 55
+      Height = 19
+      Top = 27
+      Width = 75
+      ColorThumb = clMaroon
+      DefaultSize = 19
+      Position = 20
+      RangeMax = 255
+      SliderMode = smSingle
+      TrackThickness = 5
+      OnMouseMove = SP1MouseMove
+      OnMouseUp = SP1MouseUp
+    end
+    object SP2: TMultiSlider
+      Tag = 18
+      Left = 55
+      Height = 19
+      Top = 77
+      Width = 75
+      ColorThumb = clMaroon
+      DefaultSize = 19
+      Position = 20
+      RangeMax = 255
+      SliderMode = smSingle
+      TrackThickness = 5
+      OnMouseMove = SP2MouseMove
+      OnMouseUp = SP1MouseUp
+    end
+    object SP3: TMultiSlider
+      Tag = 19
+      Left = 55
+      Height = 19
+      Top = 126
+      Width = 75
+      ColorThumb = clMaroon
+      DefaultSize = 19
+      Position = 20
+      RangeMax = 255
+      SliderMode = smSingle
+      TrackThickness = 5
+      OnMouseMove = SP3MouseMove
+      OnMouseUp = SP1MouseUp
+    end
+    object SP4: TMultiSlider
+      Tag = 15
+      Left = 55
+      Height = 19
+      Top = 176
+      Width = 75
+      ColorThumb = clMaroon
+      DefaultSize = 19
+      Position = 20
+      RangeMax = 255
+      SliderMode = smSingle
+      TrackThickness = 5
+      OnMouseMove = SP4MouseMove
+      OnMouseUp = SP1MouseUp
+    end
+    object sp1v: TLabel
+      Tag = 14
+      Left = 143
+      Height = 17
+      Top = 27
+      Width = 46
+      Caption = '0.00V'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object sp1vLabel: TLabel
+      Tag = 14
+      Left = 16
+      Height = 17
+      Top = 25
+      Width = 30
+      Caption = 'SP1'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      OnDblClick = sp1vLabelDblClick
+    end
+    object sp1vLabel1: TLabel
+      Tag = 18
+      Left = 16
+      Height = 17
+      Top = 77
+      Width = 30
+      Caption = 'SP2'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      OnDblClick = sp1vLabelDblClick
+    end
+    object sp1vLabel2: TLabel
+      Tag = 19
+      Left = 16
+      Height = 17
+      Top = 126
+      Width = 30
+      Caption = 'SP3'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      OnDblClick = sp1vLabelDblClick
+    end
+    object sp1vLabel3: TLabel
+      Tag = 15
+      Left = 16
+      Height = 17
+      Top = 173
+      Width = 30
+      Caption = 'SP4'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      OnDblClick = sp1vLabelDblClick
+    end
+    object sp2v: TLabel
+      Tag = 18
+      Left = 145
+      Height = 17
+      Top = 77
+      Width = 46
+      Caption = '0.00V'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object sp3v: TLabel
+      Tag = 19
+      Left = 143
+      Height = 17
+      Top = 126
+      Width = 46
+      Caption = '0.00V'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object sp4v: TLabel
+      Tag = 15
+      Left = 143
+      Height = 17
+      Top = 173
+      Width = 46
+      Caption = '0.00V'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object sp1v1: TLCDDisplay
+      Tag = 14
+      Left = 207
+      Height = 43
+      Top = 14
+      Width = 108
+      DotSize = 2
+      DotColorOn = clLime
+      DotColorOff = clBtnText
+      DisplayLineCount = 1
+      DisplayCharCount = 5
+      Lines.Strings = (
+        '3.45V'
+        ' '
+      )
+      DotShape = stRound
+    end
+    object sp2v2: TLCDDisplay
+      Tag = 18
+      Left = 207
+      Height = 43
+      Top = 62
+      Width = 108
+      DotSize = 2
+      DotColorOn = clLime
+      DotColorOff = clBtnText
+      DisplayLineCount = 1
+      DisplayCharCount = 5
+      Lines.Strings = (
+        '3.45V'
+        ' '
+      )
+      DotShape = stRound
+    end
+    object sp3v3: TLCDDisplay
+      Tag = 19
+      Left = 207
+      Height = 43
+      Top = 110
+      Width = 108
+      DotSize = 2
+      DotColorOn = clLime
+      DotColorOff = clBtnText
+      DisplayLineCount = 1
+      DisplayCharCount = 5
+      Lines.Strings = (
+        '3.45V'
+        ' '
+      )
+      DotShape = stRound
+    end
+    object sp4v4: TLCDDisplay
+      Tag = 15
+      Left = 207
+      Height = 43
+      Top = 158
+      Width = 108
+      DotSize = 2
+      DotColorOn = clLime
+      DotColorOff = clBtnText
+      DisplayLineCount = 1
+      DisplayCharCount = 5
+      Lines.Strings = (
+        '3.45V'
+        ' '
+      )
+      DotShape = stRound
+    end
+  end
+  object Label4: TLabel
+    Left = 159
+    Height = 19
+    Top = 296
+    Width = 100
+    Caption = 'Supervised'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Sans'
+    Font.Quality = fqDraft
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Panel1: TPanel
+    Left = 33
+    Height = 192
+    Top = 93
+    Width = 99
+    BevelInner = bvLowered
+    BevelWidth = 4
+    BorderWidth = 2
+    BorderStyle = bsSingle
+    ClientHeight = 190
+    ClientWidth = 97
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -13
+    Font.Name = 'Sans'
+    Font.Quality = fqDraft
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 2
+    object Rd1RD0: TAdvLed
+      Tag = 9
+      Left = 11
+      Height = 24
+      Top = 12
+      Width = 24
+      Kind = lkGreenLight
+      OnClick = Rd1RD0Click
+    end
+    object Label9: TLabel
+      Left = 40
+      Height = 17
+      Top = 14
+      Width = 20
+      Caption = 'D0'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label10: TLabel
+      Left = 40
+      Height = 17
+      Top = 41
+      Width = 20
+      Caption = 'D1'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Rd1RD1: TAdvLed
+      Tag = 10
+      Left = 11
+      Height = 24
+      Top = 38
+      Width = 24
+      Kind = lkGreenLight
+      OnClick = Rd1RD0Click
+    end
+    object Rd1Rled: TAdvLed
+      Tag = 5
+      Left = 11
+      Height = 24
+      Top = 88
+      Width = 24
+      Kind = lkGreenLight
+    end
+    object Label11: TLabel
+      Left = 40
+      Height = 17
+      Top = 93
+      Width = 32
+      Caption = 'rLed'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Rd1Gled: TAdvLed
+      Tag = 11
+      Left = 11
+      Height = 24
+      Top = 115
+      Width = 24
+      Kind = lkGreenLight
+    end
+    object Label12: TLabel
+      Left = 40
+      Height = 17
+      Top = 118
+      Width = 35
+      Caption = 'gLed'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Rd1Bz: TAdvLed
+      Tag = 40
+      Left = 11
+      Height = 24
+      Top = 142
+      Width = 24
+      Kind = lkGreenLight
+    end
+    object Label13: TLabel
+      Left = 40
+      Height = 17
+      Top = 144
+      Width = 17
+      Caption = 'bz'
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -13
+      Font.Name = 'Sans'
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+  end
+  object UpdateTimer: TTimer
+    OnTimer = UpdateTimerEvent
+    Left = 368
+    Top = 16
+  end
+  object MainFormUpdateTimerTimer: TTimer
+    OnTimer = MainFormUpdateTimer
+    Left = 318
+    Top = 16
+  end
+end

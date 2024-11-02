@@ -1,0 +1,24 @@
+object Relays: TRelays
+  Left = 1585
+  Height = 385
+  Top = 1161
+  Width = 611
+  Caption = 'Relays'
+  DesignTimePPI = 140
+  Font.CharSet = ANSI_CHARSET
+  Font.Height = -39
+  Font.Name = 'Arial Narrow'
+  Font.Pitch = fpVariable
+  Font.Quality = fqDraft
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  LCLVersion = '3.4.0.0'
+  Scaled = False
+  object pullTimer: TTimer
+    Interval = 450
+    OnTimer = pullTimerTimer
+    Left = 417
+    Top = 117
+  end
+end

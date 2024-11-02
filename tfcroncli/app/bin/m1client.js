@@ -18,8 +18,8 @@ const config = require('../src/config');
 const os = require('../src/os');
 const logger = require('../src/logger');
 
-const logContainer = 'm1-3200-logs';
-const secretsContainer = 'm1-3200-secrets';
+let logContainer = '-logs';
+let secretsContainer = '-secrets';
 const firmwareContainer = 'firmware';
 process.env.SNAP_DATA = '/var/snap/m1tfd1/current';
 const publicKey = path.join(process.env.SNAP_DATA, 'public.key');
@@ -49,6 +49,7 @@ program.command('update')
             os.executeShellCommand(`sudo sed -i '${str}' /etc/crontab`, logfile);
             const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
             dir = configData.m1mtfDir;
+            secretsContainer = `${configData.productName}-secrets`;
             logfile = logger.getLogger('m1cli', 'update', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
             logfile.info('Checking for SW & FW update ...');
             blobSvc = azure.createBlobService(configData.conString);
@@ -125,13 +126,16 @@ program.command('synclogs')
         const matches = glob.sync(`${configData.m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
         const logfile = logger.getLogger('m1cli', 'synclogs', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         const blobSvc = azure.createBlobService(configData.conString);
+        
         if (!matches.length) {
             logfile.info('No log files to upload');
             fs.writeFileSync(`${configData.m1mtfDir}/${UpdateLogsTimeStamp}`, dateNow);
             return;
         }
         try {
-            await azureOp.syncFiles(blobSvc, `${logContainer}-${configData.vendorSite.toLowerCase()}`, matches);
+            logContainer = `${configData.productName}-logs-${configData.vendorSite}`;
+            logfile.info(`Container: ${logContainer}`);
+            await azureOp.syncFiles(blobSvc, `${logContainer.toLowerCase()}`, matches);
         }
         catch (err) {
             logfile.error(err.message);

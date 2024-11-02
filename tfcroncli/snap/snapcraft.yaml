@@ -7,7 +7,7 @@ description: |
 grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: classic
 
-base: core20
+base: core22
 
 apps:
     m1client:
@@ -20,6 +20,7 @@ parts:
       source: ./app/
       source-type: local
       plugin: npm
-      npm-node-version: 16.19.0
+      npm-include-node: true
+      npm-node-version: 20.18.0
       stage-packages: 
           - musl

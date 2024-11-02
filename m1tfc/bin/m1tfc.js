@@ -20,6 +20,7 @@ const common = require('../tests/common');
 const sqliteDriver = require('../utils/sqliteDriver');
 const utils = require('../utils/utils');
 const buzzer = require('../tests/buzzer');
+const mnpHwIo = require('../tests/mnpHW.js');
 const testBoardLink = require('../src/testBoardLink');
 const { mkdirp } = require('mkdirp');
 // const azure = require('azure-storage');
@@ -48,6 +49,8 @@ const configuration = {
     forceEppromOverwrite: false,
     vendorSite: 'N1',
     skipTestpointCheck: false,
+    skipRS485test: false,
+    skipBatteryTest: false,
     pingPorts: true,
     progEEPROM: true,
     makeLabel: true,
@@ -149,6 +152,31 @@ program.command('m1cmd')
         }
     });
 
+    program.command('mnpcmd <action> [sigNameOrTestpont] [value]')
+    .description('execute mnp IO commands. \n\tCommands: [read, write, printio] \n\Example:\n\tm1test write WGD1_BPR 1\n\ttm1test read WGD2_D0_3V3 WGD1_BPR 0\n\nuse command printio to list testpoints and signames\n\nMake sure to execute m1dfu command before this command to load the FW')
+    .action(async (readOrWrite, name, value) => {
+        const configData = await config(configuration);
+        const logfile = console;
+        try {
+            const command = mnpHwIo.getCommand(readOrWrite, name, value, logfile);
+            process.env.coinCellDebug = config.coinCellDebug;
+            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+            await delay(400);
+            await targetICTLink.initSerial(configData.m1SerialDev, 115200, logfile);
+            logfile.log(JSON.stringify(command));
+            const output = await targetICTLink.sendCommand(command);
+            logfile.log(JSON.stringify(output));
+            // await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
+            process.exit(0);
+        }
+        catch (err) {
+            if (err.message === 'No Error') return;
+            logfile.error(err);
+            await delay(100);
+            process.exit(exitCodes.commandFailed);
+        }
+    });   
 program.command('ict')
     .description('Executes ICT test')
     .option('-s, --serial <string>', 'vendor serial number')
@@ -158,11 +186,14 @@ program.command('ict')
 
     .action(async (options) => {
         const configData = await config(configuration);
+        if (!configuration.productName) configuration.productName = 'm1=3200';
+        process.env.productName = configuration.productName;
         let logfile;
         let db;
         let startStatusOk = true;
         try {
             process.env.coinCellDebug = config.coinCellDebug;
+            process.env.skipBatteryTest = config.skipBatteryTest;
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.mtfDir, options.debug);
             db = sqliteDriver.initialize(logfile);
@@ -190,6 +221,18 @@ program.command('ict')
                     logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
                 }
             }
+            const interfaces = await si.networkInterfaces();
+            if (!configData.tfInterface) configData.tfInterface = 'enp0s31f6';
+            if (interfaces.find(o => o.iface === configData.tfInterface) === undefined) {
+                startStatusOk = false;
+                logfile.error('Internet Ethernet jack is not plugged. Check connection and retry the test.');
+            }
+
+            if (interfaces.find(o => o.ip4 === '192.168.0.100') === undefined) {
+                startStatusOk = false;
+                logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
+            }
+
 
             devices.forEach(async (deviceFile) => {
                 const exists = fs.existsSync(deviceFile.name);
@@ -215,7 +258,7 @@ program.command('ict')
             if ((options.cellBatTol !== 'new') && (options.cellBatTol !== 'used')) await errorAndExit('cellBatTol argument  -b option is not valid', logfile);
             process.env.cellBatTol = options.cellBatTol;
             let skipTestpointCheck = false;
-            let memTestSize1MBBlocks = 512;
+            let memTestSize1MBBlocks = 10;
             if (options.debug) {
                 skipTestpointCheck = configData.skipTestpointCheck || false;
                 memTestSize1MBBlocks = configData.memTestSize1MBBlocks || 512;

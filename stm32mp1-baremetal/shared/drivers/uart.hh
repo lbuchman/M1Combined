@@ -21,6 +21,7 @@ public:
 	{
 		txpin.init(PinMode::Alt);
 		rxpin.init(PinMode::Alt);
+		depin.init(PinMode::Alt);
         if constexpr ((BASE_ADDR == UART8_BASE) || (BASE_ADDR == UART4_BASE) || (BASE_ADDR == UART5_BASE)) {
             depin.init(PinMode::Alt);
         }

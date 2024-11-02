@@ -54,6 +54,8 @@ sudo apt install net-tools openssh-server
 sudo apt install sqlite3 arp-scan curl  python3-pip autossh ethtool imagemagick-6.q16  libusb-1.0-0 cron
 sudo chmod 4755  /usr/sbin/arp-scan
 pip install --upgrade brother_ql
+sudo systemctl disable ipp-usb
+sudo systemctl stop ipp-usb
 sudo apt remove ippusbxd
 sudo apt-mark hold ippusbxd
 sudo sed -i '/CMDLINE_LINUX_DEFAULT/c\CMDLINE_LINUX_DEFAULT="quiet pcie_aspm=off splash libata.noacpi=1"' /etc/default/grub

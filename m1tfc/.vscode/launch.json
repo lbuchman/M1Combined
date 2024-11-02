@@ -20,7 +20,19 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["ict", "-d", "2", "-s", "3023370015", "-b", "used"]
+            "args": ["ict", "-d", "2", "-s", "3023340011", "-b", "used"]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch mnpcmd",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/bin/m1tfc.js",
+            "args": ["mnpcmd", "write", "RD1_RLED", "0" ]
         },
         {
             "type": "pwa-node",
@@ -52,7 +64,7 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["progmac",    "-d", "2", "-s", "3224350004" ]
+            "args": ["progmac",    "-d", "2", "-s", "3023370036"]
         },
         {
             "type": "pwa-node",
@@ -84,7 +96,7 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["eeprom", "-d", "2", "-s", "3023370031" ]
+            "args": ["eeprom", "-d", "2", "-s", "3023200011" ]
         },
         {
             "type": "pwa-node",
@@ -116,7 +128,7 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["functest",  "-d", "2", "-s", "3023180042" ]
+            "args": ["functest",  "-d", "2", "-s", "3023200011" ]
         },
         {
             "type": "pwa-node",
@@ -132,7 +144,7 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["makelabel",  "-d", "2", "-s", "3023370015" ]
+            "args": ["makelabel",  "-d", "2", "-s", "label" ]
         },
         {
             "type": "pwa-node",

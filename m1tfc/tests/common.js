@@ -67,7 +67,7 @@ async function programStm(programmer, stm32, m1Dev, logger) {
     logger.debug(`Target ICT FW Rev - ${fwRev}`);
 }
 
-async function initializeTestFixture(programmer, programSTM, stm32, m1Dev, logger) {
+async function initializeTestFixture(programmer, programSTM, stm32, m1Dev, logger, initAndQuit) {
     await testBoardLink.retrieveIoDef();
     testBoardLink.getIoDef();
 
@@ -93,7 +93,7 @@ async function initializeTestFixture(programmer, programSTM, stm32, m1Dev, logge
         await delay(100);
         logger.debug('Programming Done');
         await delay(1000); // let M1 start
-        if (m1Dev) {
+        if (m1Dev && !initAndQuit) {
             await targetICTLink.initSerial(m1Dev, 115200, logger);
             const fwRev = await getICTFWRev(4);
             logger.debug(`Target ICT FW Rev - ${fwRev}`);

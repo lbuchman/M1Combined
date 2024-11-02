@@ -4,10 +4,10 @@
 #cmake -DRPI2=1 -DCMAKE_TOOLCHAIN_FILE=../arm-linux-gnueabihf.cmake ..
 
 cmake_minimum_required(VERSION 3.20)
-set(PROJECT_NAME HomeAutomation)
+set(PROJECT_NAME mnptester)
 
 include(ExternalProject)
-project (HomeAutomation)
+project(mnptester)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -109,8 +109,8 @@ add_custom_command(TARGET ${PROJECT_NAME}
 
 add_custom_target(flash
     COMMAND
-        #${TOOLSPATH}/teensy_loader_cli  -mmcu=${MCU_LOADER} -w -s -v  ${PROJECT_NAME}.hex
-        ${TOOLSPATH}/teensy_post_compile -board=${MCU_LOADER} -file=${PROJECT_NAME} -path=${CMAKE_BINARY_DIR} -tools=${TOOLSPATH} -reboot
+        ${TOOLSPATH}/teensy_loader_cli  -mmcu=${MCU_LOADER} -w -s -v  ${PROJECT_NAME}.hex
+        #${TOOLSPATH}/teensy_post_compile -board=${MCU_LOADER} -file=${PROJECT_NAME} -path=${CMAKE_BINARY_DIR} -tools=${TOOLSPATH} -reboot
     VERBATIM
 )
  

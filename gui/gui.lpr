@@ -9,8 +9,7 @@ uses
   lazcontrols,
   laz_synapse,
   main,
-  provision,
-  logForm,
+    logForm,
   logger,
   configurationJson,
   about, errorReportForm;

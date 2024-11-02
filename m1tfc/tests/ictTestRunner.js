@@ -48,7 +48,7 @@ module.exports = class IctTestRunner {
         this.db.resetErrorCode(process.env.serial);
         let ret = true;
         try {
-            await common.initializeTestFixture(programmer, initAndQuit, this.stm32, this.m1Dev, this.logger);
+            await common.initializeTestFixture(programmer, initAndQuit, this.stm32, this.m1Dev, this.logger, initAndQuit);
             if (initAndQuit) return;
             await regulators.checkLeverState(this.logger, this.db);
             if (!skipTestpointCheck) this.logger.info('Testing test points ...');
@@ -63,10 +63,14 @@ module.exports = class IctTestRunner {
                 throw err;
             }
             if (!skipTestpointCheck) await regulators.testDDRVoltage(this.tolerance, this.logger, this.db);
-            this.logger.info('Testing Ribbon cable pins ...');
-            if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger, this.db)) ret = false;
+            if (!process.env.productName) {
+                this.logger.info('Testing Ribbon cable pins ...');
+                if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger, this.db)) ret = false;
+            }
+            
             this.logger.info('Testing RS485 ...');
             if (!await rs485.testRs485(this.logger, this.db)) ret = false;
+
             this.logger.info('Testing Status LED ...');
             if (!await ledTest.test(this.logger, this.db)) ret = false;
             this.logger.info('Testing Tamper sensor ...');
@@ -75,7 +79,7 @@ module.exports = class IctTestRunner {
             if (!await ddr3.testDDR3Test(ddrblocks, this.logger, this.db)) ret = false;
             this.logger.info('Testing I2C EEPROM ...');
             if (!await eeprom.checkEEPROM(this.logger, this.db)) ret = false;
-            if (!await battery.test(this.logger, this.db)) ret = false;
+            if (!process.env.productName) if (!await battery.test(this.logger, this.db)) ret = false;
 
             if (ret) {
                 this.logger.info('ICT Test Passed!!!');

@@ -125,8 +125,9 @@ void getgpio(int arg_cnt, char **args) {
         stream.printf("{ \"status\": false, \"error\": \"invalid pin\"}\n\r");
         return;
     };
+
     int value = PinConf{port, pin, PinAF::AFNone}.read();
-    stream.printf("{ \"status\": true, \"value\": %d, \"port\": %d, \"pin\": %d }\n\r", value, port, pin);
+    stream.printf("{ \"status\": true, \"value\": %d, \"port\": \"%s\", \"pin\": \"%s\" }\n\r", value, args[1], args[2]);
 };
 
 /*
@@ -158,6 +159,8 @@ void pulsegpio(int arg_cnt, char **args)  {
 
     int value = atoi(args[3]);
 
+    PinConf{port, pin}.low();
+    udelay(1000);
     PinConf{port, pin}.high();
     udelay(value);
     PinConf{port, pin}.low();

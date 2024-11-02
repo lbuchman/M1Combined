@@ -29,7 +29,7 @@ Serial stream;
 SerialTerminal serialTerminal;
 namespace Board = STM32MP1Disco;
 constexpr uint32_t dlytime = 50; // loop time is 50uSec
-char *fwRev = (char*) "0.10";
+char *fwRev = (char*) "0.20";
 EEPROM24aa02 eeprom{Board::PMIC::I2C_config};
 static int searchString(char* strIn, char* strOut, char terminatedBy, int maxLegth);
 bool checkEEPROMBlank();
@@ -51,7 +51,8 @@ int main() {
     auto clockspeed = SystemClocks::init_core_clocks(Board::HSE_Clock_Hz, Board::MPU_MHz);
     security_init();
 
-    Uart<Board::ConsoleUART> console(Board::UartRX, Board::UartTX, Board::UartTX, 115200);
+    Uart<Board::ConsoleUART> console(Board::UartRX, Board::UartTX, Board::B9_PORT, 115200);
+
 
     Board::PCB_ID0.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
     Board::PCB_ID1.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
@@ -61,13 +62,15 @@ int main() {
     Board::PCB_ID5.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
 
     int pcbIdH = Board::PCB_ID3.readBit(3) | Board::PCB_ID4.readBit(4) | Board::PCB_ID5.readBit(5);
-    stream.printf("pcbIdH = 0x%x\n\r",pcbIdH );
+    stream.printf("pcbIdH = 0x%x\n\r", pcbIdH);
     int pcbIdL = Board::PCB_ID0.readBit(0) | Board::PCB_ID1.readBit(1) | Board::PCB_ID2.readBit(2);
-    stream.printf("pcbIdL = 0x%x\n\r",pcbIdL);
+    stream.printf("pcbIdL = 0x%x\n\r", pcbIdL);
+    stream.printf("pcbIdH = 0x%x\n\r", pcbIdH);
     pcbId = pcbIdH | pcbIdL;
-    stream.printf("pcbId = 0x%x\n\r",pcbId);
+    stream.printf("pcbId = 0x%x\n\r", pcbId);
 
-    if (Board::PCB_ID5.read()) { // true for MNP, otherwise M1
+    if(Board::PCB_ID5.read()) {  // true for MNP, otherwise M1
+        stream.printf("Detected MNP Board\n\r");
         Uart<Board::MNP_Rx485UART> mnpRs485(Board::MNP_Rx485UartRX, Board::MNP_Rx485UartTX, Board::MNP_Rx485UartDE, 115200);
         Uart<Board::MNP_Rd1UART> mnpRd1Rs485(Board::MNP_Rd1UARTRX, Board::MNP_Rd1UARTTX, Board::MNP_Rd1UARTDE, 115200);
         Board::MNP_Rd1Te.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
@@ -93,7 +96,7 @@ int main() {
         Board::STRIKE2_KICKER_EN.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
 
         Board::nPoE_PSE.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
-
+        Board::nPoEP_PSE.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
 
         Board::Adc1_In1.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
         Board::Adc1_In2.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
@@ -168,46 +171,82 @@ int main() {
         (void) args;
         stream.printf("{ \"status\": true,  \"fwrev\": \"%s\", \"cpu\": \"m1\" }\n\r", fwRev);
     });
+
     serialTerminal.cmdAdd("testrs485", "test rs485 loopback test, needs rs485 slave to be connected in echo mode", [](int arg_cnt, char **args) -> void {
         (void) arg_cnt;
         (void) args;
-
+        int isMNP = STM32MP1Disco::PCB_ID5.read();
         uint32_t UartAddress;
-        if (STM32MP1Disco::PCB_ID5.read()) {
-            UartAddress = STM32MP1Disco::MNP_Rx485UART;
-        }
-        else {
-            UartAddress = STM32MP1Disco::Rx485UART;
-        }
 
-        while(Uart<Board::Rx485UART>::available()) Uart<Board::Rx485UART>::readChar();
-        for(int count = 0x30; count < 0x33; count++) {
-            Uart<Board::Rx485UART>::putchar(count);
-            int timeout = 10;
+        PinConf{GPIO::A,PinNum::_15}.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
 
-            while(timeout > 0 && !Uart<Board::Rx485UART>::available()) {
-                timeout -= 1;
-                udelay(1000);
-            };
+        PinConf{GPIO::A,PinNum::_15}.high();
+       // udelay(1000);
 
-            char ret = Uart<Board::Rx485UART>::readChar();
+        if(STM32MP1Disco::PCB_ID5.read()) {
 
-            if(ret != count) {
-                stream.printf("{ \"status\": false,  \"error\": \"no reply match send = %d rec = %d\" }\n\r", count, ret);
-                return;
+            while(Uart<STM32MP1Disco::MNP_Rx485UART>::available()) {
+                Uart<STM32MP1Disco::MNP_Rx485UART>::readChar();
             }
 
-            udelay(5000);
+            for(int count = 0x30; count < 0x33; count++) {
+                        PinConf{GPIO::A,PinNum::_15}.high();
+
+                Uart<STM32MP1Disco::MNP_Rx485UART>::putchar(count);
+                int timeout = 10;
+ udelay(150);
+ PinConf{GPIO::A,PinNum::_15}.low();
+                while(timeout > 0 && !Uart<STM32MP1Disco::MNP_Rx485UART>::available()) {
+                    timeout -= 1;
+                    udelay(100);
+                };
+
+                char ret = Uart<STM32MP1Disco::MNP_Rx485UART>::readChar();
+
+                if(ret != count) {
+                    stream.printf("{ \"status\": false,  \"isMNP\" %d, \"error\": \"no reply match send = %d rec = %d\" }\n\r", isMNP, count, ret);
+                    return;
+                }
+
+                udelay(5000);
+            }
         }
+        else {
+            while(Uart<Board::Rx485UART>::available()) {
+                Uart<Board::Rx485UART>::readChar();
+            }
+
+            for(int count = 0x30; count < 0x33; count++) {
+                Uart<Board::Rx485UART>::putchar(count);
+                int timeout = 10;
+
+                while(timeout > 0 && !Uart<Board::Rx485UART>::available()) {
+                    timeout -= 1;
+                    udelay(1000);
+                };
+
+                char ret = Uart<Board::Rx485UART>::readChar();
+
+                if(ret != count) {
+                    stream.printf("{ \"status\": false,  \"isMNP\" %d, \"error\": \"no reply match send = %d rec = %d\" }\n\r", isMNP, count, ret);
+                    return;
+                }
+
+                udelay(5000);
+            }
+        }
+
+
         stream.printf("{ \"status\": true }\n\r", fwRev);
     });
 
     serialTerminal.cmdAdd("testrd1rs485", "test mnp reader 1 rs485 loopback test, needs rs485 slave to be connected in echo mode", [](int arg_cnt, char **args) -> void {
         (void) arg_cnt;
         (void) args;
-        if (!STM32MP1Disco::PCB_ID5.read()) {
-           stream.printf("{ \"status\": false,  \"error\": \"unsupported HW }\n\r");
-           return;
+
+        if(!STM32MP1Disco::PCB_ID5.read()) {
+            stream.printf("{ \"status\": false,  \"error\": \"unsupported HW }\n\r");
+            return;
         }
         uint32_t UartAddress = STM32MP1Disco::MNP_Rd1UART;
         Board::MNP_Rd1Te.high();
@@ -233,12 +272,13 @@ int main() {
         }
         stream.printf("{ \"status\": true }\n\r", fwRev);
     });
-  serialTerminal.cmdAdd("testrd2rs485", "test mnp reader 2 rs485 loopback test, needs rs485 slave to be connected in echo mode", [](int arg_cnt, char **args) -> void {
+    serialTerminal.cmdAdd("testrd2rs485", "test mnp reader 2 rs485 loopback test, needs rs485 slave to be connected in echo mode", [](int arg_cnt, char **args) -> void {
         (void) arg_cnt;
         (void) args;
-        if (!STM32MP1Disco::PCB_ID5.read()) {
-           stream.printf("{ \"status\": false,  \"error\": \"unsupported HW }\n\r");
-           return;
+
+        if(!STM32MP1Disco::PCB_ID5.read()) {
+            stream.printf("{ \"status\": false,  \"error\": \"unsupported HW }\n\r");
+            return;
         }
         uint32_t UartAddress = STM32MP1Disco::MNP_Rd2UART;
         Board::MNP_Rd2Te.high();
@@ -270,16 +310,17 @@ int main() {
             stream.printf("{ \"status\": false, \"error\": \"invalid argument required 3 parameters, got %d, type help followed by enter for help\" }\n\r", arg_cnt);
             return;
         }
-        
-        
+
+
         int overwrite = atoi(args[3]);
-        if (!checkEEPROMBlank() && overwrite == 0 ) {
+
+        if(!checkEEPROMBlank() && overwrite == 0) {
             stream.printf("{ \"status\": false, \"error\": \"EEPROM is not Blank\" }\n\r");
             return;
         }
         Board::EEPROM_Wp.low();
         char eepromString[128];
-        memset(eepromString, 0 , sizeof(eepromString));
+        memset(eepromString, 0, sizeof(eepromString));
         memset(eepromString, 0, sizeof(eepromString));
         sprintf(eepromString, "%s\n%s\n", args[1], args[2]);
         int  dataLength = strlen(eepromString);
@@ -289,7 +330,8 @@ int main() {
         memcpy(&eepromString[dataLength], hash, 16);
 
         bool retvalue = eeprom.writeData((uint8_t*) eepromString, dataLength + 16, EEPROM_START_ADDRESS);
-        if (!retvalue) {
+
+        if(!retvalue) {
             stream.printf("{ \"status\": false, \"error\": \"error writing EEPROM\" }\n\r");
             Board::EEPROM_Wp.high();
             return;
@@ -306,78 +348,84 @@ int main() {
         Board::EEPROM_Wp.high();
         uint8_t datain[128];
         memset(datain, 0, sizeof(datain));
-        if (!eeprom.readData(datain, sizeof(datain), EEPROM_START_ADDRESS)) {
-           stream.printf("{ \"status\": false, \"error\": \"error reading EEPROM\" }\n\r"); 
+
+        if(!eeprom.readData(datain, sizeof(datain), EEPROM_START_ADDRESS)) {
+            stream.printf("{ \"status\": false, \"error\": \"error reading EEPROM\" }\n\r");
         }
 
         char  serial[64];
         char  secret[64];
         int dataPosition1, dataPosition2;
         unsigned char hash[16];
-        
+
         if(!(dataPosition1 = searchString((char*) datain, serial, '\n', 64))) {
             stream.printf("{ \"status\": false, \"error\": \"invalid EEPROM Data, cannot decode serial number\" }\n\r");
             return;
         }
-   
+
         if(!(dataPosition2 = searchString((char*) &datain[dataPosition1], secret, '\n', 64))) {
             stream.printf("{ \"status\": false, \"error\": \"invalid EEPROM Data, cannot decode secret number\" }\n\r");
             return;
         }
 
-         memcpy(hash,&datain[dataPosition1 + dataPosition2], 16); 
-         char *md5str = MD5::make_digest(hash, 16);
-  
-         char eepromString[128];
-         memset(eepromString, 0, sizeof(eepromString));
-         sprintf(eepromString, "%s\n%s\n", serial, secret);
-         unsigned char* hashv = MD5::make_hash(eepromString);
-         if (memcmp(hashv,hash, 16)) {
-             stream.printf("{ \"status\": false, \"error\": \"invalid EEPROM Data hash\", \"serial\": \"%s\", \"secret\": \"%s\", \"hash\": \"%s\" }\n\r", serial, secret, md5str);
-             return;
-         }
-       
-         stream.printf("{ \"status\": true, \"serial\": \"%s\", \"secret\": \"%s\", \"hash\": \"%s\" }\n\r", serial, secret, md5str);
+        memcpy(hash, &datain[dataPosition1 + dataPosition2], 16);
+        char *md5str = MD5::make_digest(hash, 16);
+
+        char eepromString[128];
+        memset(eepromString, 0, sizeof(eepromString));
+        sprintf(eepromString, "%s\n%s\n", serial, secret);
+        unsigned char* hashv = MD5::make_hash(eepromString);
+
+        if(memcmp(hashv, hash, 16)) {
+            stream.printf("{ \"status\": false, \"error\": \"invalid EEPROM Data hash\", \"serial\": \"%s\", \"secret\": \"%s\", \"hash\": \"%s\" }\n\r", serial, secret, md5str);
+            return;
+        }
+
+        stream.printf("{ \"status\": true, \"serial\": \"%s\", \"secret\": \"%s\", \"hash\": \"%s\" }\n\r", serial, secret, md5str);
     });
-    
+
     serialTerminal.cmdAdd("checkeeeprom", "checkeeeprom arg: none", [](int arg_cnt, char **args) -> void {
-        Board::EEPROM_Wp.low();  
+        Board::EEPROM_Wp.low();
         char* eepromString = (char*) "test string";
         bool retvalue = eeprom.writeData((uint8_t*) eepromString, strlen(eepromString) + 1, EEPROM_START_ADDRESS_EXT);
-        if (!retvalue) {
+
+        if(!retvalue) {
             stream.printf("{ \"status\": false, \"error\": \"error writing EEPROM\" }\n\r");
-            Board::EEPROM_Wp.high(); 
+            Board::EEPROM_Wp.high();
             return;
-        }  
+        }
         udelay(100000);
         Board::EEPROM_Wp.high();
 
         char* eepromStringRet[16];
         memset(eepromStringRet, 0, sizeof(eepromStringRet));
+
         if(!eeprom.readData((uint8_t*) eepromStringRet, strlen(eepromString) + 1, EEPROM_START_ADDRESS_EXT)) {
-           stream.printf("{ \"status\": false, \"error\": \"error reading EEPROM\" }\n\r"); 
-           return;
+            stream.printf("{ \"status\": false, \"error\": \"error reading EEPROM\" }\n\r");
+            return;
         }
 
-        if (strncmp((char*) eepromString, (char*) eepromStringRet, sizeof(eepromString))) {
+        if(strncmp((char*) eepromString, (char*) eepromStringRet, sizeof(eepromString))) {
             stream.printf("{ \"status\": false, \"error\": \"check eeprom failed, compare failed\" }\n\r");
             return;
         }
 
         char* eepromString1 = (char*) "test1 string";
         retvalue = eeprom.writeData((uint8_t*) eepromString, strlen(eepromString) + 1, 200);
-        if (!retvalue) {
+
+        if(!retvalue) {
             stream.printf("{ \"status\": false, \"error\": \"error writing EEPROM\" }\n\r");
-            Board::EEPROM_Wp.high(); 
+            Board::EEPROM_Wp.high();
             return;
-        }  
+        }
         memset(eepromStringRet, 0, sizeof(eepromStringRet));
-        if (!eeprom.readData((uint8_t*) eepromStringRet, strlen(eepromString) + 1, 200)) {
-           stream.printf("{ \"status\": false, \"error\": \"error reading EEPROM\" }\n\r");
-           return;
+
+        if(!eeprom.readData((uint8_t*) eepromStringRet, strlen(eepromString) + 1, 200)) {
+            stream.printf("{ \"status\": false, \"error\": \"error reading EEPROM\" }\n\r");
+            return;
         }
 
-        if (!strncmp((char*) eepromString1, (char*) eepromStringRet, sizeof(eepromStringRet))) {
+        if(!strncmp((char*) eepromString1, (char*) eepromStringRet, sizeof(eepromStringRet))) {
             stream.printf("{ \"status\": false, \"error\": \"check eeprom failed Wp pin failed\" }\n\r");
             return;
         }
@@ -404,11 +452,12 @@ int main() {
         stream.printf("{ \"status\": true, \"pcbId\": %d }\n\r", pcbId);
     });
 
- serialTerminal.cmdAdd("latchctl", "control led and rly latch, arg addrd value(0 or 1)", [](int arg_cnt, char **args) -> void {
+    serialTerminal.cmdAdd("latchctl", "control led and rly latch, arg addrd value(0 or 1)", [](int arg_cnt, char **args) -> void {
         (void) arg_cnt;
         (void) args;
         char ret;
         int count;
+
         if(arg_cnt != 3) {
             stream.printf("{ \"status\": false, \"error\": \"invalid argument required 2 parameters, got %d, type help followed by enter for help\" }\n\r", arg_cnt);
             return;
@@ -416,20 +465,29 @@ int main() {
 
         int address = atoi(args[1]);
         int data = atoi(args[2]);
-        if (address & 1) Board::LADR0.high();
-        else Board::LADR0.low();
-        if (address & 2) Board::LADR1.high();
-        else Board::LADR1.low();
-        if (address & 4) Board::LADR2.high();
-        else Board::LADR2.low();
-        if (data) Board::Ldat.high();
-        else Board::Ldat.low();
+
+        if(address & 1) Board::LADR0.high();
+        else {
+            Board::LADR0.low();
+        }
+        if(address & 2) Board::LADR1.high();
+        else {
+            Board::LADR1.low();
+        }
+        if(address & 4) Board::LADR2.high();
+        else {
+            Board::LADR2.low();
+        }
+        if(data) Board::Ldat.high();
+        else {
+            Board::Ldat.low();
+        }
         udelay(5);
         Board::LEN_L.low();
         udelay(5);
         Board::LEN_L.high();
 
-        stream.printf("{ \"status\": true, \"count\": %d }\n\r", count);
+        stream.printf("{ \"status\": true, \"addr\": %d, \"data\": %d  }\n\r", address, data);
     });
 
 
@@ -438,9 +496,10 @@ int main() {
         (void) args;
         char ret;
         int count;
-        if (STM32MP1Disco::PCB_ID5.read()) {
-           stream.printf("{ \"status\": false,  \"error\": \"unsupported HW }\n\r");
-           return;
+
+        if(STM32MP1Disco::PCB_ID5.read()) {
+            stream.printf("{ \"status\": false,  \"error\": \"unsupported HW }\n\r");
+            return;
         }
 
         Uart<Board::Rx422UART>::readChar();
@@ -453,18 +512,19 @@ int main() {
             int timeout = 20;
 
             int dataAvailable = Uart<Board::Rx422UART>::available();
+
             while(timeout > 0 && !dataAvailable) {
                 timeout -= 1;
                 udelay(1000);
                 dataAvailable = Uart<Board::Rx422UART>::available();
             };
 
-            if (dataAvailable) {
+            if(dataAvailable) {
                 ret = Uart<Board::Rx422UART>::readChar();
             }
             else {
                 stream.printf("{ \"status\": false,  \"error\": \"no reply from MP1, count = %d }\n\r", count);
-                return; 
+                return;
             }
 
             if(ret != testBufferTx[count]) {
@@ -487,7 +547,7 @@ int main() {
 
     int patternLdDbg1[] = {200, 100, 200, 500};
     int patternLdDbg2[] = {200, 200, 500};
-     int patternLdDbg4[] = {500, 400, 100};
+    int patternLdDbg4[] = {500, 400, 100};
     led_debug1.setPatternSingle(patternLdDbg1, 4);
     led_debug2.setPatternSingle(patternLdDbg2, 3);
     led_debug3.setPatternSingle(patternLdDbg1, 4);
@@ -506,25 +566,28 @@ int main() {
         led_debug3.update();
         led_debug4.update();
         ledCpu.update();
-        if (Board::PCB_ID5.read()) {
-         Board::LED_POEP led_POEP;
-         Board::LED_POE led_POE;
-         static bool ones = true;
-         if (ones) {
-             led_POEP.setPatternSingle(patternLdDbg4, 3);
-             led_POE.setPatternSingle(patternLdDbg1, 4);
-             ones = false;
-         }
-         led_POEP.update();
-         led_POE.update();
+
+        if(Board::PCB_ID5.read()) {
+            Board::LED_POEP led_POEP;
+            Board::LED_POE led_POE;
+            static bool ones = true;
+
+            if(ones) {
+                led_POEP.setPatternSingle(patternLdDbg4, 3);
+                led_POE.setPatternSingle(patternLdDbg1, 4);
+                ones = false;
+            }
+
+            led_POEP.update();
+            led_POE.update();
         }
     }
 }
 
 /*
  * return position of the terminatedBy char, 0 if failed
- * 
- */ 
+ *
+ */
 int searchString(char* strIn, char* strOut, char terminatedBy, int maxLegth) {
     int count = 0;
 
@@ -533,20 +596,21 @@ int searchString(char* strIn, char* strOut, char terminatedBy, int maxLegth) {
 
         if(strIn[count] == terminatedBy) {
             count++;
-            strOut[count -1] = 0;
+            strOut[count - 1] = 0;
             return count;
         }
+
         count++;
     }
-    
+
     return 0;
 }
 
 
 /*
  * return position of the terminedBy char, 0 if failed
- * 
- */ 
+ *
+ */
 bool checkEEPROMBlank() {
     int count = 0;
     uint8_t datain[128];
@@ -555,6 +619,6 @@ bool checkEEPROMBlank() {
     uint8_t blankData[32];
     memset(blankData, 0xFF, sizeof(blankData));
     return memcmp(blankData, datain, sizeof(blankData)) == 0;
-    
+
     return false;
 }

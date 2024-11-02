@@ -28,12 +28,12 @@ class HumidityContr {
             });
 
             sensor.onError([this](void* data) -> void {
-                if (sensorErrorPrintCounter > 30) {
+                if(sensorErrorPrintCounter > 30) {
                     logger().error(logger().printHeader, (char*) __FILE__, __LINE__,  "sensor %s %s read error", deviceData.name, ipToString(deviceData.sensorIp).c_str());
                     sensorErrorPrintCounter = 0;
                 }
-                    sensorErrorPrintCounter += 1;
-                    sensorErrorCount += 1;
+                sensorErrorPrintCounter += 1;
+                sensorErrorCount += 1;
             });
 
             deviceTask.enable();
@@ -55,7 +55,7 @@ class HumidityContr {
             // logger().info(logger().printHeader, (char*) __FILE__, __LINE__,  "sensor %s devicePowerWatt = %d  runTimeCount = %d", deviceData.name, deviceData.devicePowerWatt, runTimeCount, deviceData.totalRunTimeSec);
             return powerWattHour / 1000.0;
         }
- 
+
         void getHumidityDeviceData(Stream & stream, int device) {
             JsonDocument  doc;
             JsonObject  retData = doc.to<JsonObject>();
@@ -96,20 +96,20 @@ class HumidityContr {
         TDevice& getDeviceData() {
             return deviceData;
         }
-        
+
         void clearPowerUsed() {
             actualOnTime = 0;
         }
-        
+
         String getLastPowerResetDateTime() {
             time_t refTime = deviceData.totalRunTimeResetEpoch;
             return epochToString(refTime);
         }
-        
+
         String getRunTimeCount() {
-         return String(runTimeCount /1000);   
+            return String(runTimeCount / 1000);
         }
-        
+
     private:
         Scheduler& ts;
         TDevice& deviceData;
