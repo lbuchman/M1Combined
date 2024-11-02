@@ -29,12 +29,12 @@ const si = require('systeminformation');
 const targetICTLink = require('../src/m1ICTLink');
 
 // AS name Onguard Testing -> enel2anestingtsm
-
+// layoutFilePath = `${configData.mtfDir}/${configData.fwDir}/${configData.layoutFilePath}`;
 const configuration = {
-    ictFWFilePath: `${process.env.HOME}/m1mtf/fsbl.stm32`,
-    m1fwBase: `${process.env.HOME}/m1mtf/stm32mp15-lenels2-m1`,
-    m1mtfDir: `${process.env.HOME}/m1mtf`,
-    layoutFilePath: `${process.env.HOME}/m1mtf/stm32mp15-lenels2-m1/flashlayout_st-ls2m1-image-core/trusted//FlashLayout_emmc_stm32mp151f-ls2m1-trusted.tsv`,
+    mtfDir: `${process.env.HOME}/m1mtf`,
+    ictFWFilePath: 'fsbl.stm32',
+    fwDir: 'stm32mp15-lenels2-m1',
+    layoutFilePath: 'flashlayout_st-ls2m1-image-core/trusted/FlashLayout_emmc_stm32mp151f-ls2m1-trusted.tsv',
     programmingCommand: `${process.env.HOME}/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI`,
     m1SerialDev: '/dev/ttyUSB0',
     m1defaultIP: '192.168.0.251',
@@ -88,7 +88,7 @@ program.command('m1dfu')
         const logfile = console;
         try {
             process.env.coinCellDebug = config.coinCellDebug;
-            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
@@ -164,31 +164,32 @@ program.command('ict')
         try {
             process.env.coinCellDebug = config.coinCellDebug;
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
-            logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.m1mtfDir, options.debug);
+            logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.mtfDir, options.debug);
             db = sqliteDriver.initialize(logfile);
             const devices = [
                 { name: '/dev/ttyACM0', desc: 'Testboard Teensy' },
                 { name: '/dev/ttyUSB0', desc: 'M1-3200 Terminal Serial Converter' }
             ];
 
-            if (configData.makeLabel) {
-                const printerStatus = await os.executeShellCommand('lsusb | grep "QL-810W"', logfile);
-                if (!printerStatus) {
+            if (options.debug !== '2') {
+                if (configData.makeLabel) {
+                    const printerStatus = await os.executeShellCommand('lsusb | grep "QL-810W"', logfile);
+                    if (!printerStatus) {
+                        startStatusOk = false;
+                        logfile.error('Label Printer is not detected. Check connections and power and retry the test.');
+                    }
+                }
+                const interfaces = await si.networkInterfaces();
+                if (interfaces.find(o => o.iface === 'enp0s31f6') === undefined) {
                     startStatusOk = false;
-                    logfile.error('Label Printer is not detected. Check connections and power and retry the test.');
+                    logfile.error('Internet Ethernet jack is not plugged. Check connection and retry the test.');
+                }
+
+                if (interfaces.find(o => o.ip4 === '192.168.0.100') === undefined) {
+                    startStatusOk = false;
+                    logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
                 }
             }
-            const interfaces = await si.networkInterfaces();
-            if (interfaces.find(o => o.iface === 'enp0s31f6') === undefined) {
-                startStatusOk = false;
-                logfile.error('Internet Ethernet jack is not plugged. Check connection and retry the test.');
-            }
-
-            if (interfaces.find(o => o.ip4 === '192.168.0.100') === undefined) {
-                startStatusOk = false;
-                logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
-            }
-
 
             devices.forEach(async (deviceFile) => {
                 const exists = fs.existsSync(deviceFile.name);
@@ -244,9 +245,9 @@ program.command('eeprom')
         let logfile;
         let db;
         try {
-            process.env.fwDir = configData.m1fwBase;
+            process.env.fwDir = `${configData.mtfDir}/${configData.fwDir}`;
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
-            logfile = logger.getLogger(options.serial, ' eeprom', options.serial, configData.m1mtfDir, options.debug);
+            logfile = logger.getLogger(options.serial, ' eeprom', options.serial, configData.mtfDir, options.debug);
             db = sqliteDriver.initialize(logfile);
             if (!configData.progEEPROM) {
                 logfile.error('Prog EEPROM is disabled');
@@ -283,12 +284,12 @@ program.command('progmac')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug')
     .action(async (options) => {
         const configData = await config(configuration);
-        process.env.fwDir = configData.m1fwBase;
+        process.env.fwDir = `${configData.mtfDir}/${configData.fwDir}`;
         let logfile;
         let db;
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
-            logfile = logger.getLogger(options.serial, 'progmac', options.serial, configData.m1mtfDir, options.debug);
+            logfile = logger.getLogger(options.serial, 'progmac', options.serial, configData.mtfDir, options.debug);
             db = sqliteDriver.initialize(logfile);
             logfile.info('--------------------------------------------');
             logfile.info('Executing program MAC command ...');
@@ -317,14 +318,14 @@ program.command('flash')
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             db = sqliteDriver.initialize(logfile);
-            process.env.fwDir = configData.m1fwBase;
-            logfile = logger.getLogger(options.serial, '   eMMC', options.serial, configData.m1mtfDir, options.debug);
+            process.env.fwDir = `${configData.mtfDir}/${configData.fwDir}`;
+            logfile = logger.getLogger(options.serial, '   eMMC', options.serial, configData.mtfDir, options.debug);
             logfile.info('--------------------------------------------');
-            const revisionFile = fs.readFileSync(`${configData.m1fwBase}/VERSION`);
+            const revisionFile = fs.readFileSync(`${configData.mtfDir}/${configData.fwDir}/VERSION`);
             logfile.info(`Flashing eMMC revision: ${revisionFile.toString()}`);
-            const flashEmmc = new FlashEmmc(configData.layoutFilePath, options.serial, logfile);
+            const flashEmmc = new FlashEmmc(`${configData.mtfDir}/${configData.fwDir}/${configData.layoutFilePath}`, options.serial, logfile);
             await flashEmmc.init(configData.testBoardTerminalDev, configData.serialBaudrate);
-            await flashEmmc.run(configData.programmingCommand, configData.layoutFilePath);
+            await flashEmmc.run(configData.programmingCommand, `${configData.mtfDir}/${configData.fwDir}/${configData.layoutFilePath}`);
         }
         catch (err) {
             logfile.error(err);
@@ -346,7 +347,7 @@ program.command('pingM1apps')
         let db;
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
-            logfile = logger.getLogger(options.serial, '   apps', options.serial, configData.m1mtfDir, options.debug);
+            logfile = logger.getLogger(options.serial, '   apps', options.serial, configData.mtfDir, options.debug);
             if (!configData.pingPorts) {
                 logfile.info('pinging port 80 is disabled in config file');
                 return;
@@ -418,10 +419,10 @@ program.command('cleanup')
             if (options.failed) {
                 errSuf = 'E';
             }
-            const tarFile = `${configData.m1mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${configData.vendorSite}${errSuf}.txz`;
-            await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.m1mtfDir}/logs/${options.serial} .`, logfile, false);
+            const tarFile = `${configData.mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${configData.vendorSite}${errSuf}.txz`;
+            await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.mtfDir}/logs/${options.serial} .`, logfile, false);
             // console.info(`logfile to created  ${tarFile}`);
-            await os.executeShellCommand(`rm -fr ${configData.m1mtfDir}/logs/${options.serial}`, logfile, false);
+            await os.executeShellCommand(`rm -fr ${configData.mtfDir}/logs/${options.serial}`, logfile, false);
             await delay(100);
         }
         catch (err) {
@@ -443,9 +444,9 @@ program.command('functest')
 
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
-            process.env.fwDir = configData.m1fwBase;
+            process.env.fwDir = `${configData.mtfDir}/${configData.fwDir}`;
             process.env.m1defaultIP = configData.m1defaultIP;
-            logfile = logger.getLogger(options.serial, '   func', options.serial, configData.m1mtfDir, options.debug);
+            logfile = logger.getLogger(options.serial, '   func', options.serial, configData.mtfDir, options.debug);
             if (configData.funcTestDisable) {
                 logfile.error('Func test is disabled');
                 await delay(100);
@@ -454,10 +455,10 @@ program.command('functest')
             logfile.info('--------------------------------------------');
             logfile.info('Executing m1-3200 functional test ...');
             process.env.SERIAL = options.serial;
-            process.env.logDir = `${configData.m1mtfDir}/logs/${options.serial}`;
+            process.env.logDir = `${configData.mtfDir}/logs/${options.serial}`;
             const funcTest = new FuncTest(options.serial, configData, logfile);
             await funcTest.init(configData.testBoardTerminalDev, configData.serialBaudrate);
-            await funcTest.run(configData.programmingCommand, configData.layoutFilePath, configData.login, configData.password, configData.m1SerialDev, configData.skipUSBPenDriveTest, '115200');
+            await funcTest.run(configData.programmingCommand, `${configData.mtfDir}/${configData.fwDir}/${configData.layoutFilePath}`, configData.login, configData.password, configData.m1SerialDev, configData.skipUSBPenDriveTest, '115200');
             process.exit(exitCodes.normalExit);
         }
         catch (err) {
@@ -477,7 +478,7 @@ program.command('makelabel')
     .action(async (options) => {
         if (!options.serial) await errorAndExit('must define vendor serial number', console);
         const configData = await config(configuration);
-        const logfile = logger.getLogger(options.serial, '  label', options.serial, configData.m1mtfDir, options.debug);
+        const logfile = logger.getLogger(options.serial, '  label', options.serial, configData.mtfDir, options.debug);
         const db = sqliteDriver.initialize(logfile);
         if (!configData.makeLabel) {
             logfile.info('Make Label is disabled');
@@ -485,7 +486,7 @@ program.command('makelabel')
             process.exit(exitCodes.normalExit);
         }
         try {
-            process.env.fwDir = configData.m1fwBase;
+            process.env.fwDir = `${configData.mtfDir}/${configData.fwDir}`;
             let eepromData = {};
             if (!options.serial) await errorAndExit('must define vendor serial number', logfile);
 
@@ -562,9 +563,9 @@ const log = console;
 os.executeShellCommand('killall -9 STM32_Programmer_CLI', log, true)
     .then(async () => {
         const configData = await config(configuration);
-        process.env.DBPATH = configData.m1mtfDir;
-        mkdirp.sync(configData.m1mtfDir);
-        mkdirp.sync(`${configData.m1mtfDir}/logs`);
+        process.env.DBPATH = configData.mtfDir;
+        mkdirp.sync(configData.mtfDir);
+        mkdirp.sync(`${configData.mtfDir}/logs`);
         program.parse(process.argv);
     });
 // log.info(`Cmd line: ${process.argv.join('  ')}`);

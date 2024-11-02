@@ -13,7 +13,7 @@ const tsv = require('../utils/tsv');
 module.exports = class ProgramMac {
     constructor(config, serial, log_) {
         this.logger = log_;
-        this.tsv = config.layoutFilePath;
+        this.tsv = `${config.mtfDir}/${config.fwDir}/${config.layoutFilePath}`
         this.serial = serial;
         this.config = config;
     }
@@ -38,9 +38,10 @@ module.exports = class ProgramMac {
             const db = sqliteDriver.initialize(this.logger);
             db.updateSerial(this.serial);
             await common.initializeTestFixture(null, false, null, null, this.logger);
-            this.logger.debug('Programming TSV file ...');
             const minimalTsv = tsv.makeMinimalTsv(this.tsv);
+            this.logger.debug('Wait for DFU ...');
             await common.waitDFU(programmer, this.logger);
+            this.logger.debug('Programming TSV file ...');
             await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${minimalTsv}`, this.logger, false, false, 1024 * 200, fwDir);
             await delay(100);
 

@@ -15,6 +15,10 @@
             ],
             "outputCapture": "std",
             "console": "integratedTerminal",
+            "env": {
+                "SNAP_DATA": "/home/lbuchman/snap_data",
+                "SNAP_COMMON": "/home/lbuchman/snap_common"
+            },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["ict", "-d", "2", "-s", "3023370015", "-b", "used"]
         },
@@ -27,6 +31,10 @@
             ],
             "outputCapture": "std",
             "console": "integratedTerminal",
+            "env": {
+                "SNAP_DATA": "/home/lbuchman/snap_data",
+                "SNAP_COMMON": "/home/lbuchman/snap_common"
+            },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["cleanup", "-d", "1", "-s", "3023200042" ]
         },
@@ -39,8 +47,12 @@
             ],
             "outputCapture": "std",
             "console": "integratedTerminal",
+            "env": {
+                "SNAP_DATA": "/home/lbuchman/snap_data",
+                "SNAP_COMMON": "/home/lbuchman/snap_common"
+            },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["progmac",    "-d", "2", "-s", "3023200042" ]
+            "args": ["progmac",    "-d", "2", "-s", "3224350004" ]
         },
         {
             "type": "pwa-node",
@@ -50,9 +62,13 @@
                 "<node_internals>/**"
             ],
             "outputCapture": "std",
+            "env": {
+                "SNAP_DATA": "/home/lbuchman/snap_data",
+                "SNAP_COMMON": "/home/lbuchman/snap_common"
+            },
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["flash",    "-d", "2", "-s", "3023200042" ]
+            "args": ["flash",    "-d", "2", "-s", "3224350011" ]
         },
         {
             "type": "pwa-node",
@@ -63,6 +79,10 @@
             ],
             "outputCapture": "std",
             "console": "integratedTerminal",
+            "env": {
+                "SNAP_DATA": "/home/lbuchman/snap_data",
+                "SNAP_COMMON": "/home/lbuchman/snap_common"
+            },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["eeprom", "-d", "2", "-s", "3023370031" ]
         },
@@ -75,6 +95,10 @@
             ],
             "outputCapture": "std",
             "console": "integratedTerminal",
+            "env": {
+                "SNAP_DATA": "/home/lbuchman/snap_data",
+                "SNAP_COMMON": "/home/lbuchman/snap_common"
+            },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["pingM1apps", "-d", "2", "-s", "3023200042" ] 
         },
@@ -87,6 +111,10 @@
             ],
             "outputCapture": "std",
             "console": "integratedTerminal",
+            "env": {
+                "SNAP_DATA": "/home/lbuchman/snap_data",
+                "SNAP_COMMON": "/home/lbuchman/snap_common"
+            },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["functest",  "-d", "2", "-s", "3023180042" ]
         },
@@ -99,6 +127,10 @@
             ],
             "outputCapture": "std",
             "console": "integratedTerminal",
+            "env": {
+                "SNAP_DATA": "/home/lbuchman/snap_data",
+                "SNAP_COMMON": "/home/lbuchman/snap_common"
+            },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["makelabel",  "-d", "2", "-s", "3023370015" ]
         },
@@ -111,6 +143,10 @@
             ],
             "outputCapture": "std",
             "console": "integratedTerminal",
+            "env": {
+                "SNAP_DATA": "/home/lbuchman/snap_data",
+                "SNAP_COMMON": "/home/lbuchman/snap_common"
+            },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["m1dfu"]
         },
@@ -123,6 +159,10 @@
             ],
             "outputCapture": "std",
             "console": "integratedTerminal",
+            "env": {
+                "SNAP_DATA": "/home/lbuchman/snap_data",
+                "SNAP_COMMON": "/home/lbuchman/snap_common"
+            },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["tbcmd", "-c", "date"]
         },
@@ -135,6 +175,10 @@
             ],
             "outputCapture": "std",
             "console": "integratedTerminal",
+            "env": {
+                "SNAP_DATA": "/home/lbuchman/snap_data",
+                "SNAP_COMMON": "/home/lbuchman/snap_common"
+            },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["m1cmd", "-c", "getfwrev"]
         }
