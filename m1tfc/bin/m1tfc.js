@@ -32,6 +32,7 @@ const targetICTLink = require('../src/m1ICTLink');
 // AS name Onguard Testing -> enel2anestingtsm
 // layoutFilePath = `${configData.mtfDir}/${configData.fwDir}/${configData.layoutFilePath}`;
 const configuration = {
+    tfInterface: 'eth1',
     mtfDir: `${process.env.HOME}/m1mtf`,
     ictFWFilePath: 'fsbl.stm32',
     fwDir: 'stm32mp15-lenels2-m1',
