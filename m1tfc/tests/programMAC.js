@@ -13,7 +13,7 @@ const tsv = require('../utils/tsv');
 module.exports = class ProgramMac {
     constructor(config, serial, log_) {
         this.logger = log_;
-        this.tsv = `${config.mtfDir}/${config.fwDir}/${config.layoutFilePath}`
+        this.tsv = `${config.mtfDir}/${config.fwDir}/${config.layoutFilePath}`;
         this.serial = serial;
         this.config = config;
     }

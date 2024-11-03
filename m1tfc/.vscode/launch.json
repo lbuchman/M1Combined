@@ -20,7 +20,7 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["ict", "-d", "2", "-s", "3023340011", "-b", "used"]
+            "args": ["ict", "-d", "2", "-s", "3224350004", "-b", "used"]
         },
         {
             "type": "pwa-node",

@@ -20,7 +20,7 @@ const common = require('../tests/common');
 const sqliteDriver = require('../utils/sqliteDriver');
 const utils = require('../utils/utils');
 const buzzer = require('../tests/buzzer');
-const mnpHwIo = require('../tests/mnpHW.js');
+const mnpHwIo = require('../tests/mnpHW');
 const testBoardLink = require('../src/testBoardLink');
 const { mkdirp } = require('mkdirp');
 // const azure = require('azure-storage');
@@ -91,7 +91,7 @@ program.command('m1dfu')
         const configData = await config(configuration);
         const logfile = console;
         try {
-            process.env.coinCellDebug = config.coinCellDebug;
+            process.env.coinCellDebug = configData.coinCellDebug;
             const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
@@ -112,7 +112,7 @@ program.command('tbcmd')
         const configData = await config(configuration);
         const logfile = console;
         try {
-            process.env.coinCellDebug = config.coinCellDebug;
+            process.env.coinCellDebug = configData.coinCellDebug;
             const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
@@ -136,8 +136,8 @@ program.command('m1cmd')
         const configData = await config(configuration);
         const logfile = console;
         try {
-            process.env.coinCellDebug = config.coinCellDebug;
-            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            process.env.coinCellDebug = configData.coinCellDebug;
+            const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             await targetICTLink.initSerial(configData.m1SerialDev, 115200, logfile);
@@ -153,15 +153,16 @@ program.command('m1cmd')
         }
     });
 
-    program.command('mnpcmd <action> [sigNameOrTestpont] [value]')
-    .description('execute mnp IO commands. \n\tCommands: [read, write, printio] \n\Example:\n\tm1test write WGD1_BPR 1\n\ttm1test read WGD2_D0_3V3 WGD1_BPR 0\n\nuse command printio to list testpoints and signames\n\nMake sure to execute m1dfu command before this command to load the FW')
+program.command('mnpcmd <action> [sigNameOrTestpont] [value]')
+    // eslint-disable-next-line
+    .description('execute mnp IO commands\n\tCommands: [read, write, printio]\n\Example:\n\tm1test write WGD1_BPR 1\n\ttm1test read WGD2_D0_3V3 WGD1_BPR 0\n\nuse command printio to list testpoints and signames\n\nMake sure to execute m1dfu command before this command to load the FW')
     .action(async (readOrWrite, name, value) => {
         const configData = await config(configuration);
         const logfile = console;
         try {
             const command = mnpHwIo.getCommand(readOrWrite, name, value, logfile);
-            process.env.coinCellDebug = config.coinCellDebug;
-            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            process.env.coinCellDebug = configData.coinCellDebug;
+            const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             await targetICTLink.initSerial(configData.m1SerialDev, 115200, logfile);
@@ -177,7 +178,7 @@ program.command('m1cmd')
             await delay(100);
             process.exit(exitCodes.commandFailed);
         }
-    });   
+    });
 program.command('ict')
     .description('Executes ICT test')
     .option('-s, --serial <string>', 'vendor serial number')
@@ -193,8 +194,9 @@ program.command('ict')
         let db;
         let startStatusOk = true;
         try {
-            process.env.coinCellDebug = config.coinCellDebug;
-            process.env.skipBatteryTest = config.skipBatteryTest;
+            process.env.board = configData.productName;
+            process.env.coinCellDebug = configData.coinCellDebug;
+            process.env.skipBatteryTest = configData.skipBatteryTest;
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.mtfDir, options.debug);
             db = sqliteDriver.initialize(logfile);
@@ -222,6 +224,7 @@ program.command('ict')
                     logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
                 }
             }
+/*
             const interfaces = await si.networkInterfaces();
             if (!configData.tfInterface) configData.tfInterface = 'enp0s31f6';
             if (interfaces.find(o => o.iface === configData.tfInterface) === undefined) {
@@ -233,7 +236,7 @@ program.command('ict')
                 startStatusOk = false;
                 logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
             }
-
+*/
 
             devices.forEach(async (deviceFile) => {
                 const exists = fs.existsSync(deviceFile.name);
@@ -251,8 +254,8 @@ program.command('ict')
             logfile.info('Starting ICT Test.');
 
             if (!options.cellBatTol) await errorAndExit('must define cellBatTol', logfile);
-            logfile.info(`Executing ICT command ${configData.ictFWFilePath} ...`);
-            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            logfile.info(`Executing ICT command ${configData.mtfDir}/${configData.ictFWFilePath} ...`);
+            const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             // logfile.info(`Coin Cell Battery level:  ${options.cellBatTol}`);
@@ -303,7 +306,7 @@ program.command('eeprom')
             logfile.info('--------------------------------------------');
             logfile.info('Executing writing I2C EEPROM command ...');
 
-            const eeprom = new Eeprom(configData.ictFWFilePath, logfile);
+            const eeprom = new Eeprom(`${configData.mtfDir}/${configData.ictFWFilePath}`, logfile);
             await eeprom.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             await eeprom.program(configData.programmingCommand, options.serial, configData.vendorSite, configData.forceEppromOverwrite);
@@ -561,7 +564,7 @@ program.command('makelabel')
                 if (retValue.exitCode !== exitCodes.normalExit) throw new Error('Could not read MP1 OTP');
                 const uid = retValue.mac.toUpperCase();
 
-                const eeprom = new Eeprom(configData.ictFWFilePath, logfile);
+                const eeprom = new Eeprom(`${configData.mtfDir}/${configData.ictFWFilePath}`, logfile);
                 await eeprom.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
                 await delay(400);
                 eepromData = await eeprom.get(configData.programmingCommand);

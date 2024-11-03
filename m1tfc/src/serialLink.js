@@ -122,7 +122,7 @@ module.exports = class SerialLink {
     async initSerial(devFile, baud, log, dumpdata = false) {
         this.logger = log;
         this.devFile = devFile;
-        if (this.serialPort)  return;
+        if (this.serialPort) return;
         this.logger.debug(`Opening ${this.linkName} link serial port: ${devFile}`);
         this.serialPort = new SerialPort({ path: devFile, baudRate: parseInt(baud, 10) });
         this.parser = this.serialPort.pipe(this.parser);

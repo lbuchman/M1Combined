@@ -39,7 +39,7 @@ extern Scheduler* pts;
 class TIOPin {
     public:
         TIOPin() = delete;
-        TIOPin(ADC_Module* _adc, pinIdDefinition _pinId, uint8_t _pin, uint8_t _muxChannel, uint8_t _pinType, String _pinName, uint8_t _pinNumber, String _pinDesc, double _calib, double _reqValue, float _minValue, float _maxValue, groupdDefinition _group = groupdDefinition::NotDefinedGroup): adc(_adc), pinId(_pinId), pin(_pin), muxChannel(int2muxSelection(_muxChannel)), pinType(_pinType), pinName(_pinName), pinNumber(_pinNumber), pinDesc(_pinDesc), calib(_calib), reqValue(_reqValue), minValue(_minValue), maxValue(_maxValue), group(_group) {
+        TIOPin(ADC_Module* _adc, pinIdDefinition _pinId, uint8_t _pin, uint8_t _muxChannel, uint8_t _pinType, String _pinName, uint8_t _pinNumber, String _pinDesc,  String __mnpPinName, double _calib, double _reqValue, float _minValue, float _maxValue, groupdDefinition _group = groupdDefinition::NotDefinedGroup): adc(_adc), pinId(_pinId), pin(_pin), muxChannel(int2muxSelection(_muxChannel)), pinType(_pinType), pinName(_pinName), pinNumber(_pinNumber), pinDesc(_pinDesc), mnpPinName(__mnpPinName),  calib(_calib), reqValue(_reqValue), minValue(_minValue), maxValue(_maxValue), group(_group) {
             plogger->info(plogger->printHeader, (char*) __FILE__, __LINE__, "Adding IO-> pin:  pinName %s(%d), hw pin: %2d, muxChannel: %d, pin type: (%d), minValue = %f, maxValue = %f", pinName.c_str(), pinIdDefinition2Int(pinId), pin, muxChannel, pinType, minValue, maxValue);
             Serial.printf("pin = %d to mode %d\n\r, pin, mode");
             pinMode(pin, pinType & 0x03);
@@ -68,10 +68,15 @@ class TIOPin {
             return pinName;
         }
 
+        String get_mnpPinName() {
+            return  mnpPinName;
+        }
+        
         String get_pinDesc() {
             return  pinDesc;
         }
-
+        
+       
         uint8_t get_pinNumber() {
             return pinNumber;
         }
@@ -150,9 +155,10 @@ class TIOPin {
         uint32_t     pin;          // hardware pin
         muxSelection muxChannel;   // only for A/D input
         uint8_t      pinType;      // input or output or A/D input, for A/D input MUX channel shall be set
-        String       pinName;      // same as pinId but string
+        String       pinName;      // same as pinId but string 
         uint8_t      pinNumber;    // pin number
-        String       pinDesc;      // pin on m1-3200 connection
+        String       pinDesc;    // pin on m1-3200 connection, TP name
+        String       mnpPinName;   // pin on mnplus connection, TP name
         double       calib;        // calibration value, actual = calib * 3.3V RawAD/(2^12)
         double       reqValue;     // expected
         double       minValue;     // expected value min

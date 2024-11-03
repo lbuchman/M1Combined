@@ -46,6 +46,7 @@ module.exports = class IctTestRunner {
         process.env.serial = serial;
         this.db.updateSerial(serial);
         this.db.resetErrorCode(process.env.serial);
+        regulators.init();
         let ret = true;
         try {
             await common.initializeTestFixture(programmer, initAndQuit, this.stm32, this.m1Dev, this.logger, initAndQuit);
@@ -67,7 +68,7 @@ module.exports = class IctTestRunner {
                 this.logger.info('Testing Ribbon cable pins ...');
                 if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger, this.db)) ret = false;
             }
-            
+
             this.logger.info('Testing RS485 ...');
             if (!await rs485.testRs485(this.logger, this.db)) ret = false;
 

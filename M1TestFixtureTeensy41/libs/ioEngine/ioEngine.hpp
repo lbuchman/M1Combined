@@ -48,47 +48,48 @@ class TioEngine {
     private:
         ADC*  adc = new ADC;
         std::map<pinIdDefinition, TIOPin*> ioPins = {
-            { pinIdDefinition::M1Boot1, new TIOPin(nullptr, pinIdDefinition::M1Boot1, 34, 0, OUTPUT, "M1Boot1", 0, "M1Boot1", 1.0, 0.0, 0.0, 0.0, groupdDefinition::NotDefinedGroup)},
-            { pinIdDefinition::Tamper, new TIOPin(nullptr, pinIdDefinition::Tamper, 33, 0, OUTPUT, "TamperPin", 0, "TamperPin", 1.0, 0.0, 0.0, 0.0, groupdDefinition::NotDefinedGroup)},
-            { pinIdDefinition::BatEnable, new TIOPin(nullptr, pinIdDefinition::BatEnable, 22, 0, OUTPUT, "BatEnablePin", 0, "BatEnablePin", 0.0, 1.0, 0, 0, groupdDefinition::NotDefinedGroup)},
-            { pinIdDefinition::BattLoadEn, new TIOPin(nullptr, pinIdDefinition::BattLoadEn, 21, 0, OUTPUT, "BattLoadEn", 0, "BattLoadEn", 0.0, 1.0, 0, 0, groupdDefinition::NotDefinedGroup)},
-            { pinIdDefinition::TargetPwrControl, new TIOPin(nullptr, pinIdDefinition::TargetPwrControl, 20, 0, OUTPUT, "TargetPwrControl", 0, "TargetPwrControl", 0.0, 1.0, 0, 0, groupdDefinition::NotDefinedGroup)},
-            { pinIdDefinition::BASE12VAD, new TIOPin(adc->adc0, pinIdDefinition::BASE12VAD, A1, 0, INPUT_ANALOG_NOMUX, "base12VAD", 0, "base12VAD", V12Scale, 12.0, 11.5, 12.5, groupdDefinition::PowerGroup)},
-            { pinIdDefinition::Bat12VAD, new TIOPin(adc->adc1, pinIdDefinition::Bat12VAD, A17, 0, INPUT_ANALOG_NOMUX, "bat12VAD", 0, "bat12VAD", V12Scale, 12.0, 11.5, 12.5, groupdDefinition::PowerGroup)},
-            { pinIdDefinition::BatChargeVAD, new TIOPin(adc->adc0, pinIdDefinition::BatChargeVAD, A9, 0, INPUT_ANALOG_NOMUX, "batChargeVAD", 0, "batChargeVAD", V12Scale, 13.0, 11.6, 14.5, groupdDefinition::PowerGroup)},
-            { pinIdDefinition::SwitchTargetPower, new TIOPin(nullptr, pinIdDefinition::SwitchTargetPower, 35, 0, INPUT_PULLUP, "SwitchTargetPower", 1, "SwitchTargetPower", 0.0, 0, 0, 0, groupdDefinition::NotDefinedGroup)},
-            { pinIdDefinition::BootSwitch, new TIOPin(nullptr, pinIdDefinition::BootSwitch, 40, 0, INPUT_PULLUP, "BootSwitch", 2, "BootSwitch", 0.0, 0, 0, 0, groupdDefinition::NotDefinedGroup)},
-            { pinIdDefinition::BatCellBat, new TIOPin(adc->adc1, pinIdDefinition::BatCellBat, A15, 0, INPUT_ANALOG_NOMUX, "BatCellBat", 0, "BatCellBat", BatCellScale, 2.8, 3.0, 3.3, groupdDefinition::PowerGroup)},
-            { pinIdDefinition::I2C_SDA, new TIOPin(nullptr, pinIdDefinition::I2C_SDA, 18, 0, INPUT, "J5.3", 3, "I2C_SDA", V033Scale, 3.3, 3.1, 3.5, groupdDefinition::RibbonCableGroupDynamic)},
-            { pinIdDefinition::P6V_2, new TIOPin(adc->adc0, pinIdDefinition::P6V_2, A0, 2, INPUT_ANALOG_MUX, "J5.5", 5, "P6V_2", V06Scale, 6.0, 5.8, 6.2, groupdDefinition::RibbonCableGroupStatic)},
-            { pinIdDefinition::I2C_SCL, new TIOPin(nullptr, pinIdDefinition::I2C_SCL, 19, 0, INPUT, "J5.6", 6, "I2C_SCL", V033Scale, 3.3, 3.1, 3.5, groupdDefinition::RibbonCableGroupDynamic)},
-            { pinIdDefinition::P6V_3, new TIOPin(adc->adc0, pinIdDefinition::P6V_3, A0, 3, INPUT_ANALOG_MUX, "J5.7", 7, "P6V_3", V06Scale, 6.0, 5.8, 6.2, groupdDefinition::RibbonCableGroupStatic)},
-            { pinIdDefinition::P6V_1, new TIOPin(adc->adc0, pinIdDefinition::P6V_1, A0, 1, INPUT_ANALOG_MUX, "J5.8", 8, "P6V_1", V06Scale, 6.0, 5.8, 6.2, groupdDefinition::RibbonCableGroupStatic)},
-            { pinIdDefinition::P12V_1, new TIOPin(adc->adc0, pinIdDefinition::P12V_1, A0, 4, INPUT_ANALOG_MUX, "J5.13", 13, "P12V_1", V12Scale, 11.8, 11.5, 12.5, groupdDefinition::RibbonCableGroupStatic)},
-            { pinIdDefinition::P12V_2, new TIOPin(adc->adc0, pinIdDefinition::P12V_2, A0, 0, INPUT_ANALOG_MUX, "J5.14", 14, "P12V_2", V12Scale, 11.8, 11.5, 12.5, groupdDefinition::RibbonCableGroupStatic)},
-            { pinIdDefinition::R_S1, new TIOPin(adc->adc0, pinIdDefinition::R_S1, A0, 5, INPUT_ANALOG_MUX, "J5.15", 15, "R_S1", V0RibbonSelectScale, 0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupDynamic)},
-            { pinIdDefinition::R_S2, new TIOPin(adc->adc0, pinIdDefinition::R_S2, A2, 7, INPUT_ANALOG_MUX, "J5.16", 16, "R_S2", V0RibbonSelectScale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupDynamic)},
-            { pinIdDefinition::R_nRst, new TIOPin(adc->adc0, pinIdDefinition::R_nRst, A0, 6, INPUT_ANALOG_MUX, "J5.17", 17, "RnRst", V0RibbonSelectScale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupDynamic)},
-            { pinIdDefinition::R_S0, new TIOPin(adc->adc0, pinIdDefinition::R_S0, A2, 6, INPUT_ANALOG_MUX, "J5.18", 18, "R_S0", V0RibbonSelectScale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupDynamic)},
-            { pinIdDefinition::R_S7, new TIOPin(adc->adc0, pinIdDefinition::R_S7, A0, 7, INPUT_ANALOG_MUX, "J5.19", 19, "R_S7", V0RibbonSelectScale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupDynamic)},
-            { pinIdDefinition::R_G3, new TIOPin(adc->adc0, pinIdDefinition::R_G3, A2, 5, INPUT_ANALOG_MUX, "J5.20", 20, "R_G3", V05Scale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupStatic)},
-            { pinIdDefinition::R_G4, new TIOPin(adc->adc0, pinIdDefinition::R_G4, A2, 4, INPUT_ANALOG_MUX, "J5.22", 22, "R_G4", V05Scale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupStatic)},
-            { pinIdDefinition::R_G1, new TIOPin(adc->adc0, pinIdDefinition::R_G1, A2, 0, INPUT_ANALOG_MUX, "J5.23", 23, "R_G1", V05Scale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupStatic)},
-            { pinIdDefinition::R_G5, new TIOPin(adc->adc0, pinIdDefinition::R_G5, A2, 3, INPUT_ANALOG_MUX, "J5.24", 24, "R_G5", V05Scale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupStatic)},
-            { pinIdDefinition::R_G2, new TIOPin(adc->adc0, pinIdDefinition::R_G2, A2, 1, INPUT_ANALOG_MUX, "J5.25", 25, "R_G2", V05Scale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupStatic)},
-            { pinIdDefinition::R_G6, new TIOPin(adc->adc0, pinIdDefinition::R_G6, A2, 2, INPUT_ANALOG_MUX, "J5.26", 26, "R_G6", V05Scale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupStatic)},
-            { pinIdDefinition::J6_3_V33, new TIOPin(adc->adc0, pinIdDefinition::J6_3_V33, A3, 2, INPUT_ANALOG_MUX, "TP36", 3, "TP36", V033Scale, 3.3, 3.1, 3.6, groupdDefinition::TestpointsGroup)},
-            { pinIdDefinition::J6_4_V33, new TIOPin(adc->adc0, pinIdDefinition::J6_4_V33, A3, 3, INPUT_ANALOG_MUX, "TP31", 4, "TP31", V033Scale, 3.3, 3.1, 3.6, groupdDefinition::TestpointsGroup)},
-            { pinIdDefinition::J6_5_V33, new TIOPin(adc->adc0, pinIdDefinition::J6_5_V33, A3, 4, INPUT_ANALOG_MUX, "TP34", 5, "TP34", V033Scale, 3.3, 3.1, 3.6, groupdDefinition::TestpointsGroup)},
-            { pinIdDefinition::J6_6_V33, new TIOPin(adc->adc0, pinIdDefinition::J6_6_V33, A3, 5, INPUT_ANALOG_MUX, "TP35", 6, "TP35", V033Scale, 3.3, 3.1, 3.6, groupdDefinition::TestpointsGroup)},
-            { pinIdDefinition::J6_7_V33, new TIOPin(adc->adc0, pinIdDefinition::J6_7_V33, A3, 6, INPUT_ANALOG_MUX, "TP33", 7, "TP33", V033Scale, 3.3, 3.1, 3.6, groupdDefinition::TestpointsGroup)},
-            { pinIdDefinition::J6_2_V50, new TIOPin(adc->adc1, pinIdDefinition::J6_2_V50, A3, 7, INPUT_ANALOG_MUX, "TP025", 4, "TP025",  V05Scale, 5.0, 4.8, 5.3, groupdDefinition::TestpointsGroup)},
-            { pinIdDefinition::LED_POS, new TIOPin(adc->adc1, pinIdDefinition::LED_POS, A3, 0, INPUT_ANALOG_MUX,  "J8.1", 1, "LED_POS", LedScale, 0.4, 0.547, 2.64)},
-            { pinIdDefinition::LED_NEG, new TIOPin(adc->adc1, pinIdDefinition::LED_NEG, A3, 1, INPUT_ANALOG_MUX, "J8.2", 2, "LED_NEG", LedScale, 0.4, 0.547, 2.64)},
-            { pinIdDefinition::Buzz, new TIOPin(nullptr, pinIdDefinition::Buzz, 4, 0, OUTPUT, "Buzz", 0, "Buzz", 0, 1.0, 0, 0)},
-            { pinIdDefinition::Sol1, new TIOPin(nullptr, pinIdDefinition::Sol1, 9, 0, OUTPUT, "Sol1", 0, "Sol1", 0, 1.0, 0, 0)},
-            { pinIdDefinition::Sol2, new TIOPin(nullptr, pinIdDefinition::Sol2, 10, 0, OUTPUT, "Sol2", 0, "Sol2", 0, 1.0, 0, 0)},
-            { pinIdDefinition::LeverSensor, new TIOPin(nullptr, pinIdDefinition::LeverSensor, 11, 0, INPUT_PULLUP, "LeverSensor", 0, "LeverSensor", 0, 1.0, 0, 0)}
+            { pinIdDefinition::M1Boot1, new TIOPin(nullptr, pinIdDefinition::M1Boot1, 34, 0, OUTPUT, "M1Boot1", 0, "M1Boot1", "M1Boot1",1.0, 0.0, 0.0, 0.0, groupdDefinition::NotDefinedGroup)},
+            { pinIdDefinition::Tamper, new TIOPin(nullptr, pinIdDefinition::Tamper, 33, 0, OUTPUT, "TamperPin", 0, "TamperPin", "TamperPin", 1.0, 0.0, 0.0, 0.0, groupdDefinition::NotDefinedGroup)},
+            { pinIdDefinition::BatEnable, new TIOPin(nullptr, pinIdDefinition::BatEnable, 22, 0, OUTPUT, "BatEnablePin", 0, "BatEnablePin", "BatEnablePin", 0.0, 1.0, 0, 0, groupdDefinition::NotDefinedGroup)},
+            { pinIdDefinition::BattLoadEn, new TIOPin(nullptr, pinIdDefinition::BattLoadEn, 21, 0, OUTPUT, "BattLoadEn", 0, "BattLoadEn", "BattLoadEn", 0.0, 1.0, 0, 0, groupdDefinition::NotDefinedGroup)},
+            { pinIdDefinition::TargetPwrControl, new TIOPin(nullptr, pinIdDefinition::TargetPwrControl, 20, 0, OUTPUT, "TargetPwrControl", 0, "TargetPwrControl", "TargetPwrControl", 0.0, 1.0, 0, 0, groupdDefinition::NotDefinedGroup)},
+            { pinIdDefinition::BASE12VAD, new TIOPin(adc->adc0, pinIdDefinition::BASE12VAD, A1, 0, INPUT_ANALOG_NOMUX, "base12VAD", 0, "base12VAD", "base12VAD", V12Scale, 12.0, 11.5, 12.5, groupdDefinition::PowerGroup)},
+            { pinIdDefinition::Bat12VAD, new TIOPin(adc->adc1, pinIdDefinition::Bat12VAD, A17, 0, INPUT_ANALOG_NOMUX, "bat12VAD", 0, "bat12VAD", "bat12VAD", V12Scale, 12.0, 11.5, 12.5, groupdDefinition::PowerGroup)},
+            { pinIdDefinition::BatChargeVAD, new TIOPin(adc->adc0, pinIdDefinition::BatChargeVAD, A9, 0, INPUT_ANALOG_NOMUX, "batChargeVAD", 0, "batChargeVAD", "batChargeVAD", V12Scale, 13.0, 11.6, 14.5, groupdDefinition::PowerGroup)},
+            { pinIdDefinition::SwitchTargetPower, new TIOPin(nullptr, pinIdDefinition::SwitchTargetPower, 35, 0, INPUT_PULLUP, "SwitchTargetPower", 1, "SwitchTargetPower", "SwitchTargetPower", 0.0, 0, 0, 0, groupdDefinition::NotDefinedGroup)},
+            { pinIdDefinition::BootSwitch, new TIOPin(nullptr, pinIdDefinition::BootSwitch, 40, 0, INPUT_PULLUP, "BootSwitch", 2, "BootSwitch", "BootSwitch", 0.0, 0, 0, 0, groupdDefinition::NotDefinedGroup)},
+            { pinIdDefinition::BatCellBat, new TIOPin(adc->adc1, pinIdDefinition::BatCellBat, A15, 0, INPUT_ANALOG_NOMUX, "BatCellBat", 0, "BatCellBat","BatCellBat", BatCellScale, 2.8, 3.0, 3.3, groupdDefinition::PowerGroup)},
+            { pinIdDefinition::I2C_SDA, new TIOPin(nullptr, pinIdDefinition::I2C_SDA, 18, 0, INPUT, "J5.3", 3, "I2C_SDA", "I2C_SDA", V033Scale, 3.3, 3.1, 3.5, groupdDefinition::RibbonCableGroupDynamic)},
+            { pinIdDefinition::P6V_2, new TIOPin(adc->adc0, pinIdDefinition::P6V_2, A0, 2, INPUT_ANALOG_MUX, "J5.5", 5, "P6V_2", "TP401", V06Scale, 6.0, 5.8, 6.2, groupdDefinition::RibbonCableGroupStatic)},
+            { pinIdDefinition::I2C_SCL, new TIOPin(nullptr, pinIdDefinition::I2C_SCL, 19, 0, INPUT, "J5.6", 6, "I2C_SCL", "I2C_SCL", V033Scale, 3.3, 3.1, 3.5, groupdDefinition::RibbonCableGroupDynamic)},
+            { pinIdDefinition::P6V_3, new TIOPin(adc->adc0, pinIdDefinition::P6V_3, A0, 3, INPUT_ANALOG_MUX, "J5.7", 7, "P6V_3", "P6V_3", V06Scale, 6.0, 5.8, 6.2, groupdDefinition::RibbonCableGroupStatic)},
+            { pinIdDefinition::P6V_1, new TIOPin(adc->adc0, pinIdDefinition::P6V_1, A0, 1, INPUT_ANALOG_MUX, "J5.8", 8, "P6V_1","P6V_1", V06Scale, 6.0, 5.8, 6.2, groupdDefinition::RibbonCableGroupStatic)},
+            { pinIdDefinition::P12V_1, new TIOPin(adc->adc0, pinIdDefinition::P12V_1, A0, 4, INPUT_ANALOG_MUX, "J5.13", 13, "P12V_1","P12V_1", V12Scale, 11.8, 11.5, 12.5, groupdDefinition::RibbonCableGroupStatic)},
+            { pinIdDefinition::P12V_2, new TIOPin(adc->adc0, pinIdDefinition::P12V_2, A0, 0, INPUT_ANALOG_MUX, "J5.14", 14, "P12V_2","TP2301", V12Scale, 11.8, 11.5, 12.5, groupdDefinition::RibbonCableGroupStatic)},
+            { pinIdDefinition::R_S1, new TIOPin(adc->adc0, pinIdDefinition::R_S1, A0, 5, INPUT_ANALOG_MUX, "J5.15", 15, "R_S1","R_S1", V0RibbonSelectScale, 0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupDynamic)},
+            { pinIdDefinition::R_S2, new TIOPin(adc->adc0, pinIdDefinition::R_S2, A2, 7, INPUT_ANALOG_MUX, "J5.16", 16, "R_S2", "R_S2", V0RibbonSelectScale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupDynamic)},
+            { pinIdDefinition::R_nRst, new TIOPin(adc->adc0, pinIdDefinition::R_nRst, A0, 6, INPUT_ANALOG_MUX, "J5.17", 17, "RnRst","RnRst", V0RibbonSelectScale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupDynamic)},
+            { pinIdDefinition::R_S0, new TIOPin(adc->adc0, pinIdDefinition::R_S0, A2, 6, INPUT_ANALOG_MUX, "J5.18", 18, "R_S0","R_S0", V0RibbonSelectScale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupDynamic)},
+            { pinIdDefinition::R_S7, new TIOPin(adc->adc0, pinIdDefinition::R_S7, A0, 7, INPUT_ANALOG_MUX, "J5.19", 19, "R_S7","R_S7", V0RibbonSelectScale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupDynamic)},
+            { pinIdDefinition::R_G3, new TIOPin(adc->adc0, pinIdDefinition::R_G3, A2, 5, INPUT_ANALOG_MUX, "J5.20", 20, "R_G3","R_G3", V05Scale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupStatic)},
+            { pinIdDefinition::R_G4, new TIOPin(adc->adc0, pinIdDefinition::R_G4, A2, 4, INPUT_ANALOG_MUX, "J5.22", 22, "R_G4","R_G4", V05Scale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupStatic)},
+            { pinIdDefinition::R_G1, new TIOPin(adc->adc0, pinIdDefinition::R_G1, A2, 0, INPUT_ANALOG_MUX, "J5.23", 23, "R_G1","R_G1", V05Scale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupStatic)},
+            { pinIdDefinition::R_G5, new TIOPin(adc->adc0, pinIdDefinition::R_G5, A2, 3, INPUT_ANALOG_MUX, "J5.24", 24, "R_G5","R_G5", V05Scale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupStatic)},
+            { pinIdDefinition::R_G2, new TIOPin(adc->adc0, pinIdDefinition::R_G2, A2, 1, INPUT_ANALOG_MUX, "J5.25", 25, "R_G2", "R_G2", V05Scale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupStatic)},
+            { pinIdDefinition::R_G6, new TIOPin(adc->adc0, pinIdDefinition::R_G6, A2, 2, INPUT_ANALOG_MUX, "J5.26", 26, "R_G6", "R_G6", V05Scale,  0.0, -0.5, 0.5, groupdDefinition::RibbonCableGroupStatic)},
+            { pinIdDefinition::J6_3_V33, new TIOPin(adc->adc0, pinIdDefinition::J6_3_V33, A3, 2, INPUT_ANALOG_MUX, "TP36", 3, "TP36", "TP303", V033Scale, 3.3, 3.1, 3.6, groupdDefinition::TestpointsGroup)},
+            
+            { pinIdDefinition::J6_4_V33, new TIOPin(adc->adc0, pinIdDefinition::J6_4_V33, A3, 3, INPUT_ANALOG_MUX, "TP31", 4, "TP31", "TP304", V033Scale, 3.3, 3.1, 3.6, groupdDefinition::TestpointsGroup)},
+            { pinIdDefinition::J6_5_V33, new TIOPin(adc->adc0, pinIdDefinition::J6_5_V33, A3, 4, INPUT_ANALOG_MUX, "TP34", 5, "TP34", "TP305", V033Scale, 3.3, 3.1, 3.6, groupdDefinition::TestpointsGroup)},
+            { pinIdDefinition::J6_6_V33, new TIOPin(adc->adc0, pinIdDefinition::J6_6_V33, A3, 5, INPUT_ANALOG_MUX, "TP35", 6, "TP35", "TP306",V033Scale, 3.3, 3.1, 3.6, groupdDefinition::TestpointsGroup)},
+            { pinIdDefinition::J6_7_V33, new TIOPin(adc->adc0, pinIdDefinition::J6_7_V33, A3, 6, INPUT_ANALOG_MUX, "TP33", 7, "TP33", "TP308", V033Scale, 3.3, 3.1, 3.6, groupdDefinition::TestpointsGroup)},
+            { pinIdDefinition::J6_2_V50, new TIOPin(adc->adc1, pinIdDefinition::J6_2_V50, A3, 7, INPUT_ANALOG_MUX, "TP025", 4, "TP025", "TP204", V05Scale, 5.0, 4.8, 5.3, groupdDefinition::TestpointsGroup)},
+            { pinIdDefinition::LED_POS, new TIOPin(adc->adc1, pinIdDefinition::LED_POS, A3, 0, INPUT_ANALOG_MUX,  "J8.1", 1, "LED_POS", "LED_POS", LedScale, 0.4, 0.547, 2.64)},
+            { pinIdDefinition::LED_NEG, new TIOPin(adc->adc1, pinIdDefinition::LED_NEG, A3, 1, INPUT_ANALOG_MUX, "J8.2", 2, "LED_NEG", "LED_NEG", LedScale, 0.4, 0.547, 2.64)},
+            { pinIdDefinition::Buzz, new TIOPin(nullptr, pinIdDefinition::Buzz, 4, 0, OUTPUT, "Buzz", 0, "Buzz", "Buzz",0, 1.0, 0, 0)},
+            { pinIdDefinition::Sol1, new TIOPin(nullptr, pinIdDefinition::Sol1, 9, 0, OUTPUT, "Sol1", 0, "Sol1","Sol1", 0, 1.0, 0, 0)},
+            { pinIdDefinition::Sol2, new TIOPin(nullptr, pinIdDefinition::Sol2, 10, 0, OUTPUT, "Sol2", 0, "Sol2", "Sol2", 0, 1.0, 0, 0)},
+            { pinIdDefinition::LeverSensor, new TIOPin(nullptr, pinIdDefinition::LeverSensor, 11, 0, INPUT_PULLUP, "LeverSensor", 0, "LeverSensor", "LeverSensor", 0, 1.0, 0, 0)}
         };
         bool beeperPulse;
         int  beeperCount;
@@ -144,6 +145,7 @@ class TioEngine {
                 jsonItem["pinName"] = item.second->get_pinName();
                 jsonItem["pinId"] = pinIdDefinition2Int(item.second->get_pinId());
                 jsonItem["pinDesc"] = item.second->get_pinDesc();
+                jsonItem["mnpPinName"] = item.second->get_mnpPinName();
                 jsonItem["pinNumber"] = item.second->get_pinNumber();
                 jsonItem["valueValid"] = valueValid;
                 jsonItem["value"] = value;
@@ -187,6 +189,7 @@ class TioEngine {
                 bool valueValid = item.second->isValueWithinTolerance();
                 jsonItem.clear();
                 jsonItem["pinName"] = item.second->get_pinName();
+                jsonItem["mnpPinName"] = item.second->get_mnpPinName();
                 jsonItem["pinId"] = pinIdDefinition2Int(item.second->get_pinId());
                 jsonItem["pinDesc"] = item.second->get_pinDesc();
                 jsonItem["pinNumber"] = item.second->get_pinNumber();
@@ -209,7 +212,7 @@ class TioEngine {
                 jsonItem["pinId"] = pinIdDefinition2Int(item.second->get_pinId());
                 jsonItem["group"] = groupdDefinition2Int(item.second->get_group());
                 jsonItem["reqValue"] = item.second->getReqValue();
-
+                jsonItem["mnpPinName"] = item.second->get_mnpPinName();
                 jsonItem["pinDesc"] = item.second->get_pinDesc();
                 jsonItem["pinType"] = item.second->get_pinType();
 

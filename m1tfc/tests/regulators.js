@@ -3,9 +3,9 @@
 const testBoardLink = require('../src/testBoardLink');
 const errorCodes = require('../bin/errorCodes');
 
-const ddrVoltage = { name: 'TP31', voltage: 1.35 };
+const ddrVoltage = { name: 'TP304', voltage: 1.35 };
 const leverLockVoltage = { name: 'LeverSensor', voltage: 0 };
-const testPoints = [
+const testPointsM1 = [
     { name: 'TP025', voltage: 5 },
     { name: 'TP33', voltage: 2.8 },
     { name: 'TP35', voltage: 3.3 },
@@ -17,8 +17,29 @@ const testPoints = [
     { name: 'J5.8', voltage: 6.0 }
 ];
 
+const testPointsMnp = [
+    { name: 'TP204', voltage: 5.0 },
+    { name: 'TP308', voltage: 2.8 },
+    { name: 'TP303', voltage: 1.2 },
+    { name: 'TP305', voltage: 3.3 },
+    { name: 'TP306', voltage: 3.3 },
+  //  { name: 'TP401', voltage: 5.0 },
+  //  { name: 'TP2301', voltage: 12.0 }
+];
+
+
+let testPoints;
+
 const coinCellBattery = { name: 'BatCellBat', minVoltage: 3.1, maxVoltage: 3.7 };
 
+
+function init() {
+    if (process.env.board === 'mnplus') {
+        testPoints = testPointsMnp;
+        return;
+    }
+    testPoints = testPointsM1;
+}
 
 async function checkLeverState(logger, db) {
     const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(leverLockVoltage.name)}`);
@@ -108,5 +129,6 @@ module.exports = {
     test,
     testDDRVoltage,
     cellBatTest,
-    checkLeverState
+    checkLeverState,
+    init
 };

@@ -2,6 +2,15 @@
 
 const errorCodes = {
     ICT_EXCEPT: { errorCode: 'ICT-EXCEPTION', test: 'ICT', desc: 'software exception, see debug log for details' },
+    TP204: { errorCode: '00000000TP204', test: 'ICT', desc: 'TP204 voltage is out of tolerance' },
+    TP308: { errorCode: '00000000TP308', test: 'ICT', desc: 'TP308 voltage is out of tolerance' },
+    TP303: { errorCode: '00000000TP303', test: 'ICT', desc: 'TP303 voltage is out of tolerance' },
+    TP304: { errorCode: '00000000TP304', test: 'ICT', desc: 'TP304 voltage is out of tolerance' },
+    TP305: { errorCode: '00000000TP305', test: 'ICT', desc: 'TP305 voltage is out of tolerance' },
+    TP306: { errorCode: '00000000TP306', test: 'ICT', desc: 'TP306 voltage is out of tolerance' },
+    TP401: { errorCode: '00000000TP305', test: 'ICT', desc: 'TP401 voltage is out of tolerance' },
+    TP2301: { errorCode: '00000000TP306', test: 'ICT', desc: 'TP2301 voltage is out of tolerance' },
+    //
     TP025: { errorCode: '000000000TP25', test: 'ICT', desc: 'TP25 voltage is out of tolerance' },
     TP33: { errorCode: '000000000TP33', test: 'ICT', desc: 'TP33 voltage is out of tolerance' },
     TP35: { errorCode: '000000000TP35', test: 'ICT', desc: 'TP35 voltage is out of tolerance' },
@@ -28,6 +37,7 @@ const errorCodes = {
     'J5.26': { errorCode: '000000TPJ5.26', test: 'ICT', desc: 'Ribbon Cable voltage is out of tolerance' },
     'J8.2': { errorCode: '0000000RedLed', test: 'ICT', desc: 'J8.2 Red Led voltage drop is out of tolerance' },
     'J8.1': { errorCode: '0000000BlueLed', test: 'ICT', desc: 'J8.1 Blue Led voltage drop is out of tolerance' },
+    //
     RS422: { errorCode: '00000000RS422', test: 'ICT', desc: 'Ribbon Cable RS-422 echo test failed' },
     RS485: { errorCode: '00000000RS485', test: 'ICT', desc: 'RS-485 echo test failed' },
     TamperPin: { errorCode: '0000000Tamper', test: 'ICT', desc: 'Tamper pin test failed' },

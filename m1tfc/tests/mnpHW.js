@@ -51,32 +51,32 @@ function getCommand(action, signalNameOrTespoint, value, log) {
     if (action === 'printio') {
         mnpIOMap.forEach((item) => {
             log.info(JSON.stringify(item));
-        })
+        });
         throw new Error('No Error');
     }
-    let output = mnpIOMap.filter((value) => {
-        return value.name == signalNameOrTespoint;
-
+    let output = mnpIOMap.filter((val) => {
+        return val.name === signalNameOrTespoint;
     });
 
     if (!output.length) {
-        output = mnpIOMap.filter((value) => {
-            return value.testPoint == signalNameOrTespoint;
+        output = mnpIOMap.filter((val) => {
+            return val.testPoint === signalNameOrTespoint;
         });
     }
     if (!output.length) throw new Error('no such test point or signal');
     switch (output[0].mode) {
         case 'input':
             if (action !== 'read') throw new Error('invalid action for IO line');
-            return `getgpio ${output[0].port} ${output[0].pin}`
+            return `getgpio ${output[0].port} ${output[0].pin}`;
         case 'output':
             if (action !== 'write') throw new Error('invalid action for IO line');
-            return `setgpio ${output[0].port} ${output[0].pin} ${value}`
+            return `setgpio ${output[0].port} ${output[0].pin} ${value}`;
         case 'latch':
             if (action !== 'write') throw new Error('invalid action for IO line');
-            return `latchctl ${output[0].port}  ${value}`
+            return `latchctl ${output[0].port}  ${value}`;
+        default:
+            return '';
     }
-    return '';
 }
 
 module.exports = {
