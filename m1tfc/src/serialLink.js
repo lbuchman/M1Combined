@@ -4,6 +4,7 @@
 const { SerialPort } = require('serialport');
 const utils = require('../utils/utils');
 const fs = require('fs-extra');
+const delay = require('delay');
 
 module.exports = class SerialLink {
     constructor(linkName, linkType, parser) {
@@ -28,6 +29,7 @@ module.exports = class SerialLink {
         }
         this.busy = true;
         await this.serialPort.flush();
+        await delay(1000);
         this.serialPort.write(`${cmd}\n\r`);
         let timeoutHandle;
         return new Promise(async (resolve, reject) => {

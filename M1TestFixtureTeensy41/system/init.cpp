@@ -72,7 +72,9 @@ int setupFw() {
     Serial2.transmitterEnable(26);
     static Task Rs485Echo(TASK_MILLISECOND, TASK_FOREVER, "Rs485Echo Task", [](void) -> void {
         if(Serial2.available()) {
-            Serial2.write(Serial2.read());
+            char test = Serial2.read();
+            plogger->info(plogger->printHeader, (char*) __FILE__, __LINE__, "Rec Char 0x%x\n\r", test);
+            Serial2.write(test);
         }
     }, pts, false, NULL, NULL);
 

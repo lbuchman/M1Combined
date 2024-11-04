@@ -55,14 +55,14 @@ public:
 	{
 		_enable_rcc();
 		LL_USART_Disable(uart);
-        if constexpr (BASE_ADDR == UART8_BASE) {
+        if constexpr ((BASE_ADDR == UART8_BASE) || (BASE_ADDR == UART4_BASE) || (BASE_ADDR == UART5_BASE)) {
             LL_USART_SetDEAssertionTime(uart, 8);
             LL_USART_SetDEAssertionTime(uart, 8);
            // LL_USART_SetDESignalPolarity(uart, LL_USART_DE_POLARITY_HIGH);
             LL_USART_EnableDEMode(uart);
         }        
 		LL_USART_Init(uart, conf);
-		LL_USART_EnableFIFO(uart);
+	    LL_USART_EnableFIFO(uart);
      
 		LL_USART_Enable(uart);
         LL_USART_EnableDirectionRx(uart);

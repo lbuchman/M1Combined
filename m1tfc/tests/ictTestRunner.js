@@ -64,10 +64,8 @@ module.exports = class IctTestRunner {
                 throw err;
             }
             if (!skipTestpointCheck) await regulators.testDDRVoltage(this.tolerance, this.logger, this.db);
-            if (!process.env.productName) {
-                this.logger.info('Testing Ribbon cable pins ...');
-                if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger, this.db)) ret = false;
-            }
+            this.logger.info('Testing Ribbon cable pins ...');
+            if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger, this.db)) ret = false;
 
             this.logger.info('Testing RS485 ...');
             if (!await rs485.testRs485(this.logger, this.db)) ret = false;

@@ -29,7 +29,7 @@ Serial stream;
 SerialTerminal serialTerminal;
 namespace Board = STM32MP1Disco;
 constexpr uint32_t dlytime = 50; // loop time is 50uSec
-char *fwRev = (char*) "0.20";
+char *fwRev = (char*) "0.32";
 EEPROM24aa02 eeprom{Board::PMIC::I2C_config};
 static int searchString(char* strIn, char* strOut, char terminatedBy, int maxLegth);
 bool checkEEPROMBlank();
@@ -178,33 +178,41 @@ int main() {
         int isMNP = STM32MP1Disco::PCB_ID5.read();
         uint32_t UartAddress;
 
-        PinConf{GPIO::A,PinNum::_15}.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
-
-        PinConf{GPIO::A,PinNum::_15}.high();
-       // udelay(1000);
-
         if(STM32MP1Disco::PCB_ID5.read()) {
-
             while(Uart<STM32MP1Disco::MNP_Rx485UART>::available()) {
                 Uart<STM32MP1Disco::MNP_Rx485UART>::readChar();
             }
+            
+            for(int count = 0x30; count < 0x35; count++) {
+                Uart<STM32MP1Disco::MNP_Rx485UART>::putchar(count);
+                udelay(1000);
+            }
+             
+           while(Uart<STM32MP1Disco::MNP_Rx485UART>::available()) {
+                Uart<STM32MP1Disco::MNP_Rx485UART>::readChar();
+            }  
 
-            for(int count = 0x30; count < 0x33; count++) {
-                        PinConf{GPIO::A,PinNum::_15}.high();
-
+            for(int count = 0x30; count < 0x35; count++) {
                 Uart<STM32MP1Disco::MNP_Rx485UART>::putchar(count);
                 int timeout = 10;
- udelay(150);
- PinConf{GPIO::A,PinNum::_15}.low();
-                while(timeout > 0 && !Uart<STM32MP1Disco::MNP_Rx485UART>::available()) {
+               udelay(2000); 
+               while ((Uart<STM32MP1Disco::MNP_Rx485UART>::available() == 0) && timeout > 0) {
                     timeout -= 1;
                     udelay(100);
-                };
+               };
+                
+                if (timeout == 0 ) {
+                   stream.printf("{ \"status\": false,  \"isMNP\": %d, \"error\": \"timeout reading echo reply\" }\n\r", isMNP);
+                   return;
+                }
 
-                char ret = Uart<STM32MP1Disco::MNP_Rx485UART>::readChar();
+                char ret;
+                while (Uart<STM32MP1Disco::MNP_Rx485UART>::available())  {
+                    ret = Uart<STM32MP1Disco::MNP_Rx485UART>::readChar();
+               };
 
-                if(ret != count) {
-                    stream.printf("{ \"status\": false,  \"isMNP\" %d, \"error\": \"no reply match send = %d rec = %d\" }\n\r", isMNP, count, ret);
+                if(ret != count)  {
+                    stream.printf("{ \"status\": false, \"error\": \"sent 0x%x but rec 0x%x\" }\n\r", count, ret);
                     return;
                 }
 
@@ -228,16 +236,14 @@ int main() {
                 char ret = Uart<Board::Rx485UART>::readChar();
 
                 if(ret != count) {
-                    stream.printf("{ \"status\": false,  \"isMNP\" %d, \"error\": \"no reply match send = %d rec = %d\" }\n\r", isMNP, count, ret);
+                    stream.printf("{ \"status\": false,  \"isMNP\": %d, \"error\":  \"sent 0x%x but rec 0x%x\" }\n\r", isMNP, count, ret);
                     return;
                 }
 
                 udelay(5000);
             }
         }
-
-
-        stream.printf("{ \"status\": true }\n\r", fwRev);
+        stream.printf("{ \"status\": true,  \"isMNP\": %d }\n\r", isMNP);
     });
 
     serialTerminal.cmdAdd("testrd1rs485", "test mnp reader 1 rs485 loopback test, needs rs485 slave to be connected in echo mode", [](int arg_cnt, char **args) -> void {

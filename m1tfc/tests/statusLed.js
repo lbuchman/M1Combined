@@ -67,7 +67,7 @@ async function test(logger, db) {
             ret = false;
         }
 
-        setLedActive(statusLed.ledRed, statusLed.ledBlue, logger);
+        await setLedActive(statusLed.ledRed, statusLed.ledBlue, logger);
         ledVoltage = await getLedVoltages(logger);
         if (!lodash.inRange(ledVoltage, statusLed.ledRed.minVoltage, statusLed.ledRed.maxVoltage)) {
             logger.error(`Led test failed, expected voltage range ${statusLed.ledBlue.minVoltage} - ${statusLed.ledBlue.maxVoltage}, actual ${ledVoltage}`);
