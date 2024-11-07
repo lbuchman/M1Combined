@@ -53,7 +53,7 @@ module.exports = class IctTestRunner {
             if (initAndQuit) return;
             await regulators.checkLeverState(this.logger, this.db);
             if (!skipTestpointCheck) this.logger.info('Testing test points ...');
-            if (!skipTestpointCheck) await regulators.test(this.tolerance, this.logger, this.db);
+            if (!skipTestpointCheck) if (!await regulators.test(this.tolerance, this.logger, this.db)) ret = false;
             await regulators.cellBatTest(this.logger, this.db);
             try {
                 await common.programStm(programmer, this.stm32, this.m1Dev, this.logger, this.db);
@@ -63,8 +63,9 @@ module.exports = class IctTestRunner {
                 this.db.updateErrorCode(process.env.serial, errorCodes.codes['STM'].errorCode, 'E');
                 throw err;
             }
-            if (!skipTestpointCheck) await regulators.testDDRVoltage(this.tolerance, this.logger, this.db);
-            this.logger.info('Testing Ribbon cable pins ...');
+
+            if (process.env.productName === 'mnplus') if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db)) ret = false;
+            if (!skipTestpointCheck) if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db)) ret = false;
             if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger, this.db)) ret = false;
 
             this.logger.info('Testing RS485 ...');

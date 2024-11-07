@@ -62,15 +62,15 @@ int main() {
     Board::PCB_ID5.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
 
     int pcbIdH = Board::PCB_ID3.readBit(3) | Board::PCB_ID4.readBit(4) | Board::PCB_ID5.readBit(5);
-    stream.printf("pcbIdH = 0x%x\n\r", pcbIdH);
+    // stream.printf("pcbIdH = 0x%x\n\r", pcbIdH);
     int pcbIdL = Board::PCB_ID0.readBit(0) | Board::PCB_ID1.readBit(1) | Board::PCB_ID2.readBit(2);
-    stream.printf("pcbIdL = 0x%x\n\r", pcbIdL);
-    stream.printf("pcbIdH = 0x%x\n\r", pcbIdH);
+    // stream.printf("pcbIdL = 0x%x\n\r", pcbIdL);
+    // stream.printf("pcbIdH = 0x%x\n\r", pcbIdH);
     pcbId = pcbIdH | pcbIdL;
-    stream.printf("pcbId = 0x%x\n\r", pcbId);
+    // stream.printf("pcbId = 0x%x\n\r", pcbId);
 
     if(Board::PCB_ID5.read()) {  // true for MNP, otherwise M1
-        stream.printf("Detected MNP Board\n\r");
+        // stream.printf("Detected MNP Board\n\r");
         Uart<Board::MNP_Rx485UART> mnpRs485(Board::MNP_Rx485UartRX, Board::MNP_Rx485UartTX, Board::MNP_Rx485UartDE, 115200);
         Uart<Board::MNP_Rd1UART> mnpRd1Rs485(Board::MNP_Rd1UARTRX, Board::MNP_Rd1UARTTX, Board::MNP_Rd1UARTDE, 115200);
         Board::MNP_Rd1Te.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
@@ -183,15 +183,16 @@ int main() {
                 Uart<STM32MP1Disco::MNP_Rx485UART>::readChar();
             }
             
-            for(int count = 0x30; count < 0x35; count++) {
+            for(int count = 0x30; count < 0x40; count++) {
                 Uart<STM32MP1Disco::MNP_Rx485UART>::putchar(count);
                 udelay(1000);
             }
              
            while(Uart<STM32MP1Disco::MNP_Rx485UART>::available()) {
                 Uart<STM32MP1Disco::MNP_Rx485UART>::readChar();
-            }  
-
+            }
+            
+            udelay(2000); 
             for(int count = 0x30; count < 0x35; count++) {
                 Uart<STM32MP1Disco::MNP_Rx485UART>::putchar(count);
                 int timeout = 10;

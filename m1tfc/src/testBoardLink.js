@@ -84,7 +84,7 @@ class TestBoardLink {
         const pin = this.ioDef.find(o => o.pinName === pinName);
         if (pin) return pin.pinId;
         const pin1 = this.ioDef.find(o => o.mnpPinName === pinName);
-        if (pin1) return pin1.pinId;        
+        if (pin1) return pin1.pinId;
         throw new Error(`findPinIdByName() invalid pin Name - ${pinName}`);
     }
 

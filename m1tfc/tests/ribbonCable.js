@@ -16,6 +16,14 @@ const ribbonCableSelectPins = [
     { name: 'aioNrst', port: 'k', pin: 0, pinNameOnTestBoard: 'J5.17' }
 ];
 
+
+const ribbonCableA2DPins = [
+    { name: 'TP1801', voltage: 2.97 },
+    { name: 'TP1802', voltage: 2.97 },
+    { name: 'TP1901', voltage: 2.97 },
+    { name: 'TP1902', voltage: 2.97 },
+];
+
 const ribbonCableI2CPinsSlave = [
     { name: 'sda', port: 'a', pin: 12, pinNameOnTestBoard: 'J5.6' },
     { name: 'scl', port: 'a', pin: 11, pinNameOnTestBoard: 'J5.3' }
@@ -68,6 +76,30 @@ async function runRibbonCableTestStaticVoltages(tolerance, logger) {
         return false;
     }
 }
+
+async function testA2DVoltages(tolerance, logger) {
+    let retValue = true;
+    // eslint-disable-next-line no-restricted-syntax
+    for (const testPoint of ribbonCableA2DPins) {
+        // eslint-disable-next-line no-await-in-loop
+        const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(testPoint.name)}`);
+        if (!ret.status) {
+            db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'T');
+            throw new Error(`Test Board control command failed on pinName=${testPoint.name}, ${ret.error}`);
+        }
+        if (!testPoint.tolerance) testPoint.tolerance = tolerance;
+        if (((Math.abs(ret.value - testPoint.voltage)) / (testPoint.voltage)) > testPoint.tolerance) {
+            db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
+            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${ret.value}, reqValue=${testPoint.voltage}`);
+            retValue = false;
+        }
+        else {
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${ret.value}V, Expected = ${testPoint.voltage}V`);
+        }
+    }
+    return retValue;
+}
+
 async function runRibbonCableTestAddressSelectResetPins(settoLevel, floatpins, logger) {
     let freturn = true;
     let ret;
@@ -206,8 +238,21 @@ async function testRs422(logger) {
     return true;
 }
 
-async function runRibbonCableTest(tolerance, logger, db_) {
-return true;
+async function runRibbonCableTestMnp(tolerance, logger, db_) {
+    db = db_;
+    let retValue = true;
+
+    if (!await testA2DVoltages(tolerance, logger)) retValue = false;
+
+    // if (!await runRibbonCableTestAddressSelectResetPins(1, false, logger)) retValue = false;
+    // if (!await runRibbonCableTestAddressSelectResetPins(0, false, logger)) retValue = false;
+
+
+    return retValue;
+}
+
+async function runRibbonCableTestM1(tolerance, logger, db_) {
+    logger.info('Testing Ribbon cable pins ...');
     db = db_;
     let retValue = true;
     const i2cTestCases = [0, 1, 0, 1];
@@ -232,6 +277,12 @@ return true;
     }
 
     logger.info('Passed Ribbon cable test');
+    return true;
+}
+
+async function runRibbonCableTest(tolerance, logger, db_) {
+    if (process.env.productName === 'mnplus') return runRibbonCableTestMnp(tolerance, logger, db_);
+    if (process.env.productName === 'm1') return runRibbonCableTestM1(tolerance, logger, db_);
     return true;
 }
 

@@ -252,7 +252,7 @@ program.command('ict')
             }
 
             logfile.info('Starting ICT Test.');
-
+            await targetICTLink.initSerial(configData.m1SerialDev, 115200, logfile);
             if (!options.cellBatTol) await errorAndExit('must define cellBatTol', logfile);
             logfile.info(`Executing ICT command ${configData.mtfDir}/${configData.ictFWFilePath} ...`);
             const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);

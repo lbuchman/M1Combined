@@ -5,7 +5,7 @@ const errorCodes = require('../bin/errorCodes');
 
 async function testRs485(logger, db) {
     try {
-        let ret = await targetICTLink.sendCommand('testrs485');
+        const ret = await targetICTLink.sendCommand('testrs485');
         if (!ret.status) {
             logger.error(`Failed RS485 echo test ${ret.error}`);
             throw new Error('RS485 echo test failed');

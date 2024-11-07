@@ -2,29 +2,39 @@
 
 const testBoardLink = require('../src/testBoardLink');
 const errorCodes = require('../bin/errorCodes');
+const mnpHwIo = require('../tests/mnpHW');
+const targetICTLink = require('../src/m1ICTLink');
 
 const ddrVoltage = { name: 'TP304', voltage: 1.35 };
 const leverLockVoltage = { name: 'LeverSensor', voltage: 0 };
 const testPointsM1 = [
-    { name: 'TP025', voltage: 5 },
-    { name: 'TP33', voltage: 2.8 },
-    { name: 'TP35', voltage: 3.3 },
-    { name: 'TP34', voltage: 3.3 },
-    { name: 'TP36', voltage: 1.2 },
-    { name: 'J5.13', voltage: 11.7 },
-    { name: 'J5.5', voltage: 6.0 },
-    { name: 'J5.7', voltage: 6.0 },
-    { name: 'J5.8', voltage: 6.0 }
+    { name: 'TP025', voltage: 5, scale: 1 },
+    { name: 'TP33', voltage: 2.8, scale: 1 },
+    { name: 'TP35', voltage: 3.3, scale: 1 },
+    { name: 'TP34', voltage: 3.3, scale: 1 },
+    { name: 'TP36', voltage: 1.2, scale: 1 },
+    { name: 'J5.13', voltage: 11.7, scale: 1 },
+    { name: 'J5.5', voltage: 6.0, scale: 1 },
+    { name: 'J5.7', voltage: 6.0, scale: 1 },
+    { name: 'J5.8', voltage: 6.0, scale: 1 }
 ];
 
 const testPointsMnp = [
-    { name: 'TP204', voltage: 5.0 },
-    { name: 'TP308', voltage: 2.8 },
-    { name: 'TP303', voltage: 1.2 },
-    { name: 'TP305', voltage: 3.3 },
-    { name: 'TP306', voltage: 3.3 },
-  //  { name: 'TP401', voltage: 5.0 },
-  //  { name: 'TP2301', voltage: 12.0 }
+    { name: 'TP204', voltage: 5.0, scale: 1 },
+    { name: 'TP308', voltage: 2.8, scale: 1 },
+    { name: 'TP303', voltage: 1.2, scale: 1 },
+    { name: 'TP305', voltage: 3.3, scale: 1 },
+    { name: 'TP306', voltage: 3.3, scale: 1 },
+    { name: 'TP401', voltage: 5.0, scale: 0.98 },
+    // POE { name: 'TP2301', voltage: 12.0, scale: 1 } },
+    { name: 'TP202', voltage: 12.0, scale: 0.995 },
+    { name: 'J2101.1', voltage: 11.85, scale: 1.61 },
+    { name: 'J2001.1', voltage: 11.85, scale: 1.61 },
+];
+
+const strikeReg = [
+    { name: 'SW1601.6', funcName: 'STRIKE1_KICKER_EN', voltage: 28.3, scale: 5.42 },
+    { name: 'SW1602.6', funcName: 'STRIKE2_KICKER_EN', voltage: 28.3, scale: 5.42 },
 ];
 
 
@@ -98,7 +108,44 @@ async function cellBatTest(logger, db) {
     return true;
 }
 
+async function strikeBoostReg(tolerance, logger, db) {
+    // Test strike regulators
+    let retValue = true;
+    let command;
+    let ret;
+
+
+    for (const testPoint of strikeReg) {
+        command = mnpHwIo.getCommand('write', testPoint.funcName, 1, logger);
+        ret = await targetICTLink.sendCommand(command);
+        if (!ret.status) {
+            logger.error(`Target Board control command failed on pin ${testPoint.funcName}, ${ret.error}`);
+            retValue = false;
+            db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'T');
+        }
+        // eslint-disable-next-line no-await-in-loop
+        ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(testPoint.name)}`);
+        if (!ret.status) {
+            db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'T');
+            throw new Error(`Test Board control command failed on pinName=${testPoint.name}, ${ret.error}`);
+        }
+        if (!testPoint.tolerance) testPoint.tolerance = tolerance;
+        if (((Math.abs(ret.value * testPoint.scale - testPoint.voltage)) / (testPoint.voltage)) > testPoint.tolerance) {
+            db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
+            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${ret.value * testPoint.scale}, reqValue=${testPoint.voltage}`);
+            retValue = false;
+        }
+        else {
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${ret.value * testPoint.scale}V, Expected = ${testPoint.voltage}V`);
+        }
+    }
+    return retValue;
+
+}
+
+
 async function test(tolerance, logger, db) {
+    let retValue = true;
     // eslint-disable-next-line no-restricted-syntax
     for (const testPoint of testPoints) {
         if (process.env.cellBatTol === 'new') {
@@ -114,15 +161,17 @@ async function test(tolerance, logger, db) {
             throw new Error(`Test Board control command failed on pinName=${testPoint.name}, ${ret.error}`);
         }
         if (!testPoint.tolerance) testPoint.tolerance = tolerance;
-        if (((Math.abs(ret.value - testPoint.voltage)) / (testPoint.voltage)) > testPoint.tolerance) {
+        if (((Math.abs(ret.value * testPoint.scale - testPoint.voltage)) / (testPoint.voltage)) > testPoint.tolerance) {
             db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
-            throw new Error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${ret.value}, reqValue=${testPoint.voltage}`);
+            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${ret.value * testPoint.scale}, reqValue=${testPoint.voltage}`);
+            retValue = false;
         }
         else {
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${ret.value}V, Expected = ${testPoint.voltage}V`);
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${ret.value * testPoint.scale}V, Expected = ${testPoint.voltage}V`);
         }
     }
-    return true;
+
+    return retValue;
 }
 
 module.exports = {
@@ -130,5 +179,6 @@ module.exports = {
     testDDRVoltage,
     cellBatTest,
     checkLeverState,
-    init
+    init,
+    strikeBoostReg
 };
