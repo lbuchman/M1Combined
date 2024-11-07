@@ -78,6 +78,7 @@ async function initializeTestFixture(programmer, programSTM, stm32, m1Dev, logge
     logger.debug('Setting UUT power off');
     await testBoardLink.targetPower(false);
     await testBoardLink.batteryOn(false);
+    await testBoardLink.poeOn(false);
     await delay(2000);
     await m1boot.activateDFU();
     await delay(1000);

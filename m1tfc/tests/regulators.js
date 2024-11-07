@@ -26,7 +26,7 @@ const testPointsMnp = [
     { name: 'TP305', voltage: 3.3, scale: 1 },
     { name: 'TP306', voltage: 3.3, scale: 1 },
     { name: 'TP401', voltage: 5.0, scale: 0.98 },
-    // POE { name: 'TP2301', voltage: 12.0, scale: 1 } },
+    { name: 'TP2301', voltage: 12.8, scale: 1 },
     { name: 'TP202', voltage: 12.0, scale: 0.995 },
     { name: 'J2101.1', voltage: 11.85, scale: 1.61 },
     { name: 'J2001.1', voltage: 11.85, scale: 1.61 },
@@ -44,7 +44,7 @@ const coinCellBattery = { name: 'BatCellBat', minVoltage: 3.1, maxVoltage: 3.7 }
 
 
 function init() {
-    if (process.env.board === 'mnplus') {
+    if (process.env.productName === 'mnplus') {
         testPoints = testPointsMnp;
         return;
     }
@@ -72,10 +72,10 @@ async function testDDRVoltage(tolerance, logger, db) {
     }
     if (((Math.abs(ret.value - ddrVoltage.voltage)) / (ddrVoltage.voltage)) > tolerance) {
         db.updateErrorCode(process.env.serial, errorCodes.codes[ddrVoltage.name].errorCode, 'E');
-        throw new Error(`Failed: Voltage is out of tolerance, TP=${ddrVoltage.name}, value=${ret.value}, reqValue=${ddrVoltage.voltage}`);
+        throw new Error(`Failed: Voltage is out of tolerance, TP=${ddrVoltage.name}, value=${ret.value.toFixed(2)}, reqValue=${ddrVoltage.voltage.toFixed(2)}`);
     }
     else {
-        logger.info(`Passed TP=${ddrVoltage.name} test, Voltage = ${ret.value}V, Expected = ${ddrVoltage.voltage}V`);
+        logger.info(`Passed TP=${ddrVoltage.name} test, Voltage = ${ret.value.toFixed(2)}V, Expected = ${ddrVoltage.voltage.toFixed(2)}V`);
     }
     return true;
 }
@@ -114,8 +114,8 @@ async function strikeBoostReg(tolerance, logger, db) {
     let command;
     let ret;
 
-
     for (const testPoint of strikeReg) {
+        logger.info(`Enabling ${testPoint.funcName}`);
         command = mnpHwIo.getCommand('write', testPoint.funcName, 1, logger);
         ret = await targetICTLink.sendCommand(command);
         if (!ret.status) {
@@ -132,11 +132,11 @@ async function strikeBoostReg(tolerance, logger, db) {
         if (!testPoint.tolerance) testPoint.tolerance = tolerance;
         if (((Math.abs(ret.value * testPoint.scale - testPoint.voltage)) / (testPoint.voltage)) > testPoint.tolerance) {
             db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
-            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${ret.value * testPoint.scale}, reqValue=${testPoint.voltage}`);
+            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)}`);
             retValue = false;
         }
         else {
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${ret.value * testPoint.scale}V, Expected = ${testPoint.voltage}V`);
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V`);
         }
     }
     return retValue;
@@ -147,6 +147,7 @@ async function strikeBoostReg(tolerance, logger, db) {
 async function test(tolerance, logger, db) {
     let retValue = true;
     // eslint-disable-next-line no-restricted-syntax
+    await testBoardLink.poeOn(true);
     for (const testPoint of testPoints) {
         if (process.env.cellBatTol === 'new') {
             testPoints.voltage = 3.3;
@@ -163,14 +164,14 @@ async function test(tolerance, logger, db) {
         if (!testPoint.tolerance) testPoint.tolerance = tolerance;
         if (((Math.abs(ret.value * testPoint.scale - testPoint.voltage)) / (testPoint.voltage)) > testPoint.tolerance) {
             db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
-            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${ret.value * testPoint.scale}, reqValue=${testPoint.voltage}`);
+            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)}`);
             retValue = false;
         }
         else {
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${ret.value * testPoint.scale}V, Expected = ${testPoint.voltage}V`);
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V`);
         }
     }
-
+    await testBoardLink.poeOn(false);
     return retValue;
 }
 

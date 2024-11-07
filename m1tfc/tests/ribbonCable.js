@@ -90,11 +90,11 @@ async function testA2DVoltages(tolerance, logger) {
         if (!testPoint.tolerance) testPoint.tolerance = tolerance;
         if (((Math.abs(ret.value - testPoint.voltage)) / (testPoint.voltage)) > testPoint.tolerance) {
             db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
-            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${ret.value}, reqValue=${testPoint.voltage}`);
+            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${ret.value.toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)}`);
             retValue = false;
         }
         else {
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${ret.value}V, Expected = ${testPoint.voltage}V`);
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${ret.value.toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V`);
         }
     }
     return retValue;

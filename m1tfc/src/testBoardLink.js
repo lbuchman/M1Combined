@@ -110,6 +110,23 @@ class TestBoardLink {
     */
     // eslint-disable-next-line class-methods-use-this
     async batteryOn(onoff) {
+        if (process.env.productName === 'mnplus') return;
+        if (onoff) {
+            await this.sendCommand('batteryon');
+        }
+        else {
+            await this.sendCommand('batteryoff');
+        }
+    }
+
+        /**
+     * @public
+     *
+     * @param {integer} 1 is on, 0 is off
+    */
+    // eslint-disable-next-line class-methods-use-this
+    async poeOn(onoff) {
+        if (process.env.productName === 'm1') return;
         if (onoff) {
             await this.sendCommand('batteryon');
         }

@@ -56,7 +56,8 @@ const configuration = {
     progEEPROM: true,
     makeLabel: true,
     funcTestDisable: false,
-    coinCellDebug: true
+    coinCellDebug: true,
+    productName: 'm1'
 };
 
 /* Just for running out of snap */
@@ -91,7 +92,6 @@ program.command('m1dfu')
         const configData = await config(configuration);
         const logfile = console;
         try {
-            process.env.coinCellDebug = configData.coinCellDebug;
             const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
@@ -112,7 +112,6 @@ program.command('tbcmd')
         const configData = await config(configuration);
         const logfile = console;
         try {
-            process.env.coinCellDebug = configData.coinCellDebug;
             const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
@@ -136,7 +135,6 @@ program.command('m1cmd')
         const configData = await config(configuration);
         const logfile = console;
         try {
-            process.env.coinCellDebug = configData.coinCellDebug;
             const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
@@ -161,7 +159,6 @@ program.command('mnpcmd <action> [sigNameOrTestpont] [value]')
         const logfile = console;
         try {
             const command = mnpHwIo.getCommand(readOrWrite, name, value, logfile);
-            process.env.coinCellDebug = configData.coinCellDebug;
             const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
@@ -188,15 +185,10 @@ program.command('ict')
 
     .action(async (options) => {
         const configData = await config(configuration);
-        if (!configuration.productName) configuration.productName = 'm1=3200';
-        process.env.productName = configuration.productName;
         let logfile;
         let db;
         let startStatusOk = true;
         try {
-            process.env.board = configData.productName;
-            process.env.coinCellDebug = configData.coinCellDebug;
-            process.env.skipBatteryTest = configData.skipBatteryTest;
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.mtfDir, options.debug);
             db = sqliteDriver.initialize(logfile);

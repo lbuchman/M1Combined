@@ -22,6 +22,10 @@ async function getConfig(configDataDefaults) {
     }
 
     const ret = _.merge(configDataDefaults, configDataUser);
+    process.env.productName = ret.productName;
+    process.env.coinCellDebug = ret.coinCellDebug;
+    process.env.skipBatteryTest = ret.skipBatteryTest;
+    
     return ret;
 }
 
