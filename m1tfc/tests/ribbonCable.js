@@ -18,10 +18,10 @@ const ribbonCableSelectPins = [
 
 
 const ribbonCableA2DPins = [
-    { name: 'TP1801', voltage: 2.97 },
-    { name: 'TP1802', voltage: 2.97 },
-    { name: 'TP1901', voltage: 2.97 },
-    { name: 'TP1902', voltage: 2.97 },
+    { name: 'TP1801', voltage: 2.7 },
+    { name: 'TP1802', voltage: 2.7 },
+    { name: 'TP1901', voltage: 2.7 },
+    { name: 'TP1902', voltage: 2.7 },
 ];
 
 const ribbonCableI2CPinsSlave = [
