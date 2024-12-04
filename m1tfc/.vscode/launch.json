@@ -64,7 +64,7 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["progmac",    "-d", "2", "-s", "3023370036"]
+            "args": ["progmac",    "-d", "2", "-s", "3023200011"]
         },
         {
             "type": "pwa-node",
@@ -80,7 +80,7 @@
             },
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["flash",    "-d", "2", "-s", "3224350011" ]
+            "args": ["flash",    "-d", "2", "-s", "3023200011" ]
         },
         {
             "type": "pwa-node",

@@ -112,7 +112,7 @@ module.exports = class ProgramMac {
         const fwDir = process.env.fwDir;
         await common.initializeTestFixture(null, false, null, null, this.logger);
         this.logger.debug('Programming TSV file ...');
-        const minimalTsv = tsv.makeMinimalTsv(this.config.layoutFilePath);
+        const minimalTsv = tsv.makeMinimalTsv(this.tsv);
         await common.waitDFU(programmer, this.logger);
         await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${minimalTsv}`, this.logger, false, false, 1024 * 200, fwDir);
         await delay(100);

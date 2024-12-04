@@ -29,7 +29,7 @@ module.exports = class SerialLink {
         }
         this.busy = true;
         await this.serialPort.flush();
-        await delay(1000);
+        await delay(100);
         this.serialPort.write(`${cmd}\n\r`);
         let timeoutHandle;
         return new Promise(async (resolve, reject) => {
