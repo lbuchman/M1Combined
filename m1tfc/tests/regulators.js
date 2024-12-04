@@ -5,7 +5,9 @@ const errorCodes = require('../bin/errorCodes');
 const mnpHwIo = require('../tests/mnpHW');
 const targetICTLink = require('../src/m1ICTLink');
 
-const ddrVoltage = { name: 'TP304', voltage: 1.35 };
+const ddrVoltageMnp = { name: 'TP304', voltage: 1.35 };
+const ddrVoltageM1 = { name: 'TP31', voltage: 1.35 };
+
 const leverLockVoltage = { name: 'LeverSensor', voltage: 0 };
 const testPointsM1 = [
     { name: 'TP025', voltage: 5, scale: 1 },
@@ -29,16 +31,17 @@ const testPointsMnp = [
     { name: 'TP2301', voltage: 12.8, scale: 1 },
     { name: 'TP202', voltage: 12.0, scale: 0.995 },
     { name: 'J2101.1', voltage: 11.85, scale: 1.61 },
-    { name: 'J2001.1', voltage: 11.85, scale: 1.61 },
+    { name: 'J2001.1', voltage: 11.85, scale: 1.61 }
 ];
 
 const strikeReg = [
     { name: 'SW1601.6', funcName: 'STRIKE1_KICKER_EN', voltage: 28.3, scale: 5.42 },
-    { name: 'SW1602.6', funcName: 'STRIKE2_KICKER_EN', voltage: 28.3, scale: 5.42 },
+    { name: 'SW1602.6', funcName: 'STRIKE2_KICKER_EN', voltage: 28.3, scale: 5.42 }
 ];
 
 
 let testPoints;
+let ddrVoltage;
 
 const coinCellBattery = { name: 'BatCellBat', minVoltage: 3.1, maxVoltage: 3.7 };
 
@@ -46,9 +49,11 @@ const coinCellBattery = { name: 'BatCellBat', minVoltage: 3.1, maxVoltage: 3.7 }
 function init() {
     if (process.env.productName === 'mnplus') {
         testPoints = testPointsMnp;
+        ddrVoltage = ddrVoltageMnp;
         return;
     }
     testPoints = testPointsM1;
+    ddrVoltage = ddrVoltageM1;
 }
 
 async function checkLeverState(logger, db) {
@@ -113,10 +118,11 @@ async function strikeBoostReg(tolerance, logger, db) {
     let retValue = true;
     let command;
     let ret;
-
+    /* eslint-disable-next-line no-restricted-syntax */
     for (const testPoint of strikeReg) {
         logger.info(`Enabling ${testPoint.funcName}`);
         command = mnpHwIo.getCommand('write', testPoint.funcName, 1, logger);
+        // eslint-disable-next-line no-await-in-loop
         ret = await targetICTLink.sendCommand(command);
         if (!ret.status) {
             logger.error(`Target Board control command failed on pin ${testPoint.funcName}, ${ret.error}`);
@@ -140,7 +146,6 @@ async function strikeBoostReg(tolerance, logger, db) {
         }
     }
     return retValue;
-
 }
 
 
@@ -148,6 +153,7 @@ async function test(tolerance, logger, db) {
     let retValue = true;
     // eslint-disable-next-line no-restricted-syntax
     await testBoardLink.poeOn(true);
+     /* eslint-disable-next-line no-restricted-syntax */
     for (const testPoint of testPoints) {
         if (process.env.cellBatTol === 'new') {
             testPoints.voltage = 3.3;

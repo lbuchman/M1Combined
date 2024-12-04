@@ -25,7 +25,7 @@ async function getConfig(configDataDefaults) {
     process.env.productName = ret.productName;
     process.env.coinCellDebug = ret.coinCellDebug;
     process.env.skipBatteryTest = ret.skipBatteryTest;
-    
+
     return ret;
 }
 
