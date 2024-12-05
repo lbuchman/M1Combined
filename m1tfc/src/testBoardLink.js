@@ -126,7 +126,7 @@ class TestBoardLink {
     */
     // eslint-disable-next-line class-methods-use-this
     async poeOn(onoff) {
-        if (process.env.productName === 'm1') return;
+        if (process.env.productName === 'm1-3200') return;
         if (onoff) {
             await this.sendCommand('batteryon');
         }

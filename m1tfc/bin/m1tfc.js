@@ -57,7 +57,7 @@ const configuration = {
     makeLabel: true,
     funcTestDisable: false,
     coinCellDebug: true,
-    productName: 'm1'
+    productName: 'm1-3200'
 };
 
 /* Just for running out of snap */

@@ -282,7 +282,7 @@ async function runRibbonCableTestM1(tolerance, logger, db_) {
 
 async function runRibbonCableTest(tolerance, logger, db_) {
     if (process.env.productName === 'mnplus') return runRibbonCableTestMnp(tolerance, logger, db_);
-    if (process.env.productName === 'm1') return runRibbonCableTestM1(tolerance, logger, db_);
+    if (process.env.productName === 'm1-3200') return runRibbonCableTestM1(tolerance, logger, db_);
     return true;
 }
 
