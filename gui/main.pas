@@ -17,12 +17,13 @@ const
   precheckHWFailed = 15;
   OtpIsNotBlank = 10;
   EepromIsntBlank = 11;
-  FW_Dir = '/home/lenel/m1mtf/stm32mp15-lenels2-m1/VERSION';
   App_Dir = '/home/lenel/m1mtf/';
   Interval7Days = (24 * 60 * 60 * 7);
   UpdateFwTimeStamp = 'UpdateFwTimeStamp.txt';
   UpdateSycretsTimeStamp = 'UpdateSycretsTimeStamp.txt';
   UpdateLogsTimeStamp = 'UpdateLogsTimeStamp.txt';
+
+  var FW_Dir: String;
 
 type
   TMethodPtr = procedure(Sender: TObject) of object;
@@ -209,7 +210,9 @@ begin
   testStatus := True;
   ClearBusyFlag;
   doOnes := True;
+  if ReadConfigFile = false then Application.Terminate;
   configuration := ConfigurationGet;
+  FW_Dir:= configuration.fwDir + '/VERSION';
   SyncFailedLabel.Font.Color := clRed;
   Tests[0] := MakeTestRecord('ICT', 5, TMethodPtr(@ICTTestSwitchClick),
     @ICTTestSwitch, True);
@@ -429,6 +432,7 @@ end;
 
 procedure TmainForm.AbountMenuItemClick(Sender: TObject);
 begin
+  aboutForm.SetFwDirectory(fw_dir);
   aboutForm.ShowModal;
 end;
 

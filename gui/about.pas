@@ -19,11 +19,13 @@ type
     m1FirmwareVersion: TLabel;
     m1tfd1Version: TLabel;
     m1ClientVersion: TLabel;
+    procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
+    fw_directory: String;
     procedure GetRevision(Sender: TObject; snapName: string);
   public
-
+   procedure SetFwDirectory(value: string);
   end;
 
 var
@@ -33,6 +35,11 @@ implementation
 
 {$R *.lfm}
 
+
+procedure TaboutForm.SetFwDirectory(value: string);
+begin
+ fw_directory := value;
+end;
 
 procedure TaboutForm.GetRevision(Sender: TObject; snapName: string);
 const
@@ -100,9 +107,14 @@ begin
   GetRevision(m1tfd1Version, 'm1tfd1');
   GetRevision(m1ClientVersion, 'm1client');
   tempStringList := TStringList.Create;
-  tempStringList.LoadFromFIle('/home/lenel/m1mtf/stm32mp15-lenels2-m1/VERSION');
+  tempStringList.LoadFromFIle(fw_directory);
   m1FirmwareVersion.Caption := tempStringList[0];
   tempStringList.Free;
+
+end;
+
+procedure TaboutForm.FormCreate(Sender: TObject);
+begin
 
 end;
 
