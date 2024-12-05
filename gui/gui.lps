@@ -17,9 +17,10 @@
         <ComponentName Value="mainForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="433"/>
-        <CursorPos X="34" Y="435"/>
+        <TopLine Value="192"/>
+        <CursorPos X="28" Y="195"/>
         <UsageCount Value="227"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -67,7 +68,6 @@
         <ComponentName Value="aboutForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <CursorPos X="14" Y="28"/>
         <UsageCount Value="201"/>
@@ -252,7 +252,7 @@
       </Position29>
       <Position30>
         <Filename Value="about.pas"/>
-        <Caret Line="28" Column="35" TopLine="5"/>
+        <Caret Line="28" Column="14"/>
       </Position30>
     </JumpHistory>
     <RunParams>
@@ -290,13 +290,6 @@
         <WatchKind Value="wpkWrite"/>
         <Source Value="main.pas"/>
         <Line Value="955"/>
-      </Item>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="main.pas"/>
-        <Line Value="216"/>
       </Item>
     </BreakPoints>
     <Watches>
