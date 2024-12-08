@@ -2,7 +2,7 @@
 
 const mnpIOMap = [
     // Rd1 RS485
-    { port: 'B', pin: 5, mode: 'output', name: 'Rd1_RS485_1_RX', testPoint: 'TP2003' },
+    { port: 'B', pin: 5, mode: 'output', name: 'Rd1_RS485_1_RX', testPoint: '`TP2003`' },
     { port: 'B', pin: 6, mode: 'output', name: 'Rd1_RS485_1_TX', testPoint: 'TP2004' },
     { port: 'C', pin: 8, mode: 'output', name: 'Rd1_RS485_1_DE', testPoint: 'TP2005' },
     { port: 'B', pin: 12, mode: 'output', name: 'Rd1_RS485_1_TE', testPoint: 'na' },
