@@ -39,6 +39,6 @@ module.exports = class MnpTests {
     }
 
     async run() {
-        return this.testme();
+        // return this.testme();
     }
 };

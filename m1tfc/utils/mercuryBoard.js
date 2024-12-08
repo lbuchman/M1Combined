@@ -24,13 +24,19 @@ module.exports = class MercuryBoardLink {
             const handler = setInterval(() => {
                 if (this.reply.length) {
                     clearInterval(handler);
+                    const reply = this.reply[0];
+                    if (!reply.status) {
+                        reject(new Error(`Error, command to Mercury Board ${cmd} ${arg} failed, ${reply.error} `));
+                        clearInterval(handler);
+                        return;
+                    }
                     resolve(this.reply[0]);
                     this.reply = [];
                     return;
                 }
                 count -= 1;
                 if (count === 0) {
-                    reject(new Error('udp timeout'));
+                    reject(new Error(`Error, command to Mercury Board "${cmd} ${arg}" failed, udp timeout `));
                     clearInterval(handler);
                 }
             }, 100);
