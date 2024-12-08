@@ -216,7 +216,7 @@ program.command('ict')
                     logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
                 }
             }
-/*
+
             const interfaces = await si.networkInterfaces();
             if (!configData.tfInterface) configData.tfInterface = 'enp0s31f6';
             if (interfaces.find(o => o.iface === configData.tfInterface) === undefined) {
@@ -228,7 +228,7 @@ program.command('ict')
                 startStatusOk = false;
                 logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
             }
-*/
+
 
             devices.forEach(async (deviceFile) => {
                 const exists = fs.existsSync(deviceFile.name);

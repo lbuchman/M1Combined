@@ -10,7 +10,7 @@ const mnpIOMap = [
     { port: 'F', pin: 9, mode: 'input', name: 'WGD1_D0_3V3', testPoint: 'TP2001' },
     { port: 'K', pin: 3, mode: 'input', name: 'WGD1_D1_3V3', testPoint: 'TP2002' },
     { port: 'H', pin: 11, mode: 'output', name: 'WGD1_BPR', testPoint: 'na' },
-    // WGD1
+    // WGD2
     { port: 'C', pin: 2, mode: 'input', name: 'WGD2_D0_3V3', testPoint: 'na' },
     { port: 'J', pin: 15, mode: 'input', name: 'WGD2_D1_3V3', testPoint: 'na' },
     { port: 'J', pin: 12, mode: 'output', name: 'WGD2_BPR', testPoint: 'na' },

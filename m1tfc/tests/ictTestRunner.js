@@ -15,6 +15,8 @@ const exitCodes = require('../src/exitCodes');
 const sqliteDriver = require('../utils/sqliteDriver');
 const utils = require('../utils/utils');
 const errorCodes = require('../bin/errorCodes');
+const MnpTests = require('./mnpTests');
+
 
 module.exports = class IctTestRunner {
     constructor(stm32, tolerance, log) {
@@ -49,6 +51,12 @@ module.exports = class IctTestRunner {
         regulators.init();
         let ret = true;
         try {
+            if (process.env.productName === 'mnplus') {
+                const mnp = new MnpTests(this.logger);
+                await mnp.begin();
+                await mnp.run();
+            }
+
             await common.initializeTestFixture(programmer, initAndQuit, this.stm32, this.m1Dev, this.logger, initAndQuit);
             if (initAndQuit) return;
             await regulators.checkLeverState(this.logger, this.db);
@@ -80,6 +88,12 @@ module.exports = class IctTestRunner {
             this.logger.info('Testing I2C EEPROM ...');
             if (!await eeprom.checkEEPROM(this.logger, this.db)) ret = false;
             if (!process.env.productName) if (!await battery.test(this.logger, this.db)) ret = false;
+
+            if (process.env.productName === 'mnplus') {
+                const mnp = new MnpTests(this.logger);
+                await mnp.begin();
+                await mnp.run();
+            }
 
             if (ret) {
                 this.logger.info('ICT Test Passed!!!');

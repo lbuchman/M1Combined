@@ -296,14 +296,14 @@ begin
   ioLines[1].itemR := @Rd1RD1;
 
 
-  ioLines[2].cmdRead := 'Rd1Rled';
+  ioLines[2].cmdRead := 'rd1rled';
   ioLines[2].pinType := OUTPUT;
   ioLines[2].cmdWrite := '';
   ioLines[2].pinN := 5;
   ioLines[2].itemR := @Rd1Rled;
   ioLines[2].itemW := nil;
 
-  ioLines[3].cmdRead := 'Rd1Gled';
+  ioLines[3].cmdRead := 'rd1gled';
   ioLines[3].pinType := INPUT;
   ioLines[3].cmdWrite := '';
   ioLines[3].pinN := 11;
@@ -332,14 +332,14 @@ begin
   ioLines[6].itemW := nil;
   ioLines[6].itemR := @Rd2RD1;
 
-  ioLines[7].cmdRead := 'Rd2Rled';
+  ioLines[7].cmdRead := 'rd2rled';
   ioLines[7].pinType := INPUT;
   ioLines[7].cmdWrite := '';
   ioLines[7].pinN := 12;
   ioLines[7].itemR := @Rd2Rled;
   ioLines[7].itemW := nil;
 
-  ioLines[8].cmdRead := 'Rd2Gled';
+  ioLines[8].cmdRead := 'rd2gled';
   ioLines[8].pinType := INPUT;
   ioLines[8].cmdWrite := '';
   ioLines[8].pinN := 30;
@@ -354,7 +354,7 @@ begin
   ioLines[9].itemW := nil;
 
 
-  ioLines[10].cmdRead := 'Ry1';
+  ioLines[10].cmdRead := 'ry1';
   ioLines[10].pinType := INPUT;
   ioLines[10].cmdWrite := '';
   ioLines[10].pinN := 23;
@@ -362,21 +362,21 @@ begin
   ioLines[10].itemW := nil;
 
 
-  ioLines[11].cmdRead := 'Ry2';
+  ioLines[11].cmdRead := 'ry2';
   ioLines[11].pinType := INPUT;
   ioLines[11].cmdWrite := '';
   ioLines[11].pinN := 3;
   ioLines[11].itemR := @Ry2;
   ioLines[11].itemW := nil;
 
-  ioLines[12].cmdRead := 'Ry3';
+  ioLines[12].cmdRead := 'ry3';
   ioLines[12].pinType := INPUT;
   ioLines[12].cmdWrite := '';
   ioLines[12].pinN := 33;
   ioLines[12].itemR := @Ry3;
   ioLines[12].itemW := nil;
 
-  ioLines[13].cmdRead := 'Ry4';
+  ioLines[13].cmdRead := 'ry4';
   ioLines[13].pinType := INPUT;
   ioLines[13].cmdWrite := '';
   ioLines[13].pinN := 37;

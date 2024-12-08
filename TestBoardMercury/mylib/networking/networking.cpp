@@ -16,7 +16,7 @@
 #define CcnfigNetPin 35
 
 static bool ethernetStatus = false;
-bool startNetwork(unsigned long timeout, unsigned long responseTimeout);
+bool startNetwork(unsigned long timeout, unsigned long responseTimeout, sllibMod& watchDogLed);
 
 shellFunc ifconfig = [](int arg_cnt, char **args, Stream & stream) {
     if(!checkArgument(1, arg_cnt, args, (char*) "\t{ \"cmd\": \"%s\", \"desc\": \"returns board IP address\" },\n\r", stream)) {
@@ -86,10 +86,10 @@ void initNetworking(Scheduler& ts, sllibMod& watchDogLed) {
         }
 
         watchDogLed.ledNoDHCPIp();
-        ethernetStatus = startNetwork(4000, 3900); // to prevent watchdog reset
+        ethernetStatus = startNetwork(4000, 3900, watchDogLed); // to prevent watchdog reset
     }), &ts, false);
 
-    ethernetStatus = startNetwork(4000, 3900); // to prevent watchdog reset
+    ethernetStatus = startNetwork(4000, 3900, watchDogLed); // to prevent watchdog reset
     ShellFunctor::getInstance().add("setntpserver", setntpserver);
     ShellFunctor::getInstance().add("ifconfig", ifconfig);
     ShellFunctor::getInstance().add("setmac", setmac);
@@ -99,7 +99,7 @@ void initNetworking(Scheduler& ts, sllibMod& watchDogLed) {
     if (!digitalRead(CcnfigNetPin)) ethernetTask.enable();
 }
 
-bool startNetwork(unsigned long timeout, unsigned long responseTimeout) {
+bool startNetwork(unsigned long timeout, unsigned long responseTimeout, sllibMod& watchDogLed) {
     TNetworkConfig netConfig = getNetworkConfig();
     bool retStatus = false;
 
@@ -109,6 +109,7 @@ bool startNetwork(unsigned long timeout, unsigned long responseTimeout) {
         IPAddress ip(192, 168, 0, 60);
         IPAddress myDns(192, 168, 0, 6);
         Ethernet.begin(netConfig.mac, ip, myDns);
+        watchDogLed.ledWatchdog();
         return true;
     }
 

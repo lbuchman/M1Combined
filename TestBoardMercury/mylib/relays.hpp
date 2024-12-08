@@ -15,7 +15,7 @@ class Relay {
         }
 
         void begin() {
-            ShellFunctor::getInstance().add(prefix + "v", getPinValue);
+            ShellFunctor::getInstance().add(prefix, getPinValue);
         }
 
         int getValue() {
