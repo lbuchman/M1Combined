@@ -7,6 +7,8 @@
 #include <TaskSchedulerDeclarations.h>
 #include <shellFunctor.hpp>
 
+using namespace std;
+
 class Reader {
     public:
         Reader(Scheduler& _ts, readerPins& _pins, String _prefix): ts(_ts), pins(_pins) {
@@ -15,10 +17,12 @@ class Reader {
             pinMode(pins.rLed.pinN, pins.rLed.pinMode);
             pinMode(pins.gLed.pinN, pins.gLed.pinMode);
             pinMode(pins.bz.pinN, pins.bz.pinMode);
-
+            pinMode(pins.de.pinN, pins.de.pinMode);
+            pins.serial.transmitterEnable(pins.de.pinN);
             digitalWrite(pins.d0.pinN, pins.d0.defValue);
             digitalWrite(pins.d1.pinN, pins.d1.defValue);
             prefix = _prefix;
+            pins.serial.begin(115200);
         }
 
         int getRLedPin() {
@@ -141,6 +145,13 @@ class Reader {
             stream.printf("\t{\"cmd\": \"%s\", \"status\": true, \"value\": %d }\n\r", args[0], value);
             return 1;
         };
+        Task watchdogTaskHw{TASK_MILLISECOND, TASK_FOREVER, function<void()> ([this](void) -> void {
+            if (pins.serial.available()) {
+                char inChar = pins.serial.read();
+                pins.serial.write(inChar);
+            };
+    }), &ts, false};
+
 };
 
 #endif

@@ -30,11 +30,11 @@ Scheduler ts;
 
 #define Rev "0.1"
 
-readerPins rd1Pins = { {9, OUTPUT, 0, 0}, {10, OUTPUT, 0, 0}, {5, INPUT_PULLUP, 0, 0}, {11, INPUT_PULLUP, 0, 0}, {40, INPUT_PULLUP, 0, 0} };
-readerPins rd2Pins = { {32, OUTPUT, 0, 0}, {26, OUTPUT, 0, 0}, {12, INPUT_PULLUP, 0, 0}, {30, INPUT_PULLUP, 0, 0}, {39, INPUT_PULLUP, 0, 0} };
+readerPins rd1Pins = { {9, OUTPUT, 0, 0}, {10, OUTPUT, 0, 0}, {5, INPUT_PULLUP, 0, 0}, {11, INPUT_PULLUP, 0, 0}, {40, INPUT_PULLUP, 0, 0}, {6, OUTPUT, 0, 0}, Serial2 };
+readerPins rd2Pins = { {32, OUTPUT, 0, 0}, {26, OUTPUT, 0, 0}, {12, INPUT_PULLUP, 0, 0}, {30, INPUT_PULLUP, 0, 0}, {39, INPUT_PULLUP, 0, 0}, {27, OUTPUT, 0, 0}, Serial7 };
 int Rs485TermPin = 31; // no need for termination, set to low
-int Rd1Rs485De = 6; // no need for termination, set to low
-int Rd2Rs485De = 27;
+// int Rd1Rs485De = 6; // no need for termination, set to low
+// int Rd2Rs485De = 27;
 int rl1pin = 23;
 int rl2pin = 3;
 int rl3pin = 33;
@@ -46,10 +46,10 @@ int sp3pin = 19;
 int sp4pin = 15;
 
 int main() {
-    pinMode(Rd1Rs485De, OUTPUT);
-    digitalWrite(Rd1Rs485De, LOW);
-    pinMode(Rd2Rs485De, OUTPUT);
-    digitalWrite(Rd2Rs485De, LOW);
+    // pinMode(Rd1Rs485De, OUTPUT);
+    // digitalWrite(Rd1Rs485De, LOW);
+    // pinMode(Rd2Rs485De, OUTPUT);
+    // digitalWrite(Rd2Rs485De, LOW);
     pinMode(Rs485TermPin, OUTPUT);
     digitalWrite(Rs485TermPin, LOW);
     pinMode(WATCHDOG_LED, OUTPUT);
