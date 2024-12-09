@@ -51,12 +51,6 @@ module.exports = class IctTestRunner {
         regulators.init();
         let ret = true;
         try {
-            if (process.env.productName === 'mnplus') {
-                const mnp = new MnpTests(this.logger);
-                await mnp.begin();
-                await mnp.run();
-            }
-
             await common.initializeTestFixture(programmer, initAndQuit, this.stm32, this.m1Dev, this.logger, initAndQuit);
             if (initAndQuit) return;
             await regulators.checkLeverState(this.logger, this.db);
@@ -71,7 +65,13 @@ module.exports = class IctTestRunner {
                 this.db.updateErrorCode(process.env.serial, errorCodes.codes['STM'].errorCode, 'E');
                 throw err;
             }
-
+            // ////////////////
+            if (process.env.productName === 'mnplus') {
+                const mnp = new MnpTests(this.db, this.logger);
+                await mnp.begin();
+                if (!await mnp.run()) ret = false;
+            }
+            // ///////////////
             if (process.env.productName === 'mnplus') if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db)) ret = false;
             if (!skipTestpointCheck) if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db)) ret = false;
             if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger, this.db)) ret = false;
@@ -89,10 +89,10 @@ module.exports = class IctTestRunner {
             if (!await eeprom.checkEEPROM(this.logger, this.db)) ret = false;
             if (!process.env.productName) if (!await battery.test(this.logger, this.db)) ret = false;
 
-            if (process.env.productName === 'mnplus') {
-                const mnp = new MnpTests(this.logger);
+            if (process.env.productName === 'mnplus1') {
+                const mnp = new MnpTests(this.db, this.logger);
                 await mnp.begin();
-                await mnp.run();
+                if (!await mnp.run()) ret = false;
             }
 
             if (ret) {
@@ -109,7 +109,7 @@ module.exports = class IctTestRunner {
             process.exit(exitCodes.ictTestFailed);
         }
         catch (err) {
-            this.logger.error(err.message);
+            this.logger.error(err.stack);
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();
             process.exit(exitCodes.ictTestFailed);

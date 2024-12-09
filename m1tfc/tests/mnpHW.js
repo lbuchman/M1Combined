@@ -47,6 +47,10 @@ const mnpIOMap = [
     { port: 'K', pin: 0, mode: 'input', name: 'nPoEP_PSE', testPoint: 'na' },
 ];
 
+function getIoMap() {
+    return mnpIOMap;
+}
+
 function getCommand(action, signalNameOrTespoint, value, log) {
     if (action === 'printio') {
         mnpIOMap.forEach((item) => {
@@ -80,5 +84,6 @@ function getCommand(action, signalNameOrTespoint, value, log) {
 }
 
 module.exports = {
-    getCommand
+    getCommand,
+    getIoMap
 };

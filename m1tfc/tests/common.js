@@ -48,6 +48,7 @@ async function getICTFWRev(retries) {
         catch (err) {
             await delay(500);
         }
+        await delay(500);
         return getICTFWRev(retries - 1);
     }
     throw new Error('cannot get rev from M1 ict fw');

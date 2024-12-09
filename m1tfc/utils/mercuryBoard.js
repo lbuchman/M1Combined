@@ -14,7 +14,7 @@ module.exports = class MercuryBoardLink {
     }
 
     async begin() {
-        this.udpDgram.startServer();
+        await this.udpDgram.startServer();
     }
 
     async sendCommand(cmd, arg) {
