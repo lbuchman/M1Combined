@@ -81,12 +81,12 @@ module.exports = class MnpTests {
             let testPassed = true;
             if (thisIo.pinType === 'OUTPUT') {
                 // eslint-disable-next-line no-await-in-loop
-                if (!await this.testOutputLogicalState(thisIo, thisMnpIo, 0, thisIo.inverted)) {
+                if (!await this.testOutputLogicalState(thisIo, thisMnpIo, 1, thisIo.inverted)) {
                     ret = false;
                     testPassed = false;
                 }
                 // eslint-disable-next-line no-await-in-loop
-                if (!await this.testOutputLogicalState(thisIo, thisMnpIo, 1, thisIo.inverted)) {
+                if (!await this.testOutputLogicalState(thisIo, thisMnpIo, 0, thisIo.inverted)) {
                     ret = false;
                     testPassed = false;
                 }
@@ -94,12 +94,12 @@ module.exports = class MnpTests {
             }
             else {
                 // eslint-disable-next-line no-await-in-loop
-                if (!await this.testInputLogicalState(thisIo, thisMnpIo, 0, thisIo.inverted)) {
+                if (!await this.testInputLogicalState(thisIo, thisMnpIo, 1, thisIo.inverted)) {
                     ret = false;
                     testPassed = false;
                 }
                 // eslint-disable-next-line no-await-in-loop
-                if (!await this.testInputLogicalState(thisIo, thisMnpIo, 1, thisIo.inverted)) {
+                if (!await this.testInputLogicalState(thisIo, thisMnpIo, 0, thisIo.inverted)) {
                     ret = false;
                     testPassed = false;
                 }
