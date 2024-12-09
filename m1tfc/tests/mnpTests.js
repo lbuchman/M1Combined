@@ -113,15 +113,15 @@ module.exports = class MnpTests {
             this.logger.error(`Failed OSDP Rd1 Test error: ${osdp1TestStatus.error}`);
         }
         else {
-            this.logger.info('Passed OSDP1` Test');
+            this.logger.info('Passed OSDP1 Test');
         }
         if (!osdp2TestStatus) {
             ret = false;
             this.logger.error(`Failed OSDP Rd1 Test error: ${osdp2TestStatus.error}`);
-        } 
+        }
         else {
-            this.logger.info('Passed OSDP2` Test');
-        } 
+            this.logger.info('Passed OSDP2 Test');
+        }
         return ret;
     }
 };
