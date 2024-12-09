@@ -18,6 +18,25 @@ module.exports = class MercuryBoardLink {
     }
 
     async sendCommand(cmd, arg) {
+        let count;
+        let ret = { status: false };
+        /* eslint-disable no-restricted-syntax */
+        // eslint-disable-next-line no-plusplus
+        for (count = 0; count <= 3; count++) {
+            try {
+                 // eslint-disable-next-line no-await-in-loop
+                ret = await this.sendCommandRaw(cmd, arg);
+                if (ret.status !== true) throw (new Error(`command ${cmd} ${arg} failed, ${ret.error}`));
+                return ret;
+            }
+            catch (err) {
+                if (count === 3) throw (err);
+            }
+        }
+        return ret;
+    }
+
+    async sendCommandRaw(cmd, arg) {
         this.udpDgram.sendTo(this.mercuryBoardIpAddress, { cmd, arg });
         let count = 20;
         return new Promise((resolve, reject) => {

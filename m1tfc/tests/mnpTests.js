@@ -1,6 +1,6 @@
 'use strict';
 
-const MercuryBoard = require('../utils/mercuryBoard');
+const MercurlBoard = require('../utils/mercuryBoard');
 const mnpHwIo = require('../tests/mnpHW');
 const targetICTLink = require('../src/m1ICTLink');
 const errorCodes = require('../bin/errorCodes');
@@ -23,24 +23,24 @@ module.exports = class MnpTests {
             { name: 'Rd2Gled', pinType: 'INPUT', cmdRead: 'rd2gled', pinN: 30, mnpPinName: 'RD2_GLED', inverted: 0 },
             { name: 'Rd2bz', pinType: 'INPUT', cmdRead: 'rd2bz', pinN: 39, mnpPinName: 'WGD2_BPR', inverted: 0 },
             // Relay 1
-            { name: 'ry1', pinType: 'INPUT', cmdRead: 'ry1', pinN: 23, mnpPinName: 'RLY1_EN', inverted: 1 },
+            { name: 'rl1', pinType: 'INPUT', cmdRead: 'rl1', pinN: 23, mnpPinName: 'RLY1_EN', inverted: 0 },
             // Relay 2
-            { name: 'ry2', pinType: 'INPUT', cmdRead: 'ry2', pinN: 3, mnpPinName: 'RLY1_EN', inverted: 1 },
+            { name: 'rl2', pinType: 'INPUT', cmdRead: 'rl2', pinN: 3, mnpPinName: 'RLY2_EN', inverted: 0 },
             // Relay 3
-            // { name: 'ry3', pinType: 'INPUT', cmdRead: 'ry3', pinN: 33, mnpPinName: 'RLY1_EN', inverted: true },
+            { name: 'rl3', pinType: 'INPUT', cmdRead: 'rl3', pinN: 33, mnpPinName: 'RLY3_EN', inverted: 0 },
             // Relay 4
-            // { name: 'ry4', pinType: 'INPUT', cmdRead: 'ry4', pinN: 37, mnpPinName: 'RLY1_EN', inverted: true }
+            { name: 'rl4', pinType: 'INPUT', cmdRead: 'rl4', pinN: 37, mnpPinName: 'RLY4_EN', inverted: 0 }
         ];
     }
 
 
     async begin() {
-        this.mercuryBoard = new MercuryBoard(this.logger);
-        await this.mercuryBoard.begin();
+        this.mercurlBoard = new MercurlBoard(this.logger);
+        await this.mercurlBoard.begin();
     }
 
     async testOutputLogicalState(thisIo, thisMnpIo, value, inverted) {
-        await this.mercuryBoard.sendCommand(thisIo.cmdWrite, value);
+        await this.mercurlBoard.sendCommand(thisIo.cmdWrite, value);
         const command = mnpHwIo.getCommand('read', thisMnpIo.name, value, this.logger);
         const ret = await targetICTLink.sendCommand(command);
         // eslint-disable-next-line no-bitwise
@@ -56,7 +56,7 @@ module.exports = class MnpTests {
     async testInputLogicalState(thisIo, thisMnpIo, value, inverted) {
         const command = mnpHwIo.getCommand('write', thisMnpIo.name, value, this.logger);
         await targetICTLink.sendCommand(command);
-        const ret = await this.mercuryBoard.sendCommand(thisIo.cmdRead, null);
+        const ret = await this.mercurlBoard.sendCommand(thisIo.cmdRead, null);
 
         // eslint-disable-next-line no-bitwise
         if (ret.value !== (value ^ inverted)) {
