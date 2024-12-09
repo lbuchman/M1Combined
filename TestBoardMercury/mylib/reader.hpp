@@ -23,6 +23,7 @@ class Reader {
             digitalWrite(pins.d1.pinN, pins.d1.defValue);
             prefix = _prefix;
             pins.serial.begin(115200);
+            osdpTask.enable();
         }
 
         int getRLedPin() {
@@ -145,7 +146,7 @@ class Reader {
             stream.printf("\t{\"cmd\": \"%s\", \"status\": true, \"value\": %d }\n\r", args[0], value);
             return 1;
         };
-        Task watchdogTaskHw{TASK_MILLISECOND, TASK_FOREVER, function<void()> ([this](void) -> void {
+        Task osdpTask{TASK_MILLISECOND, TASK_FOREVER, function<void()> ([this](void) -> void {
             if (pins.serial.available()) {
                 char inChar = pins.serial.read();
                 pins.serial.write(inChar);

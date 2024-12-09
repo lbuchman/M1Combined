@@ -258,17 +258,17 @@ int main() {
         uint32_t UartAddress = STM32MP1Disco::MNP_Rd1UART;
         Board::MNP_Rd1Te.high();
 
-        while(Uart<Board::Rx485UART>::available()) Uart<Board::Rx485UART>::readChar();
+        while(Uart<Board::MNP_Rd1UART>::available()) Uart<Board::MNP_Rd1UART>::readChar();
         for(int count = 0x30; count < 0x33; count++) {
-            Uart<Board::Rx485UART>::putchar(count);
+            Uart<Board::MNP_Rd1UART>::putchar(count);
             int timeout = 10;
 
-            while(timeout > 0 && !Uart<Board::Rx485UART>::available()) {
+            while(timeout > 0 && !Uart<Board::MNP_Rd1UART>::available()) {
                 timeout -= 1;
                 udelay(1000);
             };
 
-            char ret = Uart<Board::Rx485UART>::readChar();
+            char ret = Uart<Board::MNP_Rd1UART>::readChar();
 
             if(ret != count) {
                 stream.printf("{ \"status\": false,  \"error\": \"no reply match send = %d rec = %d\" }\n\r", count, ret);
@@ -290,17 +290,17 @@ int main() {
         uint32_t UartAddress = STM32MP1Disco::MNP_Rd2UART;
         Board::MNP_Rd2Te.high();
 
-        while(Uart<Board::Rx485UART>::available()) Uart<Board::Rx485UART>::readChar();
+        while(Uart<Board::MNP_Rd2UART>::available()) Uart<Board::MNP_Rd2UART>::readChar();
         for(int count = 0x30; count < 0x33; count++) {
-            Uart<Board::Rx485UART>::putchar(count);
+            Uart<Board::MNP_Rd2UART>::putchar(count);
             int timeout = 10;
 
-            while(timeout > 0 && !Uart<Board::Rx485UART>::available()) {
+            while(timeout > 0 && !Uart<Board::MNP_Rd2UART>::available()) {
                 timeout -= 1;
                 udelay(1000);
             };
 
-            char ret = Uart<Board::Rx485UART>::readChar();
+            char ret = Uart<Board::MNP_Rd2UART>::readChar();
 
             if(ret != count) {
                 stream.printf("{ \"status\": false,  \"error\": \"no reply match send = %d rec = %d\" }\n\r", count, ret);
