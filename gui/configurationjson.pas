@@ -54,7 +54,7 @@ begin
   except
     on E: Exception do
     begin
-      config.error := '2 ' + E.Message;
+      config.error := '2 ' + configFileName;
       exit(false);
     end;
   end;

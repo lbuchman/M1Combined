@@ -1,5 +1,5 @@
 object aboutForm: TaboutForm
-  Left = 154
+  Left = 963
   Height = 266
   Top = 398
   Width = 1488
@@ -39,8 +39,8 @@ object aboutForm: TaboutForm
     Left = 17
     Height = 30
     Top = 86
-    Width = 272
-    Caption = 'M1-3200 firmware version'
+    Width = 217
+    Caption = 'M1 firmware version'
     Font.Height = -21
     Font.Name = 'Sans'
     Font.Style = [fsBold]
@@ -84,13 +84,14 @@ object aboutForm: TaboutForm
     ParentFont = False
   end
   object Label3: TLabel
-    Left = 17
-    Height = 30
-    Top = 29
-    Width = 195
-    Caption = 'LenelS2 Test Fixture'
-    Font.Height = -21
+    Left = 304
+    Height = 49
+    Top = 0
+    Width = 293
+    Caption = 'SW/FW Revisions'
+    Font.Height = -35
     Font.Name = 'Sans'
+    Font.Style = [fsBold]
     ParentColor = False
     ParentFont = False
   end
