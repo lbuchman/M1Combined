@@ -14,6 +14,7 @@ type
     Logdir: string;
     ProductName: String;
     fwDir: String;
+    error: String;
   end;
 
 
@@ -38,7 +39,10 @@ begin
     strList := TStringList.Create();
     strList.LoadFromFile(configFileName);
   except
-    on E: Exception do exit(false);
+    on E: Exception do begin
+      config.error := '1 ' + configFileName;
+      exit(false);
+    end;
   end;
 
   fileData := strList.Text;
@@ -50,6 +54,7 @@ begin
   except
     on E: Exception do
     begin
+      config.error := '2 ' + E.Message;
       exit(false);
     end;
   end;

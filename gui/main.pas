@@ -226,7 +226,8 @@ begin
   ClearBusyFlag;
   doOnes := True;
   if ReadConfigFile = False then begin
-    ShowMessage('Mising Configfile');
+    configuration := ConfigurationGet;
+    ShowMessage('Mising Configfile ' + config.error);
     Application.Terminate;
    end;
   configuration := ConfigurationGet;

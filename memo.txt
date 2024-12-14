@@ -9,6 +9,6 @@ Missing
 2. USB drive flash
 3. M1 bat switch pins check
 
-m1CloudClient/m1CloudClient-linux uploadfw -t /home/lbuchman/m1mtf/m1firmware.txz  -m /home/lbuchman/m1mtf//fsbl.stm32  -s  /home/lbuchman/myGitHub/M1Combined/m1tfd1_1f01cb1d_amd64.snap -c /home/lbuchman/myGitHub/M1Combined/tfcroncli/m1client_e8b7e7c2_amd64.snap
+m1CloudClient/bin/m1CloudClient.js uploadfw -t /home/lbuchman/m1mtf/m1firmware.txz  -m /home/lbuchman/m1mtf//fsbl.stm32  -s  /home/lbuchman/myGitHub/M1Combined/m1tfd1_1f01cb1d_amd64.snap -c /home/lbuchman/myGitHub/M1Combined/tfcroncli/m1client_e8b7e7c2_amd64.snap
 
 INSERT INTO uid (uid) values("58:FC:C8:0F:42:40");
