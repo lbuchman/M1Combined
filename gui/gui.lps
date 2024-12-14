@@ -3,13 +3,14 @@
   <ProjectSession>
     <Version Value="12"/>
     <BuildModes Active="Release"/>
-    <Units Count="14">
+    <Units Count="15">
       <Unit0>
         <Filename Value="gui.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="47" Y="13"/>
+        <EditorIndex Value="3"/>
+        <CursorPos Y="19"/>
         <UsageCount Value="227"/>
+        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="main.pas"/>
@@ -17,10 +18,8 @@
         <ComponentName Value="mainForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="927"/>
-        <CursorPos X="41" Y="933"/>
+        <TopLine Value="605"/>
+        <CursorPos Y="572"/>
         <UsageCount Value="227"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -40,10 +39,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="logForm"/>
-        <TopLine Value="4"/>
+        <EditorIndex Value="-1"/>
         <CursorPos Y="43"/>
         <UsageCount Value="203"/>
-        <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="logger.pas"/>
@@ -56,9 +54,9 @@
         <Filename Value="configurationjson.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="configurationJson"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="22"/>
-        <CursorPos X="78" Y="55"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="5"/>
+        <CursorPos Y="17"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
       </Unit5>
@@ -68,11 +66,12 @@
         <ComponentName Value="aboutForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <CursorPos X="14" Y="28"/>
+        <TopLine Value="63"/>
+        <CursorPos X="4" Y="81"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="errorreportform.pas"/>
@@ -83,7 +82,7 @@
         <UnitName Value="errorReportForm"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="12" Y="24"/>
-        <UsageCount Value="30"/>
+        <UsageCount Value="38"/>
       </Unit7>
       <Unit8>
         <Filename Value="macutils.pas"/>
@@ -126,133 +125,139 @@
       </Unit12>
       <Unit13>
         <Filename Value="/usr/share/fpcsrc/3.2.2/rtl/objpas/fgl.pp"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="1002"/>
         <CursorPos X="20" Y="1023"/>
-        <UsageCount Value="14"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="15"/>
       </Unit13>
+      <Unit14>
+        <Filename Value="/usr/share/fpcsrc/3.2.2/rtl/objpas/classes/classesh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="590"/>
+        <CursorPos X="27" Y="625"/>
+        <UsageCount Value="10"/>
+      </Unit14>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="main.pas"/>
-        <Caret Line="208" TopLine="178"/>
+        <Filename Value="about.pas"/>
+        <Caret Line="67" TopLine="41"/>
       </Position1>
       <Position2>
-        <Filename Value="main.pas"/>
-        <Caret Line="212" TopLine="178"/>
+        <Filename Value="about.pas"/>
+        <Caret Line="73" TopLine="41"/>
       </Position2>
       <Position3>
-        <Filename Value="configurationjson.pas"/>
-        <Caret Line="36" TopLine="20"/>
+        <Filename Value="about.pas"/>
+        <Caret Line="74" TopLine="41"/>
       </Position3>
       <Position4>
-        <Filename Value="configurationjson.pas"/>
-        <Caret Line="37" TopLine="20"/>
+        <Filename Value="about.pas"/>
+        <Caret Line="75" TopLine="41"/>
       </Position4>
       <Position5>
-        <Filename Value="configurationjson.pas"/>
-        <Caret Line="38" TopLine="20"/>
+        <Filename Value="about.pas"/>
+        <Caret Line="77" TopLine="41"/>
       </Position5>
       <Position6>
-        <Filename Value="configurationjson.pas"/>
-        <Caret Line="39" TopLine="20"/>
+        <Filename Value="about.pas"/>
+        <Caret Line="78" TopLine="41"/>
       </Position6>
       <Position7>
-        <Filename Value="configurationjson.pas"/>
-        <Caret Line="40" TopLine="20"/>
+        <Filename Value="about.pas"/>
+        <Caret Line="67" TopLine="65"/>
       </Position7>
       <Position8>
-        <Filename Value="configurationjson.pas"/>
-        <Caret Line="41" TopLine="20"/>
+        <Filename Value="about.pas"/>
+        <Caret Line="112" TopLine="64"/>
       </Position8>
       <Position9>
-        <Filename Value="configurationjson.pas"/>
-        <Caret Line="39" Column="59" TopLine="20"/>
+        <Filename Value="about.pas"/>
+        <Caret Line="113" TopLine="64"/>
       </Position9>
       <Position10>
-        <Filename Value="configurationjson.pas"/>
-        <Caret Line="43" Column="64" TopLine="20"/>
+        <Filename Value="about.pas"/>
+        <Caret Line="114" TopLine="64"/>
       </Position10>
       <Position11>
-        <Filename Value="configurationjson.pas"/>
-        <Caret Line="49" TopLine="20"/>
+        <Filename Value="about.pas"/>
+        <Caret Line="40" Column="35"/>
       </Position11>
       <Position12>
-        <Filename Value="configurationjson.pas"/>
-        <Caret Line="50" TopLine="20"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="140" TopLine="112"/>
       </Position12>
       <Position13>
-        <Filename Value="configurationjson.pas"/>
-        <Caret Line="48" Column="12" TopLine="20"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="104" Column="46" TopLine="77"/>
       </Position13>
       <Position14>
-        <Filename Value="configurationjson.pas"/>
-        <Caret Line="52" TopLine="20"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="458" TopLine="430"/>
       </Position14>
       <Position15>
         <Filename Value="configurationjson.pas"/>
-        <Caret Line="23" Column="120" TopLine="20"/>
+        <Caret Line="36" TopLine="9"/>
       </Position15>
       <Position16>
         <Filename Value="main.pas"/>
-        <Caret Line="208" TopLine="190"/>
+        <Caret Line="227" Column="38" TopLine="192"/>
       </Position16>
       <Position17>
         <Filename Value="main.pas"/>
-        <Caret Line="209" TopLine="190"/>
+        <Caret Line="232" TopLine="210"/>
       </Position17>
       <Position18>
-        <Filename Value="main.pas"/>
-        <Caret Line="210" TopLine="190"/>
+        <Filename Value="about.pas"/>
+        <Caret Line="39" TopLine="10"/>
       </Position18>
       <Position19>
         <Filename Value="main.pas"/>
-        <Caret Line="211" TopLine="190"/>
+        <Caret Line="233" TopLine="211"/>
       </Position19>
       <Position20>
         <Filename Value="main.pas"/>
-        <Caret Line="212" TopLine="190"/>
+        <Caret Line="478" Column="46" TopLine="476"/>
       </Position20>
       <Position21>
         <Filename Value="main.pas"/>
-        <Caret Line="213" TopLine="190"/>
+        <Caret Line="233" TopLine="598"/>
       </Position21>
       <Position22>
-        <Filename Value="main.pas"/>
-        <Caret Line="208" Column="10" TopLine="202"/>
+        <Filename Value="configurationjson.pas"/>
+        <Caret Line="17" TopLine="5"/>
       </Position22>
       <Position23>
         <Filename Value="main.pas"/>
-        <Caret Line="215" Column="44" TopLine="181"/>
+        <Caret Line="212" Column="38" TopLine="194"/>
       </Position23>
       <Position24>
         <Filename Value="main.pas"/>
-        <Caret Line="181" Column="76" TopLine="186"/>
+        <Caret Line="214" Column="38" TopLine="196"/>
       </Position24>
       <Position25>
         <Filename Value="main.pas"/>
-        <Caret Line="217" TopLine="186"/>
+        <Caret Line="576" Column="6" TopLine="559"/>
       </Position25>
       <Position26>
-        <Filename Value="about.pas"/>
-        <Caret Line="51" TopLine="38"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="486" Column="3" TopLine="472"/>
       </Position26>
       <Position27>
         <Filename Value="main.pas"/>
-        <Caret Line="435" Column="34" TopLine="433"/>
+        <Caret Line="455" TopLine="453"/>
       </Position27>
       <Position28>
-        <Filename Value="about.pas"/>
-        <Caret Line="25" Column="5"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="573" Column="30" TopLine="571"/>
       </Position28>
       <Position29>
-        <Filename Value="about.pas"/>
-        <Caret Line="28" Column="14"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="572" Column="30" TopLine="570"/>
       </Position29>
       <Position30>
         <Filename Value="main.pas"/>
-        <Caret Line="195" Column="28" TopLine="192"/>
+        <Caret Line="571" Column="30" TopLine="569"/>
       </Position30>
     </JumpHistory>
     <RunParams>
@@ -276,6 +281,13 @@
         <WatchScope Value="wpsGlobal"/>
         <WatchKind Value="wpkWrite"/>
         <InitialEnabled Value="False"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="configurationjson.pas"/>
+        <Line Value="50"/>
       </Item>
     </BreakPoints>
     <Watches>

@@ -30,15 +30,10 @@ function ReadConfigFile: boolean;
 var
   strList: TStringList;
   fileData: String;
-  user: string;
   configFileName: string;
-  envVarName: string;
   jData: TJSONData;
 begin
-  envVarName := 'HOME';
-  user := GetEnvironmentVariable('USER');
-  if user = '' then configFileName := '/var/snap/m1tfd1/current/config.json'
-  else configFileName := GetEnvironmentVariable('HOME') + '/snap_data/config.json';
+  configFileName := '/var/snap/m1tfd1/current/config.json';
   try
     strList := TStringList.Create();
     strList.LoadFromFile(configFileName);
@@ -51,8 +46,7 @@ begin
    try
     jData := GetJSON(fileData);
     config.productName := jdata.FindPath('productName').asString;
-    config.fwDir := jdata.FindPath('fwDir').asString;
-    config.fwDir := GetEnvironmentVariable('HOME') + '/m1mtf/' + config.fwDir;
+    config.fwDir := GetEnvironmentVariable('HOME') + '/m1mtf/' + jdata.FindPath('fwDir').asString;
   except
     on E: Exception do
     begin

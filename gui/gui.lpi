@@ -47,10 +47,9 @@
           </CodeGeneration>
           <Linking>
             <Debugging>
-              <DebugInfoType Value="dsDwarf3"/>
-              <UseHeaptrc Value="True"/>
+              <DebugInfoType Value="dsDwarf2"/>
               <TrashVariables Value="True"/>
-              <UseExternalDbgSyms Value="True"/>
+              <UseValgrind Value="True"/>
             </Debugging>
             <Options>
               <Win32>

@@ -17,13 +17,10 @@ const
   precheckHWFailed = 15;
   OtpIsNotBlank = 10;
   EepromIsntBlank = 11;
-  App_Dir = '/home/lenel/m1mtf/';
   Interval7Days = (24 * 60 * 60 * 7);
   UpdateFwTimeStamp = 'UpdateFwTimeStamp.txt';
   UpdateSycretsTimeStamp = 'UpdateSycretsTimeStamp.txt';
   UpdateLogsTimeStamp = 'UpdateLogsTimeStamp.txt';
-
-  var FW_Dir: String;
 
 type
   TMethodPtr = procedure(Sender: TObject) of object;
@@ -48,6 +45,7 @@ type
   { TmainForm }
 
   TmainForm = class(TForm)
+    Revs: TMenuItem;
     PushSecretsMenuItem: TMenuItem;
     PushLogsMenuItem: TMenuItem;
     SyncFailedLabel: TLabel;
@@ -55,7 +53,6 @@ type
     StopTestClick: TAction;
     QuitClick: TAction;
     AppsCheckSwitch: TindLed;
-    AbountMenuItem: TMenuItem;
     Re_TestMenuItem1: TMenuItem;
     CommissionClick: TAction;
     FakeLed: TindLed;
@@ -94,15 +91,14 @@ type
     TestTumer: TTimer;
     SyncLelLedTimer: TTimer;
     SyncLabelLedTimer: TTimer;
-    procedure AbountMenuItemClick(Sender: TObject);
-    procedure Action2Execute(Sender: TObject);
+    procedure AboutMenuItemClick(Sender: TObject);
     procedure CheckCloudUpdateTimerTimer(Sender: TObject);
-    procedure CloudMenuItemClick(Sender: TObject);
-    procedure LogsMenuItemClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure MenuItem1Click(Sender: TObject);
     procedure PushLogsMenuItemClick(Sender: TObject);
     procedure PushSecretsMenuItemClick(Sender: TObject);
+    procedure RevsClick(Sender: TObject);
     procedure Re_TestMenuItem1Click(Sender: TObject);
-    procedure OpenLogExecute(Sender: TObject);
     procedure PublishLogMenuItemClick(Sender: TObject);
     procedure Panel1DblClick(Sender: TObject);
     function DoLabelSwitchClick(Sender: TObject): integer;
@@ -143,11 +139,13 @@ type
     configuration: TConfigration;
     Tests: array[0..6] of TestRecord;
     DebugLevel: string;
+    fwVersionFile: String;
 
     function GetDateTimeFromFile(filename: string): TDateTime;
     function RunM1Tfc(command: string; arg: array of string; var Led: TindLed): integer;
     function CheckSerialBarcodeScan(serial: ansistring): boolean;
     procedure RunTests(tMode: TestingMode; modeStr: ansistring);
+    function ReadThisFile(FileName: string): string;
   public
     newData: string;
     procedure DoCleanupCmd();
@@ -175,24 +173,41 @@ implementation
 
 { TmainForm }
 
+function TmainForm.ReadThisFile(FileName: string): string;
+var
+  f: TextFile;
+  OneLine: string;
+begin
+  Result := '';
+  assignFile(f, FileName);
+  reset(f);
+  while not EOF(f) do
+  begin
+    readln(f, OneLine);
+    Result := OneLine;
+    closefile(f);
+    exit;
+  end;
+end;
+
+
+
 function TmainForm.GetDateTimeFromFile(filename: string): TDateTime;
 var
   myDateTimeVariable: TDateTime;
   FS: TFormatSettings;
   dateTimeFromFile: string;
   filePath: string;
-  stringList: TStringList;
 begin
   dateTimeFromFile := '2023-01-24 21:20:08';
-  stringList := TStringList.Create;
+  filePath := GetEnvironmentVariable('HOME') + '/m1mtf/' + filename;
   try
-    filePath := App_Dir + filename;
-    stringList.LoadFromFile(filePath);
-    dateTimeFromFile := stringList.Text;
+      dateTimeFromFile := ReadThisFile(filePath);
   except
-    on E: Exception do dateTimeFromFile := '2023-01-24 21:20:08';
+      on E: Exception do dateTimeFromFile := '2023-01-24 21:20:08';
   end;
-  stringList.Free;
+  if dateTimeFromFile = '' then dateTimeFromFile := '2023-01-24 21:20:08';
+
   FS := DefaultFormatSettings;
   FS.DateSeparator := '-';
   FS.ShortDateFormat := 'yyyy-mm-dd';
@@ -210,9 +225,12 @@ begin
   testStatus := True;
   ClearBusyFlag;
   doOnes := True;
-  if ReadConfigFile = false then Application.Terminate;
+  if ReadConfigFile = False then begin
+    ShowMessage('Mising Configfile');
+    Application.Terminate;
+   end;
   configuration := ConfigurationGet;
-  FW_Dir:= configuration.fwDir + '/VERSION';
+  fwVersionFile := configuration.fwDir + '/VERSION';
   SyncFailedLabel.Font.Color := clRed;
   Tests[0] := MakeTestRecord('ICT', 5, TMethodPtr(@ICTTestSwitchClick),
     @ICTTestSwitch, True);
@@ -236,12 +254,12 @@ begin
 
   pid := IntToStr(system.GetProcessID);
   with TStringList.Create do
-    try
-      Add(pid);
-      SaveToFile(GetEnvironmentVariable('HOME') + '/m1mtf/m1tfd1app.pid');
-    finally
-      Free;
-    end;
+  try
+    Add(pid);
+    SaveToFile(GetEnvironmentVariable('HOME') + '/m1mtf/m1tfd1app.pid');
+  finally
+    Free;
+  end;
 end;
 
 procedure TmainForm.SetTestStatusFailed;
@@ -378,17 +396,17 @@ begin
   try
     if serial.Length <> 10 then raise BarcodeException.Create('Invalid Barcode Scan');
     str := AnsiMidStr(serial, 1, 2);
-    Case str of
-     '30' : begin
-       WriteLn ('A pressed');
-       ret := 'M1';
-     end;
-     '32' : begin
-       WriteLn ('B pressed');
-       ret := 'MNP';
-     end
-    else
-      raise BarcodeException.Create('Invalid Barcode Scan');
+    case str of
+      '30': begin
+        WriteLn('A pressed');
+        ret := 'M1';
+      end;
+      '32': begin
+        WriteLn('B pressed');
+        ret := 'MNP';
+      end
+      else
+        raise BarcodeException.Create('Invalid Barcode Scan');
     end;
 
     str := AnsiMidStr(serial, 3, 2);
@@ -430,15 +448,9 @@ begin
   Result := True;
 end;
 
-procedure TmainForm.AbountMenuItemClick(Sender: TObject);
+procedure TmainForm.AboutMenuItemClick(Sender: TObject);
 begin
-  aboutForm.SetFwDirectory(fw_dir);
-  aboutForm.ShowModal;
-end;
-
-procedure TmainForm.Action2Execute(Sender: TObject);
-begin
-
+   aboutForm.ShowModal;
 end;
 
 procedure TmainForm.CheckCloudUpdateTimerTimer(Sender: TObject);
@@ -446,7 +458,6 @@ var
   epochTime: int64;
   epochTimeNow: int64;
   dateTimeNow: TDateTime;
-  dateTimeFromFile: TDateTime;
 begin
   blinkMe := False;
   dateTimeNow := Now;
@@ -459,25 +470,18 @@ begin
   epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateLogsTimeStamp));
   if (epochTimeNow - epochTime) > Interval7Days then blinkMe := True;
 
-end;
-
-procedure TmainForm.CloudMenuItemClick(Sender: TObject);
-begin
+  GetDateTimeFromFile(UpdateSycretsTimeStamp);
 
 end;
 
-procedure TmainForm.LogsMenuItemClick(Sender: TObject);
-var
-  homeEnv: string;
-  envVarName: string;
+procedure TmainForm.FormShow(Sender: TObject);
 begin
-  envVarName := 'HOME';
-  homeEnv := GetEnvironmentVariable(envVarName);
-  LogsOpenDialog1.InitialDir := homeEnv + DirectorySeparator + 'm1mtf/logs';
-  if LogsOpenDialog1.Execute then
-  begin
-    Memo1.Lines.LoadFromFile(LogsOpenDialog1.Filename);
-  end;
+    aboutForm.SetFwDirectory(fwVersionFile);
+end;
+
+procedure TmainForm.MenuItem1Click(Sender: TObject);
+begin
+
 end;
 
 procedure TmainForm.PushLogsMenuItemClick(Sender: TObject);
@@ -562,6 +566,11 @@ begin
   aLocalProcess := nil;
 end;
 
+procedure TmainForm.RevsClick(Sender: TObject);
+begin
+     aboutForm.ShowModal;
+end;
+
 procedure TmainForm.Re_TestMenuItem1Click(Sender: TObject);
 begin
   if busyFlag then exit;
@@ -575,11 +584,6 @@ begin
   ColorProgress1.progress := 0;
   RunTests(TestingMode.re_test, 'Re-test');
   targetVendorSerial.Text := '';
-end;
-
-procedure TmainForm.OpenLogExecute(Sender: TObject);
-begin
-  LogsMenuItemClick(Sender);
 end;
 
 procedure TmainForm.PublishLogMenuItemClick(Sender: TObject);
@@ -641,12 +645,12 @@ begin
     exit;
   end;
   with TStringList.Create do
-    try
-      LoadFromFile(FW_Dir);
-      Memo1.Lines.Add(logger.log('info', 'eMMC', 'Programming FW Rev: ' + Text));
-    finally
-      Free;
-    end;
+  try
+    LoadFromFile(fwVersionFile);
+    Memo1.Lines.Add(logger.log('info', 'eMMC', 'Programming FW Rev: ' + Text));
+  finally
+    Free;
+  end;
 
   FlashSwitch.LedValue := False;
   arg[0] := '-s';
@@ -1178,7 +1182,8 @@ begin
 
   if (testReturnStatus <> NormalExit) and (testReturnStatus <> ProcessTerminated) then
   begin
-    if testReturnStatus <> precheckHWFailed then begin
+    if testReturnStatus <> precheckHWFailed then
+    begin
       DoLabelError;
       ErrorForm.ShowModal;
     end;
@@ -1190,9 +1195,9 @@ begin
     Memo1.Lines.Add(logger.log('info', modeStr, 'Success! All Done'));
     ShowMessage('Test Success!');
   end;
- // else
- //   ShowMessage('Test Failed!');
-    TestMode := TestingMode.none;
+  // else
+  //   ShowMessage('Test Failed!');
+  TestMode := TestingMode.none;
 
 end;
 

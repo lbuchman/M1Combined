@@ -19,13 +19,12 @@ type
     m1FirmwareVersion: TLabel;
     m1tfd1Version: TLabel;
     m1ClientVersion: TLabel;
-    procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
-    fw_directory: String;
+    fwVersionFile: String;
     procedure GetRevision(Sender: TObject; snapName: string);
   public
-   procedure SetFwDirectory(value: string);
+   procedure SetFwDirectory(fw_VersionFile: string);
   end;
 
 var
@@ -36,9 +35,9 @@ implementation
 {$R *.lfm}
 
 
-procedure TaboutForm.SetFwDirectory(value: string);
+procedure TaboutForm.SetFwDirectory(fw_VersionFile: string);
 begin
- fw_directory := value;
+ fwVersionFile := fw_VersionFile;
 end;
 
 procedure TaboutForm.GetRevision(Sender: TObject; snapName: string);
@@ -74,6 +73,10 @@ begin
   if BytesRead >= bufferSize then Buffer[bufferSize - 1] := 0
   else
     Buffer[BytesRead] := 0;
+  if BytesRead = 0 then begin
+     AProcess.Free;
+     exit;
+  end;
 
   Sleep(50);
   textToSee := '';
@@ -107,14 +110,9 @@ begin
   GetRevision(m1tfd1Version, 'm1tfd1');
   GetRevision(m1ClientVersion, 'm1client');
   tempStringList := TStringList.Create;
-  tempStringList.LoadFromFIle(fw_directory);
+  tempStringList.LoadFromFIle(fwVersionFile);
   m1FirmwareVersion.Caption := tempStringList[0];
   tempStringList.Free;
-
-end;
-
-procedure TaboutForm.FormCreate(Sender: TObject);
-begin
 
 end;
 
