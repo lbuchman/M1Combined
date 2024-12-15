@@ -36,7 +36,7 @@ function syncFiles(blobSvc, container, files) {
                     reject(err);
                 }
                 else {
-                     resolve();
+                    resolve();
                 }
             });
         });

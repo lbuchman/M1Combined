@@ -27,7 +27,7 @@ const debuglevel = '2';
 
 const UpdateFwTimeStamp = 'UpdateFwTimeStamp.txt';
 const UpdateSycretsTimeStamp = 'UpdateSycretsTimeStamp.txt';
-const UpdateLogsTimeStamp = 'UpdateLogsTimeStamp.txt'; 
+const UpdateLogsTimeStamp = 'UpdateLogsTimeStamp.txt';
 
 if (!process.env.VERSION) process.env.VERSION = '123456';
 
@@ -49,7 +49,6 @@ program.command('update')
             os.executeShellCommand(`sudo sed -i '${str}' /etc/crontab`, logfile);
             const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
             dir = configData.m1mtfDir;
-            secretsContainer = `${configData.productName}secrets`;
             logfile = logger.getLogger('m1cli', 'update', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
             logfile.info('Checking for SW & FW update ...');
             blobSvc = azure.createBlobService(configData.conString);
@@ -126,7 +125,7 @@ program.command('synclogs')
         const matches = glob.sync(`${configData.m1mtfDir}/logs/*.txz`, { nonull: false, realpath: true });
         const logfile = logger.getLogger('m1cli', 'synclogs', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         const blobSvc = azure.createBlobService(configData.conString);
-        
+
         if (!matches.length) {
             logfile.info('No log files to upload');
             fs.writeFileSync(`${configData.m1mtfDir}/${UpdateLogsTimeStamp}`, dateNow);
@@ -156,8 +155,7 @@ program.command('synclogs')
                 logfile.error(err.message);
             }
         });
-        if (noError)  fs.writeFileSync(`${configData.m1mtfDir}/${UpdateLogsTimeStamp}`, dateNow);
-
+        if (noError) fs.writeFileSync(`${configData.m1mtfDir}/${UpdateLogsTimeStamp}`, dateNow);
     });
 
 program.command('backupdb')
@@ -209,7 +207,7 @@ program.command('syncsecrets')
     .description('sync M1-3200 secrets into Cloud AS')
     .action(async () => {
         const dateNow = os.getDate();
-        const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
+        const configData = await config({ m1mtfDir: '/home/lbuchman/m1mtf' });
         const logfile = logger.getLogger('m1cli', 'syncsecrets', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         secrets.initialize(configData.m1mtfDir, logfile);
         const now = new Date();
@@ -226,6 +224,8 @@ program.command('syncsecrets')
                 return;
             }
             let firstLine = true;
+            secretsContainer = `${configData.productName}-secrets`;
+            logfile.info(`Container: ${secretsContainer}`);
             records.forEach((board) => {
                 if (!board.uid || !board.secret || !board.boardS2Serial) return;
                 const data = {
