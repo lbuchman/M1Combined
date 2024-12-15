@@ -139,7 +139,7 @@ type
     configuration: TConfigration;
     Tests: array[0..6] of TestRecord;
     DebugLevel: string;
-    fwVersionFile: String;
+    fwVersionFile: string;
 
     function GetDateTimeFromFile(filename: string): TDateTime;
     function RunM1Tfc(command: string; arg: array of string; var Led: TindLed): integer;
@@ -202,9 +202,9 @@ begin
   dateTimeFromFile := '2023-01-24 21:20:08';
   filePath := GetEnvironmentVariable('HOME') + '/m1mtf/' + filename;
   try
-      dateTimeFromFile := ReadThisFile(filePath);
+    dateTimeFromFile := ReadThisFile(filePath);
   except
-      on E: Exception do dateTimeFromFile := '2023-01-24 21:20:08';
+    on E: Exception do dateTimeFromFile := '2023-01-24 21:20:08';
   end;
   if dateTimeFromFile = '' then dateTimeFromFile := '2023-01-24 21:20:08';
 
@@ -225,13 +225,6 @@ begin
   testStatus := True;
   ClearBusyFlag;
   doOnes := True;
-  if ReadConfigFile = False then begin
-    configuration := ConfigurationGet;
-    ShowMessage('Mising Configfile ' + config.error);
-    Application.Terminate;
-   end;
-  configuration := ConfigurationGet;
-  fwVersionFile := configuration.fwDir + '/VERSION';
   SyncFailedLabel.Font.Color := clRed;
   Tests[0] := MakeTestRecord('ICT', 5, TMethodPtr(@ICTTestSwitchClick),
     @ICTTestSwitch, True);
@@ -451,7 +444,7 @@ end;
 
 procedure TmainForm.AboutMenuItemClick(Sender: TObject);
 begin
-   aboutForm.ShowModal;
+  aboutForm.ShowModal;
 end;
 
 procedure TmainForm.CheckCloudUpdateTimerTimer(Sender: TObject);
@@ -477,7 +470,14 @@ end;
 
 procedure TmainForm.FormShow(Sender: TObject);
 begin
-    aboutForm.SetFwDirectory(fwVersionFile);
+  if ReadConfigFile = False then
+  begin
+    ShowMessage('Mising Configfile ' + config.error);
+    Application.Terminate;
+  end;
+  configuration := ConfigurationGet;
+  fwVersionFile := configuration.fwDir + '/VERSION';
+  aboutForm.SetFwDirectory(fwVersionFile);
 end;
 
 procedure TmainForm.MenuItem1Click(Sender: TObject);
@@ -569,7 +569,7 @@ end;
 
 procedure TmainForm.RevsClick(Sender: TObject);
 begin
-     aboutForm.ShowModal;
+  aboutForm.ShowModal;
 end;
 
 procedure TmainForm.Re_TestMenuItem1Click(Sender: TObject);

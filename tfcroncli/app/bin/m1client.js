@@ -49,7 +49,7 @@ program.command('update')
             os.executeShellCommand(`sudo sed -i '${str}' /etc/crontab`, logfile);
             const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
             dir = configData.m1mtfDir;
-            secretsContainer = `${configData.productName}-secrets`;
+            secretsContainer = `${configData.productName}secrets`;
             logfile = logger.getLogger('m1cli', 'update', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
             logfile.info('Checking for SW & FW update ...');
             blobSvc = azure.createBlobService(configData.conString);

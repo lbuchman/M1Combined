@@ -21,10 +21,10 @@ type
     m1ClientVersion: TLabel;
     procedure FormShow(Sender: TObject);
   private
-    fwVersionFile: String;
+    fwVersionFile: string;
     procedure GetRevision(Sender: TObject; snapName: string);
   public
-   procedure SetFwDirectory(fw_VersionFile: string);
+    procedure SetFwDirectory(fw_VersionFile: string);
   end;
 
 var
@@ -37,7 +37,7 @@ implementation
 
 procedure TaboutForm.SetFwDirectory(fw_VersionFile: string);
 begin
- fwVersionFile := fw_VersionFile;
+  fwVersionFile := fw_VersionFile;
 end;
 
 procedure TaboutForm.GetRevision(Sender: TObject; snapName: string);
@@ -73,9 +73,10 @@ begin
   if BytesRead >= bufferSize then Buffer[bufferSize - 1] := 0
   else
     Buffer[BytesRead] := 0;
-  if BytesRead = 0 then begin
-     AProcess.Free;
-     exit;
+  if BytesRead = 0 then
+  begin
+    AProcess.Free;
+    exit;
   end;
 
   Sleep(50);

@@ -47,8 +47,8 @@
           </CodeGeneration>
           <Linking>
             <Debugging>
-              <UseHeaptrc Value="True"/>
               <TrashVariables Value="True"/>
+              <UseValgrind Value="True"/>
               <GenGProfCode Value="True"/>
               <UseExternalDbgSyms Value="True"/>
             </Debugging>

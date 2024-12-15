@@ -53,7 +53,8 @@ sudo apt upgrade
 sudo apt install net-tools openssh-server
 sudo apt install sqlite3 arp-scan curl  python3-pip autossh ethtool imagemagick-6.q16  libusb-1.0-0 cron
 sudo chmod 4755  /usr/sbin/arp-scan
-pip install --upgrade brother_ql
+sudo apt install pipx
+pipx install  brother_ql
 sudo systemctl disable ipp-usb
 sudo systemctl stop ipp-usb
 sudo apt remove ippusbxd
@@ -79,7 +80,7 @@ cp -f 01-network-manager-all.yaml /etc/netplan
 cp -f autossh.service /lib/systemd/system
 systemctl restart autossh
 sed -i 's/20007/'"${SSHPORT}"'/'  /lib/systemd/system/autossh.service
-curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
+curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
 sudo bash /tmp/nodesource_setup.sh
 sudo apt update
 sudo apt  install nodejs
