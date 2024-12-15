@@ -218,13 +218,13 @@ function macToUid(mac) {
 async function printLabel(mac, serial, tsId, dbError, logger) {
     const labelPath = '/tmp/label.txt';
     const pngPath = '/tmp/label.png';
-    let convertCmd = `convert -size 306x150 xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
+    let convertCmd = `convert -size 306x160 xc:white -font "Ubuntu-Mono-Bold" -pointsize 32 -fill black -draw @${labelPath} ${pngPath}`;
     const pritnLabelCmd = `brother_ql print -l 29 ${pngPath}`;
 
     let labelTxt;
 
     if (dbError.length) {
-        convertCmd = `convert -size 306x${150 + 25 * (dbError.length + 1)} xc:white -font "Ubuntu-Mono-Bold" -pointsize 36 -fill black -draw @${labelPath} ${pngPath}`;
+        convertCmd = `convert -size 306x${160 + 25 * (dbError.length + 1)} xc:white -font "Ubuntu-Mono-Bold" -pointsize 32 -fill black -draw @${labelPath} ${pngPath}`;
         labelTxt = `text 1,1 "\nFailed\nM1-3200\n${serial}${tsId}\n`;
         dbError.forEach((item) => {
             labelTxt += `${item}\n`;
