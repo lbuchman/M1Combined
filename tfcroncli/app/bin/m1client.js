@@ -207,7 +207,7 @@ program.command('syncsecrets')
     .description('sync M1-3200 secrets into Cloud AS')
     .action(async () => {
         const dateNow = os.getDate();
-        const configData = await config({ m1mtfDir: '/home/lbuchman/m1mtf' });
+        const configData = await config({ m1mtfDir: '/home/lenel/m1mtf' });
         const logfile = logger.getLogger('m1cli', 'syncsecrets', 'm1cli', `${configData.m1mtfDir}/m1cli`, debuglevel);
         secrets.initialize(configData.m1mtfDir, logfile);
         const now = new Date();
