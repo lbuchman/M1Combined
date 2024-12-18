@@ -205,8 +205,11 @@ program.command('ict')
                         logfile.error('Label Printer is not detected. Check connections and power and retry the test.');
                     }
                 }
+
+                logfile.info(JSON.stringify(configData));
                 const interfaces = await si.networkInterfaces();
-                if (interfaces.find(o => o.iface === 'enp0s31f6') === undefined) {
+                if (!configData.tfInterface) configData.tfInterface = 'enp0s31f6';
+                if (interfaces.find(o => o.iface === configData.tfInterface) === undefined) {
                     startStatusOk = false;
                     logfile.error('Internet Ethernet jack is not plugged. Check connection and retry the test.');
                 }
@@ -215,18 +218,6 @@ program.command('ict')
                     startStatusOk = false;
                     logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
                 }
-            }
-
-            const interfaces = await si.networkInterfaces();
-            if (!configData.tfInterface) configData.tfInterface = 'enp0s31f6';
-            if (interfaces.find(o => o.iface === configData.tfInterface) === undefined) {
-                startStatusOk = false;
-                logfile.error('Internet Ethernet jack is not plugged. Check connection and retry the test.');
-            }
-
-            if (interfaces.find(o => o.ip4 === '192.168.0.100') === undefined) {
-                startStatusOk = false;
-                logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
             }
 
 
