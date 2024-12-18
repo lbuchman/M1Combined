@@ -206,7 +206,6 @@ program.command('ict')
                     }
                 }
 
-                logfile.info(JSON.stringify(configData));
                 const interfaces = await si.networkInterfaces();
                 if (!configData.tfInterface) configData.tfInterface = 'enp0s31f6';
                 if (interfaces.find(o => o.iface === configData.tfInterface) === undefined) {
