@@ -1,5 +1,5 @@
 name: m1tfd1 # you probably want to 'snapcraft register <name>'
-version: "4a2ddf3e"
+version: "01288706"
 summary: M1 test fixture cli utility
 description: |
   cli utility for testing M1-3200 in production
