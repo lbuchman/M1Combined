@@ -81,7 +81,7 @@ module.exports = class IctTestRunner {
             if (!await ddr3.testDDR3Test(ddrblocks, this.logger, this.db)) ret = false;
             this.logger.info('Testing I2C EEPROM ...');
             if (!await eeprom.checkEEPROM(this.logger, this.db)) ret = false;
-            if (!process.env.productName) if (!await battery.test(this.logger, this.db)) ret = false;
+            if (process.env.productName === 'm1-3200') if (!await battery.test(this.logger, this.db)) ret = false;
 
             if (process.env.productName === 'mnplus') {
                 const mnp = new MnpTests(this.db, this.logger);
