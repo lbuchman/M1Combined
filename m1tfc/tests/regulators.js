@@ -57,6 +57,7 @@ function init() {
 }
 
 async function checkLeverState(logger, db) {
+    if (process.env.debug === '2') return true;
     const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(leverLockVoltage.name)}`);
     if (!ret.status) {
         throw new Error(`Test Board control command failed on pinName=${leverLockVoltage.name}, ${ret.error}`);

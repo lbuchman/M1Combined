@@ -193,6 +193,7 @@ program.command('ict')
         let db;
         let startStatusOk = true;
         process.env.productName = configData.productName;
+        process.env.debug = options.debug;
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.mtfDir, options.debug);

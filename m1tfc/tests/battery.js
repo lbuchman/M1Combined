@@ -50,7 +50,9 @@ async function test(logger, db) {
         if (battPresent.value !== 1) throw new Error('nBATT_PRESENT status bit is 1, expected 0');
         if (dcinPresent.value !== 0) throw new Error('nDCIN_PWR status bit is 1, expected 0');
         await testBoardLink.batteryOn(true);
+        await delay(5000);
         await testBoardLink.targetPower(false);
+
         await testBoardLink.batteryLoadOn(true);
 
         logger.info('Testing main 12V power loss');
@@ -67,10 +69,11 @@ async function test(logger, db) {
         if (dcinPresent.value !== 1) throw new Error('nDCIN_PWR status bit is 1, expected 0');
         logger.info('Testing battery charging circuit ...');
         await testBoardLink.targetPower(true);
+        await delay(500);
         battPresent = await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[0].port} ${batteryStateStatusPins[0].pin}`);
         dcinPresent = await await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[1].port} ${batteryStateStatusPins[1].pin}`);
-        if (battPresent.value !== 1) throw new Error('nBATT_PRESENT status bit is 1, expected 0');
-        if (dcinPresent.value !== 1) throw new Error('nDCIN_PWR status bit is 1, expected 0');
+        if (battPresent.value !== 1) throw new Error('nBATT_PRESENT status bit is 0, expected 1');
+        if (dcinPresent.value !== 0) throw new Error('nDCIN_PWR status bit is 1, expected 0');
         battPresent = await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[0].port} ${batteryStateStatusPins[0].pin}`);
         dcinPresent = await await targetICTLink.sendCommand(`getgpio ${batteryStateStatusPins[1].port} ${batteryStateStatusPins[1].pin}`);
         const batVoltage = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName('bat12VAD')}`);
