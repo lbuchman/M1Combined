@@ -91,6 +91,7 @@ program.command('m1dfu')
     .action(async () => {
         const configData = await config(configuration);
         const logfile = console;
+        process.env.productName = configData.productName;
         try {
             const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
@@ -111,6 +112,7 @@ program.command('tbcmd')
     .action(async (options) => {
         const configData = await config(configuration);
         const logfile = console;
+        process.env.productName = configData.productName;
         try {
             const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
@@ -134,6 +136,7 @@ program.command('m1cmd')
     .action(async (options) => {
         const configData = await config(configuration);
         const logfile = console;
+        process.env.productName = configData.productName;
         try {
             const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
@@ -157,6 +160,7 @@ program.command('mnpcmd <action> [sigNameOrTestpont] [value]')
     .action(async (readOrWrite, name, value) => {
         const configData = await config(configuration);
         const logfile = console;
+        process.env.productName = configData.productName;
         try {
             const command = mnpHwIo.getCommand(readOrWrite, name, value, logfile);
             const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
@@ -188,6 +192,7 @@ program.command('ict')
         let logfile;
         let db;
         let startStatusOk = true;
+        process.env.productName = configData.productName;
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.mtfDir, options.debug);
@@ -273,6 +278,7 @@ program.command('eeprom')
         const configData = await config(configuration);
         let logfile;
         let db;
+        process.env.productName = configData.productName;
         try {
             process.env.fwDir = `${configData.mtfDir}/${configData.fwDir}`;
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
@@ -316,6 +322,7 @@ program.command('progmac')
         process.env.fwDir = `${configData.mtfDir}/${configData.fwDir}`;
         let logfile;
         let db;
+        process.env.productName = configData.productName;
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, 'progmac', options.serial, configData.mtfDir, options.debug);
@@ -344,6 +351,7 @@ program.command('flash')
         const configData = await config(configuration);
         let logfile;
         let db;
+        process.env.productName = configData.productName;
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             db = sqliteDriver.initialize(logfile);
@@ -374,6 +382,7 @@ program.command('pingM1apps')
         const configData = await config(configuration);
         let logfile;
         let db;
+        process.env.productName = configData.productName;
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             logfile = logger.getLogger(options.serial, '   apps', options.serial, configData.mtfDir, options.debug);
@@ -431,6 +440,7 @@ program.command('cleanup')
         const configData = await config(configuration);
         const logfile = console;
         const now = new Date();
+        process.env.productName = configData.productName;
         const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_mm_ss');
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
@@ -470,7 +480,7 @@ program.command('functest')
     .action(async (options) => {
         const configData = await config(configuration);
         let logfile;
-
+        process.env.productName = configData.productName;
         try {
             if (!options.serial) await errorAndExit('must define vendor serial number', console);
             process.env.fwDir = `${configData.mtfDir}/${configData.fwDir}`;
@@ -509,6 +519,7 @@ program.command('makelabel')
         const configData = await config(configuration);
         const logfile = logger.getLogger(options.serial, '  label', options.serial, configData.mtfDir, options.debug);
         const db = sqliteDriver.initialize(logfile);
+        process.env.productName = configData.productName;
         if (!configData.makeLabel) {
             logfile.info('Make Label is disabled');
             await delay(100);

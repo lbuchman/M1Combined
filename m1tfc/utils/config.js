@@ -15,7 +15,7 @@ const _ = require('lodash');
 async function getConfig(configDataDefaults) {
     let configDataUser;
     try {
-        configDataUser = await fs.readJSON(`${process.env.SNAP_DATA}/config.json`, 'utf8');
+        configDataUser = await fs.readJSON('/var/snap/m1tfd1/current/config.json', 'utf8');
     }
     catch (err) {
         configDataUser = {};

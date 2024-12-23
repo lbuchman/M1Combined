@@ -152,7 +152,7 @@ async function strikeBoostReg(tolerance, logger, db) {
 async function test(tolerance, logger, db) {
     let retValue = true;
     // eslint-disable-next-line no-restricted-syntax
-    await testBoardLink.poeOn(true);
+    if (process.env.productName === 'mnplus') await testBoardLink.poeOn(true);
      /* eslint-disable-next-line no-restricted-syntax */
     for (const testPoint of testPoints) {
         if (process.env.cellBatTol === 'new') {
@@ -177,7 +177,7 @@ async function test(tolerance, logger, db) {
             logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V`);
         }
     }
-    await testBoardLink.poeOn(false);
+    if (process.env.productName === 'mnplus') await testBoardLink.poeOn(false);
     return retValue;
 }
 
