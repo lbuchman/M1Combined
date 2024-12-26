@@ -153,6 +153,7 @@ module.exports = {
     testingDoneSuccess,
     savelog,
     programStm,
+    getICTFWRev,
     waitDFU
 
 };

@@ -16,5 +16,6 @@ module.exports = {
     notAllTestsPassed: 12,
     functTestFailed: 13,
     invalidArgument: 14,
-    precheckHWFailed: 15
+    precheckHWFailed: 15,
+    poeTestFailed: 16,
 };

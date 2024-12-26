@@ -50,6 +50,8 @@ module.exports = class IctTestRunner {
         this.db.resetErrorCode(process.env.serial);
         regulators.init();
         let ret = true;
+
+        this.db.updateIctStatus(serial, utils.boolToInt(false));
         try {
             await common.initializeTestFixture(programmer, initAndQuit, this.stm32, this.m1Dev, this.logger, initAndQuit);
             if (initAndQuit) return;
@@ -66,7 +68,10 @@ module.exports = class IctTestRunner {
                 throw err;
             }
 
-            if (process.env.productName === 'mnplus') if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db)) ret = false;
+            if (process.env.productName === 'mnplus') {
+                if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db)) ret = false;
+
+            }
             if (!skipTestpointCheck) if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db)) ret = false;
             if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger, this.db)) ret = false;
 
@@ -89,6 +94,24 @@ module.exports = class IctTestRunner {
                 if (!await mnp.run()) ret = false;
             }
 
+
+            if (process.env.productName === 'mnplus') {
+                await testBoardLink.poeOn(true);
+                await delay(2000);
+                await testBoardLink.targetPower(false);
+                try {
+                    await common.getICTFWRev(3);
+                }
+                catch (err) {
+                    this.logger.error('Test to switch to POE power failed ');
+                    this.db.updateErrorCode(serial, errorCodes.codes['POE'].errorCode, 'E'); 
+                    ret = false;
+                }
+                finally {
+                    await testBoardLink.poeOn(false);
+                }
+            }
+
             if (ret) {
                 this.logger.info('ICT Test Passed!!!');
                 await common.testEndSuccess();
@@ -96,7 +119,6 @@ module.exports = class IctTestRunner {
                 process.exit(exitCodes.normalExit);
             }
 
-            this.db.updateIctStatus(serial, utils.boolToInt(false));
             await common.testFailed();
             this.logger.warn('One or more tests Failed!!!');
             await delay(100);
