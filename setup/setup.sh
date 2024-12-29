@@ -11,11 +11,10 @@ TESTSTATION=$4
 # Mate disable screen timeout
 # sshd no password login
 # Interface names may not match so mkake sure netplan names are correct
-# Mate disable screen timeout
 # sshd no password login
 # verify autossh service has correct port
-#disable power mng in the control centre
-
+# disable power mng in the control centre
+# change Imagemagic policy in /etc
 
 usage() {
         echo "usage: $0 SSHPORT HOSTNAME<m1testf?> STARTMAC<00:0F:A6:00:00:00> <test Station ID>"
@@ -57,8 +56,10 @@ sudo apt install pipx
 pipx install  brother_ql
 sudo systemctl disable ipp-usb
 sudo systemctl stop ipp-usb
-sudo apt remove ippusbxd
-sudo apt-mark hold ippusbxd
+sudo apt-mark hold ipp-usb
+sudo apt remove ipp-usb
+# sudo apt remove ippusbxd
+# sudo apt-mark hold ippusbxd
 sudo sed -i '/CMDLINE_LINUX_DEFAULT/c\CMDLINE_LINUX_DEFAULT="quiet pcie_aspm=off splash libata.noacpi=1"' /etc/default/grub
 sudo update-grub
 echo "PATH=\"/home/lenel/.local/bin:/home/lenel/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\"" > /etc/environment
