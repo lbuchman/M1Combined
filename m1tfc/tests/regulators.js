@@ -30,8 +30,8 @@ const testPointsMnp = [
     { name: 'TP401', voltage: 5.0, scale: 0.98 },
     { name: 'TP2301', voltage: 12.8, scale: 1 },
     { name: 'TP202', voltage: 12.0, scale: 0.995 },
-    { name: 'J2101.1', voltage: 11.85, scale: 1.61 },
-    { name: 'J2001.1', voltage: 11.85, scale: 1.61 }
+    { name: 'J2101.1', voltage: 11.85, scale: 2.78 },
+    { name: 'J2001.1', voltage: 11.85, scale: 2.78 }
 ];
 
 const strikeReg = [
