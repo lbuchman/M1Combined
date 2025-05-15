@@ -24,11 +24,13 @@ const errorCodes = {
     RD1_RLED: { errorCode: '0000000WRD1RLED', test: 'ICT', desc: 'rd1rled test failed' },
     RD1_GLED: { errorCode: '0000000WRD1GLED', test: 'ICT', desc: 'rd1gled test failed' },
     RD1_BZ: { errorCode: '00000000WRD1BZ', test: 'ICT', desc: 'rd1bz test failed' },
+    WGD1_BPR: { errorCode: '0000000WRD1BPR', test: 'ICT', desc: 'Reader1 BPR test failed' },
     WGD2_D0_3V3: { errorCode: '0000000WGDRD2D0', test: 'ICT', desc: 'rd2d0 test failed' },
     WGD2_D1_3V3: { errorCode: '0000000WGDRD2D1', test: 'ICT', desc: 'rd2d1 test failed' },
     RD2_RLED: { errorCode: '0000000WRD2RLED', test: 'ICT', desc: 'rd2rled test failed' },
     RD2_GLED: { errorCode: '0000000WRD2GLED', test: 'ICT', desc: 'rd2gled test failed' },
     RD2_BZ: { errorCode: '00000000WRD2BZ', test: 'ICT', desc: 'rd2bz test failed' },
+    WGD2_BPR: { errorCode: '0000000WRD2BPR', test: 'ICT', desc: 'Reader2 BPR test failed' },
     RLY1_EN: { errorCode: '0000000000RLY1', test: 'ICT', desc: 'rly1 test failed' },
     RLY2_EN: { errorCode: '0000000000RLY1', test: 'ICT', desc: 'rly2 test failed' },
     RLY3_EN: { errorCode: '0000000000RLY1', test: 'ICT', desc: 'rly3 test failed' },
@@ -90,7 +92,7 @@ const errorCodes = {
     SERIAL_MISSMATH: { errorCode: 'SER_MISS_MATCH', test: 'LABEL', desc: 'Serial number provided does not match EEPROM value' },
     FW_MISSMATH: { errorCode: 'FW_MISS_MATCH', test: 'LABEL', desc: 'The UUT programmed FW Rev does not match FW File' },
     LeverSensor: { errorCode: 'LEVER_LOCK', test: 'ICT', desc: 'The Lock Lever is not locked' },
-    POE: { errorCode: '00000000000POE', test: 'ICT', desc: 'Switch to POE power failed' }, 
+    POE: { errorCode: '00000000000POE', test: 'ICT', desc: 'Switch to POE power failed' },
     ERR_UNDEF: { errorCode: '0000ERR_UNDEF', test: 'Label', desc: 'Undefined error, i.e. no error code available in the DB for this failure' }
 };
 
