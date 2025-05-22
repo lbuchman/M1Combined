@@ -44,7 +44,7 @@ const mnpIOMap = [
     { port: '0', pin: -1, mode: 'latch', name: 'RLY1_EN', testPoint: 'na' },
     // POE
     { port: 'D', pin: 5, mode: 'input', name: 'nPoEP_PSE', testPoint: 'na' },
-    { port: 'K', pin: 0, mode: 'input', name: 'nPoEP_PSE', testPoint: 'na' },
+    { port: 'K', pin: 0, mode: 'input', name: 'nPoEP_PSE', testPoint: 'na' }
 ];
 
 function getIoMap() {

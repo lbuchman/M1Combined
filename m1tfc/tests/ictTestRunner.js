@@ -70,7 +70,6 @@ module.exports = class IctTestRunner {
 
             if (process.env.productName === 'mnplus') {
                 if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db)) ret = false;
-
             }
             if (!skipTestpointCheck) if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db)) ret = false;
             if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger, this.db)) ret = false;
@@ -101,10 +100,11 @@ module.exports = class IctTestRunner {
                 await testBoardLink.targetPower(false);
                 try {
                     await common.getICTFWRev(3);
+                    this.logger.info('POE test to switch to POE power OK ');
                 }
                 catch (err) {
                     this.logger.error('Test to switch to POE power failed ');
-                    this.db.updateErrorCode(serial, errorCodes.codes['POE'].errorCode, 'E'); 
+                    this.db.updateErrorCode(serial, errorCodes.codes['POE'].errorCode, 'E');
                     ret = false;
                 }
                 finally {

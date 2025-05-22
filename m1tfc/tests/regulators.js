@@ -30,8 +30,8 @@ const testPointsMnp = [
     { name: 'TP401', voltage: 5.0, scale: 0.98 },
     { name: 'TP2301', voltage: 12.8, scale: 1 },
     { name: 'TP202', voltage: 12.0, scale: 0.995 },
-    { name: 'J2101.1', voltage: 11.85, scale: 2.78 },
-    { name: 'J2001.1', voltage: 11.85, scale: 2.78 }
+    { name: 'J2101.1', voltage: 11.85, scale: 2.79 },
+    { name: 'J2001.1', voltage: 11.85, scale: 2.79 }
 ];
 
 const strikeReg = [
@@ -76,12 +76,13 @@ async function testDDRVoltage(tolerance, logger, db) {
         db.updateErrorCode(process.env.serial, errorCodes.codes[ddrVoltage.name].errorCode, 'T');
         throw new Error(`Test Board control command failed on pinName=${ddrVoltage.name}, ${ret.error}`);
     }
-    if (((Math.abs(ret.value - ddrVoltage.voltage)) / (ddrVoltage.voltage)) > tolerance) {
+    const error = ((Math.abs(ret.value - ddrVoltage.voltage)) / (ddrVoltage.voltage));
+    if (error > tolerance) {
         db.updateErrorCode(process.env.serial, errorCodes.codes[ddrVoltage.name].errorCode, 'E');
-        throw new Error(`Failed: Voltage is out of tolerance, TP=${ddrVoltage.name}, value=${ret.value.toFixed(2)}, reqValue=${ddrVoltage.voltage.toFixed(2)}`);
+        throw new Error(`Failed: Voltage is out of tolerance, TP=${ddrVoltage.name}, value=${ret.value.toFixed(2)}, reqValue=${ddrVoltage.voltage.toFixed(2)} Error = ${(error * 200).toFixed(2)}%`);
     }
     else {
-        logger.info(`Passed TP=${ddrVoltage.name} test, Voltage = ${ret.value.toFixed(2)}V, Expected = ${ddrVoltage.voltage.toFixed(2)}V`);
+        logger.info(`Passed TP=${ddrVoltage.name} test, Voltage = ${ret.value.toFixed(2)}V, Expected = ${ddrVoltage.voltage.toFixed(2)}V Error = ${(error * 100).toFixed(2)}%`);
     }
     return true;
 }
@@ -137,13 +138,14 @@ async function strikeBoostReg(tolerance, logger, db) {
             throw new Error(`Test Board control command failed on pinName=${testPoint.name}, ${ret.error}`);
         }
         if (!testPoint.tolerance) testPoint.tolerance = tolerance;
-        if (((Math.abs(ret.value * testPoint.scale - testPoint.voltage)) / (testPoint.voltage)) > testPoint.tolerance) {
+        const error = Math.abs((ret.value * testPoint.scale - testPoint.voltage) / (testPoint.voltage));
+        if (error > testPoint.tolerance) {
             db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
-            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)}`);
+            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(2)}%`);
             retValue = false;
         }
         else {
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V`);
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V Error = ${(error * 100).toFixed(2)}%`);
         }
     }
     return retValue;
@@ -169,13 +171,14 @@ async function test(tolerance, logger, db) {
             throw new Error(`Test Board control command failed on pinName=${testPoint.name}, ${ret.error}`);
         }
         if (!testPoint.tolerance) testPoint.tolerance = tolerance;
-        if (((Math.abs(ret.value * testPoint.scale - testPoint.voltage)) / (testPoint.voltage)) > testPoint.tolerance) {
+        const error = Math.abs((ret.value * testPoint.scale - testPoint.voltage) / (testPoint.voltage));
+        if (error > testPoint.tolerance) {
             db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
-            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)}`);
+            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(2)}%`);
             retValue = false;
         }
         else {
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V`);
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V Error = ${(error * 100).toFixed(2)}%`);
         }
     }
     if (process.env.productName === 'mnplus') await testBoardLink.poeOn(false);

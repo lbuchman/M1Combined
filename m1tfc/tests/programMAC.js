@@ -8,7 +8,6 @@ const os = require('../utils/os');
 const utils = require('../utils/utils');
 const exitCodes = require('../src/exitCodes');
 const sqliteDriver = require('../utils/sqliteDriver');
-const tsv = require('../utils/tsv');
 
 // const log = console;
 module.exports = class ProgramMac {
@@ -42,7 +41,7 @@ module.exports = class ProgramMac {
             await common.waitDFU(programmer, this.logger);
             this.logger.debug('Programming TSV file ...');
             const fwDir = `${path.resolve(__dirname)}/../fw`;
-            const minimalTsv = `${fwDir}/flashlayout_st-ls2m1-image-core/trusted/minimal.tsv`
+            const minimalTsv = `${fwDir}/flashlayout_st-ls2m1-image-core/trusted/minimal.tsv`;
             await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${minimalTsv}`, this.logger, false, false, 1024 * 200, fwDir);
             await delay(100);
 
@@ -114,7 +113,7 @@ module.exports = class ProgramMac {
         this.logger.debug('Programming TSV file ...');
         await common.waitDFU(programmer, this.logger);
         const fwDir = `${path.resolve(__dirname)}/../fw`;
-        const minimalTsv = `${fwDir}/flashlayout_st-ls2m1-image-core/trusted/minimal.tsv`
+        const minimalTsv = `${fwDir}/flashlayout_st-ls2m1-image-core/trusted/minimal.tsv`;
         await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${minimalTsv}`, this.logger, false, false, 1024 * 200, fwDir);
         await delay(100);
 

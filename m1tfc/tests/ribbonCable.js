@@ -88,13 +88,14 @@ async function testA2DVoltages(tolerance, logger) {
             throw new Error(`Test Board control command failed on pinName=${testPoint.name}, ${ret.error}`);
         }
         if (!testPoint.tolerance) testPoint.tolerance = tolerance;
-        if (((Math.abs(ret.value - testPoint.voltage)) / (testPoint.voltage)) > testPoint.tolerance) {
+        const error = ((Math.abs(ret.value - testPoint.voltage)) / (testPoint.voltage));
+        if (error > testPoint.tolerance) {
             db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
-            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${ret.value.toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)}`);
+            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${ret.value.toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(2)}%`);
             retValue = false;
         }
         else {
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${ret.value.toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V`);
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${ret.value.toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V Error = ${(error * 100).toFixed(2)}%`);
         }
     }
     return retValue;

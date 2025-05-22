@@ -4,7 +4,7 @@ const gwUdpDgram = require('@lenel/gwudpdgram');
 
 module.exports = class MercuryBoardLink {
     constructor(log) {
-        this.mercuryBoardIpAddress = '192.168.0.60:4111'; /*192.168.2.48*/
+        this.mercuryBoardIpAddress = '192.168.0.60:4111'; // 192.168.2.48
         this.logger = log;
         this.reply = [];
         this.udpDgram = gwUdpDgram.gwUdpSocket(this.logger, 0); // eslint-disable-line
