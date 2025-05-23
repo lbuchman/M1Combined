@@ -41,7 +41,7 @@ SOFTWARE.
 #define IDLE_CLOCK 200000000
 
 #define FACTORY_RESET_PIN 16
-#define Rev "0.9"
+#define Rev "0.10"
 #define ADChSel0 36
 #define ADChSel1 37
 #define ADChSel2 38
