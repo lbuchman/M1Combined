@@ -333,6 +333,8 @@ program.command('progmac')
             const macProgram = new ProgramMac(configData, options.serial, logfile);
             await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
             await macProgram.run(configData.programmingCommand);
+
+            await macProgram.runProgSecret(configData.programmingCommand);
             process.exit(exitCodes.normalExit);
         }
         catch (err) {

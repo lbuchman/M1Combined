@@ -9,7 +9,10 @@ const os = require('../utils/os');
 
 const otp57 = 57;
 const otp58 = 58;
-
+const otp60 = 60;
+const otp61 = 61;
+const otp62 = 62;
+const otp63 = 63;
 function isString(x) {
     return Object.prototype.toString.call(x) === '[object String]';
 }
@@ -256,6 +259,10 @@ module.exports = {
     getWordData,
     otp57,
     otp58,
+    otp60,
+    otp61,
+    otp62,
+    otp63,
     pingTargetWait,
     getTargetIpWait,
     checkDbRecord,

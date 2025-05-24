@@ -278,3 +278,74 @@ Board 4
 [2025-05-23 00:35:50] [3023200011,     ict] info:       Passed OSDP2 Test
 [2025-05-23 00:35:53] [3023200011,     ict] info:       POE test to switch to POE power OK 
 [2025-05-23 00:35:53] [3023200011,     ict] info:       ICT Test Passed!!!
+
+************************************************************************************************
+
+Board 5
+[2025-05-23 20:00:09] [3023200011,     ict] info:       Starting ICT Test.
+[2025-05-23 20:00:09] [3023200011,     ict] debug:      Opening M1-3200 link serial port: /dev/ttyUSB0
+[2025-05-23 20:00:09] [3023200011,     ict] info:       Executing ICT command /home/lbuchman/m1mtf/fsbl.stm32 ...
+[2025-05-23 20:00:09] [3023200011,     ict] debug:      Opening TestBoard link serial port: /dev/ttyACM0
+[2025-05-23 20:00:09] [3023200011,     ict] debug:      adding Serial 3023200011 to the DB
+[2025-05-23 20:00:09] [3023200011,     ict] debug:      UNIQUE constraint failed: records.vendorSerial
+[2025-05-23 20:00:09] [3023200011,     ict] debug:      Reading Io Def from the Test Board...
+[2025-05-23 20:00:10] [3023200011,     ict] debug:      Test Board FW Rev - 0.1
+[2025-05-23 20:00:10] [3023200011,     ict] debug:      Setting UUT power off
+[2025-05-23 20:00:10] [3023200011,     ict] debug:      UUT power is On
+[2025-05-23 20:00:10] [3023200011,     ict] info:       Testing test points ...
+[2025-05-23 20:00:11] [3023200011,     ict] info:       Passed TP=TP204 test, Voltage = 4.91V, Expected = 5.00V Error = 1.89%
+[2025-05-23 20:00:11] [3023200011,     ict] info:       Passed TP=TP308 test, Voltage = 2.83V, Expected = 2.80V Error = 1.04%
+[2025-05-23 20:00:11] [3023200011,     ict] info:       Passed TP=TP303 test, Voltage = 1.17V, Expected = 1.20V Error = 2.90%
+[2025-05-23 20:00:11] [3023200011,     ict] info:       Passed TP=TP305 test, Voltage = 3.23V, Expected = 3.30V Error = 2.20%
+[2025-05-23 20:00:12] [3023200011,     ict] info:       Passed TP=TP306 test, Voltage = 3.23V, Expected = 3.30V Error = 2.11%
+[2025-05-23 20:00:12] [3023200011,     ict] info:       Passed TP=TP401 test, Voltage = 4.79V, Expected = 5.00V Error = 4.14%
+[2025-05-23 20:00:12] [3023200011,     ict] info:       Passed TP=TP2301 test, Voltage = 12.51V, Expected = 12.80V Error = 2.29%
+[2025-05-23 20:00:12] [3023200011,     ict] info:       Passed TP=TP202 test, Voltage = 11.52V, Expected = 12.00V Error = 3.96%
+[2025-05-23 20:00:12] [3023200011,     ict] info:       Passed TP=J2101.1 test, Voltage = 11.87V, Expected = 11.85V Error = 0.15%
+[2025-05-23 20:00:13] [3023200011,     ict] info:       Passed TP=J2001.1 test, Voltage = 11.86V, Expected = 11.85V Error = 0.11%
+[2025-05-23 20:00:13] [3023200011,     ict] debug:      Programming UUT ICT FW into SRAM...
+[2025-05-23 20:00:15] [3023200011,     ict] debug:      Programming Done
+[2025-05-23 20:00:15] [3023200011,     ict] debug:      Reading target ICT FW Rev ...
+[2025-05-23 20:00:16] [3023200011,     ict] debug:      Target ICT FW Rev - 0.32
+[2025-05-23 20:00:16] [3023200011,     ict] info:       Enabling STRIKE1_KICKER_EN
+[2025-05-23 20:00:16] [3023200011,     ict] info:       Passed TP=SW1601.6 test, Voltage = 28.10V, Expected = 28.30V Error = 0.70%
+[2025-05-23 20:00:16] [3023200011,     ict] info:       Enabling STRIKE2_KICKER_EN
+[2025-05-23 20:00:17] [3023200011,     ict] info:       Passed TP=SW1602.6 test, Voltage = 28.11V, Expected = 28.30V Error = 0.67%
+[2025-05-23 20:00:17] [3023200011,     ict] info:       Passed TP=TP304 test, Voltage = 1.32V, Expected = 1.35V Error = 2.38%
+[2025-05-23 20:00:17] [3023200011,     ict] info:       Passed TP=TP1801 test, Voltage = 2.63V, Expected = 2.65V Error = 0.72%
+[2025-05-23 20:00:17] [3023200011,     ict] info:       Passed TP=TP1802 test, Voltage = 2.64V, Expected = 2.65V Error = 0.46%
+[2025-05-23 20:00:17] [3023200011,     ict] info:       Passed TP=TP1901 test, Voltage = 2.63V, Expected = 2.65V Error = 0.61%
+[2025-05-23 20:00:18] [3023200011,     ict] info:       Passed TP=TP1902 test, Voltage = 2.62V, Expected = 2.65V Error = 1.02%
+[2025-05-23 20:00:18] [3023200011,     ict] info:       Testing RS485 ...
+[2025-05-23 20:00:18] [3023200011,     ict] info:       Passed RS485 test
+[2025-05-23 20:00:18] [3023200011,     ict] info:       Testing Status LED ...
+[2025-05-23 20:00:19] [3023200011,     ict] info:       Passed Led test
+[2025-05-23 20:00:19] [3023200011,     ict] info:       Testing Tamper sensor ...
+[2025-05-23 20:00:21] [3023200011,     ict] info:       Passed Tamper test
+[2025-05-23 20:00:21] [3023200011,     ict] info:       Testing DDR3 memory ...
+[2025-05-23 20:00:21] [3023200011,     ict] info:       Passed DDR3 data bus test
+[2025-05-23 20:00:21] [3023200011,     ict] info:       Passed DDR3 address bus test
+[2025-05-23 20:00:21] [3023200011,     ict] info:       Testing DDR3 memsize 0xa00000, test may take a while
+[2025-05-23 20:00:23] [3023200011,     ict] info:       Passed DDR3 test
+[2025-05-23 20:00:23] [3023200011,     ict] info:       Testing I2C EEPROM ...
+[2025-05-23 20:00:23] [3023200011,     ict] info:       Passed I2C EEPROM test
+[2025-05-23 20:00:23] [3023200011,     ict] debug:      Attempting to create UDP socket on port 0
+[2025-05-23 20:00:23] [3023200011,     ict] debug:      server listening 0.0.0.0:41071
+[2025-05-23 20:00:24] [3023200011,     ict] info:       Passed WGD1_D0_3V3 test
+[2025-05-23 20:00:24] [3023200011,     ict] info:       Passed WGD1_D1_3V3 test
+[2025-05-23 20:00:24] [3023200011,     ict] info:       Passed RD1_RLED test
+[2025-05-23 20:00:25] [3023200011,     ict] info:       Passed RD1_GLED test
+[2025-05-23 20:00:25] [3023200011,     ict] info:       Passed WGD1_BPR test
+[2025-05-23 20:00:26] [3023200011,     ict] info:       Passed WGD2_D0_3V3 test
+[2025-05-23 20:00:26] [3023200011,     ict] info:       Passed WGD2_D1_3V3 test
+[2025-05-23 20:00:27] [3023200011,     ict] info:       Passed RD2_RLED test
+[2025-05-23 20:00:27] [3023200011,     ict] info:       Passed RD2_GLED test
+[2025-05-23 20:00:27] [3023200011,     ict] info:       Passed WGD2_BPR test
+[2025-05-23 20:00:28] [3023200011,     ict] info:       Passed RLY1_EN test
+[2025-05-23 20:00:28] [3023200011,     ict] info:       Passed RLY2_EN test
+[2025-05-23 20:00:29] [3023200011,     ict] info:       Passed RLY3_EN test
+[2025-05-23 20:00:29] [3023200011,     ict] info:       Passed RLY4_EN test
+[2025-05-23 20:00:30] [3023200011,     ict] info:       Passed OSDP1 Test
+[2025-05-23 20:00:30] [3023200011,     ict] info:       Passed OSDP2 Test
+[2025-05-23 20:00:32] [3023200011,     ict] info:       POE test to switch to POE power OK 
+[2025-05-23 20:00:32] [3023200011,     ict] info:       ICT Test Passed!!!

@@ -19,9 +19,9 @@ const ribbonCableSelectPins = [
 
 const ribbonCableA2DPins = [
     { name: 'TP1801', voltage: 2.65, scale: 1.03 },
-    { name: 'TP1802', voltage: 2.65, scale: 1.03  },
-    { name: 'TP1901', voltage: 2.65, scale: 1.03  },
-    { name: 'TP1902', voltage: 2.65, scale: 1.03  },
+    { name: 'TP1802', voltage: 2.65, scale: 1.03 },
+    { name: 'TP1901', voltage: 2.65, scale: 1.03 },
+    { name: 'TP1902', voltage: 2.65, scale: 1.03 }
 ];
 
 const ribbonCableI2CPinsSlave = [
@@ -55,14 +55,15 @@ async function runRibbonCableTestStaticVoltages(tolerance, logger) {
 
             let zeroValueFix = 0;
             if (!testBoardIoDef[count].reqValue) zeroValueFix = 5;
-            if (!retValue || ((Math.abs(ret.value - testBoardIoDef[count].reqValue)) / (testBoardIoDef[count].reqValue + zeroValueFix)) > tolerance) {
-                logger.error(`Failed: Voltage is out of tolerance, pinName=${testBoardIoDef[count].pinName}, value=${ret.value}, reqValue=${testBoardIoDef[count].reqValue}`);
+            const error = (Math.abs(ret.value - testBoardIoDef[count].reqValue)) / (testBoardIoDef[count].reqValue + zeroValueFix);
+            if (!retValue || error > tolerance) {
+                logger.error(`Failed: Voltage is out of tolerance, pinName=${testBoardIoDef[count].pinName}, value=${ret.value}, reqValue=${testBoardIoDef[count].reqValue}, Error = ${(error * 100).toFixed(2)}%`);
                 retValue = false;
                 freturn = false;
                 db.updateErrorCode(process.env.serial, errorCodes.codes[testBoardIoDef[count].pinName].errorCode, 'E');
             }
             else {
-                logger.info(`Passed pinName=${testBoardIoDef[count].pinName}, actual = ${ret.value}V, expected = ${testBoardIoDef[count].reqValue}V `);
+                logger.info(`Passed pinName=${testBoardIoDef[count].pinName}, actual = ${ret.value}V, expected = ${testBoardIoDef[count].reqValue}V Error = ${(error * 100).toFixed(2)}%`);
             }
         }
         if (!freturn) {
