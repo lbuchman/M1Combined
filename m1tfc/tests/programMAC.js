@@ -196,23 +196,24 @@ module.exports = class ProgramMac {
             readBackSecretKey.word2 = utils.getWordData(word62Tmp, utils.otp62);
             readBackSecretKey.word3 = utils.getWordData(word63Tmp, utils.otp63);
             this.logger.info(`Read OTP Secret Key ${readBackSecretKey.word3}.${readBackSecretKey.word2}.${readBackSecretKey.word1}.${readBackSecretKey.word0}`);
-            if (readBackSecretKey.word3 === '0x00000000' && readBackSecretKey.word2 === '0x00000000' && readBackSecretKey.word1 === '0x00000000' && readBackSecretKey.word0 === '0x00000000') {
+            if (!(readBackSecretKey.word3 === '0x00000000' && readBackSecretKey.word2 === '0x00000000' && readBackSecretKey.word1 === '0x00000000' && readBackSecretKey.word0 === '0x00000000')) {
+                this.logger.info('Secret Key OTP is already programmed ');
                 await common.testEndSuccess();
                 await delay(300);
                 return ({ exitCode, readBackSecretKey });
             }
 
             this.logger.info(`Programing Secret Key OTP values ${secretKey.word3}.${secretKey.word2}.${secretKey.word1}.${secretKey.word0}`);
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp60} value=${secretKey.word0}`, this.logger, false);
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp61} value=${secretKey.word1}`, this.logger, false);
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp62} value=${secretKey.word2}`, this.logger, false);
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp63} value=${secretKey.word3}`, this.logger, false);
+            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp60} value=0x${(secretKey.word0).toString(16)}`, this.logger, false);
+            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp61} value=0x${(secretKey.word1).toString(16)}`, this.logger, false);
+            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp62} value=0x${(secretKey.word2).toString(16)}`, this.logger, false);
+            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp63} value=0x${(secretKey.word3).toString(16)}`, this.logger, false);
             this.logger.debug('Verifying Secret Key OTP values ...');
             const word0 = await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp60}`, this.logger, false);
             const word1 = await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp61}`, this.logger, false);
             const word2 = await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp62}`, this.logger, false);
             const word3 = await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp63}`, this.logger, false);
-            if (word3 !== secretKey.word3 || word2 !== secretKey.word2 || word1 !== secretKey.word1 || word0 !== secretKey.word0) {
+            if (utils.getWordData(word3, utils.otp63).toLowerCase() !== `0x${secretKey.word3.toString(16)}` || utils.getWordData(word2, utils.otp62).toLowerCase() !== `0x${secretKey.word2.toString(16)}` || utils.getWordData(word1, utils.otp61).toLowerCase() !== `0x${secretKey.word1.toString(16)}` || utils.getWordData(word0, utils.otp60).toLowerCase() !== `0x${secretKey.word0.toString(16)}`) {
                 this.logger.error('Secretekey in OTP compare failed!!!)');
                 await common.testFailed();
                 const throwError = new Error('OTP (SecretKey) compare failed');
