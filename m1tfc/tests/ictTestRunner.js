@@ -68,11 +68,11 @@ module.exports = class IctTestRunner {
                 throw err;
             }
 
-            if (process.env.productName === 'mnplus') {
+            if (!skipTestpointCheck && process.env.productName === 'mnplus') {
                 if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db)) ret = false;
             }
             if (!skipTestpointCheck) if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db)) ret = false;
-            if (!await ribbonCable.runRibbonCableTest(this.tolerance, this.logger, this.db)) ret = false;
+            if (!await ribbonCable.runRibbonCableTest(skipTestpointCheck, this.tolerance, this.logger, this.db)) ret = false;
 
             this.logger.info('Testing RS485 ...');
             if (!await rs485.testRs485(this.logger, this.db)) ret = false;
