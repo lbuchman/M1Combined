@@ -1,6 +1,6 @@
 'use strict';
 
-const gwUdpDgram = require('@lenel/gwudpdgram');
+const gwUdpDgram = require('gwudpdgram');
 
 module.exports = class MercuryBoardLink {
     constructor(log) {

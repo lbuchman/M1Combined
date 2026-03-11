@@ -14,7 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@lenel/gwudpdgram": "^1.0.2",
+    "gwudpdgram": "file:./npm/gwudpdgram.tar.gz",
     "@serialport/parser-readline": "^10.5.0",
     "@serialport/parser-ready": "^10.5.0",
     "arpscan": "^1.0.2",
@@ -40,8 +40,7 @@
     "winston": "^3.8.2"
   },
   "devDependencies": {
-    "@lenel/eslint-config-lenel-base": "^3.0.2",
-    "@lenel/eslint-config-lenel-test": "^3.0.2",
+    "eslint-config-lenel-test": "file:./npm/eslint-config-lenel-test.tar.gz",
     "eslint": "^5.8.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0"
