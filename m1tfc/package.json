@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "eslint-config-lenel-test": "file:./npm/eslint-config-lenel-test.tar.gz",
+    "eslint-config-lenel-base": "file:./npm/eslint-config-lenel-base.tar.gz",
     "eslint": "^5.8.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0"

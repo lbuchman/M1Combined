@@ -1,6 +1,6 @@
 'use strict';
 
-const gwUdpDgram = require('gwudpdgram');
+const gwUdpDgram = require('../gwudpdgram/index');
 
 module.exports = class MercuryBoardLink {
     constructor(log) {
