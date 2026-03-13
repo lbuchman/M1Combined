@@ -58,6 +58,8 @@ function getCPUSerial(data) {
     return sn;
 }
 
+const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+
 
 function isMacTheSame(word57, word58, mac) {
     const hexMac = mac.split(':');
@@ -271,5 +273,6 @@ module.exports = {
     printLabel,
     getCPUSerial,
     macToUid,
-    isString
+    isString,
+    genRanHex
 };
