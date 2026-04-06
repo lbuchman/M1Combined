@@ -49,8 +49,10 @@ module.exports = class ProgramMac {
             const word57 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp57}`, this.logger, false);
             const word58 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp58}`, this.logger, false);
             const osdpKey = [60, 61, 62, 63];
+            // eslint-disable-next-line no-restricted-syntax
             for (const address of osdpKey) {
                 const value = `0x${utils.genRanHex(8)}`;
+                // eslint-disable-next-line no-await-in-loop
                 await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${address} value=${value}`, this.logger, false);
             }
 
