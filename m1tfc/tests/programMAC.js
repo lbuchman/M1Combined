@@ -48,13 +48,12 @@ module.exports = class ProgramMac {
             this.logger.debug('Reading current OTP values ...');
             const word57 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp57}`, this.logger, false);
             const word58 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp58}`, this.logger, false);
-            
             const osdpKey = [60, 61, 62, 63];
             for (const address of osdpKey) {
                 const value = `0x${utils.genRanHex(8)}`;
                 await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${address} value=${value}`, this.logger, false);
             }
-            
+
             const cpuSerial = utils.getCPUSerial(word57);
             if (!this.config.testNewMac) db.updateCPUSerial(this.serial, cpuSerial);
             if (!this.config.testNewMac && (utils.getWordData(word57, utils.otp57) !== '0x00000000') && (utils.getWordData(word58, utils.otp58) !== '0x00000000')) {
@@ -77,7 +76,7 @@ module.exports = class ProgramMac {
             if (!utils.isString(mac)) throw new Error('DA Error, cannot get next MAC');
             const progData = utils.macToOtp(mac);
             this.logger.info('Programing OTP values ...');
-            //const osdpKey = [];
+            // const osdpKey = [];
             // genRanHex();
             await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp57} value=${progData.oTp57}`, this.logger, false);
             await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp58} value=${progData.oTp58}`, this.logger, false);

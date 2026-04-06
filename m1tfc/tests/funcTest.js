@@ -107,26 +107,32 @@ module.exports = class FuncTest {
                 this.logger.info('Connected to Target');
             }
 
-            this.logger.debug('Testing I2C Bus 1 Master/Slave connectivity');
+            let activeBus = 1;
+            if (process.env.productName === 'mnplus') {
+                activeBus = 0;
+            }
+
+            this.logger.debug(`Testing I2C Bus ${activeBus} Master/Slave connectivity`);
             try {
-                await client.execCommand('i2cdetect -y 1 | grep "50 51 52 UU 54 55 56 57"');
-                this.logger.info('I2C Bus 1 test passed');
+                await client.execCommand(`i2cdetect -y ${activeBus} | grep "50 51 52 UU 54 55 56 57"`);
+                this.logger.info(`I2C Bus ${activeBus} test passed`);
             }
             catch (err) {
                 this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus1'].errorCode, 'E');
-                this.logger.error('I2C Bus 1 test failed');
+                this.logger.error(`I2C Bus ${activeBus} test failed`);
             }
 
-            this.logger.debug('Testing I2C Bus 0,2 Master/Slave connectivity');
-            try {
-                await client.execCommand('i2cdetect -y 0 | grep "70 -- -- -- -- -- -- --"');
-                this.logger.info('I2C Bus 0,2 test passed');
+            if (activeBus === 1) {
+                this.logger.debug('Testing I2C Bus 0,2 Master/Slave connectivity');
+                try {
+                    await client.execCommand('i2cdetect -y 0 | grep "70 -- -- -- -- -- -- --"');
+                    this.logger.info('I2C Bus 0,2 test passed');
+                }
+                catch (err) {
+                    this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus02'].errorCode, 'E');
+                    this.logger.error('I2C Bus 0 & 2 test failed');
+                }
             }
-            catch (err) {
-                this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus02'].errorCode, 'E');
-                this.logger.error('I2C Bus 0 & 2 test failed');
-            }
-
 
             await client.execCommand(`dd if=/dev/urandom of=${controlFIle} bs=${sRamSize} count=1`);
             await client.execCommand(`dd if=${controlFIle} of=${sramFIle} bs=${sRamSize} count=1`);
