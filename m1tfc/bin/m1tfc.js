@@ -334,7 +334,7 @@ program.command('progmac')
             await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
             await macProgram.run(configData.programmingCommand);
 
-            await macProgram.runProgSecret(configData.programmingCommand);
+            // await macProgram.runProgSecret(configData.programmingCommand);
             process.exit(exitCodes.normalExit);
         }
         catch (err) {
