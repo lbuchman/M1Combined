@@ -111,6 +111,7 @@ int setupFw() {
                 else {
                     pioEngine->setIoPin(pinIdDefinition::M1Boot1, bootPinSwitchValue);
                     pioEngine->setIoPin(pinIdDefinition::TargetPwrControl, 1);
+                    pioEngine->setIoPin(pinIdDefinition::BatEnable, 1);
                 }
             }
         }
