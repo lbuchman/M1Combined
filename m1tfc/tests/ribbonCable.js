@@ -57,13 +57,13 @@ async function runRibbonCableTestStaticVoltages(tolerance, logger) {
             if (!testBoardIoDef[count].reqValue) zeroValueFix = 5;
             const error = (Math.abs(ret.value - testBoardIoDef[count].reqValue)) / (testBoardIoDef[count].reqValue + zeroValueFix);
             if (!retValue || error > tolerance) {
-                logger.error(`Failed: Voltage is out of tolerance, pinName=${testBoardIoDef[count].pinName}, value=${ret.value}, reqValue=${testBoardIoDef[count].reqValue}, Error = ${(error * 100).toFixed(2)}%`);
+                logger.error(`Failed: Voltage is out of tolerance, pinName=${testBoardIoDef[count].pinName}, value=${ret.value}, reqValue=${testBoardIoDef[count].reqValue}, Error = ${(error * 100).toFixed(1)}%`);
                 retValue = false;
                 freturn = false;
                 db.updateErrorCode(process.env.serial, errorCodes.codes[testBoardIoDef[count].pinName].errorCode, 'E');
             }
             else {
-                logger.info(`Passed pinName=${testBoardIoDef[count].pinName}, actual = ${ret.value}V, expected = ${testBoardIoDef[count].reqValue}V Tolerance = ${(error * 100).toFixed(2)}%`);
+                logger.info(`Passed pinName=${testBoardIoDef[count].pinName}, actual = ${ret.value}V, expected = ${testBoardIoDef[count].reqValue}V Tolerance = ${(error * 100).toFixed(1)}%`);
             }
         }
         if (!freturn) {
@@ -91,7 +91,7 @@ async function testA2DVoltages(tolerance, logger, calibrate) {
         if (!testPoint.tolerance) testPoint.tolerance = tolerance;
         const error = ((Math.abs(ret.value * testPoint.scale - testPoint.voltage)) / (testPoint.voltage));
         if (error > testPoint.tolerance) {
-            logger.error(`Voltage is out of tolerance and cannot be calibrated. Check A/D HW, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(2)}%`);
+            logger.error(`Voltage is out of tolerance and cannot be calibrated. Check A/D HW, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(1)}%`);
             retValue = false;
             continue
         }
@@ -104,11 +104,11 @@ async function testA2DVoltages(tolerance, logger, calibrate) {
 
         if (error > testPoint.tolerance) {
             db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
-            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Tolerance = ${(error * 100).toFixed(2)}%`);
+            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Tolerance = ${(error * 100).toFixed(1)}%`);
             retValue = false;
         }
         else {
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${(testPoint.voltage).toFixed(2)}V Tolerance = ${(error * 100).toFixed(2)}%`);
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${(testPoint.voltage).toFixed(2)}V Tolerance = ${(error * 100).toFixed(1)}%`);
         }
     }
     return retValue;
