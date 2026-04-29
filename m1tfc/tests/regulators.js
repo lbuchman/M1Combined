@@ -82,7 +82,7 @@ async function testDDRVoltage(tolerance, logger, db) {
         throw new Error(`Failed: Voltage is out of tolerance, TP=${ddrVoltage.name}, value=${ret.value.toFixed(2)}, reqValue=${ddrVoltage.voltage.toFixed(2)} Error = ${(error * 200).toFixed(2)}%`);
     }
     else {
-        logger.info(`Passed TP=${ddrVoltage.name} test, Voltage = ${ret.value.toFixed(2)}V, Expected = ${ddrVoltage.voltage.toFixed(2)}V Error = ${(error * 100).toFixed(2)}%`);
+        logger.info(`Passed TP=${ddrVoltage.name} test, Voltage = ${ret.value.toFixed(2)}V, Expected = ${ddrVoltage.voltage.toFixed(2)}V Tolerance = ${(error * 100).toFixed(2)}%`);
     }
     return true;
 }
@@ -145,7 +145,7 @@ async function strikeBoostReg(tolerance, logger, db) {
             retValue = false;
         }
         else {
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V Error = ${(error * 100).toFixed(2)}%`);
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V Tolerance = ${(error * 100).toFixed(2)}%`);
         }
     }
     return retValue;
@@ -178,7 +178,7 @@ async function test(tolerance, logger, db) {
             retValue = false;
         }
         else {
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V Error = ${(error * 100).toFixed(2)}%`);
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V Tolerance = ${(error * 100).toFixed(2)}%`);
         }
     }
     if (process.env.productName === 'mnplus') await testBoardLink.poeOn(false);
