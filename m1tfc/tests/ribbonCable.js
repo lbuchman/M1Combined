@@ -6,6 +6,7 @@ const errorCodes = require('../bin/errorCodes');
 const targetICTLink = require('../src/m1ICTLink');
 const testBoardLink = require('../src/testBoardLink');
 
+const maxM1TestBoardSupported = 10;
 let db;
 
 const ribbonCableSelectPins = [
@@ -16,12 +17,11 @@ const ribbonCableSelectPins = [
     { name: 'aioNrst', port: 'k', pin: 0, pinNameOnTestBoard: 'J5.17' }
 ];
 
-
 let ribbonCableA2DPins = [
-    { name: 'TP1801', voltage: 2.70, scale: 1.03 },
-    { name: 'TP1802', voltage: 2.70, scale: 1.03 },
-    { name: 'TP1901', voltage: 2.70, scale: 1.03 },
-    { name: 'TP1902', voltage: 2.70, scale: 1.03 }
+    { name: 'TP1801', voltage: 2.70, scale:  1.0125 },
+    { name: 'TP1802', voltage: 2.70, scale:  1.0125 },
+    { name: 'TP1901', voltage: 2.70, scale:  1.0125 },
+    { name: 'TP1902', voltage: 2.70, scale:  1.0125 }
 ];
 
 const ribbonCableI2CPinsSlave = [
@@ -95,7 +95,7 @@ async function testA2DVoltages(tolerance, logger, calibrate) {
             retValue = false;
             continue
         }
-        if (calibrate === 'true') {
+        if (calibrate) {
             testPoint.scale = testPoint.voltage / ret.value;
             logger.info(`calibrating TP=${testPoint.name} scale to value=${testPoint.scale}`);
             continue;
@@ -295,9 +295,13 @@ async function runRibbonCableTestM1(tolerance, logger, db_) {
 }
 
 async function runRibbonCableTest(skipTestPoints, tolerance, logger, db_, config, calibrate) {
+    config.boardId = parseInt(calibrate, 10);
     if (!config.boardId) config.boardId = 1;
     if (!config.boards) config.boards = [];
-    if (calibrate === "true") config.boards[`${config.boardId - 1}`].ribbonCableA2DPins = null;
+    const fillValue = {ribbonCableA2DPins};
+    config.boards.push(...new Array(maxM1TestBoardSupported - config.boards.length).fill(fillValue));
+
+    if (calibrate) config.boards[`${config.boardId - 1}`].ribbonCableA2DPins = null;
     if (config.boards[`${config.boardId - 1}`].ribbonCableA2DPins) {
         ribbonCableA2DPins = config.boards[`${config.boardId - 1}`].ribbonCableA2DPins;
     }

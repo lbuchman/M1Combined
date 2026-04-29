@@ -4,6 +4,7 @@ const testBoardLink = require('../src/testBoardLink');
 const errorCodes = require('../bin/errorCodes');
 const mnpHwIo = require('../tests/mnpHW');
 const targetICTLink = require('../src/m1ICTLink');
+const delay = require('delay');
 
 const ddrVoltageMnp = { name: 'TP304', voltage: 1.35 };
 const ddrVoltageM1 = { name: 'TP31', voltage: 1.35 };
@@ -35,8 +36,8 @@ const testPointsMnp = [
 ];
 
 const strikeReg = [
-    { name: 'SW1601.6', funcName: 'STRIKE1_KICKER_EN', voltage: 28.3, scale: 5.6 },
-    { name: 'SW1602.6', funcName: 'STRIKE2_KICKER_EN', voltage: 28.3, scale: 5.6 }
+    { name: 'SW1601.6', funcName: 'STRIKE1_KICKER_EN', functnameAux: 'STRIKE1_KICKER_POWER', voltage: 28.0, scale: 5.6 },
+    { name: 'SW1602.6', funcName: 'STRIKE2_KICKER_EN', functnameAux: 'STRIKE2_KICKER_POWER', voltage: 28.0, scale: 5.6 }
 ];
 
 
@@ -123,7 +124,12 @@ async function strikeBoostReg(tolerance, logger, db) {
     /* eslint-disable-next-line no-restricted-syntax */
     for (const testPoint of strikeReg) {
         logger.info(`Enabling ${testPoint.funcName}`);
-        command = mnpHwIo.getCommand('write', testPoint.funcName, 1, logger);
+
+
+        command = mnpHwIo.getCommand('write', testPoint.functnameAux, 1, logger); // enable Cap charging command
+        ret = await targetICTLink.sendCommand(command);
+        await delay(1000); // Wait for 1 second
+        command = mnpHwIo.getCommand('write', testPoint.funcName, 1, logger); // relay kicker
         // eslint-disable-next-line no-await-in-loop
         ret = await targetICTLink.sendCommand(command);
         if (!ret.status) {
@@ -134,6 +140,8 @@ async function strikeBoostReg(tolerance, logger, db) {
         // eslint-disable-next-line no-await-in-loop
         ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(testPoint.name)}`);
         if (!ret.status) {
+            command = mnpHwIo.getCommand('write', testPoint.functnameAux, 0, logger); // enable Cap charging command
+            await targetICTLink.sendCommand(command);
             db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'T');
             throw new Error(`Test Board control command failed on pinName=${testPoint.name}, ${ret.error}`);
         }
@@ -147,6 +155,7 @@ async function strikeBoostReg(tolerance, logger, db) {
         else {
             logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V Tolerance = ${(error * 100).toFixed(1)}%`);
         }
+        command = mnpHwIo.getCommand('write', testPoint.functnameAux, 0, logger); // enable Cap charging command
     }
     return retValue;
 }
@@ -156,7 +165,7 @@ async function test(tolerance, logger, db) {
     let retValue = true;
     // eslint-disable-next-line no-restricted-syntax
     if (process.env.productName === 'mnplus') await testBoardLink.poeOn(true);
-     /* eslint-disable-next-line no-restricted-syntax */
+    /* eslint-disable-next-line no-restricted-syntax */
     for (const testPoint of testPoints) {
         if (process.env.cellBatTol === 'new') {
             testPoints.voltage = 3.3;

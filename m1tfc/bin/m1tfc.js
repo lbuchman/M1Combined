@@ -185,7 +185,7 @@ program.command('ict')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug')
     .option('-b, --cellBatTol <cellBatTol>', 'tolerance for coin cell bat, valid values: new, used')
-    .option('-c, --callibrate <callibrate>', 'calibrate A/D and save data into the config file, set -c true')
+    .option('-c, --callibrate <callibrate>', 'calibrate A/D and save data into the config file, set -c to board Id from the board label')
     // .option('-f, --force', 'force DB update even if record exist')
 
     .action(async (options) => {
