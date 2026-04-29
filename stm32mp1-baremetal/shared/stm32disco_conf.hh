@@ -56,10 +56,11 @@ constexpr PinConf RP2_Wg_D1{GPIO::J, PinNum::_15};
 constexpr PinConf nPoE_PSE{GPIO::K, PinNum::_0};
 constexpr PinConf nPoEP_PSE{GPIO::D, PinNum::_5};
 constexpr PinConf STRIKE2_KICKER_EN{GPIO::F, PinNum::_15};
+constexpr PinConf STRIKE2_KICKER_POWER{GPIO::H, PinNum::_3};
 
 constexpr PinConf RP2_Wg_D0{GPIO::C, PinNum::_2};
 constexpr PinConf STRIKE1_KICKER_EN{GPIO::B, PinNum::_8};
-
+constexpr PinConf STRIKE1_KICKER_POWER{GPIO::F, PinNum::_8};
 
 
 constexpr PinConf Adc1_In1{GPIO::A, PinNum::_0};
