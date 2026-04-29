@@ -17,11 +17,11 @@ const ribbonCableSelectPins = [
 ];
 
 
-const ribbonCableA2DPins = [
-    { name: 'TP1801', voltage: 2.65, scale: 1.03 },
-    { name: 'TP1802', voltage: 2.65, scale: 1.03 },
-    { name: 'TP1901', voltage: 2.65, scale: 1.03 },
-    { name: 'TP1902', voltage: 2.65, scale: 1.03 }
+let ribbonCableA2DPins = [
+    { name: 'TP1801', voltage: 2.70, scale: 1.03 },
+    { name: 'TP1802', voltage: 2.70, scale: 1.03 },
+    { name: 'TP1901', voltage: 2.70, scale: 1.03 },
+    { name: 'TP1902', voltage: 2.70, scale: 1.03 }
 ];
 
 const ribbonCableI2CPinsSlave = [
@@ -78,7 +78,7 @@ async function runRibbonCableTestStaticVoltages(tolerance, logger) {
     }
 }
 
-async function testA2DVoltages(tolerance, logger) {
+async function testA2DVoltages(tolerance, logger, calibrate) {
     let retValue = true;
     // eslint-disable-next-line no-restricted-syntax
     for (const testPoint of ribbonCableA2DPins) {
@@ -89,6 +89,12 @@ async function testA2DVoltages(tolerance, logger) {
             throw new Error(`Test Board control command failed on pinName=${testPoint.name}, ${ret.error}`);
         }
         if (!testPoint.tolerance) testPoint.tolerance = tolerance;
+        if (calibrate === 'true') {
+            testPoint.scale = testPoint.voltage / ret.value;
+            logger.info(`calibrating TP=${testPoint.name} scale to value=${testPoint.scale}`);
+            continue;
+
+        }
         const error = ((Math.abs(ret.value * testPoint.scale - testPoint.voltage)) / (testPoint.voltage));
         if (error > testPoint.tolerance) {
             db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
@@ -240,11 +246,11 @@ async function testRs422(logger) {
     return true;
 }
 
-async function runRibbonCableTestMnp(tolerance, logger, db_) {
+async function runRibbonCableTestMnp(tolerance, logger, db_, calibrate) {
     db = db_;
     let retValue = true;
 
-    if (!await testA2DVoltages(tolerance, logger)) retValue = false;
+    if (!await testA2DVoltages(tolerance, logger, calibrate)) retValue = false;
 
     // if (!await runRibbonCableTestAddressSelectResetPins(1, false, logger)) retValue = false;
     // if (!await runRibbonCableTestAddressSelectResetPins(0, false, logger)) retValue = false;
@@ -282,8 +288,21 @@ async function runRibbonCableTestM1(tolerance, logger, db_) {
     return true;
 }
 
-async function runRibbonCableTest(skipTestPoints, tolerance, logger, db_) {
-    if (!skipTestPoints && process.env.productName === 'mnplus') return runRibbonCableTestMnp(tolerance, logger, db_);
+async function runRibbonCableTest(skipTestPoints, tolerance, logger, db_, config, calibrate) {
+    if (!config.boardId) config.boardId = 1;
+    if (!config.boards) config.boards = [];
+    if (calibrate === "true") config.boards[`${config.boardId - 1}`].ribbonCableA2DPins = null;
+    if (config.boards[`${config.boardId - 1}`].ribbonCableA2DPins) {
+        ribbonCableA2DPins = config.boards[`${config.boardId - 1}`].ribbonCableA2DPins;
+    }
+    else {
+        config.boards[`${config.boardId - 1}`].ribbonCableA2DPins = {};
+    }
+    if (!skipTestPoints && process.env.productName === 'mnplus') {
+        const ret = await runRibbonCableTestMnp(tolerance, logger, db_, calibrate);
+        config.boards[`${config.boardId - 1}`].ribbonCableA2DPins = ribbonCableA2DPins;
+        return ret;
+    }
     if (process.env.productName === 'm1-3200') return runRibbonCableTestM1(tolerance, logger, db_);
     return true;
 }

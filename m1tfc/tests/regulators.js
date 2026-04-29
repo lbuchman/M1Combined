@@ -26,7 +26,7 @@ const testPointsMnp = [
     { name: 'TP308', voltage: 2.8, scale: 1 },
     { name: 'TP303', voltage: 1.2, scale: 1 },
     { name: 'TP305', voltage: 3.3, scale: 1 },
-    { name: 'TP306', voltage: 0, scale: 1 },
+    { name: 'TP306', voltage: 3.3, scale: 1 },
     { name: 'TP401', voltage: 5.0, scale: 0.98 },
     { name: 'TP2301', voltage: 12.8, scale: 1 },
     { name: 'TP202', voltage: 12.0, scale: 0.995 },

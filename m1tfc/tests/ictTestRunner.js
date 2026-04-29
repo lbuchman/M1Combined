@@ -19,12 +19,14 @@ const MnpTests = require('./mnpTests');
 
 
 module.exports = class IctTestRunner {
-    constructor(stm32, tolerance, log) {
+    constructor(stm32, tolerance, log,  config) {
         this.logger = log;
         this.busy = false;
         this.tolerance = tolerance;
         this.stm32 = stm32;
         this.db = null;
+        this.config = config;
+
     }
 
     /**
@@ -44,7 +46,7 @@ module.exports = class IctTestRunner {
       *
       * @param
       */
-    async runTest(programmer, serial, ddrblocks, skipTestpointCheck, initAndQuit = false) {
+    async runTest(programmer, serial, ddrblocks, skipTestpointCheck, config, initAndQuit = false, calibrate = false) {
         process.env.serial = serial;
         this.db.updateSerial(serial);
         this.db.resetErrorCode(process.env.serial);
@@ -72,7 +74,7 @@ module.exports = class IctTestRunner {
                 if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db)) ret = false;
             }
             if (!skipTestpointCheck) if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db)) ret = false;
-            if (!await ribbonCable.runRibbonCableTest(skipTestpointCheck, this.tolerance, this.logger, this.db)) ret = false;
+            if (!await ribbonCable.runRibbonCableTest(skipTestpointCheck, this.tolerance, this.logger, this.db, this.config, calibrate)) ret = false;
 
             this.logger.info('Testing RS485 ...');
             if (!await rs485.testRs485(this.logger, this.db)) ret = false;
@@ -116,19 +118,19 @@ module.exports = class IctTestRunner {
                 this.logger.info('ICT Test Passed!!!');
                 await common.testEndSuccess();
                 this.db.updateIctStatus(serial, utils.boolToInt(true));
-                process.exit(exitCodes.normalExit);
+             // todo   process.exit(exitCodes.normalExit);
             }
 
             await common.testFailed();
             this.logger.warn('One or more tests Failed!!!');
             await delay(100);
-            process.exit(exitCodes.ictTestFailed);
+            // todo   process.exit(exitCodes.ictTestFailed);
         }
         catch (err) {
             this.logger.error(err.stack);
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();
-            process.exit(exitCodes.ictTestFailed);
+            // todo   process.exit(exitCodes.ictTestFailed);
         }
     }
 };

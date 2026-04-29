@@ -89,11 +89,11 @@ program
 program.command('m1dfu')
     .description('Start M1 in DFU mode and program bootstrap FW')
     .action(async () => {
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         const logfile = console;
         process.env.productName = configData.productName;
         try {
-            const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
+            const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile, configData, false);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
@@ -110,11 +110,11 @@ program.command('tbcmd')
     .description('execute test board raw command')
     .option('-c, --command <string>', 'test board command, make sure to inclose the command in ""')
     .action(async (options) => {
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         const logfile = console;
         process.env.productName = configData.productName;
         try {
-            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile);
+            const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile, configData, false);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             const output = await testBoardLink.sendCommand(options.command);
@@ -134,11 +134,11 @@ program.command('m1cmd')
     .description('execute M1 bootstrap raw command, make sure to run m1dfu command before ')
     .option('-c, --command <string>', 'M1-3200 command, make sure to inclose the command in ""')
     .action(async (options) => {
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         const logfile = console;
         process.env.productName = configData.productName;
         try {
-            const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
+            const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile, configData, false);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             await targetICTLink.initSerial(configData.m1SerialDev, 115200, logfile);
@@ -158,12 +158,12 @@ program.command('mnpcmd <action> [sigNameOrTestpont] [value]')
     // eslint-disable-next-line
     .description('execute mnp IO commands\n\tCommands: [read, write, printio]\n\Example:\n\tm1test write WGD1_BPR 1\n\ttm1test read WGD2_D0_3V3 WGD1_BPR 0\n\nuse command printio to list testpoints and signames\n\nMake sure to execute m1dfu command before this command to load the FW')
     .action(async (readOrWrite, name, value) => {
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         const logfile = console;
         process.env.productName = configData.productName;
         try {
             const command = mnpHwIo.getCommand(readOrWrite, name, value, logfile);
-            const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
+            const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile, configData, false);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             await targetICTLink.initSerial(configData.m1SerialDev, 115200, logfile);
@@ -183,15 +183,17 @@ program.command('mnpcmd <action> [sigNameOrTestpont] [value]')
 program.command('ict')
     .description('Executes ICT test')
     .option('-s, --serial <string>', 'vendor serial number')
-    .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
-    .option('-b, --cellBatTol <cellBatTol>', 'tolerance for coin cell bat, valid values: new, used ')
+    .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug')
+    .option('-b, --cellBatTol <cellBatTol>', 'tolerance for coin cell bat, valid values: new, used')
+    .option('-c, --callibrate <callibrate>', 'calibrate A/D and save data into the config file, set -c true')
     // .option('-f, --force', 'force DB update even if record exist')
 
     .action(async (options) => {
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         let logfile;
         let db;
         let startStatusOk = true;
+
         process.env.productName = configData.productName;
         process.env.debug = options.debug;
         try {
@@ -243,7 +245,7 @@ program.command('ict')
             await targetICTLink.initSerial(configData.m1SerialDev, 115200, logfile);
             if (!options.cellBatTol) await errorAndExit('must define cellBatTol', logfile);
             logfile.info(`Executing ICT command ${configData.mtfDir}/${configData.ictFWFilePath} ...`);
-            const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile);
+            const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile, configData);
             await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
             await delay(400);
             // logfile.info(`Coin Cell Battery level:  ${options.cellBatTol}`);
@@ -255,9 +257,15 @@ program.command('ict')
                 skipTestpointCheck = configData.skipTestpointCheck || false;
                 memTestSize1MBBlocks = configData.memTestSize1MBBlocks || 512;
             }
-            await ictTestRunner.runTest(configData.programmingCommand, options.serial, memTestSize1MBBlocks, skipTestpointCheck);
+            await ictTestRunner.runTest(configData.programmingCommand, options.serial, memTestSize1MBBlocks, skipTestpointCheck, configData, false, options.callibrate);
+            if (options.callibrate) {
+                await config.saveConfig(configData);
+            }
         }
         catch (err) {
+             if (options.callibrate) {
+                await config.saveConfig(configData);
+             }
             if (!logfile) logfile = console;
             logfile.error(err);
             // logfile.error(err.stack);
@@ -276,7 +284,7 @@ program.command('eeprom')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
     .action(async (options) => {
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         let logfile;
         let db;
         process.env.productName = configData.productName;
@@ -319,7 +327,7 @@ program.command('progmac')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug')
     .action(async (options) => {
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         process.env.fwDir = `${configData.mtfDir}/${configData.fwDir}`;
         let logfile;
         let db;
@@ -351,7 +359,7 @@ program.command('flash')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
     .action(async (options) => {
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         let logfile;
         let db;
         process.env.productName = configData.productName;
@@ -382,7 +390,7 @@ program.command('pingM1apps')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
     .action(async (options) => {
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         let logfile;
         let db;
         process.env.productName = configData.productName;
@@ -440,7 +448,7 @@ program.command('cleanup')
     .option('-s, --serial <string>', 'vendor serial number')
     .option('-e, --failed', 'will append E to the tar ball file name')
     .action(async (options) => {
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         const logfile = console;
         const now = new Date();
         process.env.productName = configData.productName;
@@ -481,7 +489,7 @@ program.command('functest')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
 
     .action(async (options) => {
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         let logfile;
         process.env.productName = configData.productName;
         try {
@@ -519,7 +527,7 @@ program.command('makelabel')
     .option('-e, --error', 'error print from the database')
     .action(async (options) => {
         if (!options.serial) await errorAndExit('must define vendor serial number', console);
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         const logfile = logger.getLogger(options.serial, '  label', options.serial, configData.mtfDir, options.debug);
         const db = sqliteDriver.initialize(logfile);
         process.env.productName = configData.productName;
@@ -605,7 +613,7 @@ const log = console;
 
 os.executeShellCommand('killall -9 STM32_Programmer_CLI', log, true)
     .then(async () => {
-        const configData = await config(configuration);
+        const configData = await config.getConfig(configuration);
         process.env.DBPATH = configData.mtfDir;
         mkdirp.sync(configData.mtfDir);
         mkdirp.sync(`${configData.mtfDir}/logs`);
