@@ -36,7 +36,7 @@ module.exports = class ProgramMac {
         try {
             const db = sqliteDriver.initialize(this.logger);
             db.updateSerial(this.serial);
-            await common.initializeTestFixture(null, false, null, null, this.logger);
+            await common.initializeTestFixture(null, null, false, null, null, this.logger);
             this.logger.debug('Wait for DFU ...');
             await common.waitDFU(programmer, this.logger);
             this.logger.debug('Programming TSV file ...');
@@ -119,7 +119,7 @@ module.exports = class ProgramMac {
     * @param
     */
     async getMac(programmer) {
-        await common.initializeTestFixture(null, false, null, null, this.logger);
+        await common.initializeTestFixture(null, null, false, null, null, this.logger);
         this.logger.debug('Programming TSV file ...');
         await common.waitDFU(programmer, this.logger);
         const fwDir = `${path.resolve(__dirname)}/../fw`;
@@ -149,7 +149,7 @@ module.exports = class ProgramMac {
  * @param
  */
     async getSecreteKey(programmer) {
-        await common.initializeTestFixture(null, false, null, null, this.logger);
+        await common.initializeTestFixture(null, null, false, null, null, this.logger);
         this.logger.debug('Programming TSV file ...');
         await common.waitDFU(programmer, this.logger);
         const fwDir = `${path.resolve(__dirname)}/../fw`;
@@ -187,7 +187,7 @@ module.exports = class ProgramMac {
             const db = sqliteDriver.initialize(this.logger);
             const exitCode = exitCodes.normalExit;
             db.updateSerial(this.serial);
-            await common.initializeTestFixture(null, false, null, null, this.logger);
+            await common.initializeTestFixture(null, null, false, null, null, this.logger);
             this.logger.debug('Wait for DFU ...');
             await common.waitDFU(programmer, this.logger);
             this.logger.debug('Programming TSV file ...');

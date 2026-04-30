@@ -257,7 +257,7 @@ program.command('ict')
                 skipTestpointCheck = configData.skipTestpointCheck || false;
                 memTestSize1MBBlocks = configData.memTestSize1MBBlocks || 512;
             }
-            await ictTestRunner.runTest(configData.programmingCommand, options.serial, memTestSize1MBBlocks, skipTestpointCheck, configData, false, options.callibrate);
+            await ictTestRunner.runTest(configData.programmingCommand, options.serial, memTestSize1MBBlocks, skipTestpointCheck,  false, options.callibrate);
             if (options.callibrate) {
                 await config.saveConfig(configData);
             }

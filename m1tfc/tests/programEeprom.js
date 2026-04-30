@@ -33,7 +33,7 @@ module.exports = class IctTestRunner {
     async program(programmer, serial, vendorSite, eeepromoverwrite = false) {
         try {
             this.logger.info('Updating I2C EEPROM ...');
-            await common.initializeTestFixture(programmer, true, this.stm32, this.m1Dev, this.logger, false);
+            await common.initializeTestFixture(null, programmer, true, this.stm32, this.m1Dev, this.logger);
             return await eeprom.updateEEPRom(serial, eeepromoverwrite, vendorSite, this.logger);
         }
         catch (err) {
@@ -54,7 +54,7 @@ module.exports = class IctTestRunner {
     async print(programmer) {
         try {
             this.logger.debug('reading I2C EEPROM ...');
-            await common.initializeTestFixture(programmer, true, this.stm32, this.m1Dev, this.logger);
+            await common.initializeTestFixture(null, programmer, true, this.stm32, this.m1Dev, this.logger);
             return eeprom.printEEPRomData(this.logger, console);
         }
         catch (err) {
@@ -76,7 +76,7 @@ module.exports = class IctTestRunner {
     async get(programmer) {
         try {
             this.logger.debug('reading I2C EEPROM ...');
-            await common.initializeTestFixture(programmer, true, this.stm32, this.m1Dev, this.logger);
+            await common.initializeTestFixture(null, programmer, true, this.stm32, this.m1Dev, this.logger);
             return eeprom.getEEPRomData(this.logger, console);
         }
         catch (err) {

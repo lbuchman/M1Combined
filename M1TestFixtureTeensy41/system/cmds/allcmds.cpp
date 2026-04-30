@@ -8,6 +8,7 @@
 #include <watchdog.h>
 #include <ioEngine.hpp>
 #include <Cmd.h>
+#include <EEPROM.h>
 
 extern Scheduler* pts;
 extern ShellFunctor* pshell;
@@ -225,6 +226,16 @@ shellFunc settime = [](int arg_cnt, char **args, Stream & stream) -> int {
     return 1;
 };
 
+shellFunc writeboardid = [](int arg_cnt, char **args, Stream & stream) -> int {
+    if(!checkArgument(2, arg_cnt, args, (char*) "{ \"cmd\": \"%s\", \"arg\": \"boardId\", \"desc\": \"<write board ide>\" },\n\r", stream)) {
+        return 1;
+    }
+    int address = 0;
+    int data = atoi(args[1]);
+    EEPROM.write(address, byte(data));
+    return 1;
+};
+
 
 shellFunc uptime = [](int arg_cnt, char **args, Stream & stream) -> int {
     if(arg_cnt == 0xFF) {
@@ -345,8 +356,12 @@ shellFunc getfwrev = [](int arg_cnt, char **args, Stream & stream) -> int {
     }
 
     plogger->info(plogger->printHeader, (char*) __FILE__, __LINE__, "executing %s", args[0]);
+    int address = 0;
+    int boardId = EEPROM.read(address);
 
-    stream.printf("\t{ \"cmd\": \"%s\", \"status\": true, \"fwrev\": %s , \"cpu\": \"teensy4.1\"}\n\r", args[0], Rev);
+
+       stream.printf("\t{ \"cmd\": \"%s\", \"status\": true, \"fwrev\": %s , \"boardId\": %d , \"cpu\": \"teensy4.1\"}\n\r", args[0], Rev, boardId);
+
     return 1;
 };
 
@@ -434,6 +449,7 @@ std::map<String, shellFunc> shellFunctions = {
     { "batteryoff", batteryoff },
     { "batteryloadon", batteryloadon },
     { "batteryloadoff", batteryloadoff },
-    { "getfwrev", getfwrev }
+    { "getfwrev", getfwrev },
+    { "writeboardid", writeboardid }
 };
 

@@ -36,7 +36,7 @@ module.exports = class ProgramMac {
             const fwDir = process.env.fwDir;
             const db = sqliteDriver.initialize(this.logger);
             db.updateSerial(this.serial);
-            await common.initializeTestFixture(programmer, true, null, null, this.logger);
+            await common.initializeTestFixture(null, programmer, true, null, null, this.logger);
             this.logger.debug('Programming TSV file ...');
             await os.executeShellCommand(`${programmer}  -c port=usb1 -w ${this.tsv}`, this.logger, false, false, 1024 * 1024 * 10, fwDir);
             try {

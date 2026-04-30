@@ -1,0 +1,52 @@
+'use strict';
+
+let ddrVoltageMnp = { name: 'TP304', voltage: 1.35 };
+let ddrVoltageM1 = { name: 'TP31', voltage: 1.35 };
+
+let strikeReg = [
+    { name: 'SW1601.6', funcName: 'STRIKE1_KICKER_EN', functnameAux: 'STRIKE1_KICKER_POWER', voltage: 28.0, scale: 5.6 },
+    { name: 'SW1602.6', funcName: 'STRIKE2_KICKER_EN', functnameAux: 'STRIKE2_KICKER_POWER', voltage: 28.0, scale: 5.6 }
+];
+
+let ribbonCableA2DPins = [
+    { name: 'TP1801', voltage: 2.70, scale: 1.0125 },
+    { name: 'TP1802', voltage: 2.70, scale: 1.0125 },
+    { name: 'TP1901', voltage: 2.70, scale: 1.0125 },
+    { name: 'TP1902', voltage: 2.70, scale: 1.0125 }
+];
+
+let testPointsM1 = [
+    { name: 'TP025', voltage: 5, scale: 1 },
+    { name: 'TP33', voltage: 2.8, scale: 1 },
+    { name: 'TP35', voltage: 3.3, scale: 1 },
+    { name: 'TP34', voltage: 3.3, scale: 1 },
+    { name: 'TP36', voltage: 1.2, scale: 1 },
+    { name: 'J5.13', voltage: 11.7, scale: 1 },
+    { name: 'J5.5', voltage: 6.0, scale: 1 },
+    { name: 'J5.7', voltage: 6.0, scale: 1 },
+    { name: 'J5.8', voltage: 6.0, scale: 1 }
+];
+
+let testPointsMnp = [
+    { name: 'TP204', voltage: 5.0, scale: 1 },
+    { name: 'TP308', voltage: 2.8, scale: 1 },
+    { name: 'TP303', voltage: 1.2, scale: 1 },
+    { name: 'TP305', voltage: 3.3, scale: 1 },
+    { name: 'TP306', voltage: 3.3, scale: 1 },
+    { name: 'TP401', voltage: 5.0, scale: 0.98 },
+    { name: 'TP2301', voltage: 12.8, scale: 1 },
+    { name: 'TP202', voltage: 12.0, scale: 0.995 },
+    { name: 'J2101.1', voltage: 11.85, scale: 2.79 },
+    { name: 'J2001.1', voltage: 11.85, scale: 2.79 }
+];
+
+
+const defaults = {
+    testPointsMnp,
+    testPointsM1,
+    ribbonCableA2DPins,
+    strikeReg
+}
+module.exports = {
+    calibrationDefaultsData
+};
