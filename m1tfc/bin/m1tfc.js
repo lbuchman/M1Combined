@@ -257,15 +257,16 @@ program.command('ict')
                 skipTestpointCheck = configData.skipTestpointCheck || false;
                 memTestSize1MBBlocks = configData.memTestSize1MBBlocks || 512;
             }
-            await ictTestRunner.runTest(configData.programmingCommand, options.serial, memTestSize1MBBlocks, skipTestpointCheck,  false, options.callibrate);
+            // eslint-disable-next-line no-param-reassign
+            if (options.callibrate === 'true') options.callibrate = true;
+            // eslint-disable-next-line no-param-reassign
+            else options.callibrate = false;
+            await ictTestRunner.runTest(configData.programmingCommand, options.serial, memTestSize1MBBlocks, skipTestpointCheck, false, options.callibrate);
+        }
+        catch (err) {
             if (options.callibrate) {
                 await config.saveConfig(configData);
             }
-        }
-        catch (err) {
-             if (options.callibrate) {
-                await config.saveConfig(configData);
-             }
             if (!logfile) logfile = console;
             logfile.error(err);
             // logfile.error(err.stack);
