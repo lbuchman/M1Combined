@@ -80,16 +80,16 @@ module.exports = class CalibrationData {
             const defData = new Array(20).fill({});
             defData.forEach((item, index) => {
                 defData[index] = structuredClone(this.defaults);
-            })
+            });
             this.config.boards = defData;
         }
         else {
             this.testPointsMnp = this.config.boards[this.boardId].testPointsMnp;
             this.testPointsM1 = this.config.boards[this.boardId].testPointsM1;
             this.ribbonCableA2DPins = this.config.boards[this.boardId].ribbonCableA2DPins;
-            this.strikeReg =this.config.boards[this.boardId].strikeReg;
+            this.strikeReg = this.config.boards[this.boardId].strikeReg;
             this.ddrVoltageM1 = this.config.boards[this.boardId].ddrVoltageM1;
-            this.ddrVoltageMnp =this.config.boards[this.boardId].ddrVoltageMnp;
+            this.ddrVoltageMnp = this.config.boards[this.boardId].ddrVoltageMnp;
             this.coinCellBattery = this.config.boards[this.boardId].coinCellBattery;
         }
     }
@@ -129,13 +129,7 @@ module.exports = class CalibrationData {
 
 
     async saveConfigFile() {
-        if (this.config.boards[1].ddrVoltageMnp.scale !== 1){
-             console.log('XXXXXXXXXXX');
-        }
         this.config.boards[this.boardId] = this.defaults;
         await config.saveConfig(this.config);
-        if (this.config.boards[1].ddrVoltageMnp.scale !== 1) {
-            console.log('RRRRRRRRRRRRRRRRRRRRRRRR');
-        }
     }
 };

@@ -53,18 +53,21 @@ async function testDDRVoltage(tolerance, logger, db, calibrate, calibrateData) {
     }
     else {
         if (calibrate) {
-             if (process.env.productName === 'mnplus') {
+            if (process.env.productName === 'mnplus') {
+                // eslint-disable-next-line no-param-reassign
                 calibrateData.defaults.ddrVoltageMnp.scale = ddrVoltage.voltage / ret.value;
             }
             else {
+                // eslint-disable-next-line no-param-reassign
                 calibrateData.defaults.ddrVoltageMnp.scale = ddrVoltage.voltage / ret.value;
             }
 
-            // eslint-disable-next-line no-param-reassign
             if (process.env.productName === 'mnplus') {
+                // eslint-disable-next-line no-param-reassign
                 calibrateData.defaults.ddrVoltageMnp = ddrVoltage;
             }
             else {
+                // eslint-disable-next-line no-param-reassign
                 calibrateData.defaults.ddrVoltageM1 = ddrVoltage;
             }
             logger.info(`calibrating TP=${ddrVoltage.name} scale to value=${ddrVoltage.scale}`);
@@ -152,7 +155,7 @@ async function strikeBoostReg(tolerance, logger, db, calibrate, calibrateData) {
         if (error > testPoint.tolerance) {
             if (calibrate) {
                 logger.error(`Voltage is out of tolerance and cannot be calibrated. Check A/D HW, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(1)}%`);
-                etValue = false;
+                retValue = false;
                 // eslint-disable-next-line no-continue
                 continue;
             }
@@ -168,6 +171,7 @@ async function strikeBoostReg(tolerance, logger, db, calibrate, calibrateData) {
                 // eslint-disable-next-line no-param-reassign
                 calibrateData.defaults.strikeReg = calibrateData.strikeReg;
                 logger.info(`calibrating TP=${testPoint.name} scale to value=${testPoint.scale}`);
+                // eslint-disable-next-line no-await-in-loop
                 await calibrateData.saveConfigFile();
                 // eslint-disable-next-line no-continue
                 continue;
@@ -226,6 +230,7 @@ async function test(tolerance, logger, db, calibrate, calibrateData) {
                     calibrateData.defaults.testPointsM1 = testPoints;
                 }
                 logger.info(`calibrating TP=${testPoint.name} scale to value=${testPoint.scale}`);
+                // eslint-disable-next-line no-await-in-loop
                 await calibrateData.saveConfigFile();
 
                 // eslint-disable-next-line no-continue
