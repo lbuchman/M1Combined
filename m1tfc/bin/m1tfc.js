@@ -186,6 +186,7 @@ program.command('ict')
     .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug')
     .option('-b, --cellBatTol <cellBatTol>', 'tolerance for coin cell bat, valid values: new, used')
     .option('-c, --callibrate <callibrate>', 'calibrate A/D and save data into the config file, set -c to board Id from the board label')
+    .option('-v, --cellBatVoltage <cellBatVoltage>', 'only for the calibration, measure cell bat voltage and enter it like: -v 3.0145')
     // .option('-f, --force', 'force DB update even if record exist')
 
     .action(async (options) => {
@@ -204,6 +205,10 @@ program.command('ict')
                 { name: '/dev/ttyACM0', desc: 'Testboard Teensy' },
                 { name: '/dev/ttyUSB0', desc: 'M1-3200 Terminal Serial Converter' }
             ];
+
+            if (options.cellBatVoltage) {
+                process.env.cellBatVoltage = options.cellBatVoltage;
+            }
 
             if (options.debug !== '2') {
                 if (configData.makeLabel) {
@@ -226,7 +231,6 @@ program.command('ict')
                     logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
                 }
             }
-
 
             devices.forEach(async (deviceFile) => {
                 const exists = fs.existsSync(deviceFile.name);

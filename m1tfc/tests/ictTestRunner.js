@@ -16,6 +16,7 @@ const sqliteDriver = require('../utils/sqliteDriver');
 const utils = require('../utils/utils');
 const errorCodes = require('../bin/errorCodes');
 const MnpTests = require('./mnpTests');
+const CalibrationDefault = require('./calibrationDefault');
 
 
 module.exports = class IctTestRunner {
@@ -26,7 +27,6 @@ module.exports = class IctTestRunner {
         this.stm32 = stm32;
         this.db = null;
         this.config = config;
-
     }
 
     /**
@@ -50,18 +50,19 @@ module.exports = class IctTestRunner {
         process.env.serial = serial;
         this.db.updateSerial(serial);
         this.db.resetErrorCode(process.env.serial);
-        regulators.init();
+        const invalidBoardId = 255;
+        this.CalibrationParam = new CalibrationDefault(invalidBoardId, this.logger, this.config);
         let ret = true;
 
         this.db.updateIctStatus(serial, utils.boolToInt(false));
-
-          try {
-            await common.initializeTestFixture(this.config, programmer, programSTM, initAndQuit, this.stm32, this.m1Dev, this.logger);
+        try {
+            await common.initializeTestFixture(this.config, programmer, initAndQuit, initAndQuit, this.stm32, this.m1Dev, this.logger, calibrate, this.CalibrationParam);
             if (initAndQuit) return;
+            regulators.init(this.CalibrationParam);
             await regulators.checkLeverState(this.logger, this.db);
             if (!skipTestpointCheck) this.logger.info('Testing test points ...');
-            if (!skipTestpointCheck) if (!await regulators.test(this.tolerance, this.logger, this.db)) ret = false;
-            await regulators.cellBatTest(this.logger, this.db);
+            if (!skipTestpointCheck) if (!await regulators.test(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) ret = false;
+            await regulators.cellBatTest(this.logger, this.db, calibrate, this.CalibrationParam);
             try {
                 await common.programStm(programmer, this.stm32, this.m1Dev, this.logger, this.db);
             }
@@ -72,10 +73,10 @@ module.exports = class IctTestRunner {
             }
 
             if (!skipTestpointCheck && process.env.productName === 'mnplus') {
-                if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db)) ret = false;
+                if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) ret = false;
             }
-            if (!skipTestpointCheck) if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db)) ret = false;
-            if (!await ribbonCable.runRibbonCableTest(skipTestpointCheck, this.tolerance, this.logger, this.db, this.config, calibrate)) ret = false;
+            if (!skipTestpointCheck) if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db, this.CalibrationParam)) ret = false;
+            if (!await ribbonCable.runRibbonCableTest(skipTestpointCheck, this.tolerance, this.logger, this.db, this.config, calibrate, this.CalibrationParam)) ret = false;
 
             this.logger.info('Testing RS485 ...');
             if (!await rs485.testRs485(this.logger, this.db)) ret = false;

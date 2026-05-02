@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 
 const inConfig = '/var/snap/m1tfd1/current/config.json';
-const outConfig = "/home/lenel/config.json"
+const outConfig = '/home/lenel/config.json';
 
 /* Additional parameters the user can specify in $SNAP_DATA/config.json
 {
@@ -33,16 +33,15 @@ async function getConfig(configDataDefaults) {
 }
 
 async function saveConfig(configData) {
-    let configDataUser;
     try {
         await fs.writeJSON(outConfig, configData, { spaces: 2 });
     }
     catch (err) {
-        configDataUser = {};
+        //
     }
 }
 
 module.exports = {
     getConfig,
     saveConfig
-}
+};

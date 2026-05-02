@@ -68,15 +68,18 @@ async function programStm(programmer, stm32, m1Dev, logger) {
     logger.debug(`Target ICT FW Rev - ${fwRev}`);
 }
 
-async function initializeTestFixture(config, programmer, programSTM, initAndQuit, stm32, m1Dev, logger, ) {
+async function initializeTestFixture(config, programmer, programSTM, initAndQuit, stm32, m1Dev, logger, calibrat, calibrationData) {
     await testBoardLink.retrieveIoDef();
     testBoardLink.getIoDef();
 
     const testBoardFwRev = await testBoardLink.sendCommand('getfwrev');
     if (!testBoardFwRev.status) throw new Error('cannot get fw rev from teensy test board');
     if (testBoardFwRev.boardId === 255) throw new Error('cannot get M1 Testboard boardId, update FW and program boardId');
-    if (config) config = testBoardFwRev.boardId;
+    if (calibrationData) {
+        calibrationData.setBoardId(testBoardFwRev.boardId);
+    }
     logger.debug(`Test Board FW Rev - ${testBoardFwRev.fwrev} BoardId - ${testBoardFwRev.boardId}`);
+    await await calibrationData.intitConfigFile();
 
     logger.debug('Setting UUT power off');
     await testBoardLink.targetPower(false);
