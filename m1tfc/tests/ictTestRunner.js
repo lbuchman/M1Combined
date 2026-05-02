@@ -75,7 +75,7 @@ module.exports = class IctTestRunner {
             if (!skipTestpointCheck && process.env.productName === 'mnplus') {
                 if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) ret = false;
             }
-            if (!skipTestpointCheck) if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db, this.CalibrationParam)) ret = false;
+            if (!skipTestpointCheck) if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) ret = false;
             if (!await ribbonCable.runRibbonCableTest(skipTestpointCheck, this.tolerance, this.logger, this.db, this.config, calibrate, this.CalibrationParam)) ret = false;
 
             this.logger.info('Testing RS485 ...');

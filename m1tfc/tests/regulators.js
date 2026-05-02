@@ -36,19 +36,43 @@ async function checkLeverState(logger, db) {
     return true;
 }
 
-async function testDDRVoltage(tolerance, logger, db) {
+async function testDDRVoltage(tolerance, logger, db, calibrate, calibrateData) {
     const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(ddrVoltage.name)}`);
     if (!ret.status) {
         db.updateErrorCode(process.env.serial, errorCodes.codes[ddrVoltage.name].errorCode, 'T');
         throw new Error(`Test Board control command failed on pinName=${ddrVoltage.name}, ${ret.error}`);
     }
-    const error = ((Math.abs(ret.value - ddrVoltage.voltage)) / (ddrVoltage.voltage));
+    const error = ((Math.abs(ret.value * ddrVoltage.scale - ddrVoltage.voltage)) / (ddrVoltage.voltage));
     if (error > tolerance) {
+        if (calibrate) {
+            logger.error(`Voltage is out of tolerance and cannot be calibrated. Check A/D HW, TP=${ddrVoltage.voltage}, value=${(ret.value - ddrVoltage.voltage).toFixed(2)}, reqValue=${calibrateData.ddrVoltage.voltage} Error = ${(error * 100).toFixed(1)}%`);
+            return false;
+        }
         db.updateErrorCode(process.env.serial, errorCodes.codes[ddrVoltage.name].errorCode, 'E');
-        throw new Error(`Failed: Voltage is out of tolerance, TP=${ddrVoltage.name}, value=${ret.value.toFixed(2)}, reqValue=${ddrVoltage.voltage.toFixed(2)} Error = ${(error * 200).toFixed(2)}%`);
+        throw new Error(`Failed: Voltage is out of tolerance, TP=${ddrVoltage.name}, value=${(ret.value * ddrVoltage.scale).toFixed(2)}, reqValue=${ddrVoltage.voltage.toFixed(2)} Error = ${(error * 200).toFixed(2)}%`);
     }
     else {
-        logger.info(`Passed TP=${ddrVoltage.name} test, Voltage = ${ret.value.toFixed(2)}V, Expected = ${ddrVoltage.voltage.toFixed(2)}V Tolerance = ${(error * 100).toFixed(1)}%`);
+        if (calibrate) {
+             if (process.env.productName === 'mnplus') {
+                calibrateData.defaults.ddrVoltageMnp.scale = ddrVoltage.voltage / ret.value;
+            }
+            else {
+                calibrateData.defaults.ddrVoltageMnp.scale = ddrVoltage.voltage / ret.value;
+            }
+
+            // eslint-disable-next-line no-param-reassign
+            if (process.env.productName === 'mnplus') {
+                calibrateData.defaults.ddrVoltageMnp = ddrVoltage;
+            }
+            else {
+                calibrateData.defaults.ddrVoltageM1 = ddrVoltage;
+            }
+            logger.info(`calibrating TP=${ddrVoltage.name} scale to value=${ddrVoltage.scale}`);
+            await calibrateData.saveConfigFile();
+            // eslint-disable-next-line no-continue
+            return true;
+        }
+        logger.info(`Passed TP=${ddrVoltage.name} test, Voltage = ${(ret.value * ddrVoltage.scale).toFixed(2)}V, Expected = ${ddrVoltage.voltage.toFixed(2)}V Tolerance = ${(error * 100).toFixed(1)}%`);
     }
     return true;
 }
@@ -76,7 +100,7 @@ async function cellBatTest(logger, db, calibrate, calibrateData) {
         // eslint-disable-next-line no-param-reassign
         calibrateData.defaults.coinCellBattery = calibrateData.coinCellBattery;
         logger.info(`calibrating coin cell battery scale to value=${calibrateData.defaults.coinCellBattery.scale}`);
-        calibrateData.saveConfigFile();
+        await calibrateData.saveConfigFile();
         // eslint-disable-next-line no-continue
         return true;
     }
@@ -128,6 +152,7 @@ async function strikeBoostReg(tolerance, logger, db, calibrate, calibrateData) {
         if (error > testPoint.tolerance) {
             if (calibrate) {
                 logger.error(`Voltage is out of tolerance and cannot be calibrated. Check A/D HW, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(1)}%`);
+                etValue = false;
                 // eslint-disable-next-line no-continue
                 continue;
             }
@@ -143,7 +168,7 @@ async function strikeBoostReg(tolerance, logger, db, calibrate, calibrateData) {
                 // eslint-disable-next-line no-param-reassign
                 calibrateData.defaults.strikeReg = calibrateData.strikeReg;
                 logger.info(`calibrating TP=${testPoint.name} scale to value=${testPoint.scale}`);
-                calibrateData.saveConfigFile();
+                await calibrateData.saveConfigFile();
                 // eslint-disable-next-line no-continue
                 continue;
             }
@@ -179,6 +204,7 @@ async function test(tolerance, logger, db, calibrate, calibrateData) {
         if (error > testPoint.tolerance) {
             if (calibrate) {
                 logger.error(`Voltage is out of tolerance and cannot be calibrated. Check A/D HW, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(1)}%`);
+                retValue = false;
                 // eslint-disable-next-line no-continue
                 continue;
             }
@@ -200,7 +226,7 @@ async function test(tolerance, logger, db, calibrate, calibrateData) {
                     calibrateData.defaults.testPointsM1 = testPoints;
                 }
                 logger.info(`calibrating TP=${testPoint.name} scale to value=${testPoint.scale}`);
-                calibrateData.saveConfigFile();
+                await calibrateData.saveConfigFile();
 
                 // eslint-disable-next-line no-continue
                 continue;

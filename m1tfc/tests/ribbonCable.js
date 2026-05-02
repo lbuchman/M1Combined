@@ -96,7 +96,7 @@ async function testA2DVoltages(tolerance, logger, calibrate, calibrateData) {
             logger.info(`calibrating TP=${testPoint.name} scale to value=${testPoint.scale}`);
             // eslint-disable-next-line no-param-reassign
             calibrateData.defaults.ribbonCableA2DPins = calibrateData.ribbonCableA2DPins;
-            calibrateData.saveConfigFile();
+            await calibrateData.saveConfigFile();
             // eslint-disable-next-line no-continue
             continue;
         }
