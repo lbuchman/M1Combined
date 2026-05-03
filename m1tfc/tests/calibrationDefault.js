@@ -23,7 +23,6 @@ module.exports = class CalibrationData {
             { name: 'SW1602.6', funcName: 'STRIKE2_KICKER_EN', functnameAux: 'STRIKE2_KICKER_POWER', voltage: 28.0, scale: 5.6 }
         ];
 
-        
         this.ribbonCableA2DPins = [
             { name: 'TP1801', voltage: 2.70, scale: 1.0325 },
             { name: 'TP1802', voltage: 2.70, scale: 1.0125 },

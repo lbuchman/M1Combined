@@ -56,20 +56,14 @@ async function testDDRVoltage(tolerance, logger, db, calibrate, calibrateData) {
             if (process.env.productName === 'mnplus') {
                 // eslint-disable-next-line no-param-reassign
                 calibrateData.defaults.ddrVoltageMnp.scale = ddrVoltage.voltage / ret.value;
+                ddrVoltage.scale = calibrateData.defaults.ddrVoltageMnp.scale;
             }
             else {
                 // eslint-disable-next-line no-param-reassign
                 calibrateData.defaults.ddrVoltageMnp.scale = ddrVoltage.voltage / ret.value;
+                ddrVoltage.scale = calibrateData.defaults.ddrVoltageM1.scale;
             }
 
-            if (process.env.productName === 'mnplus') {
-                // eslint-disable-next-line no-param-reassign
-                calibrateData.defaults.ddrVoltageMnp = ddrVoltage;
-            }
-            else {
-                // eslint-disable-next-line no-param-reassign
-                calibrateData.defaults.ddrVoltageM1 = ddrVoltage;
-            }
             logger.info(`calibrating TP=${ddrVoltage.name} scale to value=${ddrVoltage.scale}`);
             await calibrateData.saveConfigFile();
             // eslint-disable-next-line no-continue
