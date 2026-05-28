@@ -220,7 +220,7 @@ function macToUid(mac) {
     return `0000${mac.split(':').join('')}`;
 }
 
-async function printLabel(mac, serial, tsId, dbError, logger) {
+async function printLabel(productName, mac, serial, tsId, dbError, logger) {
     const labelPath = '/tmp/label.txt';
     const pngPath = '/tmp/label.png';
     let convertCmd = `convert -size 306x160 xc:white -font "Ubuntu-Mono-Bold" -pointsize 32 -fill black -draw @${labelPath} ${pngPath}`;
@@ -230,7 +230,7 @@ async function printLabel(mac, serial, tsId, dbError, logger) {
 
     if (dbError.length) {
         convertCmd = `convert -size 306x${160 + 25 * (dbError.length + 1)} xc:white -font "Ubuntu-Mono-Bold" -pointsize 32 -fill black -draw @${labelPath} ${pngPath}`;
-        labelTxt = `text 1,1 "\nFailed\nM1-3200\n${serial}${tsId}\n`;
+        labelTxt = `text 1,1 "\nFailed\n${productName}\n${serial}${tsId}\n`;
         dbError.forEach((item) => {
             labelTxt += `${item}\n`;
         });

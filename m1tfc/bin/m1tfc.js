@@ -579,7 +579,14 @@ program.command('makelabel')
                     throw new Error(`serial number ${options.serial} does not match EEPROM value ${eepromData.serial.substring(3).slice(0, -2)}`);
                 }
 
-                await utils.printLabel(uid, eepromData.serial.substring(3).slice(0), '', [], logger);
+                let productName;
+                if () {
+
+                }
+                else {
+
+                }
+                await utils.printLabel(productNameuid, eepromData.serial.substring(3).slice(0), '', [], logger);
                 logfile.debug('Label is printed');
                 await testBoardLink.targetPower(false);
                 await testBoardLink.batteryOn(false);
