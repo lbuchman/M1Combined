@@ -88,12 +88,14 @@ int main() {
         Board::RP1_Wg_D1.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
         Board::RP1_Wg_D0.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
         Board::STRIKE1_KICKER_EN.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+        Board::STRIKE1_KICKER_POWER.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
 
 
         Board::RP2_Beeper.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
         Board::RP2_Wg_D1.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
         Board::RP2_Wg_D0.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
         Board::STRIKE2_KICKER_EN.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
+        Board::STRIKE2_KICKER_POWER.init(PinMode::Output, PinPull::None, PinPolarity::Normal);
 
         Board::nPoE_PSE.init(PinMode::Input, PinPull::None, PinPolarity::Normal);
         Board::nPoEP_PSE.init(PinMode::Input, PinPull::None, PinPolarity::Normal);

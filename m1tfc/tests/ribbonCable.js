@@ -17,13 +17,6 @@ const ribbonCableSelectPins = [
 ];
 
 
-const ribbonCableA2DPins = [
-    { name: 'TP1801', voltage: 2.65, scale: 1.03 },
-    { name: 'TP1802', voltage: 2.65, scale: 1.03 },
-    { name: 'TP1901', voltage: 2.65, scale: 1.03 },
-    { name: 'TP1902', voltage: 2.65, scale: 1.03 }
-];
-
 const ribbonCableI2CPinsSlave = [
     { name: 'sda', port: 'a', pin: 12, pinNameOnTestBoard: 'J5.6' },
     { name: 'scl', port: 'a', pin: 11, pinNameOnTestBoard: 'J5.3' }
@@ -57,13 +50,13 @@ async function runRibbonCableTestStaticVoltages(tolerance, logger) {
             if (!testBoardIoDef[count].reqValue) zeroValueFix = 5;
             const error = (Math.abs(ret.value - testBoardIoDef[count].reqValue)) / (testBoardIoDef[count].reqValue + zeroValueFix);
             if (!retValue || error > tolerance) {
-                logger.error(`Failed: Voltage is out of tolerance, pinName=${testBoardIoDef[count].pinName}, value=${ret.value}, reqValue=${testBoardIoDef[count].reqValue}, Error = ${(error * 100).toFixed(2)}%`);
+                logger.error(`Failed: Voltage is out of tolerance, pinName=${testBoardIoDef[count].pinName}, value=${ret.value}, reqValue=${testBoardIoDef[count].reqValue}, Error = ${(error * 100).toFixed(1)}%`);
                 retValue = false;
                 freturn = false;
                 db.updateErrorCode(process.env.serial, errorCodes.codes[testBoardIoDef[count].pinName].errorCode, 'E');
             }
             else {
-                logger.info(`Passed pinName=${testBoardIoDef[count].pinName}, actual = ${ret.value}V, expected = ${testBoardIoDef[count].reqValue}V Error = ${(error * 100).toFixed(2)}%`);
+                logger.info(`Passed pinName=${testBoardIoDef[count].pinName}, actual = ${ret.value}V, expected = ${testBoardIoDef[count].reqValue}V Tolerance = ${(error * 100).toFixed(1)}%`);
             }
         }
         if (!freturn) {
@@ -78,10 +71,10 @@ async function runRibbonCableTestStaticVoltages(tolerance, logger) {
     }
 }
 
-async function testA2DVoltages(tolerance, logger) {
+async function testA2DVoltages(tolerance, logger, calibrate, calibrateData) {
     let retValue = true;
     // eslint-disable-next-line no-restricted-syntax
-    for (const testPoint of ribbonCableA2DPins) {
+    for (const testPoint of calibrateData.ribbonCableA2DPins) {
         // eslint-disable-next-line no-await-in-loop
         const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(testPoint.name)}`);
         if (!ret.status) {
@@ -91,12 +84,30 @@ async function testA2DVoltages(tolerance, logger) {
         if (!testPoint.tolerance) testPoint.tolerance = tolerance;
         const error = ((Math.abs(ret.value * testPoint.scale - testPoint.voltage)) / (testPoint.voltage));
         if (error > testPoint.tolerance) {
+            if (calibrate) {
+                logger.error(`Voltage is out of tolerance and cannot be calibrated. Check A/D HW, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(1)}%`);
+            }
+            retValue = false;
+            // eslint-disable-next-line no-continue
+            continue;
+        }
+        if (calibrate) {
+            testPoint.scale = testPoint.voltage / ret.value;
+            logger.info(`calibrating TP=${testPoint.name} scale to value=${testPoint.scale}`);
+            // eslint-disable-next-line no-param-reassign
+            calibrateData.defaults.ribbonCableA2DPins = calibrateData.ribbonCableA2DPins;
+            // eslint-disable-next-line no-await-in-loop
+            await calibrateData.saveConfigFile();
+            // eslint-disable-next-line no-continue
+            continue;
+        }
+        if (error > testPoint.tolerance) {
             db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
-            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(2)}%`);
+            logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Tolerance = ${(error * 100).toFixed(1)}%`);
             retValue = false;
         }
         else {
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${(testPoint.voltage).toFixed(2)}V Error = ${(error * 100).toFixed(2)}%`);
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${(testPoint.voltage).toFixed(2)}V Tolerance = ${(error * 100).toFixed(1)}%`);
         }
     }
     return retValue;
@@ -240,11 +251,11 @@ async function testRs422(logger) {
     return true;
 }
 
-async function runRibbonCableTestMnp(tolerance, logger, db_) {
+async function runRibbonCableTestMnp(tolerance, logger, db_, calibrate, calibrateData) {
     db = db_;
     let retValue = true;
 
-    if (!await testA2DVoltages(tolerance, logger)) retValue = false;
+    if (!await testA2DVoltages(tolerance, logger, calibrate, calibrateData)) retValue = false;
 
     // if (!await runRibbonCableTestAddressSelectResetPins(1, false, logger)) retValue = false;
     // if (!await runRibbonCableTestAddressSelectResetPins(0, false, logger)) retValue = false;
@@ -282,9 +293,12 @@ async function runRibbonCableTestM1(tolerance, logger, db_) {
     return true;
 }
 
-async function runRibbonCableTest(skipTestPoints, tolerance, logger, db_) {
-    if (!skipTestPoints && process.env.productName === 'mnplus') return runRibbonCableTestMnp(tolerance, logger, db_);
-    if (process.env.productName === 'm1-3200') return runRibbonCableTestM1(tolerance, logger, db_);
+async function runRibbonCableTest(skipTestPoints, tolerance, logger, db_, config, calibrate, calibrateData) {
+    if (!skipTestPoints && process.env.productName === 'mnplus') {
+        const ret = await runRibbonCableTestMnp(tolerance, logger, db_, calibrate, calibrateData);
+        return ret;
+    }
+    if (process.env.productName === 'm1-3200') return runRibbonCableTestM1(tolerance, logger, db_, calibrate, calibrateData);
     return true;
 }
 

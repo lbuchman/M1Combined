@@ -28,6 +28,8 @@ const mnpIOMap = [
     // Strike boost PS control
     { port: 'B', pin: 8, mode: 'output', name: 'STRIKE1_KICKER_EN', testPoint: 'na' },
     { port: 'F', pin: 15, mode: 'output', name: 'STRIKE2_KICKER_EN', testPoint: 'na' },
+    { port: 'F', pin: 8, mode: 'output', name: 'STRIKE1_KICKER_POWER', testPoint: 'na' },
+    { port: 'H', pin: 3, mode: 'output', name: 'STRIKE2_KICKER_POWER', testPoint: 'na' },
     // Analog
     { port: 'A', pin: 0, mode: 'input', name: 'IN1_ADC', testPoint: 'TP1801' },
     { port: 'A', pin: 1, mode: 'input', name: 'IN2_ADC', testPoint: 'TP1802' },
