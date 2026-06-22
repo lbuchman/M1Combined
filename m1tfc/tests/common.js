@@ -58,7 +58,7 @@ async function programStm(programmer, stm32, m1Dev, logger) {
     logger.debug('Programming UUT ICT FW into SRAM...');
     await waitDFU(programmer, logger);
     await delay(300);
-    os.executeShellCommand(`${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`, logger, true);
+    await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`, logger, true);
     await delay(1000);
     logger.debug('Programming Done');
     await delay(100); // let M1 start
@@ -77,9 +77,9 @@ async function initializeTestFixture(config, programmer, programSTM, initAndQuit
     if (testBoardFwRev.boardId === 255) throw new Error('cannot get M1 Testboard boardId, update FW and program boardId');
     if (calibrationData) {
         calibrationData.setBoardId(testBoardFwRev.boardId);
+        await calibrationData.intitConfigFile();
     }
     logger.debug(`Test Board FW Rev - ${testBoardFwRev.fwrev} BoardId - ${testBoardFwRev.boardId}`);
-    await await calibrationData.intitConfigFile();
 
     logger.debug('Setting UUT power off');
     await testBoardLink.targetPower(false);
@@ -93,7 +93,7 @@ async function initializeTestFixture(config, programmer, programSTM, initAndQuit
         await waitDFU(programmer, logger);
         await delay(2000); // not sure why but prog will fail without delay
         logger.debug('Programming UUT ICT FW into SRAM...');
-        os.executeShellCommand(`${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`, logger, true);
+        await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`, logger, true);
         await delay(100);
         logger.debug('Programming Done');
         await delay(1000); // let M1 start

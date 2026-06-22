@@ -36,7 +36,7 @@ module.exports = class ProgramMac {
             const fwDir = process.env.fwDir;
             const db = sqliteDriver.initialize(this.logger);
             db.updateSerial(this.serial);
-            await common.initializeTestFixture(null, programmer, true, null, null, this.logger, null, null);
+            await common.initializeTestFixture(null, programmer, true, false, null, null, this.logger, null, null);
             this.logger.debug('Programming TSV file ...');
             await os.executeShellCommand(`${programmer}  -c port=usb1 -w ${this.tsv}`, this.logger, false, false, 1024 * 1024 * 10, fwDir);
             try {
@@ -47,14 +47,14 @@ module.exports = class ProgramMac {
             }
             this.logger.info('Target flashing is done');
             await common.testEndSuccess();
-            process.exit(exitCodes.normalExit);
+            return exitCodes.normalExit;
         }
         catch (err) {
             this.logger.error(err);
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();
             await delay(100);
-            process.exit(exitCodes.programMacFailed);
+            return exitCodes.programMacFailed;
         }
     }
 };

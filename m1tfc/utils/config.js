@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 
 const inConfig = '/var/snap/m1tfd1/current/config.json';
-const outConfig = '/home/lenel/config.json';
+const outConfig = inConfig;
 
 /* Additional parameters the user can specify in $SNAP_DATA/config.json
 {

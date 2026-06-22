@@ -223,7 +223,7 @@ module.exports = class FuncTest {
             await delay('sync');
             await delay(100);
             await common.testEndSuccess();
-            process.exit(exitCodes.normalExit);
+            return exitCodes.normalExit;
         }
         catch (err) {
             const dbError = this.exceptionToErrorCode(err.message);
@@ -233,7 +233,7 @@ module.exports = class FuncTest {
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();
             await delay(100);
-            process.exit(exitCodes.functTestFailed);
+            return exitCodes.functTestFailed;
         }
     }
 

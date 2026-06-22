@@ -60,7 +60,7 @@ async function testDDRVoltage(tolerance, logger, db, calibrate, calibrateData) {
             }
             else {
                 // eslint-disable-next-line no-param-reassign
-                calibrateData.defaults.ddrVoltageMnp.scale = ddrVoltage.voltage / ret.value;
+                calibrateData.defaults.ddrVoltageM1.scale = ddrVoltage.voltage / ret.value;
                 ddrVoltage.scale = calibrateData.defaults.ddrVoltageM1.scale;
             }
 
@@ -185,10 +185,10 @@ async function test(tolerance, logger, db, calibrate, calibrateData) {
     /* eslint-disable-next-line no-restricted-syntax */
     for (const testPoint of testPoints) {
         if (process.env.cellBatTol === 'new') {
-            testPoints.voltage = 3.3;
+            testPoint.voltage = 3.3;
         }
         else {
-            testPoints.voltage = 2.9;
+            testPoint.voltage = 2.9;
         }
         // eslint-disable-next-line no-await-in-loop
         const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(testPoint.name)}`);
@@ -212,27 +212,25 @@ async function test(tolerance, logger, db, calibrate, calibrateData) {
                 retValue = false;
             }
         }
-        else {
-            if (calibrate) {
-                testPoint.scale = testPoint.voltage / ret.value;
-                if (process.env.productName === 'mnplus') {
-                    // eslint-disable-next-line no-param-reassign
-                    calibrateData.defaults.testPointsMnp = testPoints;
-                }
-                else {
-                    // eslint-disable-next-line no-param-reassign
-                    calibrateData.defaults.testPointsM1 = testPoints;
-                }
-                logger.info(`calibrating TP=${testPoint.name} scale to value=${testPoint.scale}`);
-                // eslint-disable-next-line no-await-in-loop
-                await calibrateData.saveConfigFile();
-
-                // eslint-disable-next-line no-continue
-                continue;
+        else if (calibrate) {
+            testPoint.scale = testPoint.voltage / ret.value;
+            if (process.env.productName === 'mnplus') {
+                // eslint-disable-next-line no-param-reassign
+                calibrateData.defaults.testPointsMnp = testPoints;
             }
             else {
-                logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V Tolerance = ${(error * 100).toFixed(1)}%`);
+                // eslint-disable-next-line no-param-reassign
+                calibrateData.defaults.testPointsM1 = testPoints;
             }
+            logger.info(`calibrating TP=${testPoint.name} scale to value=${testPoint.scale}`);
+            // eslint-disable-next-line no-await-in-loop
+            await calibrateData.saveConfigFile();
+
+            // eslint-disable-next-line no-continue
+            continue;
+        }
+        else {
+            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V Tolerance = ${(error * 100).toFixed(1)}%`);
         }
     }
     if (process.env.productName === 'mnplus') await testBoardLink.poeOn(false);

@@ -57,7 +57,7 @@ module.exports = class IctTestRunner {
         this.db.updateIctStatus(serial, utils.boolToInt(false));
         try {
             await common.initializeTestFixture(this.config, programmer, initAndQuit, initAndQuit, this.stm32, this.m1Dev, this.logger, calibrate, this.CalibrationParam);
-            if (initAndQuit) return;
+            if (initAndQuit) return exitCodes.normalExit;
             regulators.init(this.CalibrationParam);
             await regulators.checkLeverState(this.logger, this.db);
             if (!skipTestpointCheck) this.logger.info('Testing test points ...');
@@ -120,19 +120,19 @@ module.exports = class IctTestRunner {
                 this.logger.info('ICT Test Passed!!!');
                 await common.testEndSuccess();
                 this.db.updateIctStatus(serial, utils.boolToInt(true));
-                process.exit(exitCodes.normalExit);
+                return exitCodes.normalExit;
             }
 
             await common.testFailed();
             this.logger.warn('One or more tests Failed!!!');
             await delay(100);
-            process.exit(exitCodes.ictTestFailed);
+            return exitCodes.ictTestFailed;
         }
         catch (err) {
             this.logger.error(err.stack);
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();
-            process.exit(exitCodes.ictTestFailed);
+            return exitCodes.ictTestFailed;
         }
     }
 };
