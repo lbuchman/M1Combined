@@ -9,6 +9,7 @@ const buzzer = require('./buzzer');
 const sqliteDriver = require('../utils/sqliteDriver');
 const path = require('path');
 const fs = require('fs-extra');
+const runtimeContext = require('../utils/runtimeContext');
 
 const progPart = '0x1';
 const progopt = '-s 0x1';
@@ -79,12 +80,15 @@ async function initializeTestFixture(config, programmer, programSTM, initAndQuit
         calibrationData.setBoardId(testBoardFwRev.boardId);
     }
     logger.debug(`Test Board FW Rev - ${testBoardFwRev.fwrev} BoardId - ${testBoardFwRev.boardId}`);
-    await await calibrationData.intitConfigFile();
+    if (calibrationData) {
+        await calibrationData.initConfigFile();
+    }
 
     logger.debug('Setting UUT power off');
     await testBoardLink.targetPower(false);
     await testBoardLink.batteryOn(false);
-    if (process.env.productName === 'mnplus') await testBoardLink.poeOn(false);
+    const runtime = runtimeContext.getRuntime();
+    if (runtime.productName === 'mnplus') await testBoardLink.poeOn(false);
     await m1boot.activateDFU();
     await testBoardLink.batteryOn(true);
     await testBoardLink.targetPower(true);

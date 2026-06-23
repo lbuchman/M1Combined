@@ -14,6 +14,7 @@ const M1TermLink = require('../src/m1TermLink');
 const SshClient = require('../utils/SshClient');
 const ProgramMac = require('../tests/programMAC');
 const errorCodes = require('../bin/errorCodes');
+const runtimeContext = require('../utils/runtimeContext');
 
 const sRamSize = '128K';
 const sramFIle = '/dev/mtd0';
@@ -47,7 +48,8 @@ module.exports = class FuncTest {
       */
     async run(programmer, tsv, login, password, m1term, skipUSBPenDriveTest, baudrate) {
         try {
-            const ipAddress = process.env.m1defaultIP;
+            const runtime = runtimeContext.getRuntime();
+            const ipAddress = runtime.m1defaultIP;
             this.logger.info('Cheking MAC address');
             const macProgram = new ProgramMac(this.config, this.serial, this.logger);
             const macValue = await macProgram.getMac(programmer, false);
@@ -108,7 +110,7 @@ module.exports = class FuncTest {
             }
 
             let activeBus = 1;
-            if (process.env.productName === 'mnplus') {
+            if (runtime.productName === 'mnplus') {
                 activeBus = 0;
             }
 

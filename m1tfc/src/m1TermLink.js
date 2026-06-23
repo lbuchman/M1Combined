@@ -4,6 +4,7 @@
 const { ReadlineParser } = require('@serialport/parser-readline');
 const delay = require('delay');
 const SerialLink = require('./serialLink');
+const runtimeContext = require('../utils/runtimeContext');
 
 
 module.exports = class M1TermLink {
@@ -61,9 +62,10 @@ module.exports = class M1TermLink {
 * @param {object} log
 */
     async initTestMode() {
+        const runtime = runtimeContext.getRuntime();
         await this.executeCommand('\n\r', 0);
         await delay(500);
-        await this.executeCommand(`ifconfig eth0 ${process.env.m1defaultIP} up`, 0);
+        await this.executeCommand(`ifconfig eth0 ${runtime.m1defaultIP} up`, 0);
         await delay(1000);
         await this.executeCommand('/etc/init.d/sshd stop', 0);
         await delay(1000);

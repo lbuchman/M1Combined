@@ -17,6 +17,7 @@ const utils = require('../utils/utils');
 const errorCodes = require('../bin/errorCodes');
 const MnpTests = require('./mnpTests');
 const CalibrationDefault = require('./calibrationDefault');
+const runtimeContext = require('../utils/runtimeContext');
 
 
 module.exports = class IctTestRunner {
@@ -47,9 +48,10 @@ module.exports = class IctTestRunner {
       * @param
       */
     async runTest(programmer, serial, ddrblocks, skipTestpointCheck, initAndQuit = false, calibrate = false) {
-        process.env.serial = serial;
+        runtimeContext.setRuntime({ serial });
+        const runtime = runtimeContext.getRuntime();
         this.db.updateSerial(serial);
-        this.db.resetErrorCode(process.env.serial);
+        this.db.resetErrorCode(serial);
         const invalidBoardId = 255;
         this.CalibrationParam = new CalibrationDefault(invalidBoardId, this.logger, this.config);
         let ret = true;
@@ -68,11 +70,11 @@ module.exports = class IctTestRunner {
             }
             catch (err) {
                 /* eslint-disable dot-notation */
-                this.db.updateErrorCode(process.env.serial, errorCodes.codes['STM'].errorCode, 'E');
+                this.db.updateErrorCode(serial, errorCodes.codes['STM'].errorCode, 'E');
                 throw err;
             }
 
-            if (!skipTestpointCheck && process.env.productName === 'mnplus') {
+            if (!skipTestpointCheck && runtime.productName === 'mnplus') {
                 if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) ret = false;
             }
             if (!skipTestpointCheck) if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) ret = false;
@@ -89,16 +91,16 @@ module.exports = class IctTestRunner {
             if (!await ddr3.testDDR3Test(ddrblocks, this.logger, this.db)) ret = false;
             this.logger.info('Testing I2C EEPROM ...');
             if (!await eeprom.checkEEPROM(this.logger, this.db)) ret = false;
-            if (process.env.productName === 'm1-3200') if (!await battery.test(this.logger, this.db)) ret = false;
+            if (runtime.productName === 'm1-3200') if (!await battery.test(this.logger, this.db)) ret = false;
 
-            if (process.env.productName === 'mnplus') {
+            if (runtime.productName === 'mnplus') {
                 const mnp = new MnpTests(this.db, this.logger);
                 await mnp.begin();
                 if (!await mnp.run()) ret = false;
             }
 
 
-            if (process.env.productName === 'mnplus') {
+            if (runtime.productName === 'mnplus') {
                 await testBoardLink.poeOn(true);
                 await delay(2000);
                 await testBoardLink.targetPower(false);

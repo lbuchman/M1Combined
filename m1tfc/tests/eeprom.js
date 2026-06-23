@@ -6,6 +6,7 @@ const sqliteDriver = require('../utils/sqliteDriver');
 const { delay } = require('lodash');
 const utils = require('../utils/utils');
 const errorCodes = require('../bin/errorCodes');
+const runtimeContext = require('../utils/runtimeContext');
 
 function getSecret(size) {
     return [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
@@ -31,7 +32,7 @@ async function checkEEPROM(logger, db) {
     if (!ret.status) {
         logger.error(`I2C EEPROM Test failed  ${ret.error}`);
         /* eslint-disable dot-notation */
-        db.updateErrorCode(process.env.serial, errorCodes.codes['EEPROM'].errorCode, 'E');
+        db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes['EEPROM'].errorCode, 'E');
         return false;
     }
 
