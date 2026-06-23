@@ -7,22 +7,25 @@ interface
 uses
   Classes, SysUtils, dateutils;
 
-function log(logLevel: string; device: string; str: string): string;
-function getEpochTime(): integer;
+const
+  LOG_FORMAT = '[yyyy-mm-dd hh:nn:ss] [%s] %s:        %s';
+  LOG_PADDING = ':        ';
+
+function Log(logLevel: string; device: string; str: string): string;
+function GetEpochTime(): integer;
 
 implementation
 
-function log(logLevel: string; device: string; str: string): string;
+function Log(logLevel: string; device: string; str: string): string;
 var
   ThisMoment: TDateTime;
-
 begin
   ThisMoment := Now;
   Result := '[' + FormatDateTime('yyyy-mm-dd hh:nn:ss', ThisMoment) +
-    ']' + ' [' + device + '] ' + logLevel + ':        ' + str;
+    ']' + ' [' + device + '] ' + logLevel + LOG_PADDING + str;
 end;
 
-function getEpochTime(): integer;
+function GetEpochTime(): integer;
 var
   ThisMoment: TDateTime;
 begin

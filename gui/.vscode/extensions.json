@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "alefragnani.pascal",
+    "alefragnani.pascal-formatter",
+    "ritwickdey.LiveServer",
+    "ms-vscode.makefile-tools"
+  ]
+}

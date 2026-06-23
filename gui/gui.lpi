@@ -124,7 +124,7 @@
         <PackageName Value="LCL"/>
       </Item8>
     </RequiredPackages>
-    <Units Count="8">
+    <Units Count="12">
       <Unit0>
         <Filename Value="gui.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -172,6 +172,22 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="errorReportForm"/>
       </Unit7>
+      <Unit8>
+        <Filename Value="core/testrunner.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="core/testexecution.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="core/ledmanager.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="core/cloudops.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -1,4 +1,4 @@
-unit configuratioForm;
+unit configurationForm;
 
 {$mode ObjFPC}{$H+}
 
@@ -42,7 +42,7 @@ type
   private
 
   public
-    procedure load(configuration: TConfigration);
+    procedure load(configuration: TConfiguration);
 
   end;
 
@@ -53,7 +53,7 @@ implementation
 
 {$R *.lfm}
 
-procedure TConfigForm.load(configuration: TConfigration);
+procedure TConfigForm.load(configuration: TConfiguration);
 begin
   M1TfcExecutable.Text := configuration.M1TfcExecutable;
   ictFWFilePathEdit.Text := configuration.IctFWFilePath;

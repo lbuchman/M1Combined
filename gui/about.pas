@@ -76,6 +76,7 @@ begin
   if BytesRead = 0 then
   begin
     AProcess.Free;
+    AProcess := nil;
     exit;
   end;
 

@@ -1,0 +1,28 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.gitignore": false,
+    "**/*.dbg": true,
+    "**/*.o": true,
+    "**/lib/": true
+  },
+  "search.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/lib/": true
+  },
+  "files.associations": {
+    "*.pas": "pascal",
+    "*.lfm": "xml",
+    "*.lpi": "xml",
+    "*.lps": "xml"
+  },
+  "[pascal]": {
+    "editor.defaultFormatter": "alefragnani.pascal-formatter",
+    "editor.formatOnSave": false
+  },
+  "pascal.formatter.engine": "ptop",
+  "pascal.formatter.enginePath": "C:\\lazarus\\fpc\\3.2.2\\bin\\x86_64-win64\\ptop.exe",
+  "explorer.excludeGitIgnore": false,
+  "explorer.files.show": true
+}
