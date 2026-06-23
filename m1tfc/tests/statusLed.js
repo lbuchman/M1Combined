@@ -4,86 +4,87 @@ const lodash = require('lodash');
 const testBoardLink = require('../src/testBoardLink');
 const targetICTLink = require('../src/m1ICTLink');
 const errorCodes = require('../bin/errorCodes');
+const runtimeContext = require('../utils/runtimeContext');
+const GPIOHelper = require('../utils/gpioHelper');
+const CommandHelper = require('../utils/commandHelper');
 
 const statusLed = {
     ledBlue: { port: 'b', pin: 1, pinNameOnTestBoard: 'J8.2', onState: 1, offState: 0, maxVoltage: -2.6, minVoltage: -3.3 },
     ledRed: { port: 'b', pin: 11, pinNameOnTestBoard: 'J8.1', onState: 1, offState: 0, minVoltage: 1.6, maxVoltage: 2.2 }
 };
 
+let gpioHelper;
+let cmdHelper;
 
 async function setLedActive(ledOn, ledOff) {
-    let ret;
-    ret = await targetICTLink.sendCommand(`setgpio ${ledOn.port} ${ledOn.pin} ${ledOn.onState}`);
-    if (!ret.status) {
-        throw new Error(`Target Board control command <setgpio> failed on pin ${ledOn.port}.${ledOn.pin} ${ret.error}`);
+    if (!await gpioHelper.setLevel(ledOn.port, ledOn.pin, ledOn.onState, ledOn.pinNameOnTestBoard)) {
+        return false;
     }
-
-    ret = await targetICTLink.sendCommand(`setgpio ${ledOff.port} ${ledOff.pin} ${ledOff.offState}`);
-    if (!ret.status) {
-        throw new Error(`Target Board control command <setgpio> failed on pin ${ledOff.port}.${ledOff.pin} ${ret.error}`);
-    }
+    return await gpioHelper.setLevel(ledOff.port, ledOff.pin, ledOff.offState, ledOff.pinNameOnTestBoard);
 }
 
 async function getLedVoltages() {
-    let ret;
-    ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(statusLed.ledBlue.pinNameOnTestBoard)}`);
-    if (!ret.status) {
-        throw new Error(`Test Board control command failed on pinName=${statusLed.ledBlue.pinNameOnTestBoard}, ${ret.error}`);
-    }
-    const value1 = ret.value;
+    const blueRet = await cmdHelper.execute(
+        () => testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(statusLed.ledBlue.pinNameOnTestBoard)}`),
+        `Read blue LED voltage (${statusLed.ledBlue.pinNameOnTestBoard})`,
+        statusLed.ledBlue.pinNameOnTestBoard,
+        'T'
+    );
+    if (!blueRet) return false;
 
-    ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(statusLed.ledRed.pinNameOnTestBoard)}`);
-    if (!ret.status) {
-        throw new Error(`Test Board control command failed on pinName=${statusLed.ledBlue.pinNameOnTestBoard}, ${ret.error}`);
-    }
-    const value2 = ret.value;
+    const redRet = await cmdHelper.execute(
+        () => testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(statusLed.ledRed.pinNameOnTestBoard)}`),
+        `Read red LED voltage (${statusLed.ledRed.pinNameOnTestBoard})`,
+        statusLed.ledRed.pinNameOnTestBoard,
+        'T'
+    );
+    if (!redRet) return false;
 
-    return value1 - value2;
+    return blueRet.value - redRet.value;
 }
 
 async function initLed() {
-    let ret;
-    ret = await targetICTLink.sendCommand(`confgpio ${statusLed.ledBlue.port} ${statusLed.ledBlue.pin} output none`);
-    if (!ret.status) {
-        throw new Error(`Target Board control command <confgpio> failed on pin ${statusLed.ledBlue.port}.${statusLed.ledBlue.pin} ${ret.error}`);
+    if (!await gpioHelper.configureOutput(statusLed.ledBlue.port, statusLed.ledBlue.pin, statusLed.ledBlue.pinNameOnTestBoard)) {
+        return false;
     }
-
-    ret = await targetICTLink.sendCommand(`confgpio ${statusLed.ledRed.port} ${statusLed.ledRed.pin} output none`);
-    if (!ret.status) {
-        throw new Error(`Target Board control command <confgpio> failed on pin ${statusLed.ledRed.port}.${statusLed.ledRed.pin} ${ret.error}`);
-    }
+    return await gpioHelper.configureOutput(statusLed.ledRed.port, statusLed.ledRed.pin, statusLed.ledRed.pinNameOnTestBoard);
 }
 
 async function test(logger, db) {
-    let ret = true;
+    gpioHelper = new GPIOHelper(targetICTLink, logger, db);
+    cmdHelper = new CommandHelper(logger, db);
+    
     try {
-        await initLed(logger);
-        await setLedActive(statusLed.ledBlue, statusLed.ledRed, logger);
-        let ledVoltage = await getLedVoltages(logger);
+        if (!await initLed()) return false;
+
+        // Test blue LED
+        if (!await setLedActive(statusLed.ledBlue, statusLed.ledRed)) return false;
+        let ledVoltage = await getLedVoltages();
+        if (ledVoltage === false) return false;
 
         if (!lodash.inRange(ledVoltage, statusLed.ledBlue.minVoltage, statusLed.ledBlue.maxVoltage)) {
-            logger.error(`Led test failed, expected voltage range ${statusLed.ledBlue.minVoltage} - ${statusLed.ledBlue.maxVoltage}, actual ${ledVoltage}`);
-            db.updateErrorCode(process.env.serial, errorCodes.codes[statusLed.ledBlue.pinNameOnTestBoard].errorCode, 'E');
-            ret = false;
+            logger.error(`Blue LED test failed, expected ${statusLed.ledBlue.minVoltage}-${statusLed.ledBlue.maxVoltage}V, got ${ledVoltage}V`);
+            db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[statusLed.ledBlue.pinNameOnTestBoard].errorCode, 'E');
+            return false;
         }
 
-        await setLedActive(statusLed.ledRed, statusLed.ledBlue, logger);
-        ledVoltage = await getLedVoltages(logger);
+        // Test red LED
+        if (!await setLedActive(statusLed.ledRed, statusLed.ledBlue)) return false;
+        ledVoltage = await getLedVoltages();
+        if (ledVoltage === false) return false;
+
         if (!lodash.inRange(ledVoltage, statusLed.ledRed.minVoltage, statusLed.ledRed.maxVoltage)) {
-            logger.error(`Led test failed, expected voltage range ${statusLed.ledBlue.minVoltage} - ${statusLed.ledBlue.maxVoltage}, actual ${ledVoltage}`);
-            db.updateErrorCode(process.env.serial, errorCodes.codes[statusLed.ledRed.pinNameOnTestBoard].errorCode, 'E');
-            ret = false;
+            logger.error(`Red LED test failed, expected ${statusLed.ledRed.minVoltage}-${statusLed.ledRed.maxVoltage}V, got ${ledVoltage}V`);
+            db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[statusLed.ledRed.pinNameOnTestBoard].errorCode, 'E');
+            return false;
         }
 
-        if (ret) logger.info('Passed Led test');
-        else logger.error('Led test failed');
-        return ret;
+        logger.info('Passed LED test');
+        return true;
     }
     catch (err) {
-        logger.error('Failed Led test');
-        logger.error(err);
-        db.updateErrorCode(process.env.serial, errorCodes.codes[statusLed.ledBlue.pinNameOnTestBoard].errorCode, 'T');
-        // logger.debug(err.stack);
+        logger.error(`LED test exception: ${err.message}`);
+        db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[statusLed.ledBlue.pinNameOnTestBoard].errorCode, 'T');
         return false;
     }
 }

@@ -6,8 +6,12 @@ const runtimeContext = require('../utils/runtimeContext');
 
 const targetICTLink = require('../src/m1ICTLink');
 const testBoardLink = require('../src/testBoardLink');
+const GPIOHelper = require('../utils/gpioHelper');
+const CommandHelper = require('../utils/commandHelper');
 
 let db;
+let gpioHelper;
+let cmdHelper;
 
 const ribbonCableSelectPins = [
     { name: 'aioS0', port: 'd', pin: 5, pinNameOnTestBoard: 'J5.18' },
@@ -26,47 +30,6 @@ const ribbonCableI2CPinsMaster = [
     { name: 'sda', port: 'g', pin: 15, pinNameOnTestBoard: 'J5.6' },
     { name: 'scl', port: 'd', pin: 7, pinNameOnTestBoard: 'J5.3' }
 ];
-
-/**
- * Helper: Execute target board command and handle errors
- */
-async function executeTargetCommand(command, pinInfo, errorSeverity = 'T', logger) {
-    const ret = await targetICTLink.sendCommand(command);
-    
-    if (!ret.status) {
-        const pinDesc = `${pinInfo.port}.${pinInfo.pin}`;
-        logger.error(`Target Board command failed on pin ${pinDesc}: ${ret.error}`);
-        db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[pinInfo.pinNameOnTestBoard].errorCode, errorSeverity);
-        return false;
-    }
-    
-    return ret;
-}
-
-/**
- * Helper: Configure and set GPIO pin to specific level
- */
-async function configureAndSetGpio(pin, level, logger) {
-    // Configure pin as output
-    const confResult = await executeTargetCommand(
-        `confgpio ${pin.port} ${pin.pin} output none`,
-        pin,
-        'T',
-        logger
-    );
-    
-    if (!confResult) return false;
-    
-    // Set pin to level
-    const setResult = await executeTargetCommand(
-        `setgpio ${pin.port} ${pin.pin} ${level}`,
-        pin,
-        'E',
-        logger
-    );
-    
-    return !!setResult;
-}
 
 async function runRibbonCableTestStaticVoltages(tolerance, logger) {
     let retValue;
@@ -164,27 +127,31 @@ async function runRibbonCableTestAddressSelectResetPins(settoLevel, floatpins, l
             
             // Configure and set GPIO if not floating
             if (!floatpins) {
-                if (!await configureAndSetGpio(pin, settoLevel, logger)) {
+                if (!await gpioHelper.configureAndSet(pin, settoLevel)) {
                     freturn = false;
                     continue;
                 }
             }
             
             // Read and verify voltage
-            const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(pin.pinNameOnTestBoard)}`);
-            if (!ret.status) {
-                logger.error(`Test Board control command failed on pinName=${pin.pinNameOnTestBoard}, ${ret.error}`);
-                db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[pin.pinNameOnTestBoard].errorCode, 'T');
+            const ret = await cmdHelper.execute(
+                () => testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(pin.pinNameOnTestBoard)}`),
+                `Read voltage from ${pin.pinNameOnTestBoard}`,
+                pin.pinNameOnTestBoard,
+                'T'
+            );
+            
+            if (!ret) {
                 freturn = false;
                 continue;
             }
             
             if (!utils.testLogicalValue(ret.value, 3.3, settoLevel)) {
-                logger.error(`Failed: Incorrect voltage level on Pin=${pin.pinNameOnTestBoard}, Value=${ret.value}, Expected=${settoLevel}`);
+                logger.error(`Failed: Incorrect voltage on ${pin.pinNameOnTestBoard}, value=${ret.value}, expected=${settoLevel}`);
                 db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[pin.pinNameOnTestBoard].errorCode, 'E');
                 freturn = false;
             } else {
-                logger.info(`Passed pinName=${pin.pinNameOnTestBoard}, actual = ${ret.value}`);
+                logger.info(`Passed ${pin.pinNameOnTestBoard}, actual=${ret.value}`);
             }
         }
         
@@ -201,17 +168,19 @@ async function testI2Cpins(pins, logger, settoLevel) {
             const pin = pins[count];
             
             // Configure and set GPIO
-            if (!await configureAndSetGpio(pin, settoLevel, logger)) {
+            if (!await gpioHelper.configureAndSet(pin, settoLevel)) {
                 return false;
             }
             
             // Read and verify voltage
-            const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(pin.pinNameOnTestBoard)}`);
-            if (!ret.status) {
-                logger.error(`Test Board command failed on pinName=${pin.pinNameOnTestBoard}: ${ret.error}`);
-                db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[pin.pinNameOnTestBoard].errorCode, 'T');
-                return false;
-            }
+            const ret = await cmdHelper.execute(
+                () => testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(pin.pinNameOnTestBoard)}`),
+                `Read I2C pin ${pin.pinNameOnTestBoard}`,
+                pin.pinNameOnTestBoard,
+                'T'
+            );
+            
+            if (!ret) return false;
             
             if (ret.value === undefined) {
                 db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[pin.pinNameOnTestBoard].errorCode, 'E');
@@ -220,12 +189,12 @@ async function testI2Cpins(pins, logger, settoLevel) {
             
             const normalizedValue = ret.value > 3 ? 1 : ret.value;
             if (normalizedValue !== settoLevel) {
-                logger.error(`Failed: Incorrect voltage level on Pin=${pin.pinNameOnTestBoard}, expected ${settoLevel}, actual=${normalizedValue}`);
+                logger.error(`Failed: Incorrect voltage on ${pin.pinNameOnTestBoard}, expected ${settoLevel}, actual=${normalizedValue}`);
                 db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[pin.pinNameOnTestBoard].errorCode, 'E');
                 return false;
             }
             
-            logger.debug(`Passed pinName=${pin.pinNameOnTestBoard}, actual = ${normalizedValue}, expected = ${settoLevel}`);
+            logger.debug(`Passed ${pin.pinNameOnTestBoard}, actual=${normalizedValue}, expected=${settoLevel}`);
         }
         
         return true;
@@ -257,13 +226,12 @@ async function testRs422(logger) {
 
 async function runRibbonCableTestMnp(tolerance, logger, db_, calibrate, calibrateData) {
     db = db_;
+    gpioHelper = new GPIOHelper(targetICTLink, logger, db);
+    cmdHelper = new CommandHelper(logger, db);
+    
     let retValue = true;
 
     if (!await testA2DVoltages(tolerance, logger, calibrate, calibrateData)) retValue = false;
-
-    // if (!await runRibbonCableTestAddressSelectResetPins(1, false, logger)) retValue = false;
-    // if (!await runRibbonCableTestAddressSelectResetPins(0, false, logger)) retValue = false;
-
 
     return retValue;
 }
@@ -271,6 +239,9 @@ async function runRibbonCableTestMnp(tolerance, logger, db_, calibrate, calibrat
 async function runRibbonCableTestM1(tolerance, logger, db_) {
     logger.info('Testing Ribbon cable pins ...');
     db = db_;
+    gpioHelper = new GPIOHelper(targetICTLink, logger, db);
+    cmdHelper = new CommandHelper(logger, db);
+    
     let retValue = true;
     const i2cTestCases = [0, 1, 0, 1];
     // eslint-disable-next-line no-restricted-syntax
