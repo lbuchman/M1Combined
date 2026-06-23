@@ -95,7 +95,7 @@ var
   intN: integer;
   ret: ansistring;
 begin
-  serial := FTargetSerial;
+  FTargetSerial := serial;  { Store parameter, don't overwrite it }
   ret := '?';
   try
     if serial.Length <> 10 then
@@ -152,97 +152,128 @@ var
   MemoCopyTxt: string;
   ExitStatus: integer;
 begin
+  Result := -1;
+  retValue := -1;
+  
   if command = 'cleanup' then
     Led.tag := 1;
 
   MemoCopyTxt := '';
   Led.tag := 1;
-  retValue := -1;
-  FBusyFlag := True;
+  
+  { Wrap in try/finally to ensure busy flag is reset }
+  try
+    FBusyFlag := True;
 
-  FAProcess := TProcess.Create(nil);
-  FAProcess.Executable := 'm1tfd1.cli';
-  FAProcess.Parameters.Add(command);
-  tmpInt := 0;
+    { Create process }
+    FAProcess := TProcess.Create(nil);
+    try
+      FAProcess.Executable := 'm1tfd1.cli';
+      
+      { Check if executable exists }
+      if not FileExists(FAProcess.Executable) then
+        raise Exception.Create('Executable not found: ' + FAProcess.Executable);
+      
+      FAProcess.Parameters.Add(command);
+      tmpInt := 0;
 
-  while arg[tmpInt] <> '' do
-  begin
-    FAProcess.Parameters.Add(arg[tmpInt]);
-    Inc(tmpInt);
-  end;
+      { Add arguments with bounds checking }
+      while (tmpInt < Length(arg)) and (arg[tmpInt] <> '') do
+      begin
+        FAProcess.Parameters.Add(arg[tmpInt]);
+        Inc(tmpInt);
+      end;
 
-  FAProcess.Options := FAProcess.Options + [poUsePipes];
-  FAProcess.Execute;
+      FAProcess.Options := [poUsePipes];
+      FAProcess.Execute;
 
-  while FAProcess.Running do
-  begin
-    Buffer[0] := 0;
-    BytesRead := FAProcess.Output.Read(Buffer, FAProcess.Output.NumBytesAvailable);
-    if BytesRead >= bufferSize then
-      Buffer[bufferSize - 1] := 0
-    else
-      Buffer[BytesRead] := 0;
+      { Read output while process runs }
+      while FAProcess.Running do
+      begin
+        Buffer[0] := 0;
+        { Cap read size to buffer }
+        BytesRead := FAProcess.Output.NumBytesAvailable;
+        if BytesRead > (bufferSize - 1) then
+          BytesRead := bufferSize - 1;
+        
+        if BytesRead > 0 then
+          BytesRead := FAProcess.Output.Read(Buffer, BytesRead);
+        
+        if BytesRead >= bufferSize then
+          Buffer[bufferSize - 1] := 0
+        else
+          Buffer[BytesRead] := 0;
 
-    if BytesRead = 0 then
-    begin
-      Application.ProcessMessages;
-      Sleep(50);
-      continue;
+        if BytesRead = 0 then
+        begin
+          Application.ProcessMessages;
+          Sleep(50);
+          continue;
+        end;
+
+        Sleep(50);
+        textToSee := '';
+        SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
+        FMemo.Lines.Text := FMemo.Lines.Text + textToSee;
+        MemoCopyTxt := MemoCopyTxt + textToSee;
+        FMemo.SelStart := Length(FMemo.Lines.Text);
+        Application.ProcessMessages;
+      end;
+
+      { Read stderr before freeing process }
+      BytesRead := FAProcess.Stderr.NumBytesAvailable;
+      if BytesRead > (bufferSize - 1) then
+        BytesRead := bufferSize - 1;
+      
+      if BytesRead > 0 then
+      begin
+        BytesRead := FAProcess.Stderr.Read(Buffer, BytesRead);
+        textToSee := '';
+        SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
+        FMemo.Lines.Text := FMemo.Lines.Text + textToSee;
+      end;
+
+      { Get exit code before freeing }
+      ExitStatus := FAProcess.ExitCode;
+      retValue := ExitStatus;
+
+      if (retValue = ProcessExecError) then
+      begin
+        FMemo.Lines.Add('Abnormal termination: m1tfd1.cli not found or crashed');
+        Led.LedColorOff := clRed;
+      end;
+
+      if (retValue > ProcessExecError) then
+      begin
+        Led.LedColorOff := clRed;
+        Led.Tag := 0;
+      end;
+
+      if (retValue = 0) then
+        Led.LedColorOff := clLime;
+
+      if retValue = ProcessTerminated then
+      begin
+        Led.LedColorOff := clRed;
+        Led.Tag := 0;
+      end;
+      
+    finally
+      { Ensure process is freed }
+      if FAProcess <> nil then
+        FAProcess.Free;
+      FAProcess := nil;
     end;
-
-    Sleep(50);
-    textToSee := '';
-    SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
-    FMemo.Lines.Text := FMemo.Lines.Text + textToSee;
-    MemoCopyTxt := MemoCopyTxt + textToSee;
-    FMemo.SelStart := Length(FMemo.Lines.Text);
-    Application.ProcessMessages;
+    
+    Result := retValue;
+    FTestRet := Result;
+    
+  finally
+    { Always reset busy flag }
+    FBusyFlag := False;
+    Led.tag := 0;
+    Led.LedValue := False;
   end;
-
-  BytesRead := FAProcess.Stderr.Read(Buffer, FAProcess.Stderr.NumBytesAvailable);
-  if BytesRead > 0 then
-  begin
-    textToSee := '';
-    SetString(textToSee, pansichar(@Buffer[0]), BytesRead);
-    FMemo.Lines.Text := FMemo.Lines.Text + textToSee;
-  end;
-
-  ExitStatus := FAProcess.ExitStatus;
-  if ExitStatus <> 0 then
-    retValue := ExitStatus
-  else
-    retValue := FAProcess.ExitCode;
-
-  if (retValue = ProcessExecError) then
-  begin
-    FMemo.Lines.Add('Abnormal termination nodejs executable not found or crashed');
-    Led.LedColorOff := clRed;
-  end;
-
-  if (retValue > ProcessExecError) then
-  begin
-    Led.LedColorOff := clRed;
-    Led.Tag := 0;
-    retValue := FAProcess.ExitCode;
-  end;
-
-  FAProcess.Free;
-  FAProcess := nil;
-  Led.tag := 0;
-  Led.LedValue := False;
-
-  if (retValue = 0) then
-    Led.LedColorOff := clLime;
-
-  if retValue = ProcessTerminated then
-  begin
-    Led.LedColorOff := clRed;
-    Led.Tag := 0;
-  end;
-
-  Result := retValue;
-  FTestRet := Result;
-  FBusyFlag := False;
 end;
 
 function TTestRunner.RunTests(Tests: array of TestRecord; tMode: TestingMode;

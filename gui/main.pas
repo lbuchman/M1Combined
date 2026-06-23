@@ -3,6 +3,34 @@ Unit main;
 
 {$mode objfpc}{$H+}
 
+{******************************************************************************
+ TEST EXECUTION FLOW
+ 
+ This application orchestrates hardware testing for device commissioning/retesting.
+ 
+ 1. User clicks Commission or Re-Test menu item
+ 2. Main form sets TestMode (commission or re_test)
+ 3. Validation occurs: serial barcode scan check
+ 4. Test state is initialized (LEDs reset, progress cleared)
+ 5. TTestExecutor.RunTests() is invoked from TTestRunner
+ 6. Each test handler executes via TTestExecutor delegation
+ 7. Results are displayed: LED colors, progress bar, memo log
+ 8. On completion, UI is updated with results
+ 
+ Architecture:
+ - TmainForm: Thin UI orchestrator, delegates to handlers
+ - TTestRunner: Process execution wrapper
+ - TTestExecutor: Test logic coordinator
+ - TLedManager: LED/progress bar state management
+ - TCloudOperations: Cloud sync operations
+ - TConfiguration: Config file management
+ - logger: Centralized logging
+ 
+ State Flow:
+ - Normal -> Busy (test running) -> Success/Failed -> Normal
+ - Each transition updates UI (LEDs, progress, status)
+ ******************************************************************************}
+
 Interface
 
 Uses 
@@ -10,14 +38,9 @@ Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
 Menus, Buttons, ComCtrls, ActnList, MaskEdit, SpinEx, IndLed, BCMDButton,
 strutils, BCListBox, Process, logger, about, DateUtils, errorReportForm,
 configurationjson, jsonparser, ColorProgress, MSSQLConn,
-testrunner, testexecution, ledmanager, cloudops;
+testrunner, testexecution, ledmanager, cloudops, constants;
 
-Const 
-  Interval7Days = (24 * 60 * 60 * 7);
-  UpdateFwTimeStamp = 'UpdateFwTimeStamp.txt';
-  UpdateSycretsTimeStamp = 'UpdateSycretsTimeStamp.txt';
-  UpdateLogsTimeStamp = 'UpdateLogsTimeStamp.txt';
-  DEFAULT_DATETIME = '2023-01-24 21:20:08';
+{ Constants moved to core/constants.pas }
 
 Type 
 
@@ -106,6 +129,7 @@ Type
     Procedure AppsCheckSwitchClick_Wrapper(Sender: TObject);
     Procedure SyncLabelLedTimerTimer(Sender: TObject);
     Procedure UpdateMeMenuItemClick(Sender: TObject);
+    Procedure BlinkLed(Led: TindLed);
     Private 
       FTestRunner: TTestRunner;
       FTestExecutor: TTestExecutor;
@@ -155,15 +179,31 @@ Var
   OneLine: string;
 Begin
   Result := '';
-  assignFile(f, FileName);
-  reset(f);
-  While Not EOF(f) Do
-    Begin
-      readln(f, OneLine);
-      Result := OneLine;
-      closefile(f);
-      exit;
-    End;
+  
+  { Validate file exists }
+  if not FileExists(FileName) then
+  begin
+    Memo1.Lines.Add(logger.log('warn', 'ReadThisFile', 'File not found: ' + FileName));
+    exit;
+  end;
+
+  try
+    assignFile(f, FileName);
+    reset(f);
+    While Not EOF(f) Do
+      Begin
+        readln(f, OneLine);
+        Result := OneLine;
+        closefile(f);
+        exit;
+      End;
+  except
+    on E: Exception do
+    begin
+      Memo1.Lines.Add(logger.log('error', 'ReadThisFile', 'I/O Error: ' + E.Message));
+      Result := '';
+    end;
+  end;
 End;
 
 Function TmainForm.GetDateTimeFromFile(filename: String): TDateTime;
@@ -175,20 +215,37 @@ Var
   filePath: string;
 Begin
   dateTimeFromFile := DEFAULT_DATETIME;
-  filePath := GetEnvironmentVariable('HOME') + '/m1mtf/' + filename;
-  Try
+  filePath := GetEnvironmentVariable('HOME') + M1_HOME_DIR + filename;
+  
+  try
     dateTimeFromFile := ReadThisFile(filePath);
-  Except
-    on E: Exception Do dateTimeFromFile := DEFAULT_DATETIME;
-End;
-If dateTimeFromFile = '' Then dateTimeFromFile := DEFAULT_DATETIME;
+  except
+    on E: Exception do
+    begin
+      Memo1.Lines.Add(logger.log('error', 'GetDateTimeFromFile', 'Failed to read ' + filename + ': ' + E.Message));
+      dateTimeFromFile := DEFAULT_DATETIME;
+    end;
+  end;
 
-FS := DefaultFormatSettings;
-FS.DateSeparator := '-';
-FS.ShortDateFormat := 'yyyy-mm-dd';
-FS.ShortTimeFormat := 'hh:mm:ss';
-myDateTimeVariable := strtodatetime(dateTimeFromFile, FS);
-Result := myDateTimeVariable;
+  if dateTimeFromFile = '' then 
+    dateTimeFromFile := DEFAULT_DATETIME;
+
+  FS := DefaultFormatSettings;
+  FS.DateSeparator := '-';
+  FS.ShortDateFormat := 'yyyy-mm-dd';
+  FS.ShortTimeFormat := 'hh:mm:ss';
+  
+  try
+    myDateTimeVariable := strtodatetime(dateTimeFromFile, FS);
+  except
+    on E: Exception do
+    begin
+      Memo1.Lines.Add(logger.log('error', 'GetDateTimeFromFile', 'DateTime parse error: ' + E.Message));
+      myDateTimeVariable := EncodeDateTime(2023, 1, 24, 21, 20, 8, 0);
+    end;
+  end;
+  
+  Result := myDateTimeVariable;
 End;
 
 Procedure TmainForm.SetFlag(Var Flag: boolean; Value: boolean);
@@ -237,7 +294,7 @@ Procedure TmainForm.FormCreate(Sender: TObject);
 Var 
   pid: string;
 Begin
-  // Initialize helper classes
+  { Initialize helper classes }
   FTestRunner := TTestRunner.Create(Memo1, DebugLevel);
   FLedManager := TLedManager.Create(ColorProgress1);
   FCloudOps := TCloudOperations.Create(Memo1);
@@ -248,17 +305,19 @@ Begin
   doOnes := True;
   SyncFailedLabel.Font.Color := clRed;
 
-  // Note: Test handlers will be set up when needed
-  DebugLevel := GetEnvironmentVariable('m1tfdebug');
-  If DebugLevel <> '1' Then DebugLevel := '0';
+  { Initialize debug level from environment }
+  DebugLevel := GetEnvironmentVariable(M1_DEBUG_ENV);
+  If DebugLevel <> DEBUG_LEVEL_1 Then 
+    DebugLevel := DEFAULT_DEBUG_LEVEL;
 
   Memo1.Font.Size := 12;
 
+  { Save process ID }
   pid := IntToStr(system.GetProcessID);
   With TStringList.Create Do
     Try
       Add(pid);
-      SaveToFile(GetEnvironmentVariable('HOME') + '/m1mtf/m1tfd1app.pid');
+      SaveToFile(GetEnvironmentVariable('HOME') + M1_HOME_DIR + 'm1tfd1app.pid');
     Finally
       Free;
 End;
@@ -399,84 +458,43 @@ Begin
             MacProgSwitch);
 End;
 
-Procedure TmainForm.LedsTimer(Sender: TObject);
+Procedure TmainForm.BlinkLed(Led: TindLed);
 Begin
+  { Blink LED if it's in pending state }
+  if not Led.LedValue then
+  begin
+    if Led.LedColorOff = clYellow then
+      Led.LedColorOff := clGray
+    else
+      Led.LedColorOff := clYellow;
+  end;
+End;
+
+Procedure TmainForm.LedsTimer(Sender: TObject);
+var
+  Leds: array[0..6] of TindLed;
+  i: integer;
+Begin
+  { Skip if sync timer is active }
   If FLedManager.SyncTimerTag = 1 Then
     Begin
       FLedManager.SyncTimerTag := 0;
       exit;
     End;
 
-  If DoLabelSwitch.tag = 1 Then
-    Begin
-      If Not DoLabelSwitch.LedValue Then
-        Begin
-          If DoLabelSwitch.LedColorOff = clYellow Then
-            DoLabelSwitch.LedColorOff := clGray
-          Else
-            DoLabelSwitch.LedColorOff := clYellow;
-        End;
-    End;
-  If EEPROMSwitch.tag = 1 Then
-    Begin
-      If Not EEPROMSwitch.LedValue Then
-        Begin
-          If EEPROMSwitch.LedColorOff = clYellow Then
-            EEPROMSwitch.LedColorOff := clGray
-          Else
-            EEPROMSwitch.LedColorOff := clYellow;
-        End;
-    End;
-  If FlashSwitch.tag = 1 Then
-    Begin
-      If Not FlashSwitch.LedValue Then
-        Begin
-          If FlashSwitch.LedColorOff = clYellow Then
-            FlashSwitch.LedColorOff := clGray
-          Else
-            FlashSwitch.LedColorOff := clYellow;
-        End;
-    End;
-  If FuncTestSwitch.tag = 1 Then
-    Begin
-      If Not FuncTestSwitch.LedValue Then
-        Begin
-          If FuncTestSwitch.LedColorOff = clYellow Then
-            FuncTestSwitch.LedColorOff := clGray
-          Else
-            FuncTestSwitch.LedColorOff := clYellow;
-        End;
-    End;
-  If ICTTestSwitch.tag = 1 Then
-    Begin
-      If Not ICTTestSwitch.LedValue Then
-        Begin
-          If ICTTestSwitch.LedColorOff = clYellow Then
-            ICTTestSwitch.LedColorOff := clGray
-          Else
-            ICTTestSwitch.LedColorOff := clYellow;
-        End;
-    End;
-  If MacProgSwitch.tag = 1 Then
-    Begin
-      If Not MacProgSwitch.LedValue Then
-        Begin
-          If MacProgSwitch.LedColorOff = clYellow Then
-            MacProgSwitch.LedColorOff := clGray
-          Else
-            MacProgSwitch.LedColorOff := clYellow;
-        End;
-    End;
-  If AppsCheckSwitch.tag = 1 Then
-    Begin
-      If Not AppsCheckSwitch.LedValue Then
-        Begin
-          If AppsCheckSwitch.LedColorOff = clYellow Then
-            AppsCheckSwitch.LedColorOff := clGray
-          Else
-            AppsCheckSwitch.LedColorOff := clYellow;
-        End;
-    End;
+  { Initialize LED array }
+  Leds[0] := DoLabelSwitch;
+  Leds[1] := EEPROMSwitch;
+  Leds[2] := FlashSwitch;
+  Leds[3] := FuncTestSwitch;
+  Leds[4] := ICTTestSwitch;
+  Leds[5] := MacProgSwitch;
+  Leds[6] := AppsCheckSwitch;
+  
+  { Blink all pending LEDs }
+  for i := Low(Leds) to High(Leds) do
+    if Leds[i].tag = 1 then
+      BlinkLed(Leds[i]);
 End;
 
 Procedure TmainForm.Memo1DblClick(Sender: TObject);
@@ -525,8 +543,8 @@ Begin
   DevModeLabel.Visible := False;
   DevModeLabel.Caption := 'D0';
   DevModeLabel.Font.color := clRed;
-  DebugLevel := '0';
-  FTestRunner.FDebugLevel := '0';
+  DebugLevel := DEBUG_LEVEL_OFF;
+  FTestRunner.FDebugLevel := DEBUG_LEVEL_OFF;
 End;
 
 Procedure TmainForm.Debuglevel_1_Execute(Sender: TObject);
@@ -534,8 +552,8 @@ Begin
   DevModeLabel.Visible := True;
   DevModeLabel.Caption := 'D1';
   DevModeLabel.Font.color := clRed;
-  DebugLevel := '1';
-  FTestRunner.FDebugLevel := '1';
+  DebugLevel := DEBUG_LEVEL_1;
+  FTestRunner.FDebugLevel := DEBUG_LEVEL_1;
 End;
 
 Procedure TmainForm.Debuglevel_2_Execute(Sender: TObject);
@@ -543,8 +561,8 @@ Begin
   DevModeLabel.Visible := True;
   DevModeLabel.Caption := 'D2';
   DevModeLabel.Font.color := clRed;
-  DebugLevel := '2';
-  FTestRunner.FDebugLevel := '2';
+  DebugLevel := DEBUG_LEVEL_2;
+  FTestRunner.FDebugLevel := DEBUG_LEVEL_2;
 End;
 
 Procedure TmainForm.InterruptMenuItemClick(Sender: TObject);
@@ -572,12 +590,12 @@ Begin
   dateTimeNow := Now;
   epochTimeNow := DateTimeToUnix(dateTimeNow, False);
 
-  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateSycretsTimeStamp));
-  If (epochTimeNow - epochTime) > Interval7Days Then blinkMe := True;
-  epochTime := DateTimeToUnix(GetDateTimeFromFile(UpdateLogsTimeStamp));
-  If (epochTimeNow - epochTime) > Interval7Days Then blinkMe := True;
+  epochTime := DateTimeToUnix(GetDateTimeFromFile(UPDATE_SECRETS_TIMESTAMP));
+  If (epochTimeNow - epochTime) > INTERVAL_7_DAYS Then blinkMe := True;
+  epochTime := DateTimeToUnix(GetDateTimeFromFile(UPDATE_LOGS_TIMESTAMP));
+  If (epochTimeNow - epochTime) > INTERVAL_7_DAYS Then blinkMe := True;
 
-  GetDateTimeFromFile(UpdateSycretsTimeStamp);
+  GetDateTimeFromFile(UPDATE_SECRETS_TIMESTAMP);
 End;
 
 Procedure TmainForm.RevsClick(Sender: TObject);
@@ -612,7 +630,7 @@ End;
 
 Procedure TmainForm.EEPROMSwitchClick_Wrapper(Sender: TObject);
 Begin
-  If DebugLevel <> '2' Then
+  If DebugLevel <> DEBUG_LEVEL_2 Then
     Begin
       TindLed(Sender).LedValue := False;
       exit;
@@ -628,7 +646,7 @@ End;
 
 Procedure TmainForm.FuncTestSwitchClick_Wrapper(Sender: TObject);
 Begin
-  If DebugLevel <> '2' Then
+  If DebugLevel <> DEBUG_LEVEL_2 Then
     Begin
       TindLed(Sender).LedValue := False;
       exit;
@@ -642,7 +660,7 @@ End;
 
 Procedure TmainForm.ICTTestSwitchClick_Wrapper(Sender: TObject);
 Begin
-  If DebugLevel <> '2' Then
+  If DebugLevel <> DEBUG_LEVEL_2 Then
     Begin
       TindLed(Sender).LedValue := False;
       exit;
@@ -656,7 +674,7 @@ End;
 
 Procedure TmainForm.AppsCheckSwitchClick_Wrapper(Sender: TObject);
 Begin
-  If DebugLevel <> '2' Then
+  If DebugLevel <> DEBUG_LEVEL_2 Then
     Begin
       TindLed(Sender).LedValue := False;
       exit;
@@ -670,7 +688,7 @@ End;
 
 Procedure TmainForm.MacProgSwitchClick_Wrapper(Sender: TObject);
 Begin
-  If DebugLevel <> '2' Then
+  If DebugLevel <> DEBUG_LEVEL_2 Then
     Begin
       TindLed(Sender).LedValue := False;
       exit;
@@ -686,7 +704,7 @@ End;
 
 Procedure TmainForm.DoLabelSwitchClick_Wrapper(Sender: TObject);
 Begin
-  If DebugLevel <> '2' Then
+  If DebugLevel <> DEBUG_LEVEL_2 Then
     Begin
       TindLed(Sender).LedValue := False;
       exit;
@@ -703,7 +721,7 @@ End;
 
 Procedure TmainForm.FlashSwitchClick_Wrapper(Sender: TObject);
 Begin
-  If DebugLevel <> '2' Then
+  If DebugLevel <> DEBUG_LEVEL_2 Then
     Begin
       TindLed(Sender).LedValue := False;
       exit;

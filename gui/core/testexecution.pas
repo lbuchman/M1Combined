@@ -66,10 +66,7 @@ var
 begin
   DoLabelSwitch.LedValue := False;
   if BusyFlag then
-  begin
-    DoLabelSwitch.LedValue := False;
     exit(FRunner.TestRet);
-  end;
 
   arg[0] := '-s';
   arg[1] := Trim(FTargetVendorSerial.Text);
@@ -98,8 +95,6 @@ begin
 
   if BusyFlag then
     exit(FRunner.TestRet);
-
-  FlashSwitch.LedValue := False;
   arg[0] := '-s';
   arg[1] := Trim(FTargetVendorSerial.Text);
   arg[2] := '-d';
@@ -120,8 +115,6 @@ begin
 
   if BusyFlag then
     exit(FRunner.TestRet);
-
-  FuncTestSwitch.LedValue := False;
   arg[0] := '-s';
   arg[1] := Trim(FTargetVendorSerial.Text);
   arg[2] := '-d';
@@ -141,8 +134,6 @@ begin
 
   if BusyFlag then
     exit(FRunner.TestRet);
-
-  ICTTestSwitch.LedValue := False;
   arg[0] := '-s';
   arg[1] := Trim(FTargetVendorSerial.Text);
   arg[2] := '-d';
@@ -167,8 +158,6 @@ begin
 
   if BusyFlag then
     exit(FRunner.TestRet);
-
-  EEPROMSwitch.LedValue := False;
   arg[0] := '-s';
   arg[1] := Trim(FTargetVendorSerial.Text);
   arg[2] := '-d';
@@ -189,8 +178,6 @@ begin
 
   if BusyFlag then
     exit(FRunner.TestRet);
-
-  EEPROMSwitch.LedValue := False;
   arg[0] := '-s';
   arg[1] := Trim(FTargetVendorSerial.Text);
   arg[2] := '-d';
@@ -213,7 +200,6 @@ begin
   if BusyFlag then
     exit(-1);
 
-  MacProgSwitch.LedValue := False;
   arg[0] := '-s';
   arg[1] := Trim(FTargetVendorSerial.Text);
   arg[2] := '-d';
@@ -243,7 +229,10 @@ begin
   TindLed(Sender).LedValue := False;
   if not FRunner.CheckSerialBarcodeScan(FTargetVendorSerial.Text) then
     exit;
-  callback(Sender);
+  
+  { Validate callback before calling }
+  if Assigned(callback) then
+    callback(Sender);
 end;
 
 procedure TTestExecutor.DoLabelError(PrintError: boolean; var DoLabelSwitch: TindLed);
