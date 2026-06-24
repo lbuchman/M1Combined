@@ -1,0 +1,18 @@
+{
+  "name": "m1tfc-rest-server",
+  "version": "0.1.0",
+  "description": "Standalone REST server for m1tfc command execution",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

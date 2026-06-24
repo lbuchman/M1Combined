@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+cd "$SNAP" || exit 1
+exec "$SNAP/usr/bin/node" "$SNAP/src/server.js"

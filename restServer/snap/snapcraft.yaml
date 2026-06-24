@@ -1,0 +1,45 @@
+name: m1tfc-rest-server
+base: core22
+version: '0.1.0'
+summary: REST server wrapper for m1tfc commands
+description: |
+  Standalone REST server that executes m1tfc CLI commands in a separate process
+  and returns a normalized JSON status response.
+
+grade: devel
+confinement: strict
+
+apps:
+  rest-server:
+    command: bin/server
+    daemon: simple
+    restart-condition: always
+    environment:
+      PORT: '3300'
+      HOST: '0.0.0.0'
+      M1TFC_CMD: m1tfc
+      M1TFC_BASE_ARGS: ''
+      M1TFC_CWD: $SNAP_COMMON
+
+parts:
+  rest-server:
+    plugin: npm
+    source: ..
+    npm-node-version: 20.19.2
+    prime:
+      - src/**
+      - package.json
+      - node_modules/**
+      - bin/server
+
+  launcher:
+    plugin: dump
+    source: .
+    organize:
+      bin/server: bin/server
+
+plugs:
+  raw-usb:
+  serial-port:
+  network:
+  network-bind:
