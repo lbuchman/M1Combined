@@ -15,6 +15,8 @@ const defaultCliArgs = process.env.M1TFC_BASE_ARGS
 const cliCwd = process.env.M1TFC_CWD || process.cwd();
 const defaultConfigFile = process.env.CONFIG_JSON
     || path.join(process.env.SNAP_DATA || process.cwd(), 'config.json');
+const defaultSnapcraftFile = process.env.SNAPCRAFT_YAML
+    || path.join(process.cwd(), 'snap', 'snapcraft.yaml');
 const sseHeartbeatMs = Number(process.env.LOG_SSE_HEARTBEAT_MS || 15000);
 
 // PIN storage — use SNAP_DATA if available, else same dir as server.js
@@ -41,6 +43,16 @@ function resolveLogFile() {
         || cfg.logFilename;
     if (!configured || typeof configured !== 'string' || !configured.trim()) return null;
     return path.resolve(configured.trim());
+}
+
+function readSnapVersion() {
+    try {
+        const yaml = fs.readFileSync(defaultSnapcraftFile, 'utf8');
+        const match = yaml.match(/^version:\s*['\"]?([^'\"\n]+)['\"]?\s*$/m);
+        return match ? match[1] : 'unknown';
+    } catch {
+        return 'unknown';
+    }
 }
 
 function ensureLogFile(logFile) {
@@ -118,7 +130,9 @@ app.get('/config', (req, res) => {
     res.json({
         status: 'OK',
         machineName: process.env.MACHINE_NAME || cfg.machineName || 'FC?',
-        logFile: resolveLogFile()
+        logFile: resolveLogFile(),
+        snapVersion: process.env.SNAP_VERSION || cfg.snapVersion || readSnapVersion(),
+        fwVersion: process.env.FW_VERSION || cfg.firmwareVersion || cfg.fwVersion || cfg.flashVersion || 'unknown'
     });
 });
 

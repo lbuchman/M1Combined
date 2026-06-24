@@ -1,0 +1,33 @@
+name: gui-react
+base: core22
+version: '0.1.0'
+summary: React UI for M1 fixture operations
+description: |
+  Standalone React UI for fixture testing workflows, packaged as a Snap.
+
+grade: devel
+confinement: strict
+
+apps:
+  gui-react:
+    command: bin/node $SNAP/node_modules/vite/bin/vite.js preview --host 0.0.0.0 --port 10000 --strictPort
+    daemon: simple
+    restart-condition: always
+    plugs:
+      - network
+      - network-bind
+
+parts:
+  gui-react:
+    plugin: npm
+    source: ..
+    npm-node-version: 24.0.0
+    override-build: |
+      npm ci
+      npm run build
+      craftctl default
+    prime:
+      - dist/**
+      - node_modules/**
+      - package.json
+      - vite.config.js

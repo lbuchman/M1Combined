@@ -30,6 +30,7 @@ body{background:var(--chassis);color:var(--txt);font-family:var(--mono);min-heig
   color:#5fa8e8;text-shadow:0 0 10px rgba(95,168,232,.5);
   position:absolute;left:50%;transform:translateX(-50%);pointer-events:none}
 .mode-wrap{display:flex;gap:3px;margin-left:auto}
+.info-btn{background:#142238;color:#8fc3ff;border-color:#2e5278 #0a0a0a #0a0a0a #2e5278}
 .mode-btn{padding:8px 18px;font-family:var(--mono);font-size:1rem;font-weight:bold;
   letter-spacing:2px;border:2px solid #383838;background:#1a1a1a;color:#606060;cursor:pointer;
   border-bottom-color:#0a0a0a;border-right-color:#0a0a0a}
@@ -217,5 +218,16 @@ body{background:var(--chassis);color:var(--txt);font-family:var(--mono);min-heig
 .pin-cancel{font-family:var(--mono);font-size:.85rem;font-weight:bold;letter-spacing:2px;
   background:transparent;border:1px solid #404040;color:#505050;padding:8px 24px;cursor:pointer}
 .pin-cancel:hover{color:#909090;border-color:#606060}
+
+/* VERSIONS MODAL */
+.version-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:1100}
+.version-box{background:#1c1c1c;border:3px solid #505050;border-bottom-color:#0d0d0d;border-right-color:#0d0d0d;
+  box-shadow:6px 6px 24px #000,inset 0 1px 0 #606060;padding:24px;min-width:360px;display:flex;flex-direction:column;gap:14px}
+.version-title{font-family:var(--mono);font-size:1rem;font-weight:bold;letter-spacing:3px;color:#8dbef2}
+.version-row{display:flex;justify-content:space-between;gap:20px;padding:8px 10px;background:#101010;border:1px solid #2a2a2a}
+.version-row span{font-size:.95rem;letter-spacing:1px;color:#9a9a9a}
+.version-row strong{font-size:.95rem;letter-spacing:1px;color:#e0e0e0}
+.version-close{align-self:flex-end;font-family:var(--mono);font-size:.85rem;font-weight:bold;letter-spacing:2px;
+  background:#1e1e1e;border:2px solid #3d3d3d;border-bottom-color:#0a0a0a;border-right-color:#0a0a0a;color:#bcbcbc;padding:8px 16px;cursor:pointer}
 
 @media(max-width:900px){.step-row{grid-template-columns:repeat(4,1fr)}.action-bar{flex-wrap:wrap}}

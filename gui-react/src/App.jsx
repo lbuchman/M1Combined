@@ -1,4 +1,4 @@
-﻿import { useRef, useState, useEffect } from 'react';
+﻿import { useRef, useState, useEffect, version as reactVersion } from 'react';
 
 const COMMANDS = [
   { key: 'ict',         label: 'ICT'       },
@@ -12,7 +12,7 @@ const COMMANDS = [
 
 const PROGRESS = { ict:5, progmac:3, flash:40, functest:43, eeprom:5, pingM1apps:3, makelabel:8 };
 const RETEST_SKIP = new Set(['flash']);
-const API = localStorage.getItem('m1-api') || 'http://127.0.0.1:3300';
+const API = localStorage.getItem('m1-api') || 'http://127.0.0.1:3301';
 // TODO: Read max idle timeout from restServer config. Default is 1.5h for now.
 const MAX_IDLE_MS = 90 * 60 * 1000;
 const PROD_PIN_BYPASS = '1234';
@@ -35,6 +35,9 @@ export default function App() {
   const [powerState, setPowerState] = useState('auto'); // 'auto', 'on', 'off'
   const [poeState,   setPoeState]   = useState('auto'); // 'auto', 'on', 'off'
   const [machineName, setMachineName] = useState('FC?');
+  const [snapVersion, setSnapVersion] = useState('unknown');
+  const [fwVersion, setFwVersion] = useState('unknown');
+  const [versionModal, setVersionModal] = useState(false);
   const [pinModal,   setPinModal]   = useState(false);
   const [pinEntry,   setPinEntry]   = useState('');
   const [pinError,   setPinError]   = useState(false);
@@ -98,7 +101,11 @@ export default function App() {
   }
 
   useEffect(() => {
-    apiGet('/config').then(b => { if (b.machineName) setMachineName(b.machineName); });
+    apiGet('/config').then(b => {
+      if (b.machineName) setMachineName(b.machineName);
+      if (b.snapVersion) setSnapVersion(String(b.snapVersion));
+      if (b.fwVersion) setFwVersion(String(b.fwVersion));
+    });
   }, []);
 
   useEffect(() => {
@@ -339,6 +346,21 @@ export default function App() {
     return /^\d{10}$/.test(serial.trim());
   }
 
+  function downloadLogs() {
+    if (logLines.length === 0) return;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const content = `${logLines.join('\n')}\n`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `mnplus-debug-log-${timestamp}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
   async function callCommand(key, isRetest) {
     const arg = { serial: serial.trim(), debug };
     if (key === 'ict') arg.cellBatTol = isRetest ? 'used' : 'new';
@@ -414,6 +436,7 @@ export default function App() {
         <span className="title-text">MnPlus</span>
         <span className="machine-name">{machineName}</span>
         <div className="mode-wrap">
+          <button className="mode-btn info-btn" onClick={() => setVersionModal(true)}>INFO</button>
           <button className={`mode-btn ${appMode === 'production' ? 'mode-on' : ''}`} onClick={() => switchMode('production')}>PRODUCTION</button>
           <button className={`mode-btn ${appMode === 'debug' ? 'mode-on' : ''}`} onClick={() => switchMode('debug')}>DEBUG</button>
         </div>
@@ -479,18 +502,6 @@ export default function App() {
         <span className="progress-txt">{progress > 0 ? `${progress}%` : ''}</span>
       </div>
 
-      {/* RESULT DISPLAY */}
-      <div className={`result-box ${result ? (result.ok ? 'result-pass' : 'result-fail') : 'result-idle'}${!isDebug ? ' hidden' : ''}`}>
-        {!result && <span className="result-idle-txt">─</span>}
-        {result && (
-          <>
-            <span className="result-verdict">{result.ok ? '✔  PASS' : '✘  FAIL'}</span>
-            {result.description && <span className="result-desc">{result.description}</span>}
-            {result.step && <span className="result-step">Failed step: {result.step}</span>}
-          </>
-        )}
-      </div>
-
       {/* ACTION BUTTONS */}
       <div className="action-bar">
         <button className="btn btn-comm"   disabled={busy || isLocked} onClick={() => runSequence('commission')}>COMMISSION</button>
@@ -515,6 +526,7 @@ export default function App() {
                 <option value="2">TRACE</option>
               </select>
             </div>
+            <button className="log-btn" onClick={downloadLogs} disabled={logLines.length === 0}>DOWNLOAD</button>
             <button className="log-btn" onClick={() => setLogPaused(p => !p)}>{logPaused ? 'RESUME' : 'PAUSE'}</button>
             <button className="log-btn" onClick={() => setLogLines([])}>CLEAR</button>
           </div>
@@ -566,6 +578,18 @@ export default function App() {
               ))}
             </div>
             <button className="pin-cancel" onClick={() => setPinModal(false)}>CANCEL</button>
+          </div>
+        </div>
+      )}
+
+      {versionModal && (
+        <div className="version-overlay" onClick={() => setVersionModal(false)}>
+          <div className="version-box" onClick={e => e.stopPropagation()}>
+            <div className="version-title">SYSTEM VERSIONS</div>
+            <div className="version-row"><span>React</span><strong>{reactVersion}</strong></div>
+            <div className="version-row"><span>Snap</span><strong>{snapVersion}</strong></div>
+            <div className="version-row"><span>FW to Flash</span><strong>{fwVersion}</strong></div>
+            <button className="version-close" onClick={() => setVersionModal(false)}>CLOSE</button>
           </div>
         </div>
       )}
