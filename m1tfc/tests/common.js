@@ -9,6 +9,7 @@ const buzzer = require('./buzzer');
 const sqliteDriver = require('../utils/sqliteDriver');
 const path = require('path');
 const fs = require('fs-extra');
+const runtimeContext = require('../utils/runtimeContext');
 
 const progPart = '0x1';
 const progopt = '-s 0x1';
@@ -58,7 +59,7 @@ async function programStm(programmer, stm32, m1Dev, logger) {
     logger.debug('Programming UUT ICT FW into SRAM...');
     await waitDFU(programmer, logger);
     await delay(300);
-    await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`, logger, true);
+    os.executeShellCommand(`${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`, logger, true);
     await delay(1000);
     logger.debug('Programming Done');
     await delay(100); // let M1 start
@@ -77,14 +78,17 @@ async function initializeTestFixture(config, programmer, programSTM, initAndQuit
     if (testBoardFwRev.boardId === 255) throw new Error('cannot get M1 Testboard boardId, update FW and program boardId');
     if (calibrationData) {
         calibrationData.setBoardId(testBoardFwRev.boardId);
-        await calibrationData.intitConfigFile();
     }
     logger.debug(`Test Board FW Rev - ${testBoardFwRev.fwrev} BoardId - ${testBoardFwRev.boardId}`);
+    if (calibrationData) {
+        await calibrationData.initConfigFile();
+    }
 
     logger.debug('Setting UUT power off');
     await testBoardLink.targetPower(false);
     await testBoardLink.batteryOn(false);
-    if (process.env.productName === 'mnplus') await testBoardLink.poeOn(false);
+    const runtime = runtimeContext.getRuntime();
+    if (runtime.productName === 'mnplus') await testBoardLink.poeOn(false);
     await m1boot.activateDFU();
     await testBoardLink.batteryOn(true);
     await testBoardLink.targetPower(true);
@@ -93,7 +97,7 @@ async function initializeTestFixture(config, programmer, programSTM, initAndQuit
         await waitDFU(programmer, logger);
         await delay(2000); // not sure why but prog will fail without delay
         logger.debug('Programming UUT ICT FW into SRAM...');
-        await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`, logger, true);
+        os.executeShellCommand(`${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`, logger, true);
         await delay(100);
         logger.debug('Programming Done');
         await delay(1000); // let M1 start

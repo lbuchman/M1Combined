@@ -9,6 +9,7 @@ const os = require('../utils/os');
 const exitCodes = require('../src/exitCodes');
 const sqliteDriver = require('../utils/sqliteDriver');
 const utils = require('../utils/utils');
+const runtimeContext = require('../utils/runtimeContext');
 
 module.exports = class ProgramMac {
     constructor(tsv_, serial, log) {
@@ -33,7 +34,8 @@ module.exports = class ProgramMac {
       */
     async run(programmer) {
         try {
-            const fwDir = process.env.fwDir;
+            const runtime = runtimeContext.getRuntime();
+            const fwDir = runtime.fwDir;
             const db = sqliteDriver.initialize(this.logger);
             db.updateSerial(this.serial);
             await common.initializeTestFixture(null, programmer, true, false, null, null, this.logger, null, null);

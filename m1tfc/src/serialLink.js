@@ -5,6 +5,7 @@ const { SerialPort } = require('serialport');
 const utils = require('../utils/utils');
 const fs = require('fs-extra');
 const delay = require('delay');
+const runtimeContext = require('../utils/runtimeContext');
 
 module.exports = class SerialLink {
     constructor(linkName, linkType, parser) {
@@ -130,7 +131,8 @@ module.exports = class SerialLink {
         this.parser = this.serialPort.pipe(this.parser);
 
         if (dumpdata) {
-            const dumpFile = `${process.env.logDir}/${process.env.SERIAL}_dump.log`;
+            const runtime = runtimeContext.getRuntime();
+            const dumpFile = `${runtime.logDir}\\${runtime.serial}_dump.log`;
             fs.writeFileSync(dumpFile, '/n/r');
             this.serialPort.on('data', (data) => {
                 fs.writeFileSync(dumpFile, data.toString(), { flag: 'a' });

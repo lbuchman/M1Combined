@@ -2,38 +2,30 @@
 
 const delay = require('delay');
 const dateTime = require('date-and-time');
-const exitCodes = require('../../src/exitCodes');
+const sqliteDriver = require('../../utils/sqliteDriver');
 const utils = require('../../utils/utils');
 const os = require('../../utils/os');
-const { loadConfigData, ensureSerialOption, initDb } = require('../m1tfcShared');
+const exitCodes = require('../../src/exitCodes');
+const { loadConfig, errorAndExit, applyRuntime } = require('../commandSupport');
 
-module.exports = function registerCleanup(program) {
+function register(program) {
     program.command('cleanup')
         .description('pack the log and cleanup')
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-e, --failed', 'will append E to the tar ball file name')
         .action(async (options) => {
-            const configData = await loadConfigData();
+            const configData = await loadConfig();
             const logfile = console;
             const now = new Date();
+            applyRuntime(configData, { serial: options.serial });
             const timeStamp = dateTime.format(now, 'YYYY_MM_DD_HH_mm_ss');
-            let exitCode = exitCodes.normalExit;
             try {
-                await ensureSerialOption(options, console);
-                const db = initDb(logfile);
+                if (!options.serial) await errorAndExit('must define vendor serial number', console);
+                const db = sqliteDriver.initialize(logfile);
                 const dbRecord = db.getRecord(options.serial);
                 const mac = dbRecord[0].uid;
-                let uid;
-                if (!mac) {
-                    uid = '0000000000000000';
-                }
-                else {
-                    uid = utils.macToUid(mac);
-                }
-                let errSuf = '';
-                if (options.failed) {
-                    errSuf = 'E';
-                }
+                const uid = mac ? utils.macToUid(mac) : '0000000000000000';
+                const errSuf = options.failed ? 'E' : '';
                 const tarFile = `${configData.mtfDir}/logs/${timeStamp}_${uid}-${options.serial}${configData.vendorSite}${errSuf}.txz`;
                 await os.executeShellCommand(`tar -cJf ${tarFile} -C ${configData.mtfDir}/logs/${options.serial} .`, logfile, false);
                 await os.executeShellCommand(`rm -fr ${configData.mtfDir}/logs/${options.serial}`, logfile, false);
@@ -41,10 +33,12 @@ module.exports = function registerCleanup(program) {
             }
             catch (err) {
                 logfile.error(err);
-                exitCode = exitCodes.commandFailed;
-            }
-            finally {
-                process.exit(exitCode);
+                await delay(100);
+                process.exit(exitCodes.commandFailed);
             }
         });
+}
+
+module.exports = {
+    register
 };

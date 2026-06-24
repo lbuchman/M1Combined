@@ -1,28 +1,42 @@
 'use strict';
 
-const exitCodes = require('../../src/exitCodes');
+const delay = require('delay');
+const IctTestRunner = require('../../tests/ictTestRunner');
 const testBoardLink = require('../../src/testBoardLink');
-const { loadConfigData, createIctRunner } = require('../m1tfcShared');
+const exitCodes = require('../../src/exitCodes');
+const { loadConfig, applyRuntime } = require('../commandSupport');
 
-module.exports = function registerTbCmd(program) {
-    program.command('tbcmd')
-        .description('execute test board raw command')
-        .option('-c, --command <string>', 'test board command, make sure to inclose the command in ""')
+function register(program) {
+    program.command('m1tbcmd')
+        .description('Execute M1 test board raw command (STM32MP1 core testing: voltages, programming, pogo pins)')
+        .option('-c, --command <string>', 'M1 test board command (enclose in quotes)')
         .action(async (options) => {
-            const configData = await loadConfigData();
+            const configData = await loadConfig();
             const logfile = console;
-            let exitCode = exitCodes.normalExit;
+            applyRuntime(configData);
+            
+            if (!options.command) {
+                logfile.error('Error: command option (-c) is required');
+                process.exit(exitCodes.commandFailed);
+            }
+            
             try {
-                await createIctRunner(configData, logfile, configData.ictFWFilePath);
+                const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile, configData, false);
+                await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+                await delay(400);
+                
                 const output = await testBoardLink.sendCommand(options.command);
                 logfile.log(JSON.stringify(output));
+                process.exit(0);
             }
             catch (err) {
-                logfile.error(err);
-                exitCode = exitCodes.commandFailed;
-            }
-            finally {
-                process.exit(exitCode);
+                logfile.error(`M1 test board command failed: ${err.message}`);
+                await delay(100);
+                process.exit(exitCodes.commandFailed);
             }
         });
+}
+
+module.exports = {
+    register
 };

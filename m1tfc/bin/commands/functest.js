@@ -1,23 +1,27 @@
 'use strict';
 
 const delay = require('delay');
-const exitCodes = require('../../src/exitCodes');
+const logger = require('../../utils/logger');
 const FuncTest = require('../../tests/funcTest');
-const { loadConfigData, ensureSerialOption, applyFirmwareDir, createCommandLogger, exitCommandFailure } = require('../m1tfcShared');
+const exitCodes = require('../../src/exitCodes');
+const { loadConfig, errorAndExit, applyRuntime } = require('../commandSupport');
 
-module.exports = function registerFuncTest(program) {
+function register(program) {
     program.command('functest')
         .description('executes m1-3200 function test')
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
         .action(async (options) => {
-            const configData = await loadConfigData();
+            const configData = await loadConfig();
             let logfile;
+            applyRuntime(configData, {
+                serial: options.serial,
+                debugLevel: options.debug || '0',
+                logDir: options.serial ? `${configData.mtfDir}/logs/${options.serial}` : null
+            });
             try {
-                await ensureSerialOption(options, console);
-                applyFirmwareDir(configData);
-                process.env.m1defaultIP = configData.m1defaultIP;
-                logfile = createCommandLogger(options.serial, '   func', configData, options.debug);
+                if (!options.serial) await errorAndExit('must define vendor serial number', console);
+                logfile = logger.getLogger(options.serial, '   func', options.serial, configData.mtfDir, options.debug);
                 if (configData.funcTestDisable) {
                     logfile.error('Func test is disabled');
                     await delay(100);
@@ -25,24 +29,20 @@ module.exports = function registerFuncTest(program) {
                 }
                 logfile.info('--------------------------------------------');
                 logfile.info('Executing m1-3200 functional test ...');
-                process.env.SERIAL = options.serial;
-                process.env.logDir = `${configData.mtfDir}/logs/${options.serial}`;
                 const funcTest = new FuncTest(options.serial, configData, logfile);
                 await funcTest.init(configData.testBoardTerminalDev, configData.serialBaudrate);
-                const exitCode = await funcTest.run(
-                    configData.programmingCommand,
-                    `${configData.mtfDir}/${configData.fwDir}/${configData.layoutFilePath}`,
-                    configData.login,
-                    configData.password,
-                    configData.m1SerialDev,
-                    configData.skipUSBPenDriveTest,
-                    '115200'
-                );
-                process.exit(exitCode);
+                await funcTest.run(configData.programmingCommand, `${configData.mtfDir}/${configData.fwDir}/${configData.layoutFilePath}`, configData.login, configData.password, configData.m1SerialDev, configData.skipUSBPenDriveTest, '115200');
+                process.exit(exitCodes.normalExit);
             }
             catch (err) {
                 if (!logfile) logfile = console;
-                await exitCommandFailure(err, logfile);
+                logfile.error(err);
+                await delay(100);
+                process.exit(exitCodes.commandFailed);
             }
         });
+}
+
+module.exports = {
+    register
 };

@@ -72,13 +72,13 @@ module.exports = class CalibrationData {
     }
 
 
-    async intitConfigFile() {
+    async initConfigFile() {
         this.config = await config.getConfig({});
         if (this.boardId === 255) throw new Error('Invalid board ID, update M1 testboard FW and program an ID');
         if (!this.config.boards) {
             const defData = new Array(20).fill({});
             defData.forEach((item, index) => {
-                defData[index] = structuredClone(this.defaults);
+                defData[index] = JSON.parse(JSON.stringify(this.defaults));
             });
             this.config.boards = defData;
         }
@@ -88,17 +88,13 @@ module.exports = class CalibrationData {
             this.ribbonCableA2DPins = this.config.boards[this.boardId].ribbonCableA2DPins;
             this.strikeReg = this.config.boards[this.boardId].strikeReg;
             this.ddrVoltageM1 = this.config.boards[this.boardId].ddrVoltageM1;
-            this.ddrVoltageMnp = this.config.boards[this.boardId].ddrVoltageMnp;
+            this.ddrVolutageMnp = this.config.boards[this.boardId].ddrVoltageMnp;
             this.coinCellBattery = this.config.boards[this.boardId].coinCellBattery;
         }
     }
 
     getTestPointsMnp() {
         return this.testPointsMnp;
-    }
-
-    getTestPointsM1() {
-        return this.testPointsM1;
     }
 
     getRibbonCableA2DPins() {
@@ -128,7 +124,14 @@ module.exports = class CalibrationData {
 
 
     async saveConfigFile() {
-        this.config.boards[this.boardId] = this.defaults;
+        this.defaults.testPointsMnp = this.testPointsMnp;
+        this.defaults.testPointsM1 = this.testPointsM1;
+        this.defaults.ribbonCableA2DPins = this.ribbonCableA2DPins;
+        this.defaults.strikeReg = this.strikeReg;
+        this.defaults.ddrVoltageM1 = this.ddrVoltageM1;
+        this.defaults.ddrVoltageMnp = this.ddrVoltageMnp;
+        this.defaults.coinCellBattery = this.coinCellBattery;
+        this.config.boards[this.boardId] = JSON.parse(JSON.stringify(this.defaults));
         await config.saveConfig(this.config);
     }
 };

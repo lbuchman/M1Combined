@@ -4,6 +4,7 @@ const MercurlBoard = require('../utils/mercuryBoard');
 const mnpHwIo = require('../tests/mnpHW');
 const targetICTLink = require('../src/m1ICTLink');
 const errorCodes = require('../bin/errorCodes');
+const runtimeContext = require('../utils/runtimeContext');
 
 module.exports = class MnpTests {
     constructor(db, log) {
@@ -45,7 +46,7 @@ module.exports = class MnpTests {
         const ret = await targetICTLink.sendCommand(command);
         // eslint-disable-next-line no-bitwise
         if (ret.value !== (value ^ inverted)) {
-            this.db.updateErrorCode(process.env.serial, errorCodes.codes[thisIo.mnpPinName].errorCode, 'T');
+            this.db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[thisIo.mnpPinName].errorCode, 'T');
             this.logger.error(`Failed ${thisIo.mnpPinName} test.`);
             return false;
         }
@@ -60,7 +61,7 @@ module.exports = class MnpTests {
 
         // eslint-disable-next-line no-bitwise
         if (ret.value !== (value ^ inverted)) {
-            this.db.updateErrorCode(process.env.serial, errorCodes.codes[thisIo.mnpPinName].errorCode, 'T');
+            this.db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[thisIo.mnpPinName].errorCode, 'T');
             this.logger.error(`Failed ${thisIo.mnpPinName} test.`);
             return false;
         }

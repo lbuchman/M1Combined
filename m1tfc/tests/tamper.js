@@ -7,6 +7,8 @@ const testBoardLink = require('../src/testBoardLink');
 const targetICTLink = require('../src/m1ICTLink');
 const delay = require('delay');
 const errorCodes = require('../bin/errorCodes');
+const runtimeContext = require('../utils/runtimeContext');
+const GPIOHelper = require('../utils/gpioHelper');
 
 const tamperSensor = {
     port: 'k',
@@ -16,79 +18,82 @@ const tamperSensor = {
     deactivated: 0
 };
 
+let gpioHelper;
+
 async function getSensorState(fromNumber, expectedValue, logger, db) {
     await delay(500);
-    let ret = await targetICTLink.sendCommand(`getgpio ${tamperSensor.port} ${tamperSensor.pin}`);
-    if (!ret.status) {
-        db.updateErrorCode(process.env.serial, errorCodes.codes[tamperSensor.pinNameOnTestBoard].errorCode, 'T');
-        throw new Error(`Target Board control command <getgpio> failed on pin ${tamperSensor.port}.${tamperSensor.pin} ${ret.error}`);
+    const ret = await gpioHelper.readLevel(tamperSensor.port, tamperSensor.pin, tamperSensor.pinNameOnTestBoard);
+    if (ret === false) {
+        throw new Error(`Failed to read GPIO ${tamperSensor.port}.${tamperSensor.pin}`);
     }
 
-    if (ret.value === expectedValue) {
-        return ret;
+    if (ret === expectedValue) {
+        return { value: ret, status: true };
     }
+    
     await delay(100);
     const nextNumber = fromNumber - 1;
     if (nextNumber > 0) {
-        ret = await getSensorState(nextNumber, expectedValue, logger, db);
-        if (ret.value !== expectedValue) {
-            db.updateErrorCode(process.env.serial, errorCodes.codes[tamperSensor.pinNameOnTestBoard].errorCode, 'E');
-            return ret;
+        const nextRet = await getSensorState(nextNumber, expectedValue, logger, db);
+        if (nextRet.value !== expectedValue) {
+            db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[tamperSensor.pinNameOnTestBoard].errorCode, 'E');
+            return nextRet;
         }
+        return nextRet;
     }
-    return ret;
+    
+    return { value: ret, status: false };
 }
 
 async function activatetamper() {
     const ret = await testBoardLink.sendCommand(`setiopin ${testBoardLink.findPinIdByName(tamperSensor.pinNameOnTestBoard)} 0`);
     if (!ret.status) {
-        throw new Error(`Test Board control command failed on pinName=${tamperSensor.pinNameOnTestBoard}, ${ret.error}`);
+        throw new Error(`Test Board control command failed on ${tamperSensor.pinNameOnTestBoard}: ${ret.error}`);
     }
 }
 
 async function deactivatetamper() {
     const ret = await testBoardLink.sendCommand(`setiopin ${testBoardLink.findPinIdByName(tamperSensor.pinNameOnTestBoard)} 1`);
     if (!ret.status) {
-        throw new Error(`Test Board control command failed on pinName=${tamperSensor.pinNameOnTestBoard}, ${ret.error}`);
+        throw new Error(`Test Board control command failed on ${tamperSensor.pinNameOnTestBoard}: ${ret.error}`);
     }
 }
 
 async function initSensor() {
-    const ret = await targetICTLink.sendCommand(`confgpio ${tamperSensor.port} ${tamperSensor.pin} input none`);
-    if (!ret.status) {
-        throw new Error(`Target Board control command <confgpio> failed on pin ${tamperSensor.port}.${tamperSensor.pin} ${ret.error}`);
-    }
+    return await gpioHelper.configureOutput(tamperSensor.port, tamperSensor.pin, tamperSensor.pinNameOnTestBoard);
 }
 
 async function test(logger, db) {
+    gpioHelper = new GPIOHelper(targetICTLink, logger, db);
+    
     try {
-        await initSensor(logger);
-        let sensorState;
+        if (!await initSensor()) return false;
+
+        // Test deactivated state
         await deactivatetamper();
         await delay(100);
-        sensorState = await getSensorState(10, tamperSensor.deactivated, logger, db);
-        if (await sensorState.value !== tamperSensor.deactivated) {
-            logger.error(`tamper sensor test failed, invalid sensor state detected, expected state  ${tamperSensor.deactivated}`);
+        let sensorState = await getSensorState(10, tamperSensor.deactivated, logger, db);
+        if (sensorState.value !== tamperSensor.deactivated) {
+            logger.error(`Tamper sensor test failed: expected deactivated (${tamperSensor.deactivated}), got ${sensorState.value}`);
             return false;
         }
+
+        // Test activated state
         await activatetamper();
         await delay(100);
         sensorState = await getSensorState(10, tamperSensor.activated, logger, db);
-        if (await sensorState.value !== tamperSensor.activated) {
-            logger.error(`tamper sensor test failed, invalid sensor state detected, expected state  ${tamperSensor.activated}`);
-            // process.exit(exitCodes.tamperSensorTestFailed);
+        if (sensorState.value !== tamperSensor.activated) {
+            logger.error(`Tamper sensor test failed: expected activated (${tamperSensor.activated}), got ${sensorState.value}`);
             return false;
         }
+
         logger.info('Passed Tamper test');
+        return true;
     }
     catch (err) {
-        logger.error('Failed Temper test');
-        logger.error(err);
-        // logger.debug(err.stack);
+        logger.error(`Tamper test failed: ${err.message}`);
         return false;
     }
-
-    return true;
 }
 
 module.exports = {

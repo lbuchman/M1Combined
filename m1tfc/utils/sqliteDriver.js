@@ -2,6 +2,7 @@
 
 const Database = require('better-sqlite3');
 const fs = require('fs');
+const runtimeContext = require('./runtimeContext');
 
 /**
 * @class
@@ -351,8 +352,12 @@ class DBClass {
 }
 
 function initialize(log) {
+    const runtime = runtimeContext.getRuntime();
+    if (!runtime.dbPath) {
+        throw new Error('Database path is not initialized in runtime context');
+    }
     const options = {
-        dbPath: `${process.env.DBPATH}/tf.db`,
+        dbPath: `${runtime.dbPath}/tf.db`,
         templateDB: `${__dirname}/../template/template.db`
     };
 

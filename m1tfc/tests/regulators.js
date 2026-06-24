@@ -5,236 +5,325 @@ const errorCodes = require('../bin/errorCodes');
 const mnpHwIo = require('../tests/mnpHW');
 const targetICTLink = require('../src/m1ICTLink');
 const delay = require('delay');
+const runtimeContext = require('../utils/runtimeContext');
 
-const leverLockVoltage = { name: 'LeverSensor', voltage: 0 };
+const LEVERAGE_LOCK_VOLTAGE = { name: 'LeverSensor', voltage: 0, tolerance: 0.2 };
+const DELAY_CAPACITOR_CHARGE_MS = 1000;
+const VOLTAGE_DECIMAL_PLACES = 2;
 
-let testPoints;
-let ddrVoltage;
+/**
+ * Voltage test context - holds configuration for current test session
+ */
+class VoltageTestContext {
+    constructor(calibrationData) {
+        this.runtime = runtimeContext.getRuntime();
+        this.calibrationData = calibrationData;
+        this.isM1Plus = this.runtime.productName === 'mnplus';
+    }
 
+    getTestPoints() {
+        return this.isM1Plus 
+            ? this.calibrationData.testPointsMnp 
+            : this.calibrationData.testPointsM1;
+    }
 
+    getDdrVoltage() {
+        return this.isM1Plus 
+            ? this.calibrationData.ddrVoltageMnp 
+            : this.calibrationData.ddrVoltageM1;
+    }
+
+    updateCalibrationData(property, value) {
+        if (this.isM1Plus) {
+            this.calibrationData.defaults[`${property}Mnp`] = value;
+        } else {
+            this.calibrationData.defaults[`${property}M1`] = value;
+        }
+    }
+}
+
+/**
+ * Helper: Retrieve voltage from test point
+ */
+async function readVoltageFromTestPoint(testPointName, logger) {
+    const pinId = testBoardLink.findPinIdByName(testPointName);
+    const result = await testBoardLink.sendCommand(`getiopin ${pinId}`);
+    
+    if (!result.status) {
+        throw new Error(`Failed to read voltage from ${testPointName}: ${result.error}`);
+    }
+    
+    return result.value;
+}
+
+/**
+ * Helper: Calculate voltage error percentage
+ */
+function calculateVoltageError(measuredValue, expectedValue, scale = 1) {
+    const scaledMeasured = measuredValue * scale;
+    return Math.abs(scaledMeasured - expectedValue) / expectedValue;
+}
+
+/**
+ * Initialize with calibration data (maintains backward compatibility)
+ */
 function init(calibrationParam) {
-    if (process.env.productName === 'mnplus') {
-        testPoints = calibrationParam.testPointsMnp;
-        ddrVoltage = calibrationParam.ddrVoltageMnp;
-        return;
+    // This function now just validates the calibration data
+    // The actual context is created per test function for better isolation
+    if (!calibrationParam) {
+        throw new Error('Calibration parameters required');
     }
-    testPoints = calibrationParam.testPointsM1;
-    ddrVoltage = calibrationParam.ddrVoltageM1;
 }
 
+/**
+ * Check if cover lever is locked (safety check before testing)
+ */
 async function checkLeverState(logger, db) {
-    if (process.env.debug === '2') return true;
-    const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(leverLockVoltage.name)}`);
-    if (!ret.status) {
-        throw new Error(`Test Board control command failed on pinName=${leverLockVoltage.name}, ${ret.error}`);
+    const runtime = runtimeContext.getRuntime();
+    if (runtime.debugLevel === '2') return true;
+    
+    try {
+        const leverVoltage = await readVoltageFromTestPoint(LEVERAGE_LOCK_VOLTAGE.name, logger);
+        const leverLocked = Math.abs(leverVoltage - LEVERAGE_LOCK_VOLTAGE.voltage) <= LEVERAGE_LOCK_VOLTAGE.tolerance;
+        
+        if (!leverLocked) {
+            const errorCode = errorCodes.codes[LEVERAGE_LOCK_VOLTAGE.name]?.errorCode;
+            if (errorCode) db.updateErrorCode(runtime.serial, errorCode, 'T');
+            throw new Error('Failed: The Cover Lever is Not Locked!!!');
+        }
+        
+        return true;
+    } catch (error) {
+        if (db) {
+            const errorCode = errorCodes.codes[LEVERAGE_LOCK_VOLTAGE.name]?.errorCode;
+            if (errorCode) db.updateErrorCode(runtime.serial, errorCode, 'T');
+        }
+        throw error;
     }
-    if ((Math.abs(ret.value - leverLockVoltage.voltage)) > 0.2) {
-        db.updateErrorCode(process.env.serial, errorCodes.codes[leverLockVoltage.name].errorCode, 'T');
-        throw new Error('Failed: The Cover Lever is Not Locked!!!');
-    }
-
-    return true;
 }
 
-async function testDDRVoltage(tolerance, logger, db, calibrate, calibrateData) {
-    const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(ddrVoltage.name)}`);
-    if (!ret.status) {
-        db.updateErrorCode(process.env.serial, errorCodes.codes[ddrVoltage.name].errorCode, 'T');
-        throw new Error(`Test Board control command failed on pinName=${ddrVoltage.name}, ${ret.error}`);
-    }
-    const error = ((Math.abs(ret.value * ddrVoltage.scale - ddrVoltage.voltage)) / (ddrVoltage.voltage));
-    if (error > tolerance) {
+/**
+ * Generic voltage test with optional calibration
+ */
+async function testVoltagePoint(testPoint, tolerance, context, logger, db, calibrate, calibrateData) {
+    const runtime = context.runtime;
+    const measuredVoltage = await readVoltageFromTestPoint(testPoint.name, logger);
+    const error = calculateVoltageError(measuredVoltage, testPoint.voltage, testPoint.scale);
+    const pointTolerance = testPoint.tolerance || tolerance;
+    
+    if (error > pointTolerance) {
+        const errorCode = errorCodes.codes[testPoint.name]?.errorCode;
+        
         if (calibrate) {
-            logger.error(`Voltage is out of tolerance and cannot be calibrated. Check A/D HW, TP=${ddrVoltage.voltage}, value=${(ret.value - ddrVoltage.voltage).toFixed(2)}, reqValue=${calibrateData.ddrVoltage.voltage} Error = ${(error * 100).toFixed(1)}%`);
+            logger.error(
+                `Voltage out of tolerance (cannot calibrate). TP=${testPoint.name}, ` +
+                `measured=${(measuredVoltage * testPoint.scale).toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                `expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                `error=${(error * 100).toFixed(1)}%`
+            );
             return false;
         }
-        db.updateErrorCode(process.env.serial, errorCodes.codes[ddrVoltage.name].errorCode, 'E');
-        throw new Error(`Failed: Voltage is out of tolerance, TP=${ddrVoltage.name}, value=${(ret.value * ddrVoltage.scale).toFixed(2)}, reqValue=${ddrVoltage.voltage.toFixed(2)} Error = ${(error * 200).toFixed(2)}%`);
+        
+        if (errorCode) db.updateErrorCode(runtime.serial, errorCode, 'E');
+        throw new Error(
+            `Failed: Voltage out of tolerance. TP=${testPoint.name}, ` +
+            `measured=${(measuredVoltage * testPoint.scale).toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+            `expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V`
+        );
     }
-    else {
-        if (calibrate) {
-            if (process.env.productName === 'mnplus') {
-                // eslint-disable-next-line no-param-reassign
-                calibrateData.defaults.ddrVoltageMnp.scale = ddrVoltage.voltage / ret.value;
-                ddrVoltage.scale = calibrateData.defaults.ddrVoltageMnp.scale;
-            }
-            else {
-                // eslint-disable-next-line no-param-reassign
-                calibrateData.defaults.ddrVoltageM1.scale = ddrVoltage.voltage / ret.value;
-                ddrVoltage.scale = calibrateData.defaults.ddrVoltageM1.scale;
-            }
+    
+    if (calibrate) {
+        const newScale = testPoint.voltage / measuredVoltage;
+        testPoint.scale = newScale;
+        logger.info(`Calibrated TP=${testPoint.name} scale=${newScale.toFixed(4)}`);
+        await calibrateData.saveConfigFile();
+    } else {
+        logger.info(
+            `Passed TP=${testPoint.name}. ` +
+            `Measured=${(measuredVoltage * testPoint.scale).toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+            `Expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+            `Error=${(error * 100).toFixed(1)}%`
+        );
+    }
+    
+    return true;
+}
 
-            logger.info(`calibrating TP=${ddrVoltage.name} scale to value=${ddrVoltage.scale}`);
+/**
+ * Test DDR voltage with calibration support
+ */
+async function testDDRVoltage(tolerance, logger, db, calibrate, calibrateData) {
+    const context = new VoltageTestContext(calibrateData);
+    const ddrVoltage = context.getDdrVoltage();
+    const errorCode = errorCodes.codes[ddrVoltage.name]?.errorCode;
+    
+    try {
+        return await testVoltagePoint(ddrVoltage, tolerance, context, logger, db, calibrate, calibrateData);
+    } catch (error) {
+        if (errorCode && db) db.updateErrorCode(context.runtime.serial, errorCode, 'T');
+        throw error;
+    }
+}
+
+/**
+ * Test coin cell battery voltage (age-aware: new vs used)
+ */
+async function cellBatTest(logger, db, calibrate, calibrateData) {
+    const context = new VoltageTestContext(calibrateData);
+    const runtime = context.runtime;
+    
+    if (runtime.skipBatteryTest) {
+        return true;
+    }
+    
+    const batConfig = calibrateData.coinCellBattery;
+    const minVoltage = runtime.cellBatTol === 'used' 
+        ? calibrateData.defaults.coinCellBattery.minVoltageAged
+        : calibrateData.defaults.coinCellBattery.minVoltageNew;
+    
+    try {
+        const measuredVoltage = await readVoltageFromTestPoint(batConfig.name, logger);
+        const scaledVoltage = measuredVoltage * batConfig.scale;
+        
+        if (calibrate) {
+            if (!runtime.cellBatVoltage) {
+                throw new Error('Calibration requires voltage flag: -v voltage');
+            }
+            batConfig.scale = runtime.cellBatVoltage / measuredVoltage;
+            logger.info(`Calibrated coin cell battery scale=${batConfig.scale.toFixed(4)}`);
             await calibrateData.saveConfigFile();
-            // eslint-disable-next-line no-continue
             return true;
         }
-        logger.info(`Passed TP=${ddrVoltage.name} test, Voltage = ${(ret.value * ddrVoltage.scale).toFixed(2)}V, Expected = ${ddrVoltage.voltage.toFixed(2)}V Tolerance = ${(error * 100).toFixed(1)}%`);
-    }
-    return true;
-}
-
-async function cellBatTest(logger, db, calibrate, calibrateData) {
-    if (process.env.skipBatteryTest === 'true') {
-        return true;
-    }
-    let minVoltage = calibrateData.defaults.coinCellBattery.minVoltageNew;
-    if (process.env.cellBatTol === 'used') {
-        minVoltage = calibrateData.defaults.coinCellBattery.minVoltageAged;
-    }
-
-    const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(calibrateData.coinCellBattery.name)}`);
-    if (!ret.status) {
-        db.updateErrorCode(process.env.serial, errorCodes.codes[calibrateData.defaults.coinCellBattery.name].errorCode, 'T');
-        throw new Error(`Test Board control command failed on pinName=${calibrateData.defaults.coinCellBattery.name}, ${ret.error}`);
-    }
-    if (calibrate) {
-        if (!process.env.cellBatVoltage) {
-            throw new Error('Failed: You MUST specify voltage on coin cell battery at this time with -v voltage flag');
+        
+        if (scaledVoltage < minVoltage) {
+            const errorCode = errorCodes.codes[batConfig.name]?.errorCode;
+            if (errorCode) db.updateErrorCode(runtime.serial, errorCode, 'E');
+            throw new Error(
+                `Coin cell battery voltage below minimum. ` +
+                `Measured=${scaledVoltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                `Minimum=${minVoltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V`
+            );
         }
-        // eslint-disable-next-line no-param-reassign
-        calibrateData.defaults.coinCellBattery.scale = process.env.cellBatVoltage / ret.value;
-        // eslint-disable-next-line no-param-reassign
-        calibrateData.defaults.coinCellBattery = calibrateData.coinCellBattery;
-        logger.info(`calibrating coin cell battery scale to value=${calibrateData.defaults.coinCellBattery.scale}`);
-        await calibrateData.saveConfigFile();
-        // eslint-disable-next-line no-continue
+        
+        logger.info(
+            `Passed coin cell battery test. ` +
+            `Measured=${scaledVoltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+            `Minimum=${minVoltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V`
+        );
         return true;
+    } catch (error) {
+        const errorCode = errorCodes.codes[batConfig.name]?.errorCode;
+        if (errorCode && db) db.updateErrorCode(runtime.serial, errorCode, 'T');
+        throw error;
     }
-
-    if (ret.value * calibrateData.coinCellBattery.scale < minVoltage) {
-        db.updateErrorCode(process.env.serial, errorCodes.codes[calibrateData.coinCellBattery.name].errorCode, 'E');
-        throw new Error(`Failed: Coin cell battery voltage is not in the range. actual: ${ret.value}V, req: ${minVoltage}V`);
-    }
-    else {
-        logger.info(`Passed coin cell battery test, Actual = ${(ret.value * calibrateData.coinCellBattery.scale).toFixed(1)}V, Expected Minimum: ${minVoltage}V`);
-    }
-    return true;
 }
 
+/**
+ * Helper: Enable capacitor charging for strike regulator
+ */
+async function enableCapCharging(testPoint, logger) {
+    const command = mnpHwIo.getCommand('write', testPoint.functnameAux, 1, logger);
+    return await targetICTLink.sendCommand(command);
+}
+
+/**
+ * Helper: Disable capacitor charging for strike regulator
+ */
+async function disableCapCharging(testPoint, logger) {
+    const command = mnpHwIo.getCommand('write', testPoint.functnameAux, 0, logger);
+    return await targetICTLink.sendCommand(command);
+}
+
+/**
+ * Helper: Trigger kicker relay
+ */
+async function triggerKicker(testPoint, logger) {
+    const command = mnpHwIo.getCommand('write', testPoint.funcName, 1, logger);
+    return await targetICTLink.sendCommand(command);
+}
+
+/**
+ * Test strike boost regulators (high voltage output)
+ */
 async function strikeBoostReg(tolerance, logger, db, calibrate, calibrateData) {
-    // Test strike regulators
-    let retValue = true;
-    let command;
-    let ret;
-    /* eslint-disable-next-line no-restricted-syntax */
+    const context = new VoltageTestContext(calibrateData);
+    const runtime = context.runtime;
+    let allTestsPassed = true;
+    
     for (const testPoint of calibrateData.strikeReg) {
-        logger.info(`Enabling ${testPoint.funcName}`);
-
-
-        command = mnpHwIo.getCommand('write', testPoint.functnameAux, 1, logger); // enable Cap charging command
-        // eslint-disable-next-line no-await-in-loop
-        ret = await targetICTLink.sendCommand(command);
-        // eslint-disable-next-line no-await-in-loop
-        await delay(1000); // Wait for 1 second
-        command = mnpHwIo.getCommand('write', testPoint.funcName, 1, logger); // relay kicker
-        // eslint-disable-next-line no-await-in-loop
-        ret = await targetICTLink.sendCommand(command);
-        if (!ret.status) {
-            logger.error(`Target Board control command failed on pin ${testPoint.funcName}, ${ret.error}`);
-            retValue = false;
-            db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'T');
-        }
-        // eslint-disable-next-line no-await-in-loop
-        ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(testPoint.name)}`);
-        if (!ret.status) {
-            command = mnpHwIo.getCommand('write', testPoint.functnameAux, 0, logger); // enable Cap charging command
-            // eslint-disable-next-line no-await-in-loop
-            await targetICTLink.sendCommand(command);
-            db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'T');
-            throw new Error(`Test Board control command failed on pinName=${testPoint.name}, ${ret.error}`);
-        }
-        if (!testPoint.tolerance) testPoint.tolerance = tolerance;
-        const error = Math.abs((ret.value * testPoint.scale - testPoint.voltage) / (testPoint.voltage));
-        if (error > testPoint.tolerance) {
-            if (calibrate) {
-                logger.error(`Voltage is out of tolerance and cannot be calibrated. Check A/D HW, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(1)}%`);
-                retValue = false;
-                // eslint-disable-next-line no-continue
-                continue;
-            }
-            else {
-                db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
-                logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(1)}%`);
-                retValue = false;
+        try {
+            logger.info(`Testing ${testPoint.name} (enabling ${testPoint.funcName})`);
+            
+            // Enable capacitor charging
+            await enableCapCharging(testPoint, logger);
+            await delay(DELAY_CAPACITOR_CHARGE_MS);
+            
+            // Trigger kicker
+            await triggerKicker(testPoint, logger);
+            
+            // Read voltage
+            const measuredVoltage = await readVoltageFromTestPoint(testPoint.name, logger);
+            await disableCapCharging(testPoint, logger);
+            
+            // Test voltage
+            const testPassed = await testVoltagePoint(testPoint, tolerance, context, logger, db, calibrate, calibrateData);
+            if (!testPassed) allTestsPassed = false;
+        } catch (error) {
+            logger.error(`Strike regulator test failed for ${testPoint.name}: ${error.message}`);
+            const errorCode = errorCodes.codes[testPoint.name]?.errorCode;
+            if (errorCode) db.updateErrorCode(runtime.serial, errorCode, 'T');
+            allTestsPassed = false;
+            
+            // Attempt to disable capacitor charging on error
+            try {
+                await disableCapCharging(testPoint, logger);
+            } catch (disableError) {
+                logger.error(`Failed to disable capacitor charging: ${disableError.message}`);
             }
         }
-        else {
-            if (calibrate) {
-                testPoint.scale = testPoint.voltage / ret.value;
-                // eslint-disable-next-line no-param-reassign
-                calibrateData.defaults.strikeReg = calibrateData.strikeReg;
-                logger.info(`calibrating TP=${testPoint.name} scale to value=${testPoint.scale}`);
-                // eslint-disable-next-line no-await-in-loop
-                await calibrateData.saveConfigFile();
-                // eslint-disable-next-line no-continue
-                continue;
-            }
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V Tolerance = ${(error * 100).toFixed(1)}%`);
-        }
-        command = mnpHwIo.getCommand('write', testPoint.functnameAux, 0, logger); // enable Cap charging command
     }
-    return retValue;
+    
+    return allTestsPassed;
 }
 
 
+/**
+ * Test all configured voltage test points
+ */
 async function test(tolerance, logger, db, calibrate, calibrateData) {
-    let retValue = true;
-    // eslint-disable-next-line no-restricted-syntax
-    if (process.env.productName === 'mnplus') await testBoardLink.poeOn(true);
-    /* eslint-disable-next-line no-restricted-syntax */
-    for (const testPoint of testPoints) {
-        if (process.env.cellBatTol === 'new') {
-            testPoint.voltage = 3.3;
+    const context = new VoltageTestContext(calibrateData);
+    const runtime = context.runtime;
+    const testPoints = context.getTestPoints();
+    
+    let allTestsPassed = true;
+    
+    try {
+        // Enable POE if MNPlus variant
+        if (context.isM1Plus) {
+            await testBoardLink.poeOn(true);
         }
-        else {
-            testPoint.voltage = 2.9;
-        }
-        // eslint-disable-next-line no-await-in-loop
-        const ret = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(testPoint.name)}`);
-        if (!ret.status) {
-            db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'T');
-            throw new Error(`Test Board control command failed on pinName=${testPoint.name}, ${ret.error}`);
-        }
-        if (!testPoint.tolerance) testPoint.tolerance = tolerance;
-        const error = Math.abs((ret.value * testPoint.scale - testPoint.voltage) / (testPoint.voltage));
-
-        if (error > testPoint.tolerance) {
-            if (calibrate) {
-                logger.error(`Voltage is out of tolerance and cannot be calibrated. Check A/D HW, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(1)}%`);
-                retValue = false;
-                // eslint-disable-next-line no-continue
-                continue;
-            }
-            else {
-                db.updateErrorCode(process.env.serial, errorCodes.codes[testPoint.name].errorCode, 'E');
-                logger.error(`Failed: Voltage is out of tolerance, TP=${testPoint.name}, value=${(ret.value * testPoint.scale).toFixed(2)}, reqValue=${testPoint.voltage.toFixed(2)} Error = ${(error * 100).toFixed(1)}%`);
-                retValue = false;
+        
+        for (const testPoint of testPoints) {
+            try {
+                const testPassed = await testVoltagePoint(testPoint, tolerance, context, logger, db, calibrate, calibrateData);
+                if (!testPassed) allTestsPassed = false;
+            } catch (error) {
+                logger.error(`Test point ${testPoint.name} failed: ${error.message}`);
+                allTestsPassed = false;
             }
         }
-        else if (calibrate) {
-            testPoint.scale = testPoint.voltage / ret.value;
-            if (process.env.productName === 'mnplus') {
-                // eslint-disable-next-line no-param-reassign
-                calibrateData.defaults.testPointsMnp = testPoints;
+        
+        return allTestsPassed;
+    } finally {
+        // Disable POE if MNPlus variant
+        if (context.isM1Plus) {
+            try {
+                await testBoardLink.poeOn(false);
+            } catch (error) {
+                logger.error(`Failed to disable POE: ${error.message}`);
             }
-            else {
-                // eslint-disable-next-line no-param-reassign
-                calibrateData.defaults.testPointsM1 = testPoints;
-            }
-            logger.info(`calibrating TP=${testPoint.name} scale to value=${testPoint.scale}`);
-            // eslint-disable-next-line no-await-in-loop
-            await calibrateData.saveConfigFile();
-
-            // eslint-disable-next-line no-continue
-            continue;
-        }
-        else {
-            logger.info(`Passed TP=${testPoint.name} test, Voltage = ${(ret.value * testPoint.scale).toFixed(2)}V, Expected = ${testPoint.voltage.toFixed(2)}V Tolerance = ${(error * 100).toFixed(1)}%`);
         }
     }
-    if (process.env.productName === 'mnplus') await testBoardLink.poeOn(false);
-    return retValue;
 }
 
 module.exports = {

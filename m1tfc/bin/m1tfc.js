@@ -3,33 +3,31 @@
 'use strict';
 
 const program = require('commander');
-const os = require('../utils/os');
-const config = require('../utils/config');
 const { mkdirp } = require('mkdirp');
-const { registerCommands } = require('./m1tfcCommands');
-const { configuration } = require('./m1tfcShared');
+const os = require('../utils/os');
+const { ensureSnapEnv, loadConfig } = require('./commandSupport');
+const { registerAll } = require('./commands');
 
-/* Just for running out of snap */
-if (!process.env.SNAP) {
-    process.env.SNAP_COMMON = `${process.env.HOME}/snap_common`;
-    process.env.SNAP_DATA = `${process.env.HOME}/snap_data`;
-    process.env.SNAP = '/snap/m1tfd/current';
-    process.env.SNAP_VERSION = '08c433e';
-}
+ensureSnapEnv();
 
 program
     .name('m1test')
     .description('CLI utility to test and program M1-3200 boards')
-    .version(process.env.SNAP_VERSION);
+    .version(process.env.SNAP_VERSION || 'dev');
 
-registerCommands(program);
+registerAll(program);
 
 const log = console;
 
 os.executeShellCommand('killall -9 STM32_Programmer_CLI', log, true)
     .then(async () => {
-        const configData = await config.getConfig(configuration);
-        process.env.DBPATH = configData.mtfDir;
+        const configData = await loadConfig();
+        mkdirp.sync(configData.mtfDir);
+        mkdirp.sync(`${configData.mtfDir}/logs`);
+        program.parse(process.argv);
+    })
+    .catch(async () => {
+        const configData = await loadConfig();
         mkdirp.sync(configData.mtfDir);
         mkdirp.sync(`${configData.mtfDir}/logs`);
         program.parse(process.argv);

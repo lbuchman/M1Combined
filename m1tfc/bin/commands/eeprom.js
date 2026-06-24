@@ -1,38 +1,34 @@
 'use strict';
 
 const delay = require('delay');
-const exitCodes = require('../../src/exitCodes');
-const errorCodes = require('../../bin/errorCodes');
+const logger = require('../../utils/logger');
 const Eeprom = require('../../tests/programEeprom');
 const common = require('../../tests/common');
-const {
-    loadConfigData,
-    ensureSerialOption,
-    applyFirmwareDir,
-    createCommandLogger,
-    initDb
-} = require('../m1tfcShared');
+const sqliteDriver = require('../../utils/sqliteDriver');
+const exitCodes = require('../../src/exitCodes');
+const errorCodes = require('../errorCodes');
+const { loadConfig, errorAndExit, applyRuntime } = require('../commandSupport');
 
-module.exports = function registerEeprom(program) {
+function register(program) {
     program.command('eeprom')
         .description('Program I2C EEPROM.')
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
         .action(async (options) => {
-            const configData = await loadConfigData();
+            const configData = await loadConfig();
             let logfile;
             let db;
-            let exitCode = exitCodes.normalExit;
+            applyRuntime(configData, { serial: options.serial, debugLevel: options.debug || '0' });
             try {
-                applyFirmwareDir(configData);
-                await ensureSerialOption(options, console);
-                logfile = createCommandLogger(options.serial, ' eeprom', configData, options.debug);
-                db = initDb(logfile);
+                if (!options.serial) await errorAndExit('must define vendor serial number', console);
+                logfile = logger.getLogger(options.serial, ' eeprom', options.serial, configData.mtfDir, options.debug);
+                db = sqliteDriver.initialize(logfile);
                 if (!configData.progEEPROM) {
                     logfile.error('Prog EEPROM is disabled');
-                    return;
+                    await delay(100);
+                    process.exit(exitCodes.normalExit);
                 }
-                if (!configData.vendorSite) throw new Error('must define vendor site in $SNAP_DATA/config.json');
+                if (!configData.vendorSite) await errorAndExit('must define vendor site in $SNAP_DATA/config.json', logfile);
 
                 logfile.info('--------------------------------------------');
                 logfile.info('Executing writing I2C EEPROM command ...');
@@ -43,15 +39,18 @@ module.exports = function registerEeprom(program) {
                 await eeprom.program(configData.programmingCommand, options.serial, configData.vendorSite, configData.forceEppromOverwrite);
                 await delay(100);
                 await common.testEndSuccess();
+                process.exit(exitCodes.normalExit);
             }
             catch (err) {
                 if (!logfile) logfile = console;
                 logfile.error(err);
-                if (db) db.updateErrorCode(options.serial, errorCodes.codes.EEPROMUPDATE.errorCode, 'E');
-                exitCode = exitCodes.commandFailed;
-            }
-            finally {
-                process.exit(exitCode);
+                if (db && options.serial) db.updateErrorCode(options.serial, errorCodes.codes.EEPROMUPDATE.errorCode, 'E');
+                await delay(100);
+                process.exit(exitCodes.commandFailed);
             }
         });
+}
+
+module.exports = {
+    register
 };
