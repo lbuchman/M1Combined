@@ -8,6 +8,11 @@ const { CommandRunner, getSupportedCommands } = require('./commandRunner');
 
 const port = Number(process.env.PORT || 3300);
 const host = process.env.HOST || '0.0.0.0';
+const defaultCliPath = process.env.M1TFC_CMD || 'm1tfc';
+const defaultCliArgs = process.env.M1TFC_BASE_ARGS
+    ? process.env.M1TFC_BASE_ARGS.split(' ').filter(Boolean)
+    : [];
+const cliCwd = process.env.M1TFC_CWD || process.cwd();
 
 // PIN storage — use SNAP_DATA if available, else same dir as server.js
 const pinDir  = process.env.SNAP_DATA || path.dirname(__filename);
@@ -15,24 +20,48 @@ const pinFile = path.join(pinDir, 'pin.json');
 const PIN_ITERATIONS = 100000;
 const PIN_KEYLEN     = 64;
 const PIN_DIGEST     = 'sha512';
+const VALID_PIN_MODES = new Set(['production', 'debug']);
 
 function hashPin(pin, salt) {
     return crypto.pbkdf2Sync(pin, salt, PIN_ITERATIONS, PIN_KEYLEN, PIN_DIGEST).toString('hex');
 }
 
-function loadPin() {
-    try { return JSON.parse(fs.readFileSync(pinFile, 'utf8')); } catch { return null; }
+function loadPinData() {
+    try {
+        const parsed = JSON.parse(fs.readFileSync(pinFile, 'utf8'));
+        // Backward compatibility with old single-pin format: { hash, salt }
+        if (parsed && parsed.hash && parsed.salt) {
+            return {
+                production: { hash: parsed.hash, salt: parsed.salt },
+                debug: { hash: parsed.hash, salt: parsed.salt }
+            };
+        }
+        return parsed;
+    } catch {
+        return null;
+    }
 }
 
-function savePin(pin) {
+function savePinData(pinData) {
+    fs.mkdirSync(pinDir, { recursive: true });
+    fs.writeFileSync(pinFile, JSON.stringify(pinData), 'utf8');
+}
+
+function savePin(mode, pin) {
+    const current = loadPinData() || {};
     const salt = crypto.randomBytes(32).toString('hex');
-    fs.writeFileSync(pinFile, JSON.stringify({ hash: hashPin(pin, salt), salt }), 'utf8');
+    current[mode] = { hash: hashPin(pin, salt), salt };
+    savePinData(current);
 }
 
-function verifyPin(pin) {
-    const stored = loadPin();
-    if (!stored) return pin === '1234'; // default if no pin file yet
-    return hashPin(pin, stored.salt) === stored.hash;
+function verifyPin(mode, pin) {
+    const stored = loadPinData();
+    if (!stored || !stored[mode]) {
+        // defaults when not provisioned yet
+        const defaultPin = mode === 'production' ? '1223' : '4321';
+        return pin === defaultPin;
+    }
+    return hashPin(pin, stored[mode].salt) === stored[mode].hash;
 }
 
 const commandRunner = new CommandRunner({
@@ -70,20 +99,26 @@ app.get('/commands', (req, res) => {
 });
 
 app.post('/auth', (req, res) => {
-    const { pin } = req.body || {};
+    const { pin, mode } = req.body || {};
+    if (!mode || typeof mode !== 'string' || !VALID_PIN_MODES.has(mode)) {
+        return res.status(400).json({ status: 'FAILED', ErrorDescription: 'Invalid PIN mode' });
+    }
     if (!pin || typeof pin !== 'string' || !/^\d{4,6}$/.test(pin)) {
         return res.status(400).json({ status: 'FAILED', ErrorDescription: 'Invalid PIN format' });
     }
-    if (verifyPin(pin)) return res.json({ status: 'OK' });
+    if (verifyPin(mode, pin)) return res.json({ status: 'OK' });
     res.status(401).json({ status: 'FAILED', ErrorDescription: 'Wrong PIN' });
 });
 
 app.post('/changepin', (req, res) => {
-    const { pin } = req.body || {};
+    const { pin, mode } = req.body || {};
+    if (!mode || typeof mode !== 'string' || !VALID_PIN_MODES.has(mode)) {
+        return res.status(400).json({ status: 'FAILED', ErrorDescription: 'Invalid PIN mode' });
+    }
     if (!pin || typeof pin !== 'string' || !/^\d{4,6}$/.test(pin)) {
         return res.status(400).json({ status: 'FAILED', ErrorDescription: 'Invalid PIN format' });
     }
-    savePin(pin);
+    savePin(mode, pin);
     res.json({ status: 'OK' });
 });
 

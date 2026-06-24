@@ -13,6 +13,11 @@ const COMMANDS = [
 const PROGRESS = { ict:5, progmac:3, flash:40, functest:43, eeprom:5, pingM1apps:3, makelabel:8 };
 const RETEST_SKIP = new Set(['flash']);
 const API = localStorage.getItem('m1-api') || 'http://127.0.0.1:3300';
+// TODO: Read max idle timeout from restServer config. Default is 1.5h for now.
+const MAX_IDLE_MS = 90 * 60 * 1000;
+const PROD_PIN_BYPASS = '1234';
+const DEBUG_PIN_BYPASS = '4321';
+const DEBUG_PIN_BYPASS_ALT = '1234';
 
 function initLeds() {
   return Object.fromEntries(COMMANDS.map(c => [c.key, 'idle']));
@@ -21,7 +26,7 @@ function initLeds() {
 export default function App() {
   const [serial,   setSerial]   = useState('');
   const [debug,    setDebug]    = useState('1');
-  const [appMode,  setAppMode]  = useState('production');
+  const [appMode,  setAppMode]  = useState('locked');
   const [busy,     setBusy]     = useState(false);
   const [leds,     setLeds]     = useState(initLeds);
   const [progress, setProgress] = useState(0);
@@ -32,22 +37,94 @@ export default function App() {
   const [pinModal,   setPinModal]   = useState(false);
   const [pinEntry,   setPinEntry]   = useState('');
   const [pinError,   setPinError]   = useState(false);
+  const [pinTargetMode, setPinTargetMode] = useState('debug');
   const [changePinModal, setChangePinModal] = useState(false);
+  const [changePinMode, setChangePinMode] = useState('debug');
   const [newPin,     setNewPin]     = useState('');
   const [newPinStep, setNewPinStep] = useState(1); // 1=enter new, 2=confirm
   const [newPinFirst, setNewPinFirst] = useState('');
+  const [fakeServer, setFakeServer] = useState(false);
+  const [prodReauthRequired, setProdReauthRequired] = useState(false);
   const stopRef = useRef(false);
+  const lastActivityRef = useRef(Date.now());
+
+  function getFakePin(mode) {
+    const key = `mnplus-fake-pin-${mode}`;
+    return localStorage.getItem(key) || (mode === 'production' ? '1223' : '4321');
+  }
+
+  async function apiPost(path, payload) {
+    try {
+      const res = await fetch(`${API}${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      return await res.json();
+    } catch {
+      setFakeServer(true);
+      if (path === '/auth') {
+        return { status: payload.pin === getFakePin(payload.mode) ? 'OK' : 'FAILED' };
+      }
+      if (path === '/changepin') {
+        localStorage.setItem(`mnplus-fake-pin-${payload.mode}`, payload.pin);
+        return { status: 'OK' };
+      }
+      if (path === '/command') {
+        return { status: 'OK', ErrorDescription: 'FAKE SERVER' };
+      }
+      return { status: 'FAILED' };
+    }
+  }
+
+  async function apiGet(path) {
+    try {
+      const res = await fetch(`${API}${path}`);
+      return await res.json();
+    } catch {
+      setFakeServer(true);
+      if (path === '/config') return { status: 'OK', machineName: 'FC?' };
+      return { status: 'FAILED' };
+    }
+  }
 
   useEffect(() => {
-    fetch(`${API}/config`)
-      .then(r => r.json())
-      .then(b => { if (b.machineName) setMachineName(b.machineName); })
-      .catch(() => {});
+    apiGet('/config').then(b => { if (b.machineName) setMachineName(b.machineName); });
   }, []);
 
-  const isDebug = appMode === 'debug';
+  useEffect(() => {
+    const markActivity = () => { lastActivityRef.current = Date.now(); };
+    const events = ['pointerdown', 'keydown', 'touchstart', 'mousemove'];
+    events.forEach(e => window.addEventListener(e, markActivity, { passive: true }));
 
-  function openChangePinModal() { setNewPin(''); setNewPinStep(1); setNewPinFirst(''); setChangePinModal(true); }
+    const timer = setInterval(() => {
+      if (appMode !== 'locked' && Date.now() - lastActivityRef.current >= MAX_IDLE_MS) {
+        setAppMode('locked');
+        setPinModal(false);
+        setChangePinModal(false);
+        setPinEntry('');
+        setNewPin('');
+        setPinError(false);
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+      events.forEach(e => window.removeEventListener(e, markActivity));
+    };
+  }, [appMode]);
+
+  const isDebug = appMode === 'debug';
+  const isLocked = appMode === 'locked';
+
+  function openChangePinModal(mode) {
+    setChangePinMode(mode);
+    setNewPin('');
+    setNewPinStep(1);
+    setNewPinFirst('');
+    setPinError(false);
+    setChangePinModal(true);
+  }
 
   async function changePinPress(d) {
     if (newPin.length >= 6) return;
@@ -59,11 +136,7 @@ export default function App() {
       } else {
         if (next === newPinFirst) {
           try {
-            const res = await fetch(`${API}/changepin`, {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ pin: next })
-            });
-            const body = await res.json();
+            const body = await apiPost('/changepin', { pin: next, mode: changePinMode });
             if (body.status === 'OK') { setChangePinModal(false); }
             else { setPinError(true); setTimeout(() => { setNewPin(''); setNewPinStep(1); setNewPinFirst(''); setPinError(false); }, 700); }
           } catch {
@@ -77,7 +150,33 @@ export default function App() {
     }
   }
 
-  function openPinModal() { setPinEntry(''); setPinError(false); setPinModal(true); }
+  function openPinModal(mode) {
+    setPinTargetMode(mode);
+    setPinEntry('');
+    setPinError(false);
+    setPinModal(true);
+  }
+
+  function switchMode(targetMode) {
+    if (targetMode === appMode) return;
+
+    // Per operator rule: debug -> production does not need PIN unless production was invalidated.
+    if (appMode === 'debug' && targetMode === 'production' && !prodReauthRequired) {
+      setAppMode('production');
+      setPowerState('auto');
+      setPoeState('auto');
+      setDebug('1');
+      return;
+    }
+
+    // Moving from production to debug invalidates production until production PIN is entered again.
+    if (appMode === 'production' && targetMode === 'debug') {
+      setProdReauthRequired(true);
+    }
+
+    // Locked -> mode and production -> debug continue to use PIN modal.
+    openPinModal(targetMode);
+  }
 
   async function pinPress(d) {
     if (pinEntry.length >= 6) return;
@@ -85,12 +184,22 @@ export default function App() {
     setPinEntry(next);
     if (next.length >= 4) {
       try {
-        const res = await fetch(`${API}/auth`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pin: next })
-        });
-        const body = await res.json();
-        if (body.status === 'OK') { setPinModal(false); setAppMode('debug'); }
+        // Temporary bypass: production/debug PINs are validated locally and skip server auth.
+        const body = pinTargetMode === 'production'
+          ? { status: next === PROD_PIN_BYPASS ? 'OK' : 'FAILED' }
+          : pinTargetMode === 'debug'
+            ? { status: (next === DEBUG_PIN_BYPASS || next === DEBUG_PIN_BYPASS_ALT) ? 'OK' : 'FAILED' }
+            : await apiPost('/auth', { pin: next, mode: pinTargetMode });
+        if (body.status === 'OK') {
+          setPinModal(false);
+          setAppMode(pinTargetMode);
+          if (pinTargetMode === 'production') {
+            setProdReauthRequired(false);
+            setPowerState('auto');
+            setPoeState('auto');
+            setDebug('1');
+          }
+        }
         else { setPinError(true); setTimeout(() => { setPinEntry(''); setPinError(false); }, 700); }
       } catch {
         setPinError(true); setTimeout(() => { setPinEntry(''); setPinError(false); }, 700);
@@ -117,12 +226,7 @@ export default function App() {
     if (key === 'ict') arg.cellBatTol = isRetest ? 'used' : 'new';
     setLed(key, 'running');
     try {
-      const res  = await fetch(`${API}/command`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: key, argument: arg })
-      });
-      const body = await res.json();
+      const body = await apiPost('/command', { command: key, argument: arg });
       const ok   = body.status === 'OK';
       setLed(key, ok ? 'ok' : 'fail');
       return { ok, description: body.ErrorDescription || '' };
@@ -152,10 +256,7 @@ export default function App() {
     }
 
     if (!failed) {
-      await fetch(`${API}/command`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: 'cleanup', argument: { serial: serial.trim() } })
-      }).catch(() => {});
+      await apiPost('/command', { command: 'cleanup', argument: { serial: serial.trim() } });
     }
 
     setResult(failed ? { ok: false, ...failed } : { ok: true, step: '', description: 'All tests passed' });
@@ -169,29 +270,20 @@ export default function App() {
   async function setPower(newState) {
     setPowerState(newState);
     try {
-      await fetch(`${API}/command`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: 'power', argument: { state: newState } })
-      }).catch(() => {});
+      await apiPost('/command', { command: 'power', argument: { state: newState } });
     } catch (err) {}
   }
 
   async function setPoe(newState) {
     setPoeState(newState);
     try {
-      await fetch(`${API}/command`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: 'poe', argument: { state: newState } })
-      }).catch(() => {});
+      await apiPost('/command', { command: 'poe', argument: { state: newState } });
     } catch (err) {}
   }
 
   async function reboot() {
     try {
-      await fetch(`${API}/command`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: 'reboot', argument: {} })
-      }).catch(() => {});
+      await apiPost('/command', { command: 'reboot', argument: {} });
     } catch (err) {}
   }
 
@@ -206,8 +298,8 @@ export default function App() {
         <span className="title-text">MnPlus</span>
         <span className="machine-name">{machineName}</span>
         <div className="mode-wrap">
-          <button className={`mode-btn ${!isDebug ? 'mode-on' : ''}`} onClick={() => { setAppMode('production'); setPowerState('auto'); setPoeState('auto'); setDebug('1'); }}>PRODUCTION</button>
-          <button className={`mode-btn ${isDebug  ? 'mode-on' : ''}`} onClick={isDebug ? undefined : openPinModal}>DEBUG</button>
+          <button className={`mode-btn ${appMode === 'production' ? 'mode-on' : ''}`} onClick={() => switchMode('production')}>PRODUCTION</button>
+          <button className={`mode-btn ${appMode === 'debug' ? 'mode-on' : ''}`} onClick={() => switchMode('debug')}>DEBUG</button>
         </div>
       </div>
 
@@ -294,18 +386,19 @@ export default function App() {
 
       {/* ACTION BUTTONS */}
       <div className="action-bar">
-        <button className="btn btn-comm"   disabled={busy} onClick={() => runSequence('commission')}>COMMISSION</button>
-        <button className="btn btn-retest" disabled={busy} onClick={() => runSequence('retest')}>RE-TEST</button>
-        <button className="btn btn-stop"                   onClick={stop}>STOP</button>
+        <button className="btn btn-comm"   disabled={busy || isLocked} onClick={() => runSequence('commission')}>COMMISSION</button>
+        <button className="btn btn-retest" disabled={busy || isLocked} onClick={() => runSequence('retest')}>TEST</button>
+        <button className="btn btn-stop"   disabled={isLocked}         onClick={stop}>STOP</button>
         <button className="btn btn-clear"                  onClick={resetPanel}>CLEAR</button>
         <button className="btn btn-logs" onClick={openLogs} style={{visibility: isDebug ? 'visible' : 'hidden'}}>OPEN LOGS</button>
-        <button className="btn btn-chgpin" onClick={openChangePinModal} style={{visibility: isDebug ? 'visible' : 'hidden', marginLeft:'auto'}}>CHANGE PIN</button>
+        <button className="btn btn-chgpin" onClick={() => openChangePinModal('production')} style={{visibility: isDebug ? 'visible' : 'hidden', marginLeft:'auto'}}>CHG PROD PIN</button>
+        <button className="btn btn-chgpin" onClick={() => openChangePinModal('debug')} style={{visibility: isDebug ? 'visible' : 'hidden'}}>CHG DBG PIN</button>
       </div>
 
       {changePinModal && (
         <div className="pin-overlay" onClick={() => setChangePinModal(false)}>
           <div className="pin-box" onClick={e => e.stopPropagation()}>
-            <div className="pin-title">{newPinStep === 1 ? 'ENTER NEW PIN' : 'CONFIRM NEW PIN'}</div>
+            <div className="pin-title">{newPinStep === 1 ? `ENTER NEW ${changePinMode.toUpperCase()} PIN` : `CONFIRM ${changePinMode.toUpperCase()} PIN`}</div>
             <div className={`pin-display${pinError ? ' pin-error' : ''}`}>
               {'●'.repeat(newPin.length) || '—'}
             </div>
@@ -325,7 +418,7 @@ export default function App() {
       {pinModal && (
         <div className="pin-overlay" onClick={() => setPinModal(false)}>
           <div className="pin-box" onClick={e => e.stopPropagation()}>
-            <div className="pin-title">SUPERVISOR ACCESS</div>
+            <div className="pin-title">ENTER {pinTargetMode.toUpperCase()} PIN</div>
             <div className={`pin-display${pinError ? ' pin-error' : ''}`}>
               {'●'.repeat(pinEntry.length) || '—'}
             </div>
