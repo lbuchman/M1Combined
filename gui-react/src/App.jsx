@@ -2,12 +2,12 @@
 
 const COMMANDS = [
   { key: 'ict',         label: 'ICT'       },
-  { key: 'progmac',    label: 'MAC PROG'  },
+  { key: 'progmac',    label: 'MAC PROGRAM'  },
   { key: 'flash',      label: 'FLASH'     },
   { key: 'functest',   label: 'FUNC TEST' },
   { key: 'eeprom',     label: 'EEPROM'    },
-  { key: 'pingM1apps', label: 'APPS CHK'  },
-  { key: 'makelabel',  label: 'LABEL'     }
+  { key: 'pingM1apps', label: 'APP'       },
+  { key: 'makelabel',  label: 'PRINT LABEL' }
 ];
 
 const PROGRESS = { ict:5, progmac:3, flash:40, functest:43, eeprom:5, pingM1apps:3, makelabel:8 };
@@ -18,6 +18,7 @@ const MAX_IDLE_MS = 90 * 60 * 1000;
 const PROD_PIN_BYPASS = '1234';
 const DEBUG_PIN_BYPASS = '4321';
 const DEBUG_PIN_BYPASS_ALT = '1234';
+const MAX_LOG_LINES = 500;
 
 function initLeds() {
   return Object.fromEntries(COMMANDS.map(c => [c.key, 'idle']));
@@ -45,8 +46,16 @@ export default function App() {
   const [newPinFirst, setNewPinFirst] = useState('');
   const [fakeServer, setFakeServer] = useState(false);
   const [prodReauthRequired, setProdReauthRequired] = useState(false);
+  const [logLines, setLogLines] = useState([]);
+  const [logPaused, setLogPaused] = useState(false);
+  const [logConnected, setLogConnected] = useState(false);
+  const [logError, setLogError] = useState('');
   const stopRef = useRef(false);
   const lastActivityRef = useRef(Date.now());
+  const logViewportRef = useRef(null);
+  const logSourceRef = useRef(null);
+  const isDebug = appMode === 'debug';
+  const isLocked = appMode === 'locked';
 
   function getFakePin(mode) {
     const key = `mnplus-fake-pin-${mode}`;
@@ -114,8 +123,117 @@ export default function App() {
     };
   }, [appMode]);
 
-  const isDebug = appMode === 'debug';
-  const isLocked = appMode === 'locked';
+  useEffect(() => {
+    if (!isDebug || logPaused || !logViewportRef.current) return;
+    logViewportRef.current.scrollTop = logViewportRef.current.scrollHeight;
+  }, [isDebug, logPaused, logLines]);
+
+  useEffect(() => {
+    if (!isDebug) {
+      if (logSourceRef.current) {
+        logSourceRef.current.close();
+        logSourceRef.current = null;
+      }
+      setLogConnected(false);
+      setLogError('');
+      return;
+    }
+
+    let cancelled = false;
+
+    const pushLine = (line) => {
+      if (!line || logPaused) return;
+      setLogLines(prev => {
+        if (prev.length > 0 && prev[prev.length - 1] === line) return prev;
+        const next = [...prev, line];
+        return next.length > MAX_LOG_LINES ? next.slice(next.length - MAX_LOG_LINES) : next;
+      });
+    };
+
+    const loadTail = async () => {
+      try {
+        const res = await fetch(`${API}/logs/tail?lines=120`);
+        const body = await res.json();
+        if (cancelled) return;
+        if (body.status === 'OK' && Array.isArray(body.lines)) {
+          setLogLines(body.lines.slice(-MAX_LOG_LINES));
+          setLogError('');
+        } else {
+          setLogError('Log tail unavailable');
+        }
+      } catch {
+        if (!cancelled) setLogError('Log tail unavailable');
+      }
+    };
+
+    loadTail();
+
+    const source = new EventSource(`${API}/logs/stream?lines=1`);
+    logSourceRef.current = source;
+
+    source.onopen = () => {
+      if (cancelled) return;
+      setLogConnected(true);
+      setLogError('');
+    };
+
+    source.onmessage = (evt) => {
+      if (cancelled) return;
+      try {
+        const data = JSON.parse(evt.data);
+        pushLine(data.line);
+      } catch {
+        // Ignore malformed event payloads.
+      }
+    };
+
+    source.onerror = () => {
+      if (cancelled) return;
+      setLogConnected(false);
+      setLogError('Reconnecting...');
+    };
+
+    return () => {
+      cancelled = true;
+      setLogConnected(false);
+      if (logSourceRef.current) {
+        logSourceRef.current.close();
+        logSourceRef.current = null;
+      }
+    };
+  }, [isDebug, logPaused]);
+
+  // Keyboard input for PIN entry
+  useEffect(() => {
+    if (!pinModal && !changePinModal) return;
+
+    const handleKeyDown = (evt) => {
+      // Handle number keys 0-9
+      if (evt.key >= '0' && evt.key <= '9') {
+        evt.preventDefault();
+        if (pinModal) pinPress(evt.key);
+        else if (changePinModal) changePinPress(evt.key);
+      }
+      // Handle Backspace
+      else if (evt.key === 'Backspace') {
+        evt.preventDefault();
+        if (pinModal) setPinEntry(p => p.slice(0, -1));
+        else if (changePinModal) setNewPin(p => p.slice(0, -1));
+      }
+      // Handle Enter to confirm (optional)
+      else if (evt.key === 'Enter') {
+        evt.preventDefault();
+        if (pinModal) {
+          if (pinEntry.length >= 4) pinPress('');
+        } else if (changePinModal) {
+          if (newPin.length >= 4) changePinPress('');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [pinModal, changePinModal, pinEntry, newPin, newPinStep]);
 
   function openChangePinModal(mode) {
     setChangePinMode(mode);
@@ -265,8 +383,6 @@ export default function App() {
 
   function stop() { stopRef.current = true; setBusy(false); }
 
-  function openLogs() { window.open('http://localhost:8080', '_blank', 'width=1100,height=700'); }
-
   async function setPower(newState) {
     setPowerState(newState);
     try {
@@ -288,7 +404,7 @@ export default function App() {
   }
 
   return (
-    <div className="panel">
+    <div className={`panel${!isDebug ? ' panel-prod' : ''}`}>
 
       {/* TITLE */}
       <div className="title-bar">
@@ -336,15 +452,6 @@ export default function App() {
           </div>
         </div>
 
-        <div className="ctrl-group" style={{visibility: isDebug ? 'visible' : 'hidden'}}>
-            <span className="ctrl-lbl">DEBUG LVL</span>
-            <select className="ctrl-select" value={debug} onChange={e => setDebug(e.target.value)}>
-              <option value="0">D0</option>
-              <option value="1">D1</option>
-              <option value="2">D2</option>
-            </select>
-          </div>
-
         <div className="ctrl-group status-group">
           <span className="ctrl-lbl">STATUS</span>
           <span className={`status-led ${busy ? 'led-running' : 'led-idle'}`} />
@@ -367,13 +474,13 @@ export default function App() {
       </div>
 
       {/* PROGRESS */}
-      <div className="progress-track">
+      <div className={`progress-track${!isDebug ? ' hidden' : ''}`}>
         <div className="progress-fill" style={{ width: `${progress}%` }} />
         <span className="progress-txt">{progress > 0 ? `${progress}%` : ''}</span>
       </div>
 
       {/* RESULT DISPLAY */}
-      <div className={`result-box ${result ? (result.ok ? 'result-pass' : 'result-fail') : 'result-idle'}`}>
+      <div className={`result-box ${result ? (result.ok ? 'result-pass' : 'result-fail') : 'result-idle'}${!isDebug ? ' hidden' : ''}`}>
         {!result && <span className="result-idle-txt">─</span>}
         {result && (
           <>
@@ -390,10 +497,38 @@ export default function App() {
         <button className="btn btn-retest" disabled={busy || isLocked} onClick={() => runSequence('retest')}>TEST</button>
         <button className="btn btn-stop"   disabled={isLocked}         onClick={stop}>STOP</button>
         <button className="btn btn-clear"                  onClick={resetPanel}>CLEAR</button>
-        <button className="btn btn-logs" onClick={openLogs} style={{visibility: isDebug ? 'visible' : 'hidden'}}>OPEN LOGS</button>
-        <button className="btn btn-chgpin" onClick={() => openChangePinModal('production')} style={{visibility: isDebug ? 'visible' : 'hidden', marginLeft:'auto'}}>CHG PROD PIN</button>
-        <button className="btn btn-chgpin" onClick={() => openChangePinModal('debug')} style={{visibility: isDebug ? 'visible' : 'hidden'}}>CHG DBG PIN</button>
       </div>
+
+      {isDebug && (
+        <div className="log-drawer">
+          <div className="log-head">
+            <span className="log-title">DEBUG LOG</span>
+            <span className={`log-state ${logConnected ? 'log-up' : 'log-down'}`}>
+              {logConnected ? 'LIVE' : 'DOWN'}
+            </span>
+            {logError && <span className="log-error">{logError}</span>}
+            <div className="log-level-wrap">
+              <span className="log-level-lbl">DEBUG LVL</span>
+              <select className="log-level-select" value={debug} onChange={e => setDebug(e.target.value)}>
+                <option value="0">INFO</option>
+                <option value="1">DEBUG</option>
+                <option value="2">TRACE</option>
+              </select>
+            </div>
+            <button className="log-btn" onClick={() => setLogPaused(p => !p)}>{logPaused ? 'RESUME' : 'PAUSE'}</button>
+            <button className="log-btn" onClick={() => setLogLines([])}>CLEAR</button>
+          </div>
+          <div className="log-body" ref={logViewportRef}>
+            {logLines.length === 0 ? (
+              <div className="log-empty">No log lines</div>
+            ) : (
+              logLines.map((line, idx) => (
+                <div className="log-line" key={`${idx}-${line.slice(0, 16)}`}>{line}</div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
       {changePinModal && (
         <div className="pin-overlay" onClick={() => setChangePinModal(false)}>

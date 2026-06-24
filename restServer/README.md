@@ -15,8 +15,13 @@ Standalone REST service that executes `m1tfc` commands in a separate process.
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | GET | `/health` | Returns service health using the base response contract. |
+| GET | `/config` | Returns machine name and resolved log file path. |
 | GET | `/commands` | Returns the list of supported `m1tfc` command names. |
 | POST | `/command` | Runs one `m1tfc` command and returns the CLI JSON stdout when available. |
+| GET | `/logs/stream` | Streams log lines via Server-Sent Events (SSE). |
+| GET | `/logs/tail?lines=100` | Returns last N lines from the configured log file. |
+| GET | `/logs/download` | Downloads the configured log file. |
+| POST | `/logs/clear` | Clears the configured log file. |
 
 ### POST /command
 
@@ -86,6 +91,61 @@ Environment variables:
 - `M1TFC_CMD` (default `m1tfc`)
 - `M1TFC_BASE_ARGS` (default empty)
 - `M1TFC_CWD` (default current working directory)
+- `MACHINE_NAME` (optional machine label shown in GUI)
+- `CONFIG_JSON` (optional path to runtime config JSON)
+- `LOG_FILE` (optional absolute/relative log file override)
+- `LOG_SSE_HEARTBEAT_MS` (optional SSE heartbeat interval, default `15000`)
+
+Runtime config JSON (`CONFIG_JSON`) may also provide:
+
+- `machineName`
+- `teensyLogFilename` (preferred)
+- `logFile` or `logFilename` (fallbacks)
+
+## Client Auto-Reconnect Example
+
+Use this in the web app to auto-reconnect to `/logs/stream` without a manual reconnect button.
+
+```javascript
+let source = null;
+let reconnectTimer = null;
+let reconnectDelayMs = 1000;
+
+function connectLogStream(baseUrl, onLine) {
+  if (source) source.close();
+
+  const url = `${baseUrl.replace(/\/$/, '')}/logs/stream?lines=500`;
+  source = new EventSource(url);
+
+  source.onopen = () => {
+    reconnectDelayMs = 1000;
+    console.log('log stream connected');
+  };
+
+  source.onmessage = (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      if (payload && payload.line) onLine(payload.line);
+    } catch {
+      // Ignore malformed event payloads.
+    }
+  };
+
+  source.onerror = () => {
+    source.close();
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+
+    reconnectTimer = setTimeout(() => {
+      connectLogStream(baseUrl, onLine);
+    }, reconnectDelayMs);
+
+    reconnectDelayMs = Math.min(reconnectDelayMs * 2, 15000);
+  };
+}
+
+// Usage example:
+// connectLogStream('http://127.0.0.1:3300', (line) => appendLineToUi(line));
+```
 
 ### Dev example with local repo
 
