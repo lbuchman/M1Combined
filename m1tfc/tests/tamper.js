@@ -30,7 +30,7 @@ async function getSensorState(fromNumber, expectedValue, logger, db) {
     if (ret === expectedValue) {
         return { value: ret, status: true };
     }
-    
+
     await delay(100);
     const nextNumber = fromNumber - 1;
     if (nextNumber > 0) {
@@ -41,7 +41,7 @@ async function getSensorState(fromNumber, expectedValue, logger, db) {
         }
         return nextRet;
     }
-    
+
     return { value: ret, status: false };
 }
 
@@ -65,9 +65,11 @@ async function initSensor() {
 
 async function test(logger, db) {
     gpioHelper = new GPIOHelper(targetICTLink, logger, db);
-    
+
     try {
-        if (!await initSensor()) return false;
+        if (!await initSensor()) {
+            return false;
+        }
 
         // Test deactivated state
         await deactivatetamper();
@@ -89,8 +91,7 @@ async function test(logger, db) {
 
         logger.info('Passed Tamper test');
         return true;
-    }
-    catch (err) {
+    } catch (err) {
         logger.error(`Tamper test failed: ${err.message}`);
         return false;
     }

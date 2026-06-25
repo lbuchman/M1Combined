@@ -30,7 +30,9 @@ async function getLedVoltages() {
         statusLed.ledBlue.pinNameOnTestBoard,
         'T'
     );
-    if (!blueRet) return false;
+    if (!blueRet) {
+        return false;
+    }
 
     const redRet = await cmdHelper.execute(
         () => testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName(statusLed.ledRed.pinNameOnTestBoard)}`),
@@ -38,7 +40,9 @@ async function getLedVoltages() {
         statusLed.ledRed.pinNameOnTestBoard,
         'T'
     );
-    if (!redRet) return false;
+    if (!redRet) {
+        return false;
+    }
 
     return blueRet.value - redRet.value;
 }
@@ -53,14 +57,20 @@ async function initLed() {
 async function test(logger, db) {
     gpioHelper = new GPIOHelper(targetICTLink, logger, db);
     cmdHelper = new CommandHelper(logger, db);
-    
+
     try {
-        if (!await initLed()) return false;
+        if (!await initLed()) {
+            return false;
+        }
 
         // Test blue LED
-        if (!await setLedActive(statusLed.ledBlue, statusLed.ledRed)) return false;
+        if (!await setLedActive(statusLed.ledBlue, statusLed.ledRed)) {
+            return false;
+        }
         let ledVoltage = await getLedVoltages();
-        if (ledVoltage === false) return false;
+        if (ledVoltage === false) {
+            return false;
+        }
 
         if (!lodash.inRange(ledVoltage, statusLed.ledBlue.minVoltage, statusLed.ledBlue.maxVoltage)) {
             logger.error(`Blue LED test failed, expected ${statusLed.ledBlue.minVoltage}-${statusLed.ledBlue.maxVoltage}V, got ${ledVoltage}V`);
@@ -69,9 +79,13 @@ async function test(logger, db) {
         }
 
         // Test red LED
-        if (!await setLedActive(statusLed.ledRed, statusLed.ledBlue)) return false;
+        if (!await setLedActive(statusLed.ledRed, statusLed.ledBlue)) {
+            return false;
+        }
         ledVoltage = await getLedVoltages();
-        if (ledVoltage === false) return false;
+        if (ledVoltage === false) {
+            return false;
+        }
 
         if (!lodash.inRange(ledVoltage, statusLed.ledRed.minVoltage, statusLed.ledRed.maxVoltage)) {
             logger.error(`Red LED test failed, expected ${statusLed.ledRed.minVoltage}-${statusLed.ledRed.maxVoltage}V, got ${ledVoltage}V`);
@@ -81,8 +95,7 @@ async function test(logger, db) {
 
         logger.info('Passed LED test');
         return true;
-    }
-    catch (err) {
+    } catch (err) {
         logger.error(`LED test exception: ${err.message}`);
         db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes[statusLed.ledBlue.pinNameOnTestBoard].errorCode, 'T');
         return false;

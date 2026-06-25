@@ -83,9 +83,13 @@ class TestBoardLink {
    */
     findPinIdByName(pinName) {
         const pin = this.ioDef.find(o => o.pinName === pinName);
-        if (pin) return pin.pinId;
+        if (pin) {
+            return pin.pinId;
+        }
         const pin1 = this.ioDef.find(o => o.mnpPinName === pinName);
-        if (pin1) return pin1.pinId;
+        if (pin1) {
+            return pin1.pinId;
+        }
         throw new Error(`findPinIdByName() invalid pin Name - ${pinName}`);
     }
 
@@ -98,8 +102,7 @@ class TestBoardLink {
     async targetPower(onoff) {
         if (onoff) {
             await this.sendCommand('targetpoweron');
-        }
-        else {
+        } else {
             await this.sendCommand('targetpoweroff');
         }
     }
@@ -112,16 +115,17 @@ class TestBoardLink {
     // eslint-disable-next-line class-methods-use-this
     async batteryOn(onoff) {
         const runtime = runtimeContext.getRuntime();
-        if (runtime.productName === 'mnplus') return;
+        if (runtime.productName === 'mnplus') {
+            return;
+        }
         if (onoff) {
             await this.sendCommand('batteryon');
-        }
-        else {
+        } else {
             await this.sendCommand('batteryoff');
         }
     }
 
-        /**
+    /**
      * @public
      *
      * @param {integer} 1 is on, 0 is off
@@ -129,11 +133,12 @@ class TestBoardLink {
     // eslint-disable-next-line class-methods-use-this
     async poeOn(onoff) {
         const runtime = runtimeContext.getRuntime();
-        if (runtime.productName === 'm1-3200') return;
+        if (runtime.productName === 'm1-3200') {
+            return;
+        }
         if (onoff) {
             await this.sendCommand('batteryon');
-        }
-        else {
+        } else {
             await this.sendCommand('batteryoff');
         }
     }
@@ -147,8 +152,7 @@ class TestBoardLink {
     async batteryLoadOn(onoff) {
         if (onoff) {
             await this.sendCommand('batteryloadon');
-        }
-        else {
+        } else {
             await this.sendCommand('batteryloadoff');
         }
     }

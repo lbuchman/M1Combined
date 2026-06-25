@@ -33,7 +33,7 @@ module.exports = class SerialLink {
         await delay(100);
         this.serialPort.write(`${cmd}\n\r`);
         let timeoutHandle;
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let jsonRet;
             this.parser.on('data', (data) => {
                 this.busy = false;
@@ -42,8 +42,7 @@ module.exports = class SerialLink {
                 try {
                     jsonRet = JSON.parse(utils.removeNoneAscii(data.toString()));
                     resolve(jsonRet);
-                }
-                catch (err) {
+                } catch (err) {
                     this.parser.removeAllListeners('data');
                     this.logger.debug(err.message);
                     this.logger.debug(data.toString());
@@ -66,7 +65,7 @@ module.exports = class SerialLink {
       */
     async waitTillReady(timeout) {
         let timeoutHandle;
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             this.parser.on('data', (data) => {
                 if (!data.includes('login:')) {
                     return;
@@ -90,13 +89,17 @@ module.exports = class SerialLink {
     async sendData(cmd, extectedData, timeout = 100) {
         this.serialPort.flush();
         this.serialPort.write(cmd);
-        if (timeout === 0) return null;
+        if (timeout === 0) {
+            return null;
+        }
         let timeoutHandle;
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             this.parser.on('data', (data) => {
                 if (extectedData) {
                     const cleanData = utils.removeNoneAscii(data);
-                    if (!cleanData) return;
+                    if (!cleanData) {
+                        return;
+                    }
 
                     if (!data.includes(extectedData)) {
                         return;
@@ -125,7 +128,9 @@ module.exports = class SerialLink {
     async initSerial(devFile, baud, log, dumpdata = false) {
         this.logger = log;
         this.devFile = devFile;
-        if (this.serialPort) return;
+        if (this.serialPort) {
+            return;
+        }
         this.logger.debug(`Opening ${this.linkName} link serial port: ${devFile}`);
         this.serialPort = new SerialPort({ path: devFile, baudRate: parseInt(baud, 10) });
         this.parser = this.serialPort.pipe(this.parser);
@@ -139,12 +144,12 @@ module.exports = class SerialLink {
             });
         }
 
-        await new Promise(async (resolve, reject) => {
+        await new Promise((resolve, reject) => {
             this.serialPort.on('open', () => {
                 resolve(0);
             });
 
-            this.serialPort.on('error', async (error) => {
+            this.serialPort.on('error', (error) => {
                 reject(error);
             });
         });

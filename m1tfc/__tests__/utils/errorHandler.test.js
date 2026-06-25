@@ -15,21 +15,21 @@ describe('errorHandler.wrapAction', () => {
         jest.restoreAllMocks();
     });
 
-    test('calls the wrapped function with provided arguments', async () => {
+    test('calls the wrapped function with provided arguments', async() => {
         const fn = jest.fn().mockResolvedValue('ok');
         const wrapped = wrapAction(fn, mockLog);
         await wrapped('arg1', 'arg2');
         expect(fn).toHaveBeenCalledWith('arg1', 'arg2');
     });
 
-    test('does not call process.exit on success', async () => {
+    test('does not call process.exit on success', async() => {
         const fn = jest.fn().mockResolvedValue('ok');
         const wrapped = wrapAction(fn, mockLog);
         await wrapped();
         expect(process.exit).not.toHaveBeenCalled();
     });
 
-    test('logs error and exits on failure', async () => {
+    test('logs error and exits on failure', async() => {
         const fn = jest.fn().mockRejectedValue(new Error('something went wrong'));
         const wrapped = wrapAction(fn, mockLog);
         await wrapped();

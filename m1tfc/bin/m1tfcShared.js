@@ -41,8 +41,7 @@ async function exitCommandFailure(err, log = console, exitCode = exitCodes.comma
     if (err) {
         if (logMessageOnly && err.message) {
             log.error(err.message);
-        }
-        else {
+        } else {
             log.error(err);
         }
     }
@@ -61,7 +60,9 @@ async function loadConfigData() {
 }
 
 async function ensureSerialOption(options, log = console) {
-    if (!options.serial) await errorAndExit('must define vendor serial number', log);
+    if (!options.serial) {
+        await errorAndExit('must define vendor serial number', log);
+    }
 }
 
 function applyFirmwareDir(configData) {

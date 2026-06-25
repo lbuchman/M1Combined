@@ -24,7 +24,7 @@ class VoltageHelper {
         try {
             const pinId = this.testBoardLink.findPinIdByName(testPointName);
             const ret = await this.testBoardLink.sendCommand(`getiopin ${pinId}`);
-            
+
             if (!ret.status) {
                 this.logger.error(`Failed to read voltage from ${testPointName}: ${ret.error}`);
                 const errorCode = errorCodes.codes[testPointName]?.errorCode;
@@ -33,7 +33,7 @@ class VoltageHelper {
                 }
                 return false;
             }
-            
+
             return ret.value;
         } catch (err) {
             this.logger.error(`Error reading ${testPointName}: ${err.message}`);
@@ -62,7 +62,9 @@ class VoltageHelper {
      */
     async testVoltage(testPoint, tolerance, calibrate = false) {
         const measuredValue = await this.readVoltage(testPoint.name);
-        if (measuredValue === false) return false;
+        if (measuredValue === false) {
+            return false;
+        }
 
         const pointTolerance = testPoint.tolerance || tolerance;
         const error = this.calculateError(measuredValue, testPoint.voltage, testPoint.scale);

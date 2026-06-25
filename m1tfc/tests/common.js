@@ -23,8 +23,8 @@ const dfuTimeout = 20000;
 async function waitDFU(programmer, logger) {
     const pullTime = 1000;
     let count = dfuTimeout / pullTime;
-    return new Promise(async (resolve, reject) => {
-        const timeoutHandle = setInterval(async () => {
+    return new Promise((resolve, reject) => {
+        const timeoutHandle = setInterval(async() => {
             if (count === 0) {
                 reject(new Error('timeout waiting for DFU device'));
                 clearInterval(timeoutHandle);
@@ -44,9 +44,10 @@ async function getICTFWRev(retries) {
     if (retries > 0) {
         try {
             const ictFwRev = await targetICTLink.sendCommand('getfwrev');
-            if (ictFwRev.status) return ictFwRev.fwrev;
-        }
-        catch (err) {
+            if (ictFwRev.status) {
+                return ictFwRev.fwrev;
+            }
+        } catch (err) {
             await delay(500);
         }
         await delay(500);
@@ -74,8 +75,12 @@ async function initializeTestFixture(config, programmer, programSTM, initAndQuit
     testBoardLink.getIoDef();
 
     const testBoardFwRev = await testBoardLink.sendCommand('getfwrev');
-    if (!testBoardFwRev.status) throw new Error('cannot get fw rev from teensy test board');
-    if (testBoardFwRev.boardId === 255) throw new Error('cannot get M1 Testboard boardId, update FW and program boardId');
+    if (!testBoardFwRev.status) {
+        throw new Error('cannot get fw rev from teensy test board');
+    }
+    if (testBoardFwRev.boardId === 255) {
+        throw new Error('cannot get M1 Testboard boardId, update FW and program boardId');
+    }
     if (calibrationData) {
         calibrationData.setBoardId(testBoardFwRev.boardId);
     }
@@ -88,7 +93,9 @@ async function initializeTestFixture(config, programmer, programSTM, initAndQuit
     await testBoardLink.targetPower(false);
     await testBoardLink.batteryOn(false);
     const runtime = runtimeContext.getRuntime();
-    if (runtime.productName === 'mnplus') await testBoardLink.poeOn(false);
+    if (runtime.productName === 'mnplus') {
+        await testBoardLink.poeOn(false);
+    }
     await m1boot.activateDFU();
     await testBoardLink.batteryOn(true);
     await testBoardLink.targetPower(true);
@@ -128,8 +135,7 @@ async function testFailed() {
         await testBoardLink.targetPower(false);
         await testBoardLink.batteryOn(false);
         await buzzer.buzzerBeepFailed();
-    }
-    catch (err) {
+    } catch (err) {
         //
     }
 }

@@ -43,15 +43,13 @@ module.exports = class ProgramMac {
             await os.executeShellCommand(`${programmer}  -c port=usb1 -w ${this.tsv}`, this.logger, false, false, 1024 * 1024 * 10, fwDir);
             try {
                 db.updateFlashStatus(this.serial, utils.boolToInt(true));
-            }
-            catch (err) {
+            } catch (err) {
                 //
             }
             this.logger.info('Target flashing is done');
             await common.testEndSuccess();
             return exitCodes.normalExit;
-        }
-        catch (err) {
+        } catch (err) {
             this.logger.error(err);
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();

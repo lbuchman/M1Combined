@@ -18,27 +18,28 @@ function executeShellCommand(command, log, nothrow = true, errorStdout = true, m
                 const output = errorStdout ? stdout : err;
                 process.chdir(cirrentDir);
                 reject(output);
-            }
-            else {
-               // log.debug(`"${command}" - command complete success`);
+            } else {
+                // log.debug(`"${command}" - command complete success`);
                 let output = stdout;
-                if (!output) output = 'no output';
+                if (!output) {
+                    output = 'no output';
+                }
                 process.chdir(cirrentDir);
                 resolve(output);
             }
             if (stdout) {
-              //  log.debug(`${command},  stdout =:\n${stdout}`);
+                //  log.debug(`${command},  stdout =:\n${stdout}`);
             }
             if (stderr) {
-              // log.debug(`${command},  stderr =:\n -> ${stderr}`);
+                // log.debug(`${command},  stderr =:\n -> ${stderr}`);
             }
         });
     })
         .catch((err) => {
             process.chdir(cirrentDir);
             if (nothrow) {
-               // log.error(err.message);
-               // log.error(`${command},  stderr =:\n${stderrLocal}`);
+                // log.error(err.message);
+                // log.error(`${command},  stderr =:\n${stderrLocal}`);
                 return err;
             }
             throw (err);

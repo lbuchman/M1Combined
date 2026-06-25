@@ -24,13 +24,16 @@ module.exports = class MercuryBoardLink {
         // eslint-disable-next-line no-plusplus
         for (count = 0; count <= 3; count++) {
             try {
-                 // eslint-disable-next-line no-await-in-loop
+                // eslint-disable-next-line no-await-in-loop
                 ret = await this.sendCommandRaw(cmd, arg);
-                if (ret.status !== true) throw (new Error(`command ${cmd} ${arg} failed, ${ret.error}`));
+                if (ret.status !== true) {
+                    throw (new Error(`command ${cmd} ${arg} failed, ${ret.error}`));
+                }
                 return ret;
-            }
-            catch (err) {
-                if (count === 3) throw (err);
+            } catch (err) {
+                if (count === 3) {
+                    throw (err);
+                }
             }
         }
         return ret;

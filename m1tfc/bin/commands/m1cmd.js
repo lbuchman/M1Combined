@@ -10,7 +10,7 @@ function register(program) {
     program.command('m1cmd')
         .description('execute M1 bootstrap raw command, make sure to run m1dfu command before ')
         .option('-c, --command <string>', 'M1-3200 command, make sure to inclose the command in ""')
-        .action(async (options) => {
+        .action(async(options) => {
             const configData = await loadConfig();
             const logfile = console;
             applyRuntime(configData);
@@ -22,8 +22,7 @@ function register(program) {
                 const output = await targetICTLink.sendCommand(options.command);
                 logfile.log(JSON.stringify(output));
                 process.exit(0);
-            }
-            catch (err) {
+            } catch (err) {
                 logfile.error(err);
                 await delay(100);
                 process.exit(exitCodes.commandFailed);

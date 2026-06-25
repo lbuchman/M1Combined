@@ -17,5 +17,5 @@ module.exports = {
     functTestFailed: 13,
     invalidArgument: 14,
     precheckHWFailed: 15,
-    poeTestFailed: 16,
+    poeTestFailed: 16
 };

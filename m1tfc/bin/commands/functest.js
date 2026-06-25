@@ -11,7 +11,7 @@ function register(program) {
         .description('executes m1-3200 function test')
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
-        .action(async (options) => {
+        .action(async(options) => {
             const configData = await loadConfig();
             let logfile;
             applyRuntime(configData, {
@@ -20,7 +20,9 @@ function register(program) {
                 logDir: options.serial ? `${configData.mtfDir}/logs/${options.serial}` : null
             });
             try {
-                if (!options.serial) await errorAndExit('must define vendor serial number', console);
+                if (!options.serial) {
+                    await errorAndExit('must define vendor serial number', console);
+                }
                 logfile = logger.getLogger(options.serial, '   func', options.serial, configData.mtfDir, options.debug);
                 if (configData.funcTestDisable) {
                     logfile.error('Func test is disabled');
@@ -33,9 +35,10 @@ function register(program) {
                 await funcTest.init(configData.testBoardTerminalDev, configData.serialBaudrate);
                 await funcTest.run(configData.programmingCommand, `${configData.mtfDir}/${configData.fwDir}/${configData.layoutFilePath}`, configData.login, configData.password, configData.m1SerialDev, configData.skipUSBPenDriveTest, '115200');
                 process.exit(exitCodes.normalExit);
-            }
-            catch (err) {
-                if (!logfile) logfile = console;
+            } catch (err) {
+                if (!logfile) {
+                    logfile = console;
+                }
                 logfile.error(err);
                 await delay(100);
                 process.exit(exitCodes.commandFailed);

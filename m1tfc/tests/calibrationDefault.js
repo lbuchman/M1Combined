@@ -74,15 +74,16 @@ module.exports = class CalibrationData {
 
     async initConfigFile() {
         this.config = await config.getConfig({});
-        if (this.boardId === 255) throw new Error('Invalid board ID, update M1 testboard FW and program an ID');
+        if (this.boardId === 255) {
+            throw new Error('Invalid board ID, update M1 testboard FW and program an ID');
+        }
         if (!this.config.boards) {
             const defData = new Array(20).fill({});
             defData.forEach((item, index) => {
                 defData[index] = JSON.parse(JSON.stringify(this.defaults));
             });
             this.config.boards = defData;
-        }
-        else {
+        } else {
             this.testPointsMnp = this.config.boards[this.boardId].testPointsMnp;
             this.testPointsM1 = this.config.boards[this.boardId].testPointsM1;
             this.ribbonCableA2DPins = this.config.boards[this.boardId].ribbonCableA2DPins;

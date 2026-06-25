@@ -35,8 +35,7 @@ module.exports = class IctTestRunner {
             this.logger.info('Updating I2C EEPROM ...');
             await common.initializeTestFixture(null, programmer, true, false, this.stm32, this.m1Dev, this.logger, null, null);
             return await eeprom.updateEEPRom(serial, eeepromoverwrite, vendorSite, this.logger);
-        }
-        catch (err) {
+        } catch (err) {
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();
             const error = new Error(err.message);
@@ -56,8 +55,7 @@ module.exports = class IctTestRunner {
             this.logger.debug('reading I2C EEPROM ...');
             await common.initializeTestFixture(null, programmer, true, false, this.stm32, this.m1Dev, this.logger, null, null);
             return eeprom.printEEPRomData(this.logger, console);
-        }
-        catch (err) {
+        } catch (err) {
             this.logger.error(err);
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();
@@ -78,8 +76,7 @@ module.exports = class IctTestRunner {
             this.logger.debug('reading I2C EEPROM ...');
             await common.initializeTestFixture(null, programmer, true, false, this.stm32, this.m1Dev, this.logger, null, null);
             return eeprom.getEEPRomData(this.logger, console);
-        }
-        catch (err) {
+        } catch (err) {
             this.logger.error(err);
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();

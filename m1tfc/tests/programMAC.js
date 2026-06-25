@@ -57,14 +57,18 @@ module.exports = class ProgramMac {
             }
 
             const cpuSerial = utils.getCPUSerial(word57);
-            if (!this.config.testNewMac) db.updateCPUSerial(this.serial, cpuSerial);
+            if (!this.config.testNewMac) {
+                db.updateCPUSerial(this.serial, cpuSerial);
+            }
             if (!this.config.testNewMac && (utils.getWordData(word57, utils.otp57) !== '0x00000000') && (utils.getWordData(word58, utils.otp58) !== '0x00000000')) {
                 const otpToMac = utils.otpToMac(utils.getWordData(word57, utils.otp57), utils.getWordData(word58, utils.otp58));
                 this.logger.info(`OTP is not blank MAC Address is: ${otpToMac}`);
                 const dbRecord = db.getRecordFromMac(otpToMac);
                 if (dbRecord.length) {
                     const entry = dbRecord[0];
-                    if (entry.vendorSerial !== this.serial) throw Error('Board MAC is recorder under a different vendorSerial');
+                    if (entry.vendorSerial !== this.serial) {
+                        throw Error('Board MAC is recorder under a different vendorSerial');
+                    }
                 }
                 this.mac = otpToMac;
                 await common.testEndSuccess();
@@ -75,7 +79,9 @@ module.exports = class ProgramMac {
             }
 
             const mac = utils.getNextMac(db.getLastUsedMac());
-            if (!utils.isString(mac)) throw new Error('DA Error, cannot get next MAC');
+            if (!utils.isString(mac)) {
+                throw new Error('DA Error, cannot get next MAC');
+            }
             const progData = utils.macToOtp(mac);
             this.logger.info('Programing OTP values ...');
             // const osdpKey = [];
@@ -103,8 +109,7 @@ module.exports = class ProgramMac {
             await common.testEndSuccess();
             const exitCode = exitCodes.normalExit;
             return ({ exitCode, mac: this.mac });
-        }
-        catch (err) {
+        } catch (err) {
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();
             const throwError = new Error(err.message);
@@ -234,8 +239,7 @@ module.exports = class ProgramMac {
 
             await common.testEndSuccess();
             return ({ exitCode, secretKey });
-        }
-        catch (err) {
+        } catch (err) {
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();
             const throwError = new Error(err.message);

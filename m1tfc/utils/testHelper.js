@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-await-in-loop */
+
 const CommandHelper = require('./commandHelper');
 
 /**
@@ -54,7 +56,7 @@ class TestHelper {
      * @returns {Function} - Wrapped function
      */
     wrapTest(fn, testName) {
-        return async (...args) => {
+        return async(...args) => {
             try {
                 this.logger.info(`Starting ${testName}`);
                 const result = await fn(...args);

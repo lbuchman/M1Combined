@@ -24,7 +24,7 @@ class CommandHelper {
     async execute(commandFn, commandDesc, errorCodeName = null, errorSeverity = 'T') {
         try {
             const ret = await commandFn();
-            
+
             if (!ret.status) {
                 this.logger.error(`${commandDesc} failed: ${ret.error}`);
                 if (errorCodeName && this.db) {
@@ -35,7 +35,7 @@ class CommandHelper {
                 }
                 return false;
             }
-            
+
             return ret;
         } catch (err) {
             this.logger.error(`${commandDesc} exception: ${err.message}`);
@@ -59,7 +59,7 @@ class CommandHelper {
     async executeTest(testFn, testName, errorCodeName = null) {
         try {
             const ret = await testFn();
-            
+
             if (!ret.status) {
                 this.logger.error(`Failed ${testName}: ${ret.error}`);
                 if (errorCodeName && this.db) {
@@ -70,7 +70,7 @@ class CommandHelper {
                 }
                 return false;
             }
-            
+
             this.logger.info(`Passed ${testName}`);
             return true;
         } catch (err) {

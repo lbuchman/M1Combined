@@ -91,8 +91,7 @@ module.exports = class FuncTest {
             let isM1TestFileFlagSet;
             try {
                 isM1TestFileFlagSet = await client.execCommand(`ls ${M1TestFileFlag}`);
-            }
-            catch (err) {
+            } catch (err) {
                 isM1TestFileFlagSet = false;
             }
 
@@ -118,8 +117,7 @@ module.exports = class FuncTest {
             try {
                 await client.execCommand(`i2cdetect -y ${activeBus} | grep "50 51 52 UU 54 55 56 57"`);
                 this.logger.info(`I2C Bus ${activeBus} test passed`);
-            }
-            catch (err) {
+            } catch (err) {
                 this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus1'].errorCode, 'E');
                 this.logger.error(`I2C Bus ${activeBus} test failed`);
             }
@@ -129,8 +127,7 @@ module.exports = class FuncTest {
                 try {
                     await client.execCommand('i2cdetect -y 0 | grep "70 -- -- -- -- -- -- --"');
                     this.logger.info('I2C Bus 0,2 test passed');
-                }
-                catch (err) {
+                } catch (err) {
                     this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus02'].errorCode, 'E');
                     this.logger.error('I2C Bus 0 & 2 test failed');
                 }
@@ -159,8 +156,7 @@ module.exports = class FuncTest {
             if (!isM1TestFileFlagSet) {
                 try {
                     await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
-                }
-                catch (err) {
+                } catch (err) {
                     this.db.updateErrorCode(this.serial, errorCodes.codes['SPI_RAM'].errorCode, 'E');
                     throw err;
                 }
@@ -171,10 +167,11 @@ module.exports = class FuncTest {
                 if (!skipUSBPenDriveTest) {
                     const result = await client.execCommand('cat /proc/mounts | grep /dev/sda');
                     this.logger.info('USB Host port pen Drive test passed');
-                    if (!result) throw new Error('not mounted');
+                    if (!result) {
+                        throw new Error('not mounted');
+                    }
                 }
-            }
-            catch (err) {
+            } catch (err) {
                 throw new Error('USB Host port pen Drive test failed');
             }
 
@@ -226,8 +223,7 @@ module.exports = class FuncTest {
             await delay(100);
             await common.testEndSuccess();
             return exitCodes.normalExit;
-        }
-        catch (err) {
+        } catch (err) {
             const dbError = this.exceptionToErrorCode(err.message);
             this.db.updateErrorCode(this.serial, errorCodes.codes[dbError.error].errorCode, dbError.sufx);
 
@@ -242,18 +238,18 @@ module.exports = class FuncTest {
     // eslint-disable-next-line class-methods-use-this
     exceptionToErrorCode(errStr) {
         switch (errStr) {
-            case 'RTC check failed': return { error: 'RTC', sufx: 'E' };
-            case 'Target did not reboot': return { error: 'WDT', sufx: 'E' };
-            case 'USB Host port pen Drive test failed': return { error: 'PEN_DRIVE', sufx: 'E' };
-            case 'Invalid MAC Address, check OTP': return { error: 'MAC_CMP_ERR', sufx: 'E' };
-            case 'A: Target is not pingable, down or not flashed?': return { error: 'UUT_ETHER', sufx: 'TE' };
-            case 'No login promt, did M1-3200 boot?': return { error: 'UUT_TERM', sufx: 'TE' };
-            case 'ssh reconnect failed': return { error: 'SSH_RECON', sufx: 'TE' };
-            case 'timeout waiting for DFU device': return { error: 'DFU_STM', sufx: 'TE' };
-            case 'MAC Address is not programmed': return { error: 'NO_OTP_MAC', sufx: 'E' };
-            case 'not mounted': return { error: 'PEN_DRIVE', sufx: 'E' };
-            default:
-                return { error: 'FUNC_EXCEPT', sufx: 'T' };
+        case 'RTC check failed': return { error: 'RTC', sufx: 'E' };
+        case 'Target did not reboot': return { error: 'WDT', sufx: 'E' };
+        case 'USB Host port pen Drive test failed': return { error: 'PEN_DRIVE', sufx: 'E' };
+        case 'Invalid MAC Address, check OTP': return { error: 'MAC_CMP_ERR', sufx: 'E' };
+        case 'A: Target is not pingable, down or not flashed?': return { error: 'UUT_ETHER', sufx: 'TE' };
+        case 'No login promt, did M1-3200 boot?': return { error: 'UUT_TERM', sufx: 'TE' };
+        case 'ssh reconnect failed': return { error: 'SSH_RECON', sufx: 'TE' };
+        case 'timeout waiting for DFU device': return { error: 'DFU_STM', sufx: 'TE' };
+        case 'MAC Address is not programmed': return { error: 'NO_OTP_MAC', sufx: 'E' };
+        case 'not mounted': return { error: 'PEN_DRIVE', sufx: 'E' };
+        default:
+            return { error: 'FUNC_EXCEPT', sufx: 'T' };
         }
     }
 };

@@ -34,8 +34,7 @@ module.exports = class M1TermLink {
             try {
                 await this.serialLink.waitTillReady(10000);
                 return null;
-            }
-            catch (err) {
+            } catch (err) {
                 this.serialLink.sendData('\n\r', null, 0);
             }
             return this.waitLoginPrompt(timeout);

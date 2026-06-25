@@ -15,8 +15,7 @@ class DBClass {
         let stat;
         try {
             stat = fs.statSync(options.dbPath); // check if DB file exists
-        }
-        catch (error) {
+        } catch (error) {
             this.copyTemplateDB(options.templateDB, options.dbPath); // copy template file
         }
 
@@ -31,8 +30,7 @@ class DBClass {
             this.db.pragma('temp_store = MEMORY');
             this.db.pragma('synchronous  = off');
             this.db.pragma('auto_vacuum = FULL');
-        }
-        catch (err) {
+        } catch (err) {
             throw new Error(err.message);
         }
     }
@@ -46,8 +44,7 @@ class DBClass {
     copyTemplateDB(templateDB, dbPath) {
         try {
             fs.copyFileSync(templateDB, dbPath);
-        }
-        catch (err) {
+        } catch (err) {
             this.log.error(`cannot copy ${templateDB} ${err.message} file, database cannot be open`);
         }
     }
@@ -59,7 +56,9 @@ class DBClass {
     * @param {string} correlationId
     */
     getRecord(serial) {
-        if (!this.db) { this.log.error('DB is closed'); return false; }
+        if (!this.db) {
+            this.log.error('DB is closed'); return false;
+        }
         if (!serial) {
             throw new Error('cannot add board to DB, serial = NULL');
         }
@@ -75,14 +74,15 @@ class DBClass {
        */
     resetErrorCode(serial) {
         try {
-            if (!this.db) throw new Error('DB file is not open');
+            if (!this.db) {
+                throw new Error('DB file is not open');
+            }
             const update = this.db.prepare('UPDATE records set errorcode = ? WHERE vendorSerial = ?');
             const ret = update.run(JSON.stringify([]), serial);
             if (ret.changes === 0) {
                 // throw new Error('DB is not updated');
             }
-        }
-        catch (err) {
+        } catch (err) {
             throw new Error(`updateErrorCode() call failed error: ${err.message}`);
         }
     }
@@ -94,9 +94,13 @@ class DBClass {
     updateErrorCode(serial, errorCode, sufix) {
         try {
             const newError = `${sufix}${errorCode}`;
-            if (!this.db) throw new Error('DB file is not open');
+            if (!this.db) {
+                throw new Error('DB file is not open');
+            }
             const valueNow = this.getErrorCode(serial);
-            if (valueNow.includes(newError)) return;
+            if (valueNow.includes(newError)) {
+                return;
+            }
             valueNow.push(newError);
 
             const update = this.db.prepare('UPDATE records set errorcode = ? WHERE vendorSerial = ?');
@@ -104,8 +108,7 @@ class DBClass {
             if (ret.changes === 0) {
                 // throw new Error('DB is not updated');
             }
-        }
-        catch (err) {
+        } catch (err) {
             throw new Error(`updateErrorCode() call failed error: ${err.message}`);
         }
     }
@@ -115,7 +118,9 @@ class DBClass {
     *
     */
     getErrorCode(serial) {
-        if (!this.db) throw new Error('DB file is not open, cannot get next getErrorCode()');
+        if (!this.db) {
+            throw new Error('DB file is not open, cannot get next getErrorCode()');
+        }
         const select = this.db.prepare('SELECT errorcode  FROM records  where vendorSerial = ?');
         const retValue = select.all(serial);
         if (retValue && retValue[0] && retValue[0].errorcode) {
@@ -130,7 +135,9 @@ class DBClass {
     */
 
     updateLastUsedMac(mac) {
-        if (!this.db) throw new Error('DB file is not open, cannot get next MAC');
+        if (!this.db) {
+            throw new Error('DB file is not open, cannot get next MAC');
+        }
         const insert = this.db.prepare('INSERT INTO uid (uid) VALUES (?)');
         insert.run(mac);
     }
@@ -140,7 +147,9 @@ class DBClass {
     *
     */
     getRecordFromMac(mac) {
-        if (!this.db) throw new Error('DB file is not open, cannot get next MAC');
+        if (!this.db) {
+            throw new Error('DB file is not open, cannot get next MAC');
+        }
         const select = this.db.prepare('SELECT *  FROM records where  uid = ?');
         const retValue = select.all(mac);
         return retValue;
@@ -151,10 +160,14 @@ class DBClass {
     *
     */
     getLastUsedMac() {
-        if (!this.db) throw new Error('DB file is not open, cannot get next MAC');
+        if (!this.db) {
+            throw new Error('DB file is not open, cannot get next MAC');
+        }
         const select = this.db.prepare('SELECT uid FROM uid ORDER BY ROWID DESC');
         const retValue = select.all();
-        if (!retValue.length) throw new Error('DB is not initialized with MAC start range');
+        if (!retValue.length) {
+            throw new Error('DB is not initialized with MAC start range');
+        }
         return retValue[0].uid;
     }
 
@@ -163,10 +176,14 @@ class DBClass {
     *
     */
     getUid(serial) {
-        if (!this.db) throw new Error('DB file is not open, cannot get next MAC');
+        if (!this.db) {
+            throw new Error('DB file is not open, cannot get next MAC');
+        }
         const select = this.db.prepare('SELECT uid  FROM records  where vendorSerial = ?');
         const retValue = select.all(serial);
-        if (retValue && retValue[0] && retValue[0].uid) return retValue[0].uid;
+        if (retValue && retValue[0] && retValue[0].uid) {
+            return retValue[0].uid;
+        }
         throw new Error(`DB does not have MAC set for serial ${serial}`);
     }
 
@@ -176,7 +193,9 @@ class DBClass {
     */
     updateUid(serial, uid) {
         try {
-            if (!this.db) throw new Error('DB file is not open');
+            if (!this.db) {
+                throw new Error('DB file is not open');
+            }
             const update = this.db.prepare('UPDATE records set uid=? WHERE vendorSerial = ?');
             let ret = update.run(uid, serial);
 
@@ -187,8 +206,7 @@ class DBClass {
                     throw new Error('DB call to update uid failed');
                 }
             }
-        }
-        catch (err) {
+        } catch (err) {
             throw new Error(`cannot update uid in DB: ${err.message}`);
         }
     }
@@ -200,14 +218,15 @@ class DBClass {
     deleteRecord(serial) {
         try {
             this.log.debug(`deleting record with Serial ${serial} in the DB`);
-            if (!this.db) throw new Error('DB file is not open');
+            if (!this.db) {
+                throw new Error('DB file is not open');
+            }
             const deleteRecord = this.db.prepare('Delete FROM records where vendorSerial = ?');
             const ret = deleteRecord.run(serial);
             if (ret.changes === 0) {
                 throw new Error('DB call to delete record failed');
             }
-        }
-        catch (err) {
+        } catch (err) {
             this.log.debug(`${err.message}`);
         }
     }
@@ -219,14 +238,15 @@ class DBClass {
     updateSerial(serial) {
         try {
             this.log.debug(`adding Serial ${serial} to the DB`);
-            if (!this.db) throw new Error('DB file is not open');
+            if (!this.db) {
+                throw new Error('DB file is not open');
+            }
             const insert = this.db.prepare('INSERT INTO records (vendorSerial,downloadedCumulus, ictTestPassed, functionalTestPassed, flashProgrammed, cloudPushed) VALUES (?,?,?,?,?,?)');
             const ret = insert.run(serial, 0, 0, 0, 0, 0);
             if (ret.changes === 0) {
                 throw new Error('DB call to update vendorSerial failed');
             }
-        }
-        catch (err) {
+        } catch (err) {
             this.log.debug(`${err.message}`);
         }
     }
@@ -237,12 +257,16 @@ class DBClass {
     */
     updateCPUSerial(serial, cpuSN) {
         this.log.debug(`adding CPU Serial ${serial} to the DB`);
-        if (!this.db) throw new Error('DB file is not open');
+        if (!this.db) {
+            throw new Error('DB file is not open');
+        }
 
         const select = this.db.prepare('SELECT cpuSerial  FROM records  where vendorSerial = ?');
         const retValue = select.all(serial);
         if (retValue[0].cpuSerial) {
-            if (retValue[0].cpuSerial !== cpuSN) throw Error('Duplicate Board Barcode');
+            if (retValue[0].cpuSerial !== cpuSN) {
+                throw Error('Duplicate Board Barcode');
+            }
         }
         const update = this.db.prepare('UPDATE records set cpuSerial = ? WHERE vendorSerial = ?');
         const ret = update.run(cpuSN, serial);
@@ -258,14 +282,15 @@ class DBClass {
         */
     updateIctStatus(serial, status) {
         try {
-            if (!this.db) throw new Error('DB file is not open');
+            if (!this.db) {
+                throw new Error('DB file is not open');
+            }
             const update = this.db.prepare('UPDATE records set ictTestPassed = ? WHERE vendorSerial = ?');
             const ret = update.run(status, serial);
             if (ret.changes === 0) {
                 // throw new Error('DB is not updated');
             }
-        }
-        catch (err) {
+        } catch (err) {
             throw new Error(`updateIctStatus() call failed error: ${err.message}`);
         }
     }
@@ -276,14 +301,15 @@ class DBClass {
     */
     updateFuncTestStatus(serial, status) {
         try {
-            if (!this.db) throw new Error('DB file is not open');
+            if (!this.db) {
+                throw new Error('DB file is not open');
+            }
             const update = this.db.prepare('UPDATE records set functionalTestPassed = ? WHERE vendorSerial = ?');
             const ret = update.run(status, serial);
             if (ret.changes === 0) {
                 throw new Error('DB call to update functionalTestPassed Status failed');
             }
-        }
-        catch (err) {
+        } catch (err) {
             throw new Error(`cannot update ICT Status in DB: ${err.message}`);
         }
     }
@@ -294,14 +320,15 @@ class DBClass {
     */
     updateFlashStatus(serial, status) {
         try {
-            if (!this.db) throw new Error('DB file is not open');
+            if (!this.db) {
+                throw new Error('DB file is not open');
+            }
             const update = this.db.prepare('UPDATE records set flashProgrammed=? WHERE vendorSerial = ?');
             const ret = update.run(status, serial);
             if (ret.changes === 0) {
                 throw new Error('DB call to update Flash Status failed');
             }
-        }
-        catch (err) {
+        } catch (err) {
             throw new Error(`cannot update Flash Status in DB: ${err.message}`);
         }
     }
@@ -311,7 +338,9 @@ class DBClass {
     *
     */
     updateEepromData(serial, secret, boardS2Serial) {
-        if (!this.db) throw new Error('DB file is not open');
+        if (!this.db) {
+            throw new Error('DB file is not open');
+        }
         const update = this.db.prepare('UPDATE records set secret=?,boardS2Serial=?,dateAndTime=? WHERE vendorSerial = ?');
         const date = new Date();
         const ret = update.run(secret, boardS2Serial, date.toISOString(), serial);

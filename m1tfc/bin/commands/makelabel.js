@@ -18,8 +18,10 @@ function register(program) {
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
         .option('-e, --error', 'error print from the database')
-        .action(async (options) => {
-            if (!options.serial) await errorAndExit('must define vendor serial number', console);
+        .action(async(options) => {
+            if (!options.serial) {
+                await errorAndExit('must define vendor serial number', console);
+            }
             const configData = await loadConfig();
             const logfile = logger.getLogger(options.serial, '  label', options.serial, configData.mtfDir, options.debug);
             const db = sqliteDriver.initialize(logfile);
@@ -32,7 +34,9 @@ function register(program) {
             try {
                 await testBoardLink.initSerial(configData.testBoardTerminalDev, configData.serialBaudrate, logfile);
                 let dbError = db.getErrorCode(options.serial);
-                if (dbError && dbError.length) options.error = true;
+                if (dbError && dbError.length) {
+                    options.error = true;
+                }
 
                 if (options.error) {
                     dbError = dbError.length ? dbError : ['0000ERR_UNDEF'];
@@ -48,7 +52,9 @@ function register(program) {
                 const macProgram = new ProgramMac(configData, options.serial, logfile);
                 await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
                 const retValue = await macProgram.getMac(configData.programmingCommand);
-                if (retValue.exitCode !== exitCodes.normalExit) throw new Error('Could not read MP1 OTP');
+                if (retValue.exitCode !== exitCodes.normalExit) {
+                    throw new Error('Could not read MP1 OTP');
+                }
                 const mac = retValue.mac.toUpperCase();
 
                 const eeprom = new Eeprom(`${configData.mtfDir}/${configData.ictFWFilePath}`, logfile);
@@ -73,9 +79,10 @@ function register(program) {
                 await testBoardLink.batteryOn(false);
                 await delay(100);
                 process.exit(exitCodes.normalExit);
-            }
-            catch (err) {
-                if (err.message) logfile.error(err.message);
+            } catch (err) {
+                if (err.message) {
+                    logfile.error(err.message);
+                }
                 await buzzer.buzzerBeepFailed();
                 await delay(100);
                 await testBoardLink.targetPower(false);

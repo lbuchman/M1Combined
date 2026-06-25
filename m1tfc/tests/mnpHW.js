@@ -69,19 +69,27 @@ function getCommand(action, signalNameOrTespoint, value, log) {
             return val.testPoint === signalNameOrTespoint;
         });
     }
-    if (!output.length) throw new Error('no such test point or signal');
+    if (!output.length) {
+        throw new Error('no such test point or signal');
+    }
     switch (output[0].mode) {
-        case 'input':
-            if (action !== 'read') throw new Error('invalid action for IO line');
-            return `getgpio ${output[0].port} ${output[0].pin}`;
-        case 'output':
-            if (action !== 'write') throw new Error('invalid action for IO line');
-            return `setgpio ${output[0].port} ${output[0].pin} ${value}`;
-        case 'latch':
-            if (action !== 'write') throw new Error('invalid action for IO line');
-            return `latchctl ${output[0].port}  ${value}`;
-        default:
-            return '';
+    case 'input':
+        if (action !== 'read') {
+            throw new Error('invalid action for IO line');
+        }
+        return `getgpio ${output[0].port} ${output[0].pin}`;
+    case 'output':
+        if (action !== 'write') {
+            throw new Error('invalid action for IO line');
+        }
+        return `setgpio ${output[0].port} ${output[0].pin} ${value}`;
+    case 'latch':
+        if (action !== 'write') {
+            throw new Error('invalid action for IO line');
+        }
+        return `latchctl ${output[0].port}  ${value}`;
+    default:
+        return '';
     }
 }
 

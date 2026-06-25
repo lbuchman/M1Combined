@@ -66,7 +66,9 @@ const defaultConfiguration = {
  * Must be called before any Snap-dependent code.
  */
 function ensureSnapEnv() {
-    if (process.env.SNAP) return;
+    if (process.env.SNAP) {
+        return;
+    }
     process.env.SNAP_COMMON = `${homeDir}/snap_common`;
     process.env.SNAP_DATA = `${homeDir}/snap_data`;
     process.env.SNAP = '/snap/m1tfd/current';

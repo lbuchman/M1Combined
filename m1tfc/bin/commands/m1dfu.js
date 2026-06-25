@@ -8,7 +8,7 @@ const { loadConfig, applyRuntime } = require('../commandSupport');
 function register(program) {
     program.command('m1dfu')
         .description('Start M1 in DFU mode and program bootstrap FW')
-        .action(async () => {
+        .action(async() => {
             const configData = await loadConfig();
             const logfile = console;
             applyRuntime(configData);
@@ -18,8 +18,7 @@ function register(program) {
                 await delay(400);
                 await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
                 process.exit(0);
-            }
-            catch (err) {
+            } catch (err) {
                 logfile.error(err);
                 await delay(100);
                 process.exit(exitCodes.commandFailed);

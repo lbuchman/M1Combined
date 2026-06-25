@@ -19,11 +19,15 @@ function isString(x) {
 
 function testLogicalValue(value, voltageLevel, logicalValue) {
     if (logicalValue === 0) {
-        if (value < voltageLevel * 0.2) return true;
+        if (value < voltageLevel * 0.2) {
+            return true;
+        }
         return false;
     }
     if (logicalValue === 1) {
-        if (value > voltageLevel * 0.6) return true;
+        if (value > voltageLevel * 0.6) {
+            return true;
+        }
         return false;
     }
 
@@ -53,7 +57,9 @@ function getWordData(data, address) {
 function getCPUSerial(data) {
     const lines = data.split('\n');
     const str = lines.find(el => el.includes('SN          :'));
-    if (!str) throw new Error('Cannot parse CPU SN');
+    if (!str) {
+        throw new Error('Cannot parse CPU SN');
+    }
     const sn = str.split(':')[1].trim();
     return sn;
 }
@@ -89,14 +95,22 @@ function getNextMac(MACaddress) {
     const hex = MACaddress.split(':').map(x => parseInt(x, 16));
 
     function plusOne(p) {
-        if (p < 0) return;
-        if (hex[p] === 255) { hex[p] = 0; plusOne(p - 1); }
+        if (p < 0) {
+            return;
+        }
+        if (hex[p] === 255) {
+            hex[p] = 0;
+            plusOne(p - 1);
+            return;
+        }
         // eslint-disable-next-line no-plusplus
-        else { hex[p]++; }
+        hex[p]++;
     }
     plusOne(hex.length - 1);
     const ret = hex.map((x) => {
-        if (x < 16) return `0${x.toString(16).slice(-2)}`;
+        if (x < 16) {
+            return `0${x.toString(16).slice(-2)}`;
+        }
         return `${x.toString(16).slice(-2)}`;
     }).join(':');
 
@@ -105,21 +119,27 @@ function getNextMac(MACaddress) {
 
 async function getTargetIp(mac) {
     const ret = await arpScanner({ command: 'arp-scan', interface: 'eth0', sudo: false });
-    if (!ret) return null;
+    if (!ret) {
+        return null;
+    }
     const arpItem = ret.find((element) => {
         if (element.mac.includes(mac.toUpperCase())) {
             return element;
         }
         return null;
     });
-    if (!arpItem) return null;
+    if (!arpItem) {
+        return null;
+    }
     return arpItem.ip;
 }
 
 async function getTargetIpWait(mac, timeout) {
     if (timeout - new Date() / 1000 > 0) {
         const ret = await getTargetIp(mac);
-        if (ret) return ret;
+        if (ret) {
+            return ret;
+        }
         return getTargetIpWait(mac, timeout);
     }
 
@@ -200,18 +220,36 @@ function boolToInt(value) {
 }
 
 function checkDbRecord(records, full) {
-    if (records === undefined || records[0] === undefined) throw new Error('Failed, Invalid DB record');
+    if (records === undefined || records[0] === undefined) {
+        throw new Error('Failed, Invalid DB record');
+    }
     const record = records[0];
-    if (!record) throw new Error('Failed, Invalid DB record');
-    if (!record.vendorSerial) throw new Error('Failed, vendorSerial is not defined.');
-    if (!record.ictTestPassed) throw new Error('Failed, Must pass ICT test to program EEPROM');
-    if (!record.functionalTestPassed) throw new Error('Failed, Must pass Functional test to program EEPROM');
+    if (!record) {
+        throw new Error('Failed, Invalid DB record');
+    }
+    if (!record.vendorSerial) {
+        throw new Error('Failed, vendorSerial is not defined.');
+    }
+    if (!record.ictTestPassed) {
+        throw new Error('Failed, Must pass ICT test to program EEPROM');
+    }
+    if (!record.functionalTestPassed) {
+        throw new Error('Failed, Must pass Functional test to program EEPROM');
+    }
     // if (!record.flashProgrammed) throw new Error('Failed, Must pass Flash Programming to program EEPROM');
-    if (!record.uid) throw new Error('Failed, Must pass MAC Programming to program EEPROM');
+    if (!record.uid) {
+        throw new Error('Failed, Must pass MAC Programming to program EEPROM');
+    }
     if (full) {
-        if (!record.secret) throw new Error('Failed, EEPROM secret status is not defined');
-        if (!record.boardS2Serial) throw new Error('Failed, EEPROM programming status is not defined');
-        if (!record.dateAndTime) throw new Error('Failed, Missing times stamp in DB');
+        if (!record.secret) {
+            throw new Error('Failed, EEPROM secret status is not defined');
+        }
+        if (!record.boardS2Serial) {
+            throw new Error('Failed, EEPROM programming status is not defined');
+        }
+        if (!record.dateAndTime) {
+            throw new Error('Failed, Missing times stamp in DB');
+        }
     }
     return true;
 }
@@ -235,8 +273,7 @@ async function printLabel(productName, mac, serial, tsId, dbError, logger) {
             labelTxt += `${item}\n`;
         });
         labelTxt += '"';
-    }
-    else {
+    } else {
         labelTxt = `text 1,1 "\n${productName}\n${serial}${tsId}\n${macToUid(mac)}\n${mac}\n"`;
     }
 
@@ -244,8 +281,7 @@ async function printLabel(productName, mac, serial, tsId, dbError, logger) {
     await os.executeShellCommand(convertCmd, logger, false, false);
     try {
         await os.executeShellCommand(pritnLabelCmd, logger, false, false);
-    }
-    catch (err) {
+    } catch (err) {
         throw new Error(`command to print Label failed. Is printer on?: ${pritnLabelCmd}`);
     }
 }

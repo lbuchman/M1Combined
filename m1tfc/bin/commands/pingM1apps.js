@@ -15,13 +15,15 @@ function register(program) {
         .description('try to establish connection to port 80')
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
-        .action(async (options) => {
+        .action(async(options) => {
             const configData = await loadConfig();
             let logfile;
             let db;
             applyRuntime(configData, { serial: options.serial, debugLevel: options.debug || '0' });
             try {
-                if (!options.serial) await errorAndExit('must define vendor serial number', console);
+                if (!options.serial) {
+                    await errorAndExit('must define vendor serial number', console);
+                }
                 logfile = logger.getLogger(options.serial, '   apps', options.serial, configData.mtfDir, options.debug);
                 if (!configData.pingPorts) {
                     logfile.info('pinging port 80 is disabled in config file');
@@ -37,7 +39,7 @@ function register(program) {
                 await m1boot.deActivateDFU();
                 await testBoardLink.targetPower(true);
                 let timerCount = 10;
-                const interval = setInterval(async () => {
+                const interval = setInterval(async() => {
                     const results = await nodePortScanner(configData.m1defaultIP, [80]);
                     if (!timerCount) {
                         clearInterval(interval);
@@ -57,12 +59,15 @@ function register(program) {
                     }
                     logfile.debug(`port 80 open = ${results.ports.open.includes(80)}`);
                 }, 5000);
-            }
-            catch (err) {
-                if (!logfile) logfile = console;
+            } catch (err) {
+                if (!logfile) {
+                    logfile = console;
+                }
                 logfile.error(err);
                 await testBoardLink.targetPower(false);
-                if (db && options.serial) db.updateErrorCode(options.serial, errorCodes.codes.APP80.errorCode, 'T');
+                if (db && options.serial) {
+                    db.updateErrorCode(options.serial, errorCodes.codes.APP80.errorCode, 'T');
+                }
                 await delay(100);
                 process.exit(exitCodes.commandFailed);
             }

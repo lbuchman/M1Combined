@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-await-in-loop */
+
 const testBoardLink = require('../src/testBoardLink');
 const targetICTLink = require('../src/m1ICTLink');
 const delay = require('delay');
@@ -51,7 +53,7 @@ async function configureBatteryPins() {
 
 async function test(logger, db) {
     gpioHelper = new GPIOHelper(targetICTLink, logger, db);
-    
+
     try {
         logger.info('Testing battery switch circuit');
         await configureBatteryPins();
@@ -62,16 +64,24 @@ async function test(logger, db) {
 
         let battPresent = await readBatteryPin(batteryStateStatusPins[0]);
         let dcinPresent = await readBatteryPin(batteryStateStatusPins[1]);
-        if (battPresent !== 1) throw new Error('nBATT_PRESENT expected 0, got 1');
-        if (dcinPresent !== 0) throw new Error('nDCIN_PWR expected 0, got 1');
+        if (battPresent !== 1) {
+            throw new Error('nBATT_PRESENT expected 0, got 1');
+        }
+        if (dcinPresent !== 0) {
+            throw new Error('nDCIN_PWR expected 0, got 1');
+        }
 
         await testBoardLink.targetPower(true);
         await testBoardLink.batteryLoadOn(false);
         await delay(500);
         battPresent = await readBatteryPin(batteryStateStatusPins[0]);
         dcinPresent = await readBatteryPin(batteryStateStatusPins[1]);
-        if (battPresent !== 1) throw new Error('nBATT_PRESENT expected 0, got 1');
-        if (dcinPresent !== 0) throw new Error('nDCIN_PWR expected 0, got 1');
+        if (battPresent !== 1) {
+            throw new Error('nBATT_PRESENT expected 0, got 1');
+        }
+        if (dcinPresent !== 0) {
+            throw new Error('nDCIN_PWR expected 0, got 1');
+        }
 
         await testBoardLink.batteryOn(true);
         await delay(5000);
@@ -82,22 +92,29 @@ async function test(logger, db) {
         await delay(500);
         try {
             battPresent = await readBatteryPin(batteryStateStatusPins[0]);
-        }
-        catch (err) {
+        } catch (err) {
             throw new Error('Power off battery test failed');
         }
         logger.info('Power loss test passed');
         dcinPresent = await readBatteryPin(batteryStateStatusPins[1]);
-        if (battPresent !== 1) throw new Error('nBATT_PRESENT expected 0, got 1');
-        if (dcinPresent !== 1) throw new Error('nDCIN_PWR expected 0, got 1');
+        if (battPresent !== 1) {
+            throw new Error('nBATT_PRESENT expected 0, got 1');
+        }
+        if (dcinPresent !== 1) {
+            throw new Error('nDCIN_PWR expected 0, got 1');
+        }
 
         logger.info('Testing battery charging circuit...');
         await testBoardLink.targetPower(true);
         await delay(500);
         battPresent = await readBatteryPin(batteryStateStatusPins[0]);
         dcinPresent = await readBatteryPin(batteryStateStatusPins[1]);
-        if (battPresent !== 1) throw new Error('nBATT_PRESENT expected 1, got 0');
-        if (dcinPresent !== 0) throw new Error('nDCIN_PWR expected 0, got 1');
+        if (battPresent !== 1) {
+            throw new Error('nBATT_PRESENT expected 1, got 0');
+        }
+        if (dcinPresent !== 0) {
+            throw new Error('nDCIN_PWR expected 0, got 1');
+        }
 
         const batVoltage = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName('bat12VAD')}`);
         if (!batVoltage.status) {
@@ -106,12 +123,10 @@ async function test(logger, db) {
 
         const chargingVoltage = await getChargingVoltage(new Date() / 1000 + chargerIntervalCheck);
         logger.info(`Battery test passed. Charging voltage = ${chargingVoltage}V`);
-    }
-    catch (err) {
+    } catch (err) {
         db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes['BACHR'].errorCode, 'E');
         throw new Error(err.message);
-    }
-    finally {
+    } finally {
         await testBoardLink.batteryLoadOn(false);
     }
 

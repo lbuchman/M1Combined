@@ -52,12 +52,16 @@ function parseQuotedArgs(argumentString) {
 }
 
 function normalizeFlagName(key) {
-    if (key.startsWith('-')) return key;
+    if (key.startsWith('-')) {
+        return key;
+    }
     return key.length === 1 ? `-${key}` : `--${key}`;
 }
 
 function normalizeArguments(argument) {
-    if (argument === undefined || argument === null) return [];
+    if (argument === undefined || argument === null) {
+        return [];
+    }
 
     if (Array.isArray(argument)) {
         return argument.map(value => String(value));
@@ -76,8 +80,12 @@ function normalizeArguments(argument) {
         }
 
         Object.entries(argument).forEach(([key, value]) => {
-            if (key === 'positional' || key === 'args') return;
-            if (value === undefined || value === null || value === false) return;
+            if (key === 'positional' || key === 'args') {
+                return;
+            }
+            if (value === undefined || value === null || value === false) {
+                return;
+            }
 
             const flag = normalizeFlagName(key);
             if (value === true) {
@@ -110,8 +118,12 @@ function createResponse(status, errorCode, description) {
 }
 
 function getErrorDescription(exitCode, stderrOutput) {
-    if (exitCode === exitCodes.normalExit) return 'Success';
-    if (exitCodeDescriptions[exitCode]) return exitCodeDescriptions[exitCode];
+    if (exitCode === exitCodes.normalExit) {
+        return 'Success';
+    }
+    if (exitCodeDescriptions[exitCode]) {
+        return exitCodeDescriptions[exitCode];
+    }
 
     const fallback = stderrOutput
         .split(/\r?\n/)
@@ -165,8 +177,7 @@ function parseRequestBody(req) {
         req.on('end', () => {
             try {
                 resolve(body ? JSON.parse(body) : {});
-            }
-            catch (err) {
+            } catch (err) {
                 reject(new Error('Invalid JSON body'));
             }
         });
@@ -199,7 +210,7 @@ async function handleCommandRequest(req, res, options) {
 }
 
 function startRestServer(options) {
-    const server = http.createServer(async (req, res) => {
+    const server = http.createServer(async(req, res) => {
         try {
             if (req.method === 'GET' && req.url === '/health') {
                 writeJsonResponse(res, 200, createResponse('OK', 0, 'Server is running'));
@@ -212,8 +223,7 @@ function startRestServer(options) {
             }
 
             writeJsonResponse(res, 404, createResponse('FAILED', exitCodes.invalidArgument, 'Route not found'));
-        }
-        catch (err) {
+        } catch (err) {
             writeJsonResponse(res, 500, createResponse('FAILED', exitCodes.commandFailed, err.message || 'Internal server error'));
         }
     });

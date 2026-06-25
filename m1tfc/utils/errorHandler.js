@@ -11,7 +11,7 @@ const exitCodes = require('../src/exitCodes');
  * @returns {Function} Wrapped action suitable for commander `.action()`
  */
 function wrapAction(fn, log = console) {
-    return async (...args) => {
+    return async(...args) => {
         try {
             await fn(...args);
         } catch (err) {
@@ -32,7 +32,9 @@ function wrapAction(fn, log = console) {
 function registerGlobalHandlers(log = console) {
     process.on('uncaughtException', (err) => {
         log.error(`Uncaught exception: ${err.message}`);
-        if (log.debug) log.debug(err.stack);
+        if (log.debug) {
+            log.debug(err.stack);
+        }
         process.exit(exitCodes.commandFailed);
     });
 

@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-await-in-loop */
+
 const CommandHelper = require('./commandHelper');
 
 /**
@@ -74,7 +76,7 @@ class GPIOHelper {
         if (!await this.configureOutput(pin.port, pin.pin, pin.pinNameOnTestBoard)) {
             return false;
         }
-        
+
         // Set level
         return await this.setLevel(pin.port, pin.pin, level, pin.pinNameOnTestBoard);
     }

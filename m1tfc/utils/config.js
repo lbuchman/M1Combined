@@ -19,8 +19,7 @@ async function getConfig(configDataDefaults) {
     let configDataUser;
     try {
         configDataUser = await fs.readJSON(inConfig, 'utf8');
-    }
-    catch (err) {
+    } catch (err) {
         configDataUser = {};
     }
 
@@ -30,8 +29,7 @@ async function getConfig(configDataDefaults) {
 async function saveConfig(configData) {
     try {
         await fs.writeJSON(outConfig, configData, { spaces: 2 });
-    }
-    catch (err) {
+    } catch (err) {
         //
     }
 }

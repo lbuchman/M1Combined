@@ -8,8 +8,7 @@ function makeMinimalTsv(tsv) {
     const allFileContents = fs.readFileSync(tsv, 'utf-8');
     try {
         fs.unlinkSync(outFile);
-    }
-    catch (err) {
+    } catch (err) {
         //
     }
     allFileContents.split(/\r?\n/).forEach((line, index) => {

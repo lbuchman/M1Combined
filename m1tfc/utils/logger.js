@@ -38,22 +38,24 @@ function getLogger(name, test, serial, logFilePath, logdebug) {
     const logFileDir = `${logFilePath}/logs/${serial}`;
     mkdirp.sync(logFileDir);
     switch (logdebug) {
-        case '0':
-            consoleLogLevel = 'error';
-            break;
-        case '1':
-            consoleLogLevel = 'info';
-            break;
-        case '2':
-            consoleLogLevel = 'debug';
-            break;
-        default: throw new Error('Invalid debug level, shall be 0-2');
+    case '0':
+        consoleLogLevel = 'error';
+        break;
+    case '1':
+        consoleLogLevel = 'info';
+        break;
+    case '2':
+        consoleLogLevel = 'debug';
+        break;
+    default: throw new Error('Invalid debug level, shall be 0-2');
     }
 
     const lofFileNamePathDebug = path.join(logFileDir, `${serial}-debug.log`);
     const lofFileNamePathInfo = path.join(logFileDir, `${serial}-info.log`);
     const lofFileNamePathError = path.join(logFileDir, `${serial}-error.log`);
-    if (logger) return logger;
+    if (logger) {
+        return logger;
+    }
 
     const msg = i => (_.isObject(i.message) ? JSON.stringify(i.message) : i.message);
     logger = winston.createLogger({

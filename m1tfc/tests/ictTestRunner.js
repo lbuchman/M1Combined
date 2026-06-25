@@ -59,44 +59,75 @@ module.exports = class IctTestRunner {
         this.db.updateIctStatus(serial, utils.boolToInt(false));
         try {
             await common.initializeTestFixture(this.config, programmer, initAndQuit, initAndQuit, this.stm32, this.m1Dev, this.logger, calibrate, this.CalibrationParam);
-            if (initAndQuit) return exitCodes.normalExit;
+            if (initAndQuit) {
+                return exitCodes.normalExit;
+            }
             regulators.init(this.CalibrationParam);
             await regulators.checkLeverState(this.logger, this.db);
-            if (!skipTestpointCheck) this.logger.info('Testing test points ...');
-            if (!skipTestpointCheck) if (!await regulators.test(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) ret = false;
+            if (!skipTestpointCheck) {
+                this.logger.info('Testing test points ...');
+            }
+            if (!skipTestpointCheck) {
+                if (!await regulators.test(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) {
+                    ret = false;
+                }
+            }
             await regulators.cellBatTest(this.logger, this.db, calibrate, this.CalibrationParam);
             try {
                 await common.programStm(programmer, this.stm32, this.m1Dev, this.logger, this.db);
-            }
-            catch (err) {
+            } catch (err) {
                 /* eslint-disable dot-notation */
                 this.db.updateErrorCode(serial, errorCodes.codes['STM'].errorCode, 'E');
                 throw err;
             }
 
             if (!skipTestpointCheck && runtime.productName === 'mnplus') {
-                if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) ret = false;
+                if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) {
+                    ret = false;
+                }
             }
-            if (!skipTestpointCheck) if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) ret = false;
-            if (!await ribbonCable.runRibbonCableTest(skipTestpointCheck, this.tolerance, this.logger, this.db, this.config, calibrate, this.CalibrationParam)) ret = false;
+            if (!skipTestpointCheck) {
+                if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) {
+                    ret = false;
+                }
+            }
+            if (!await ribbonCable.runRibbonCableTest(skipTestpointCheck, this.tolerance, this.logger, this.db, this.config, calibrate, this.CalibrationParam)) {
+                ret = false;
+            }
 
             this.logger.info('Testing RS485 ...');
-            if (!await rs485.testRs485(this.logger, this.db)) ret = false;
+            if (!await rs485.testRs485(this.logger, this.db)) {
+                ret = false;
+            }
 
             this.logger.info('Testing Status LED ...');
-            if (!await ledTest.test(this.logger, this.db)) ret = false;
+            if (!await ledTest.test(this.logger, this.db)) {
+                ret = false;
+            }
             this.logger.info('Testing Tamper sensor ...');
-            if (!await tamperTest.test(this.logger, this.db)) ret = false;
+            if (!await tamperTest.test(this.logger, this.db)) {
+                ret = false;
+            }
             this.logger.info('Testing DDR3 memory ...');
-            if (!await ddr3.testDDR3Test(ddrblocks, this.logger, this.db)) ret = false;
+            if (!await ddr3.testDDR3Test(ddrblocks, this.logger, this.db)) {
+                ret = false;
+            }
             this.logger.info('Testing I2C EEPROM ...');
-            if (!await eeprom.checkEEPROM(this.logger, this.db)) ret = false;
-            if (runtime.productName === 'm1-3200') if (!await battery.test(this.logger, this.db)) ret = false;
+            if (!await eeprom.checkEEPROM(this.logger, this.db)) {
+                ret = false;
+            }
+            if (runtime.productName === 'm1-3200') {
+                if (!await battery.test(this.logger, this.db)) {
+                    ret = false;
+                }
+            }
 
             if (runtime.productName === 'mnplus') {
                 const mnp = new MnpTests(this.db, this.logger);
                 await mnp.begin();
-                if (!await mnp.run()) ret = false;
+                if (!await mnp.run()) {
+                    ret = false;
+                }
             }
 
 
@@ -107,13 +138,11 @@ module.exports = class IctTestRunner {
                 try {
                     await common.getICTFWRev(3);
                     this.logger.info('POE test to switch to POE power OK ');
-                }
-                catch (err) {
+                } catch (err) {
                     this.logger.error('Test to switch to POE power failed ');
                     this.db.updateErrorCode(serial, errorCodes.codes['POE'].errorCode, 'E');
                     ret = false;
-                }
-                finally {
+                } finally {
                     await testBoardLink.poeOn(false);
                 }
             }
@@ -123,8 +152,7 @@ module.exports = class IctTestRunner {
                 this.db.updateIctStatus(serial, utils.boolToInt(true));
                 try {
                     await common.testEndSuccess();
-                }
-                catch (cleanupErr) {
+                } catch (cleanupErr) {
                     this.logger.warn(`ICT cleanup failed after successful tests: ${cleanupErr.message}`);
                 }
                 return exitCodes.normalExit;
@@ -134,8 +162,7 @@ module.exports = class IctTestRunner {
             this.logger.warn('One or more tests Failed!!!');
             await delay(100);
             return exitCodes.ictTestFailed;
-        }
-        catch (err) {
+        } catch (err) {
             this.logger.error(err.stack);
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();

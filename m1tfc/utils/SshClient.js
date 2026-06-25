@@ -33,8 +33,7 @@ class SshClient {
             try {
                 await this.connect(username, password);
                 return;
-            }
-            catch (err) {
+            } catch (err) {
                 await delay(2000);
             }
             await this.reConnect(username, password, idRsa, timeout);
@@ -52,25 +51,24 @@ class SshClient {
         const opt = { host: this.address, port: this.port, username };
         if (this.idRsa) {
             opt.privateKey = this.idRsa;
-        }
-        else {
+        } else {
             opt.password = password;
         }
         this.host = this.address;
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const timeoutHandle = setTimeout(() => {
                 reject(new Error('ssh connect timeout'));
             }, timeout);
-            try {
-                await this.ssh.connect(opt);
-            }
-            catch (err) {
-                reject(err);
-                clearTimeout(timeoutHandle);
-                return;
-            }
-            clearTimeout(timeoutHandle);
-            resolve();
+
+            this.ssh.connect(opt)
+                .then(() => {
+                    clearTimeout(timeoutHandle);
+                    resolve();
+                })
+                .catch((err) => {
+                    clearTimeout(timeoutHandle);
+                    reject(err);
+                });
         });
     }
 
@@ -82,15 +80,17 @@ class SshClient {
      */
     execCommand(command, nothrow = false) {
         return this.ssh.execCommand(command)
-        .then((result) => {
-            if (result.code) {
-                throw new Error(`Command "${command}" failed. Error: ${result.stderr}`);
-            }
-            return result.stdout;
-        })
-        .catch((err) => {
-            if (!nothrow) throw (err);
-        });
+            .then((result) => {
+                if (result.code) {
+                    throw new Error(`Command "${command}" failed. Error: ${result.stderr}`);
+                }
+                return result.stdout;
+            })
+            .catch((err) => {
+                if (!nothrow) {
+                    throw (err);
+                }
+            });
     }
 
     /**
@@ -121,9 +121,9 @@ class SshClient {
      */
     getFileWithData(localFile, remoteFile) {
         return this.ssh.getFile(localFile, remoteFile)
-        .then(() => {
-            return fs.readFileSync(localFile);
-        });
+            .then(() => {
+                return fs.readFileSync(localFile);
+            });
     }
 
     /**

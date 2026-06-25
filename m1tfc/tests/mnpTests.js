@@ -76,7 +76,9 @@ module.exports = class MnpTests {
                 return item.name === thisIo.mnpPinName;
             });
             // Perform asynchronous operations with 'element'
-            if (mnpPin.length === 0) throw new Error(`Failed ${thisIo.mnpPinName} test. Cannot find pin name ${thisIo.mnpPinName} in MNP board io map`);
+            if (mnpPin.length === 0) {
+                throw new Error(`Failed ${thisIo.mnpPinName} test. Cannot find pin name ${thisIo.mnpPinName} in MNP board io map`);
+            }
             const thisMnpIo = mnpPin[0];
 
             let testPassed = true;
@@ -91,9 +93,10 @@ module.exports = class MnpTests {
                     ret = false;
                     testPassed = false;
                 }
-                if (testPassed) this.logger.info(`Passed ${thisMnpIo.name} test`);
-            }
-            else {
+                if (testPassed) {
+                    this.logger.info(`Passed ${thisMnpIo.name} test`);
+                }
+            } else {
                 // eslint-disable-next-line no-await-in-loop
                 if (!await this.testInputLogicalState(thisIo, thisMnpIo, 1, thisIo.inverted)) {
                     ret = false;
@@ -104,7 +107,9 @@ module.exports = class MnpTests {
                     ret = false;
                     testPassed = false;
                 }
-                if (testPassed) this.logger.info(`Passed ${thisMnpIo.name} test`);
+                if (testPassed) {
+                    this.logger.info(`Passed ${thisMnpIo.name} test`);
+                }
             }
         }
         const osdp1TestStatus = await targetICTLink.sendCommand('testrd1rs485');
@@ -112,15 +117,13 @@ module.exports = class MnpTests {
         if (!osdp1TestStatus) {
             ret = false;
             this.logger.error(`Failed OSDP Rd1 Test error: ${osdp1TestStatus.error}`);
-        }
-        else {
+        } else {
             this.logger.info('Passed OSDP1 Test');
         }
         if (!osdp2TestStatus) {
             ret = false;
             this.logger.error(`Failed OSDP Rd1 Test error: ${osdp2TestStatus.error}`);
-        }
-        else {
+        } else {
             this.logger.info('Passed OSDP2 Test');
         }
         return ret;

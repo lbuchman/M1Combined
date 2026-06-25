@@ -14,7 +14,7 @@ module.exports = class UdpGWSocket extends EventEmitter {
         this.socket = null;
     }
 
-        /**
+    /**
     * @public
     * Create udp socket
     *
@@ -31,8 +31,7 @@ module.exports = class UdpGWSocket extends EventEmitter {
             let jsonMessage;
             try {
                 jsonMessage = JSON.parse(message);
-            }
-            catch (err) {
+            } catch (err) {
                 this.log.error(`could not parse message to Json - ${err.message}`);
                 return;
             }
@@ -116,8 +115,7 @@ module.exports = class UdpGWSocket extends EventEmitter {
             if (dest.length > 1) {
                 host = dest[0];
                 port = dest[1];
-            }
-            else {
+            } else {
                 port = destination;
             }
             if (!this.socket) {
@@ -128,8 +126,7 @@ module.exports = class UdpGWSocket extends EventEmitter {
             this.socket.send(data, 0, data.length, port, host, (err) => {
                 if (err) {
                     reject(err);
-                }
-                else {
+                } else {
                     resolve();
                 }
             });
@@ -146,8 +143,7 @@ module.exports = class UdpGWSocket extends EventEmitter {
         let socketData = null;
         try {
             socketData = JSON.stringify(json);
-        }
-        catch (err) {
+        } catch (err) {
             this.log.error(`Could not parse object => ${json}`);
             throw (err);
         }
@@ -167,12 +163,10 @@ module.exports = class UdpGWSocket extends EventEmitter {
         if (!Buffer.isBuffer(data)) {
             try {
                 dataBuffer = this.jsonToBuffer(data);
-            }
-            catch (err) {
+            } catch (err) {
                 return Promise.reject(err);
             }
-        }
-        else {
+        } else {
             dataBuffer = data;
         }
         const retryOptions = {
@@ -192,18 +186,18 @@ module.exports = class UdpGWSocket extends EventEmitter {
         return new Promise((resolve, reject) => {
             operation.attempt((currentAttempt) => { // eslint-disable-line
                 this.sendAsync(destination, dataBuffer)
-                .then(() => {
-                    resolve();
-                })
-                .catch((err) => {
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
                     // eslint-disable-next-line max-len
-                    this.log.warn(`Retrying to send datagram (retry = ${currentAttempt}) to ${destination} "${err.message}", message: ${dataBuffer.toString('utf8')}`);
-                    if (!operation.retry(err)) {
+                        this.log.warn(`Retrying to send datagram (retry = ${currentAttempt}) to ${destination} "${err.message}", message: ${dataBuffer.toString('utf8')}`);
+                        if (!operation.retry(err)) {
                         // eslint-disable-next-line max-len
-                        this.log.error(`Failed to send datagram to ${destination} "${this.systemErrorDescription(err.errno)}", message: ${dataBuffer.toString('utf8')}`);
-                        reject(operation.mainError());
-                    }
-                });
+                            this.log.error(`Failed to send datagram to ${destination} "${this.systemErrorDescription(err.errno)}", message: ${dataBuffer.toString('utf8')}`);
+                            reject(operation.mainError());
+                        }
+                    });
             });
         });
     }
@@ -219,34 +213,34 @@ module.exports = class UdpGWSocket extends EventEmitter {
             return 'undefined error code';
         }
         switch (errCode) {
-            case -11:
-                return 'Try again';
-            case -13:
-                return 'Permission denied';
-            case -98:
-                return 'Address already in use';
-            case -111:
-                return 'Connection refused';
-            case -104:
-                return 'Connection reset by peer';
-            case -17:
-                return 'File exists';
-            case -21:
-                return 'Is a directory';
-            case -24:
-                return 'Too many open files in system';
-            case -2:
-                return 'No such file or directory';
-            case -20:
-                return 'Not a directory';
-            case -1:
-                return 'Operation not permitted';
-            case -32:
-                return 'Broken pipe';
-            case -110:
-                return 'Operation timed out';
-            default:
-                return errCode.toString();
+        case -11:
+            return 'Try again';
+        case -13:
+            return 'Permission denied';
+        case -98:
+            return 'Address already in use';
+        case -111:
+            return 'Connection refused';
+        case -104:
+            return 'Connection reset by peer';
+        case -17:
+            return 'File exists';
+        case -21:
+            return 'Is a directory';
+        case -24:
+            return 'Too many open files in system';
+        case -2:
+            return 'No such file or directory';
+        case -20:
+            return 'Not a directory';
+        case -1:
+            return 'Operation not permitted';
+        case -32:
+            return 'Broken pipe';
+        case -110:
+            return 'Operation timed out';
+        default:
+            return errCode.toString();
         }
     }
 };
