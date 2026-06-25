@@ -106,7 +106,15 @@ function register(program) {
 
                 const skipTestpointCheck = options.debug ? (configData.skipTestpointCheck || false) : false;
                 const memTestSize1MBBlocks = options.debug ? (configData.memTestSize1MBBlocks || 512) : 10;
-                await ictTestRunner.runTest(configData.programmingCommand, options.serial, memTestSize1MBBlocks, skipTestpointCheck, false, calibrate);
+                const ictExitCode = await ictTestRunner.runTest(
+                    configData.programmingCommand,
+                    options.serial,
+                    memTestSize1MBBlocks,
+                    skipTestpointCheck,
+                    false,
+                    calibrate
+                );
+                process.exit(ictExitCode);
             }
             catch (err) {
                 if (!logfile) logfile = console;

@@ -120,8 +120,13 @@ module.exports = class IctTestRunner {
 
             if (ret) {
                 this.logger.info('ICT Test Passed!!!');
-                await common.testEndSuccess();
                 this.db.updateIctStatus(serial, utils.boolToInt(true));
+                try {
+                    await common.testEndSuccess();
+                }
+                catch (cleanupErr) {
+                    this.logger.warn(`ICT cleanup failed after successful tests: ${cleanupErr.message}`);
+                }
                 return exitCodes.normalExit;
             }
 
