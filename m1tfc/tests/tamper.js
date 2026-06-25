@@ -60,7 +60,7 @@ async function deactivatetamper() {
 }
 
 async function initSensor() {
-    return await gpioHelper.configureOutput(tamperSensor.port, tamperSensor.pin, tamperSensor.pinNameOnTestBoard);
+    return await gpioHelper.configureMultipleInput([tamperSensor]);
 }
 
 async function test(logger, db) {
