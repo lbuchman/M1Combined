@@ -67,7 +67,7 @@ function register(program) {
                     throw new Error(`serial number ${options.serial} does not match EEPROM value ${eepromSerial}`);
                 }
 
-                await utils.printLabel(configData.productName, mac, options.serial, configData.vendorSite, [], logfile);
+                await utils.printLabel(configData.productName.toUpperCase(), mac, options.serial, configData.vendorSite, [], logfile);
                 logfile.debug('Label is printed');
                 await testBoardLink.targetPower(false);
                 await testBoardLink.batteryOn(false);

@@ -237,7 +237,7 @@ async function printLabel(productName, mac, serial, tsId, dbError, logger) {
         labelTxt += '"';
     }
     else {
-        labelTxt = `text 1,1 "\nM1-3200\n${serial}${tsId}\n${macToUid(mac)}\n${mac}\n"`;
+        labelTxt = `text 1,1 "\n${productName}\n${serial}${tsId}\n${macToUid(mac)}\n${mac}\n"`;
     }
 
     await fs.writeFile(labelPath, labelTxt);
