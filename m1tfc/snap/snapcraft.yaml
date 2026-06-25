@@ -11,6 +11,10 @@ confinement: classic
 apps:
   m1tfc:
     command: bin/m1tfc.js
+    environment:
+      PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
+      NODE_PATH: $SNAP/node_modules
+      NODE_OPTIONS: --max-old-space-size=256
     plugs:
       - network
       - network-bind

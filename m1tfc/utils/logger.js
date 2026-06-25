@@ -9,6 +9,24 @@ const { mkdirp } = require('mkdirp');
 
 let logger;
 
+const addCallerInfo = winston.format((info) => {
+    const err = new Error();
+    const stack = err.stack.split('\n');
+    const callerLine = stack.find(line =>
+        line.includes('.js:') &&
+        !line.includes('node_modules') &&
+        !line.includes('logger.js')
+    );
+    if (callerLine) {
+        const match = callerLine.match(/\((.+):(\d+):\d+\)/) || callerLine.match(/at (.+):(\d+):\d+/);
+        if (match) {
+            const file = match[1].split('/').slice(-2).join('/');
+            info.caller = `${file}:${match[2]}`;
+        }
+    }
+    return info;
+});
+
 /** path.join(configData.logdir, `${options.serial}.log`)
 * @public
 * Gets the logger.
@@ -41,9 +59,10 @@ function getLogger(name, test, serial, logFilePath, logdebug) {
     logger = winston.createLogger({
         level: 'info',
         format: winston.format.combine(
+            addCallerInfo(),
             winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
             winston.format.align(),
-            winston.format.printf(i => `[${i.timestamp}] [${name}, ${test}] ${i.level}: ${msg(i)}`)
+            winston.format.printf(i => `[${i.timestamp}] [${name}, ${test}] [${i.caller || '?'}] ${i.level}: ${msg(i)}`)
         ),
         transports: [
             new winston.transports.Console({ level: consoleLogLevel }),

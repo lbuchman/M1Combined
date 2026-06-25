@@ -61,6 +61,10 @@ const defaultConfiguration = {
     productName: 'm1-3200'
 };
 
+/**
+ * Ensures required Snap environment variables are set when running outside a Snap context.
+ * Must be called before any Snap-dependent code.
+ */
 function ensureSnapEnv() {
     if (process.env.SNAP) return;
     process.env.SNAP_COMMON = `${homeDir}/snap_common`;
@@ -69,12 +73,24 @@ function ensureSnapEnv() {
     process.env.SNAP_VERSION = process.env.SNAP_VERSION || 'dev';
 }
 
+/**
+ * Logs an error message and exits with a failure code after a short delay.
+ * The delay allows transports (e.g., winston file transport) to flush before exit.
+ * @param {string} errorStr - Human-readable error description
+ * @param {object} log - Logger instance (must implement `.error()`)
+ * @returns {Promise<never>}
+ */
 async function errorAndExit(errorStr, log) {
     log.error(errorStr);
     await delay(500);
     process.exit(exitCodes.commandFailed);
 }
 
+/**
+ * Applies runtime-specific values from loaded config into the global runtime context.
+ * @param {object} configData - Merged configuration object
+ * @param {object} [extra={}] - Additional runtime overrides (e.g. serial, debugLevel)
+ */
 function applyRuntime(configData, extra = {}) {
     runtimeContext.setRuntime({
         dbPath: configData.mtfDir,
@@ -87,6 +103,11 @@ function applyRuntime(configData, extra = {}) {
     });
 }
 
+/**
+ * Loads configuration by merging defaults with any user-provided overrides from disk,
+ * then applies the result to the global runtime context.
+ * @returns {Promise<object>} Resolved configuration object
+ */
 async function loadConfig() {
     const configData = await config.getConfig({ ...defaultConfiguration });
     applyRuntime(configData);

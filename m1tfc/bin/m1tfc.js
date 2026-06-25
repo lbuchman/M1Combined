@@ -2,13 +2,17 @@
 
 'use strict';
 
-const program = require('commander');
+const { Command } = require('commander');
 const { mkdirp } = require('mkdirp');
 const os = require('../utils/os');
 const { ensureSnapEnv, loadConfig } = require('./commandSupport');
 const { registerAll } = require('./commands');
+const { registerGlobalHandlers } = require('../utils/errorHandler');
+
+const program = new Command();
 
 ensureSnapEnv();
+registerGlobalHandlers(console);
 
 program
     .name('m1test')
@@ -17,18 +21,12 @@ program
 
 registerAll(program);
 
-const log = console;
+async function main() {
+    await os.executeShellCommand('killall -9 STM32_Programmer_CLI', console, true);
+    const configData = await loadConfig();
+    mkdirp.sync(configData.mtfDir);
+    mkdirp.sync(`${configData.mtfDir}/logs`);
+    await program.parseAsync(process.argv);
+}
 
-os.executeShellCommand('killall -9 STM32_Programmer_CLI', log, true)
-    .then(async () => {
-        const configData = await loadConfig();
-        mkdirp.sync(configData.mtfDir);
-        mkdirp.sync(`${configData.mtfDir}/logs`);
-        program.parse(process.argv);
-    })
-    .catch(async () => {
-        const configData = await loadConfig();
-        mkdirp.sync(configData.mtfDir);
-        mkdirp.sync(`${configData.mtfDir}/logs`);
-        program.parse(process.argv);
-    });
+main();
