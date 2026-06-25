@@ -32,14 +32,17 @@ async function checkEEPROM(logger, db) {
     if (!ret.status) {
         logger.error(`I2C EEPROM Test failed  ${ret.error}`);
         /* eslint-disable dot-notation */
-        db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes['EEPROM'].errorCode, 'E');
+        db.updateErrorCode(
+            runtimeContext.getRuntime().serial,
+            errorCodes.codes['EEPROM'].errorCode,
+            'E'
+        );
         return false;
     }
 
     logger.info('Passed I2C EEPROM test');
     return true;
 }
-
 
 async function getVerifyEEPRomData(logger) {
     const ret = await targetICTLink.sendCommand('verifyeepromdata');
@@ -78,7 +81,9 @@ async function updateEEPRom(serial, eepromoverwrite, vendorSite, logger) {
     db.updateSerial(serial);
     const overwrite = eepromoverwrite ? 1 : 0;
     logger.info('Updating I2C EEPROM Data ...');
-    const ret = await targetICTLink.sendCommand(`writeeepromdata SN=${getSerialN(serial, vendorSite)} SK=${getSecret(32)} ${overwrite}`);
+    const ret = await targetICTLink.sendCommand(
+        `writeeepromdata SN=${getSerialN(serial, vendorSite)} SK=${getSecret(32)} ${overwrite}`
+    );
     if (!ret.status) {
         if (ret.error === 'EEPROM is not Blank' && !overwrite) {
             logger.warn(`I2C EEPROM programming is rejected, ${ret.error}`);
@@ -93,7 +98,9 @@ async function updateEEPRom(serial, eepromoverwrite, vendorSite, logger) {
             const eepromSerial = eepromData.serial.substring(3).slice(0, -2);
             if (eepromSerial !== serial) {
                 db.updateErrorCode(serial, errorCodes.codes['SERIAL_MISSMATH'].errorCode, 'E');
-                throw new Error(`serial number ${serial} does not match EEPROM value ${eepromData.serial.substring(3).slice(0, -2)}`);
+                throw new Error(
+                    `serial number ${serial} does not match EEPROM value ${eepromData.serial.substring(3).slice(0, -2)}`
+                );
             }
             db.updateEepromData(serial, eepromData.secret, eepromData.serial);
         }

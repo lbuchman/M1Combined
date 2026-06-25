@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-console, no-await-in-loop */
+
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
@@ -22,7 +24,7 @@ const {
 const SIM_DIR = `/tmp/m1tfc-sim-${process.pid}`;
 
 function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function ensureDir(dirPath) {
@@ -52,21 +54,20 @@ async function startPtyPair(name) {
     const hostPath = path.join(SIM_DIR, `${name}.host`);
     const simPath = path.join(SIM_DIR, `${name}.sim`);
 
-    const socat = spawn('socat', [
-        '-d',
-        '-d',
-        `pty,raw,echo=0,link=${hostPath}`,
-        `pty,raw,echo=0,link=${simPath}`
-    ], {
-        stdio: ['ignore', 'pipe', 'pipe']
-    });
+    const socat = spawn(
+        'socat',
+        ['-d', '-d', `pty,raw,echo=0,link=${hostPath}`, `pty,raw,echo=0,link=${simPath}`],
+        {
+            stdio: ['ignore', 'pipe', 'pipe']
+        }
+    );
 
     let stderrBuf = '';
-    socat.stderr.on('data', (chunk) => {
+    socat.stderr.on('data', chunk => {
         stderrBuf += chunk.toString();
     });
 
-    socat.on('exit', (code) => {
+    socat.on('exit', code => {
         if (code !== 0) {
             // Best effort diagnostics for unexpected early exits.
             process.stderr.write(`socat ${name} exited with code ${code}\n${stderrBuf}\n`);
@@ -88,7 +89,7 @@ function openJsonResponder(portPath, onCommand) {
     const port = new SerialPort({ path: portPath, baudRate: 115200 });
     const parser = port.pipe(new ReadlineParser({ delimiter: '\n\r' }));
 
-    parser.on('data', async(raw) => {
+    parser.on('data', async raw => {
         const request = parseSerialCommand(raw);
         if (!request.cmd) {
             return;
@@ -141,8 +142,12 @@ async function main() {
         pairs.push(await startPtyPair('uut-ict'));
         pairs.push(await startPtyPair('uut-term'));
 
-        serialServers.push(openJsonResponder(pairs[0].simPath, async(request) => fixtureApi.handle(request)));
-        serialServers.push(openJsonResponder(pairs[1].simPath, async(request) => uutApi.handle(request)));
+        serialServers.push(
+            openJsonResponder(pairs[0].simPath, async request => fixtureApi.handle(request))
+        );
+        serialServers.push(
+            openJsonResponder(pairs[1].simPath, async request => uutApi.handle(request))
+        );
 
         restServer = await startRestApiServer('127.0.0.1', 18081, teensy2RestApi, logger);
 
@@ -174,12 +179,12 @@ async function main() {
         process.exitCode = 0;
     } finally {
         if (restServer) {
-            await new Promise((resolve) => restServer.close(resolve));
+            await new Promise(resolve => restServer.close(resolve));
         }
 
         for (const server of serialServers) {
             if (server && server.port && server.port.isOpen) {
-                await new Promise((resolve) => server.port.close(() => resolve()));
+                await new Promise(resolve => server.port.close(() => resolve()));
             }
         }
 
@@ -191,7 +196,7 @@ async function main() {
     }
 }
 
-main().catch((err) => {
+main().catch(err => {
     console.error(err);
     process.exit(1);
 });

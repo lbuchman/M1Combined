@@ -15,10 +15,10 @@ module.exports = class IctTestRunner {
     }
 
     /**
-      * @public
-      *
-      * @param {object} log
-      */
+     * @public
+     *
+     * @param {object} log
+     */
     async init(teensyDev, teensyDevBaudrate, m1Dev, m1DevBaudrate) {
         await testBoardLink.initSerial(teensyDev, teensyDevBaudrate, this.logger);
         this.m1Dev = m1Dev;
@@ -26,14 +26,24 @@ module.exports = class IctTestRunner {
     }
 
     /**
-      * @public
-      *
-      * @param
-      */
+     * @public
+     *
+     * @param
+     */
     async program(programmer, serial, vendorSite, eeepromoverwrite = false) {
         try {
             this.logger.info('Updating I2C EEPROM ...');
-            await common.initializeTestFixture(null, programmer, true, false, this.stm32, this.m1Dev, this.logger, null, null);
+            await common.initializeTestFixture(
+                null,
+                programmer,
+                true,
+                false,
+                this.stm32,
+                this.m1Dev,
+                this.logger,
+                null,
+                null
+            );
             return await eeprom.updateEEPRom(serial, eeepromoverwrite, vendorSite, this.logger);
         } catch (err) {
             // if (err.stack) this.logger.debug(err.stack);
@@ -46,14 +56,24 @@ module.exports = class IctTestRunner {
     }
 
     /**
-      * @public
-      *
-      * @param
-      */
+     * @public
+     *
+     * @param
+     */
     async print(programmer) {
         try {
             this.logger.debug('reading I2C EEPROM ...');
-            await common.initializeTestFixture(null, programmer, true, false, this.stm32, this.m1Dev, this.logger, null, null);
+            await common.initializeTestFixture(
+                null,
+                programmer,
+                true,
+                false,
+                this.stm32,
+                this.m1Dev,
+                this.logger,
+                null,
+                null
+            );
             return eeprom.printEEPRomData(this.logger, console);
         } catch (err) {
             this.logger.error(err);
@@ -67,14 +87,24 @@ module.exports = class IctTestRunner {
     }
 
     /**
-      * @public
-      *
-      * @param
-      */
+     * @public
+     *
+     * @param
+     */
     async get(programmer) {
         try {
             this.logger.debug('reading I2C EEPROM ...');
-            await common.initializeTestFixture(null, programmer, true, false, this.stm32, this.m1Dev, this.logger, null, null);
+            await common.initializeTestFixture(
+                null,
+                programmer,
+                true,
+                false,
+                this.stm32,
+                this.m1Dev,
+                this.logger,
+                null,
+                null
+            );
             return eeprom.getEEPRomData(this.logger, console);
         } catch (err) {
             this.logger.error(err);

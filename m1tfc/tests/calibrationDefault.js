@@ -19,17 +19,28 @@ module.exports = class CalibrationData {
         };
 
         this.strikeReg = [
-            { name: 'SW1601.6', funcName: 'STRIKE1_KICKER_EN', functnameAux: 'STRIKE1_KICKER_POWER', voltage: 28.0, scale: 5.6 },
-            { name: 'SW1602.6', funcName: 'STRIKE2_KICKER_EN', functnameAux: 'STRIKE2_KICKER_POWER', voltage: 28.0, scale: 5.6 }
+            {
+                name: 'SW1601.6',
+                funcName: 'STRIKE1_KICKER_EN',
+                functnameAux: 'STRIKE1_KICKER_POWER',
+                voltage: 28.0,
+                scale: 5.6
+            },
+            {
+                name: 'SW1602.6',
+                funcName: 'STRIKE2_KICKER_EN',
+                functnameAux: 'STRIKE2_KICKER_POWER',
+                voltage: 28.0,
+                scale: 5.6
+            }
         ];
 
         this.ribbonCableA2DPins = [
-            { name: 'TP1801', voltage: 2.70, scale: 1.0325 },
-            { name: 'TP1802', voltage: 2.70, scale: 1.0125 },
-            { name: 'TP1901', voltage: 2.70, scale: 1.0125 },
-            { name: 'TP1902', voltage: 2.70, scale: 1.0125 }
+            { name: 'TP1801', voltage: 2.7, scale: 1.0325 },
+            { name: 'TP1802', voltage: 2.7, scale: 1.0125 },
+            { name: 'TP1901', voltage: 2.7, scale: 1.0125 },
+            { name: 'TP1902', voltage: 2.7, scale: 1.0125 }
         ];
-
 
         this.testPointsM1 = [
             { name: 'TP025', voltage: 5, scale: 1 },
@@ -71,7 +82,6 @@ module.exports = class CalibrationData {
         this.boardId = boardId;
     }
 
-
     async initConfigFile() {
         this.config = await config.getConfig({});
         if (this.boardId === 255) {
@@ -106,7 +116,6 @@ module.exports = class CalibrationData {
         return this.strikeReg;
     }
 
-
     setTestPointsMnp(value) {
         this.testPointsMnp = value;
     }
@@ -122,7 +131,6 @@ module.exports = class CalibrationData {
     setStrikeReg(value) {
         this.strikeReg = value;
     }
-
 
     async saveConfigFile() {
         this.defaults.testPointsMnp = this.testPointsMnp;

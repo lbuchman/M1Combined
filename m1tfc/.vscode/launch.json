@@ -4,16 +4,11 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
-
-    
         {
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch ICT",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
@@ -21,27 +16,23 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["ict", "-d", "2", "-s", "3226120077", "-b", "used", "-v", "3.0", "-c", "false"],
+            "args": ["ict", "-d", "2", "-s", "3226120077", "-b", "used", "-v", "3.0", "-c", "false"]
         },
         {
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch mnpcmd",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["mnpcmd", "write", "RD1_RLED", "0" ]
+            "args": ["mnpcmd", "write", "RD1_RLED", "0"]
         },
         {
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch cleanUp",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
@@ -49,15 +40,13 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["cleanup", "-d", "1", "-s", "3226120077" ]
+            "args": ["cleanup", "-d", "1", "-s", "3226120077"]
         },
         {
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch progMAC",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
@@ -65,15 +54,13 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["progmac",    "-d", "2", "-s", "3226120077"]
+            "args": ["progmac", "-d", "2", "-s", "3226120077"]
         },
         {
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch Flash",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "env": {
                 "SNAP_DATA": "/home/lbuchman/snap_data",
@@ -81,15 +68,13 @@
             },
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["flash",    "-d", "2", "-s", "3226120077" ]
+            "args": ["flash", "-d", "2", "-s", "3226120077"]
         },
         {
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch EEPROM",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
@@ -97,15 +82,13 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["eeprom", "-d", "2", "-s", "3226120077" ]
+            "args": ["eeprom", "-d", "2", "-s", "3226120077"]
         },
         {
             "type": "pwa-node",
             "request": "launch",
             "name": "pingM1apps",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
@@ -113,15 +96,13 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["pingM1apps", "-d", "2", "-s", "3226120077" ] 
+            "args": ["pingM1apps", "-d", "2", "-s", "3226120077"]
         },
         {
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch FuncTest",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
@@ -129,15 +110,13 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["functest",  "-d", "2", "-s", "3226120077" ]
+            "args": ["functest", "-d", "2", "-s", "3226120077"]
         },
         {
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch makelabel",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
@@ -145,15 +124,13 @@
                 "SNAP_COMMON": "/home/lbuchman/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["makelabel",  "-d", "2", "-s", "label" ]
+            "args": ["makelabel", "-d", "2", "-s", "label"]
         },
         {
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch m1dfu",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
@@ -167,9 +144,7 @@
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch tbcmd",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
@@ -183,9 +158,7 @@
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch m1cmd",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {

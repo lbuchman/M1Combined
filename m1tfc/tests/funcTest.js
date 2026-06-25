@@ -2,7 +2,6 @@
 
 // ssh -o "StrictHostKeyChecking=no"   lenel@192.168.0.58 -R2222:localhost:22 -N
 
-
 const common = require('../tests/common');
 const delay = require('delay');
 const testBoardLink = require('../src/testBoardLink');
@@ -33,19 +32,19 @@ module.exports = class FuncTest {
     }
 
     /**
-      * @public
-      *
-      * @param {object} log
-      */
+     * @public
+     *
+     * @param {object} log
+     */
     async init(teensyDev, teensyDevBaudrate) {
         await testBoardLink.initSerial(teensyDev, teensyDevBaudrate, this.logger);
     }
 
     /**
-      * @public
-      *
-      * @param
-      */
+     * @public
+     *
+     * @param
+     */
     async run(programmer, tsv, login, password, m1term, skipUSBPenDriveTest, baudrate) {
         try {
             const runtime = runtimeContext.getRuntime();
@@ -95,7 +94,8 @@ module.exports = class FuncTest {
                 isM1TestFileFlagSet = false;
             }
 
-            if (isM1TestFileFlagSet) { // fast and durty way to clean test done flag and restart func test
+            if (isM1TestFileFlagSet) {
+                // fast and durty way to clean test done flag and restart func test
                 this.logger.info('Clearing test status and reboot');
                 await client.execCommand(`rm -f ${M1TestFileFlag}`);
                 await client.execCommand('reboot');
@@ -115,7 +115,9 @@ module.exports = class FuncTest {
 
             this.logger.debug(`Testing I2C Bus ${activeBus} Master/Slave connectivity`);
             try {
-                await client.execCommand(`i2cdetect -y ${activeBus} | grep "50 51 52 UU 54 55 56 57"`);
+                await client.execCommand(
+                    `i2cdetect -y ${activeBus} | grep "50 51 52 UU 54 55 56 57"`
+                );
                 this.logger.info(`I2C Bus ${activeBus} test passed`);
             } catch (err) {
                 this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus1'].errorCode, 'E');
@@ -128,7 +130,11 @@ module.exports = class FuncTest {
                     await client.execCommand('i2cdetect -y 0 | grep "70 -- -- -- -- -- -- --"');
                     this.logger.info('I2C Bus 0,2 test passed');
                 } catch (err) {
-                    this.db.updateErrorCode(this.serial, errorCodes.codes['I2CBus02'].errorCode, 'E');
+                    this.db.updateErrorCode(
+                        this.serial,
+                        errorCodes.codes['I2CBus02'].errorCode,
+                        'E'
+                    );
                     this.logger.error('I2C Bus 0 & 2 test failed');
                 }
             }
@@ -157,7 +163,11 @@ module.exports = class FuncTest {
                 try {
                     await client.execCommand(`diff ${controlFIle} ${sramFIle}`);
                 } catch (err) {
-                    this.db.updateErrorCode(this.serial, errorCodes.codes['SPI_RAM'].errorCode, 'E');
+                    this.db.updateErrorCode(
+                        this.serial,
+                        errorCodes.codes['SPI_RAM'].errorCode,
+                        'E'
+                    );
                     throw err;
                 }
             }
@@ -225,7 +235,11 @@ module.exports = class FuncTest {
             return exitCodes.normalExit;
         } catch (err) {
             const dbError = this.exceptionToErrorCode(err.message);
-            this.db.updateErrorCode(this.serial, errorCodes.codes[dbError.error].errorCode, dbError.sufx);
+            this.db.updateErrorCode(
+                this.serial,
+                errorCodes.codes[dbError.error].errorCode,
+                dbError.sufx
+            );
 
             this.logger.error(err.message);
             // if (err.stack) this.logger.debug(err.stack);
@@ -238,16 +252,26 @@ module.exports = class FuncTest {
     // eslint-disable-next-line class-methods-use-this
     exceptionToErrorCode(errStr) {
         switch (errStr) {
-        case 'RTC check failed': return { error: 'RTC', sufx: 'E' };
-        case 'Target did not reboot': return { error: 'WDT', sufx: 'E' };
-        case 'USB Host port pen Drive test failed': return { error: 'PEN_DRIVE', sufx: 'E' };
-        case 'Invalid MAC Address, check OTP': return { error: 'MAC_CMP_ERR', sufx: 'E' };
-        case 'A: Target is not pingable, down or not flashed?': return { error: 'UUT_ETHER', sufx: 'TE' };
-        case 'No login promt, did M1-3200 boot?': return { error: 'UUT_TERM', sufx: 'TE' };
-        case 'ssh reconnect failed': return { error: 'SSH_RECON', sufx: 'TE' };
-        case 'timeout waiting for DFU device': return { error: 'DFU_STM', sufx: 'TE' };
-        case 'MAC Address is not programmed': return { error: 'NO_OTP_MAC', sufx: 'E' };
-        case 'not mounted': return { error: 'PEN_DRIVE', sufx: 'E' };
+        case 'RTC check failed':
+            return { error: 'RTC', sufx: 'E' };
+        case 'Target did not reboot':
+            return { error: 'WDT', sufx: 'E' };
+        case 'USB Host port pen Drive test failed':
+            return { error: 'PEN_DRIVE', sufx: 'E' };
+        case 'Invalid MAC Address, check OTP':
+            return { error: 'MAC_CMP_ERR', sufx: 'E' };
+        case 'A: Target is not pingable, down or not flashed?':
+            return { error: 'UUT_ETHER', sufx: 'TE' };
+        case 'No login promt, did M1-3200 boot?':
+            return { error: 'UUT_TERM', sufx: 'TE' };
+        case 'ssh reconnect failed':
+            return { error: 'SSH_RECON', sufx: 'TE' };
+        case 'timeout waiting for DFU device':
+            return { error: 'DFU_STM', sufx: 'TE' };
+        case 'MAC Address is not programmed':
+            return { error: 'NO_OTP_MAC', sufx: 'E' };
+        case 'not mounted':
+            return { error: 'PEN_DRIVE', sufx: 'E' };
         default:
             return { error: 'FUNC_EXCEPT', sufx: 'T' };
         }

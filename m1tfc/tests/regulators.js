@@ -88,7 +88,9 @@ async function checkLeverState(logger, db) {
 
     try {
         const leverVoltage = await readVoltageFromTestPoint(LEVERAGE_LOCK_VOLTAGE.name);
-        const leverLocked = Math.abs(leverVoltage - LEVERAGE_LOCK_VOLTAGE.voltage) <= LEVERAGE_LOCK_VOLTAGE.tolerance;
+        const leverLocked =
+            Math.abs(leverVoltage - LEVERAGE_LOCK_VOLTAGE.voltage) <=
+            LEVERAGE_LOCK_VOLTAGE.tolerance;
 
         if (!leverLocked) {
             const errorCode = errorCodes.codes[LEVERAGE_LOCK_VOLTAGE.name]?.errorCode;
@@ -113,7 +115,15 @@ async function checkLeverState(logger, db) {
 /**
  * Generic voltage test with optional calibration
  */
-async function testVoltagePoint(testPoint, tolerance, context, logger, db, calibrate, calibrateData) {
+async function testVoltagePoint(
+    testPoint,
+    tolerance,
+    context,
+    logger,
+    db,
+    calibrate,
+    calibrateData
+) {
     const runtime = context.runtime;
     const measuredVoltage = await readVoltageFromTestPoint(testPoint.name);
     const error = calculateVoltageError(measuredVoltage, testPoint.voltage, testPoint.scale);
@@ -125,9 +135,9 @@ async function testVoltagePoint(testPoint, tolerance, context, logger, db, calib
         if (calibrate) {
             logger.error(
                 `Voltage out of tolerance (cannot calibrate). TP=${testPoint.name}, ` +
-                `measured=${(measuredVoltage * testPoint.scale).toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
-                `expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
-                `error=${(error * 100).toFixed(1)}%`
+                    `measured=${(measuredVoltage * testPoint.scale).toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                    `expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                    `error=${(error * 100).toFixed(1)}%`
             );
             return false;
         }
@@ -137,8 +147,8 @@ async function testVoltagePoint(testPoint, tolerance, context, logger, db, calib
         }
         throw new Error(
             `Failed: Voltage out of tolerance. TP=${testPoint.name}, ` +
-            `measured=${(measuredVoltage * testPoint.scale).toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
-            `expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V`
+                `measured=${(measuredVoltage * testPoint.scale).toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                `expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V`
         );
     }
 
@@ -150,9 +160,9 @@ async function testVoltagePoint(testPoint, tolerance, context, logger, db, calib
     } else {
         logger.info(
             `Passed TP=${testPoint.name}. ` +
-            `Measured=${(measuredVoltage * testPoint.scale).toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
-            `Expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
-            `Error=${(error * 100).toFixed(1)}%`
+                `Measured=${(measuredVoltage * testPoint.scale).toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                `Expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                `Error=${(error * 100).toFixed(1)}%`
         );
     }
 
@@ -168,7 +178,15 @@ async function testDDRVoltage(tolerance, logger, db, calibrate, calibrateData) {
     const errorCode = errorCodes.codes[ddrVoltage.name]?.errorCode;
 
     try {
-        return await testVoltagePoint(ddrVoltage, tolerance, context, logger, db, calibrate, calibrateData);
+        return await testVoltagePoint(
+            ddrVoltage,
+            tolerance,
+            context,
+            logger,
+            db,
+            calibrate,
+            calibrateData
+        );
     } catch (error) {
         if (errorCode && db) {
             db.updateErrorCode(context.runtime.serial, errorCode, 'T');
@@ -189,9 +207,10 @@ async function cellBatTest(logger, db, calibrate, calibrateData) {
     }
 
     const batConfig = calibrateData.coinCellBattery;
-    const minVoltage = runtime.cellBatTol === 'used'
-        ? calibrateData.defaults.coinCellBattery.minVoltageAged
-        : calibrateData.defaults.coinCellBattery.minVoltageNew;
+    const minVoltage =
+        runtime.cellBatTol === 'used'
+            ? calibrateData.defaults.coinCellBattery.minVoltageAged
+            : calibrateData.defaults.coinCellBattery.minVoltageNew;
 
     try {
         const measuredVoltage = await readVoltageFromTestPoint(batConfig.name);
@@ -214,15 +233,15 @@ async function cellBatTest(logger, db, calibrate, calibrateData) {
             }
             throw new Error(
                 'Coin cell battery voltage below minimum. ' +
-                `Measured=${scaledVoltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
-                `Minimum=${minVoltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V`
+                    `Measured=${scaledVoltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                    `Minimum=${minVoltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V`
             );
         }
 
         logger.info(
             'Passed coin cell battery test. ' +
-            `Measured=${scaledVoltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
-            `Minimum=${minVoltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V`
+                `Measured=${scaledVoltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                `Minimum=${minVoltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V`
         );
         return true;
     } catch (error) {
@@ -282,7 +301,15 @@ async function strikeBoostReg(tolerance, logger, db, calibrate, calibrateData) {
             await disableCapCharging(testPoint, logger);
 
             // Test voltage
-            const testPassed = await testVoltagePoint(testPoint, tolerance, context, logger, db, calibrate, calibrateData);
+            const testPassed = await testVoltagePoint(
+                testPoint,
+                tolerance,
+                context,
+                logger,
+                db,
+                calibrate,
+                calibrateData
+            );
             if (!testPassed) {
                 allTestsPassed = false;
             }
@@ -306,7 +333,6 @@ async function strikeBoostReg(tolerance, logger, db, calibrate, calibrateData) {
     return allTestsPassed;
 }
 
-
 /**
  * Test all configured voltage test points
  */
@@ -324,7 +350,15 @@ async function test(tolerance, logger, db, calibrate, calibrateData) {
 
         for (const testPoint of testPoints) {
             try {
-                const testPassed = await testVoltagePoint(testPoint, tolerance, context, logger, db, calibrate, calibrateData);
+                const testPassed = await testVoltagePoint(
+                    testPoint,
+                    tolerance,
+                    context,
+                    logger,
+                    db,
+                    calibrate,
+                    calibrateData
+                );
                 if (!testPassed) {
                     allTestsPassed = false;
                 }

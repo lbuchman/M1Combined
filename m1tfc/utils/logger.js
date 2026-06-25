@@ -9,16 +9,16 @@ const { mkdirp } = require('mkdirp');
 
 let logger;
 
-const addCallerInfo = winston.format((info) => {
+const addCallerInfo = winston.format(info => {
     const err = new Error();
     const stack = err.stack.split('\n');
-    const callerLine = stack.find(line =>
-        line.includes('.js:') &&
-        !line.includes('node_modules') &&
-        !line.includes('logger.js')
+    const callerLine = stack.find(
+        line =>
+            line.includes('.js:') && !line.includes('node_modules') && !line.includes('logger.js')
     );
     if (callerLine) {
-        const match = callerLine.match(/\((.+):(\d+):\d+\)/) || callerLine.match(/at (.+):(\d+):\d+/);
+        const match =
+            callerLine.match(/\((.+):(\d+):\d+\)/) || callerLine.match(/at (.+):(\d+):\d+/);
         if (match) {
             const file = match[1].split('/').slice(-2).join('/');
             info.caller = `${file}:${match[2]}`;
@@ -28,11 +28,11 @@ const addCallerInfo = winston.format((info) => {
 });
 
 /** path.join(configData.logdir, `${options.serial}.log`)
-* @public
-* Gets the logger.
-* @param {string} name The logger name.
-* @returns {object} A logger object.
-*/
+ * @public
+ * Gets the logger.
+ * @param {string} name The logger name.
+ * @returns {object} A logger object.
+ */
 function getLogger(name, test, serial, logFilePath, logdebug) {
     let consoleLogLevel;
     const logFileDir = `${logFilePath}/logs/${serial}`;
@@ -47,7 +47,8 @@ function getLogger(name, test, serial, logFilePath, logdebug) {
     case '2':
         consoleLogLevel = 'debug';
         break;
-    default: throw new Error('Invalid debug level, shall be 0-2');
+    default:
+        throw new Error('Invalid debug level, shall be 0-2');
     }
 
     const lofFileNamePathDebug = path.join(logFileDir, `${serial}-debug.log`);
@@ -64,7 +65,10 @@ function getLogger(name, test, serial, logFilePath, logdebug) {
             addCallerInfo(),
             winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
             winston.format.align(),
-            winston.format.printf(i => `[${i.timestamp}] [${name}, ${test}] [${i.caller || '?'}] ${i.level}: ${msg(i)}`)
+            winston.format.printf(
+                i =>
+                    `[${i.timestamp}] [${name}, ${test}] [${i.caller || '?'}] ${i.level}: ${msg(i)}`
+            )
         ),
         transports: [
             new winston.transports.Console({ level: consoleLogLevel }),

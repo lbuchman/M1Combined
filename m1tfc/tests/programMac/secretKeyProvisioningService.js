@@ -35,28 +35,51 @@ module.exports = class SecretKeyProvisioningService {
 
     // eslint-disable-next-line class-methods-use-this
     isBlank(readBackSecretKey) {
-        return readBackSecretKey.word3 === '0x00000000'
-            && readBackSecretKey.word2 === '0x00000000'
-            && readBackSecretKey.word1 === '0x00000000'
-            && readBackSecretKey.word0 === '0x00000000';
+        return (
+            readBackSecretKey.word3 === '0x00000000' &&
+            readBackSecretKey.word2 === '0x00000000' &&
+            readBackSecretKey.word1 === '0x00000000' &&
+            readBackSecretKey.word0 === '0x00000000'
+        );
     }
 
     // eslint-disable-next-line class-methods-use-this
     async programAndVerifySecretKey(programmer, otpTransport, secretKey) {
-        await otpTransport.writeLockedWord(programmer, utils.otp60, `0x${secretKey.word0.toString(16)}`);
-        await otpTransport.writeLockedWord(programmer, utils.otp61, `0x${secretKey.word1.toString(16)}`);
-        await otpTransport.writeLockedWord(programmer, utils.otp62, `0x${secretKey.word2.toString(16)}`);
-        await otpTransport.writeLockedWord(programmer, utils.otp63, `0x${secretKey.word3.toString(16)}`);
+        await otpTransport.writeLockedWord(
+            programmer,
+            utils.otp60,
+            `0x${secretKey.word0.toString(16)}`
+        );
+        await otpTransport.writeLockedWord(
+            programmer,
+            utils.otp61,
+            `0x${secretKey.word1.toString(16)}`
+        );
+        await otpTransport.writeLockedWord(
+            programmer,
+            utils.otp62,
+            `0x${secretKey.word2.toString(16)}`
+        );
+        await otpTransport.writeLockedWord(
+            programmer,
+            utils.otp63,
+            `0x${secretKey.word3.toString(16)}`
+        );
 
         const word0 = await otpTransport.readWord(programmer, utils.otp60);
         const word1 = await otpTransport.readWord(programmer, utils.otp61);
         const word2 = await otpTransport.readWord(programmer, utils.otp62);
         const word3 = await otpTransport.readWord(programmer, utils.otp63);
 
-        const isVerified = utils.getWordData(word3, utils.otp63).toLowerCase() === `0x${secretKey.word3.toString(16)}`
-            && utils.getWordData(word2, utils.otp62).toLowerCase() === `0x${secretKey.word2.toString(16)}`
-            && utils.getWordData(word1, utils.otp61).toLowerCase() === `0x${secretKey.word1.toString(16)}`
-            && utils.getWordData(word0, utils.otp60).toLowerCase() === `0x${secretKey.word0.toString(16)}`;
+        const isVerified =
+            utils.getWordData(word3, utils.otp63).toLowerCase() ===
+                `0x${secretKey.word3.toString(16)}` &&
+            utils.getWordData(word2, utils.otp62).toLowerCase() ===
+                `0x${secretKey.word2.toString(16)}` &&
+            utils.getWordData(word1, utils.otp61).toLowerCase() ===
+                `0x${secretKey.word1.toString(16)}` &&
+            utils.getWordData(word0, utils.otp60).toLowerCase() ===
+                `0x${secretKey.word0.toString(16)}`;
 
         return isVerified;
     }

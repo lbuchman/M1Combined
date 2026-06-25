@@ -10,7 +10,8 @@ const path = require('path');
  */
 function registerAll(program) {
     const commandsDir = __dirname;
-    const files = fs.readdirSync(commandsDir)
+    const files = fs
+        .readdirSync(commandsDir)
         .filter(f => f.endsWith('.js') && f !== 'index.js')
         .sort();
 

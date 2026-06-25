@@ -23,7 +23,8 @@ const NETWORK_CONFIG = {
 const FIRMWARE_CONFIG = {
     ICT_FW_FILE: 'fsbl.stm32',
     FW_DIR: 'stm32mp15-lenels2-m1',
-    LAYOUT_FILE: 'flashlayout_st-ls2m1-image-core/trusted/FlashLayout_emmc_stm32mp151f-ls2m1-trusted.tsv'
+    LAYOUT_FILE:
+        'flashlayout_st-ls2m1-image-core/trusted/FlashLayout_emmc_stm32mp151f-ls2m1-trusted.tsv'
 };
 
 const SERIAL_CONFIG = {

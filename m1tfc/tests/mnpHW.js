@@ -55,17 +55,17 @@ function getIoMap() {
 
 function getCommand(action, signalNameOrTespoint, value, log) {
     if (action === 'printio') {
-        mnpIOMap.forEach((item) => {
+        mnpIOMap.forEach(item => {
             log.info(JSON.stringify(item));
         });
         throw new Error('No Error');
     }
-    let output = mnpIOMap.filter((val) => {
+    let output = mnpIOMap.filter(val => {
         return val.name === signalNameOrTespoint;
     });
 
     if (!output.length) {
-        output = mnpIOMap.filter((val) => {
+        output = mnpIOMap.filter(val => {
             return val.testPoint === signalNameOrTespoint;
         });
     }

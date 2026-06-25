@@ -39,15 +39,15 @@ async function testDDR3Test(ddrblocks, logger, db) {
 
     let passed = true;
 
-    if (!await testDDRDatabus()) {
+    if (!(await testDDRDatabus())) {
         passed = false;
     }
 
-    if (!await testDDRAddrbus()) {
+    if (!(await testDDRAddrbus())) {
         passed = false;
     }
 
-    if (!await testDDRtest(ddrblocks, logger)) {
+    if (!(await testDDRtest(ddrblocks, logger))) {
         passed = false;
     }
 

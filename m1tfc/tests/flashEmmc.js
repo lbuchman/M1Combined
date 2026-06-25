@@ -19,28 +19,45 @@ module.exports = class ProgramMac {
     }
 
     /**
-      * @public
-      *
-      * @param {object} log
-      */
+     * @public
+     *
+     * @param {object} log
+     */
     async init(teensyDev, teensyDevBaudrate) {
         await testBoardLink.initSerial(teensyDev, teensyDevBaudrate, this.logger);
     }
 
     /**
-      * @public
-      *
-      * @param
-      */
+     * @public
+     *
+     * @param
+     */
     async run(programmer) {
         try {
             const runtime = runtimeContext.getRuntime();
             const fwDir = runtime.fwDir;
             const db = sqliteDriver.initialize(this.logger);
             db.updateSerial(this.serial);
-            await common.initializeTestFixture(null, programmer, true, false, null, null, this.logger, null, null);
+            await common.initializeTestFixture(
+                null,
+                programmer,
+                true,
+                false,
+                null,
+                null,
+                this.logger,
+                null,
+                null
+            );
             this.logger.debug('Programming TSV file ...');
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -w ${this.tsv}`, this.logger, false, false, 1024 * 1024 * 10, fwDir);
+            await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -w ${this.tsv}`,
+                this.logger,
+                false,
+                false,
+                1024 * 1024 * 10,
+                fwDir
+            );
             try {
                 db.updateFlashStatus(this.serial, utils.boolToInt(true));
             } catch (err) {

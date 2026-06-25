@@ -16,10 +16,10 @@ const progopt = '-s 0x1';
 const dfuTimeout = 20000;
 
 /** wait till DFU device is available, or timeout in dfuTimeout
-  * @public
-  *
-  * @param
-  */
+ * @public
+ *
+ * @param
+ */
 async function waitDFU(programmer, logger) {
     const pullTime = 1000;
     let count = dfuTimeout / pullTime;
@@ -32,7 +32,10 @@ async function waitDFU(programmer, logger) {
             }
             count -= 1;
             const retValue = await os.executeShellCommand(`${programmer} -l`, logger);
-            if ((retValue && retValue.includes('DFU in HS Mode')) || (retValue.includes('DFU in FS Mode'))) {
+            if (
+                (retValue && retValue.includes('DFU in HS Mode')) ||
+                retValue.includes('DFU in FS Mode')
+            ) {
                 resolve(0);
                 clearInterval(timeoutHandle);
             }
@@ -60,7 +63,11 @@ async function programStm(programmer, stm32, m1Dev, logger) {
     logger.debug('Programming UUT ICT FW into SRAM...');
     await waitDFU(programmer, logger);
     await delay(300);
-    os.executeShellCommand(`${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`, logger, true);
+    os.executeShellCommand(
+        `${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`,
+        logger,
+        true
+    );
     await delay(1000);
     logger.debug('Programming Done');
     await delay(100); // let M1 start
@@ -70,7 +77,17 @@ async function programStm(programmer, stm32, m1Dev, logger) {
     logger.debug(`Target ICT FW Rev - ${fwRev}`);
 }
 
-async function initializeTestFixture(config, programmer, programSTM, initAndQuit, stm32, m1Dev, logger, calibrat, calibrationData) {
+async function initializeTestFixture(
+    config,
+    programmer,
+    programSTM,
+    initAndQuit,
+    stm32,
+    m1Dev,
+    logger,
+    calibrat,
+    calibrationData
+) {
     await testBoardLink.retrieveIoDef();
     testBoardLink.getIoDef();
 
@@ -104,7 +121,11 @@ async function initializeTestFixture(config, programmer, programSTM, initAndQuit
         await waitDFU(programmer, logger);
         await delay(2000); // not sure why but prog will fail without delay
         logger.debug('Programming UUT ICT FW into SRAM...');
-        os.executeShellCommand(`${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`, logger, true);
+        os.executeShellCommand(
+            `${programmer}  -c port=usb1 -d ${stm32} ${progPart} ${progopt}`,
+            logger,
+            true
+        );
         await delay(100);
         logger.debug('Programming Done');
         await delay(1000); // let M1 start
@@ -121,14 +142,12 @@ async function testingDoneSuccess() {
     await buzzer.buzzerBeepSuccess();
 }
 
-
 // eslint-disable-next-line class-methods-use-this
 async function testEndSuccess() {
     // await buzzer.buzzerBeepSuccess();
     await testBoardLink.targetPower(false);
     await testBoardLink.batteryOn(false);
 }
-
 
 async function testFailed() {
     try {
@@ -170,5 +189,4 @@ module.exports = {
     programStm,
     getICTFWRev,
     waitDFU
-
 };

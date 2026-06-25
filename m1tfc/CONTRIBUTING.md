@@ -19,12 +19,14 @@ npm install
 This project uses ESLint and Prettier.
 
 Check before committing:
+
 ```bash
 npm run lint
 npm run format
 ```
 
 Auto-fix most issues:
+
 ```bash
 npm run lint:fix
 npm run format:fix
@@ -48,10 +50,11 @@ Unit tests are in `__tests__/`. They do **not** require hardware.
 'use strict';
 
 function register(program) {
-    program.command('yourcommand')
+    program
+        .command('yourcommand')
         .description('What it does')
         .option('-s, --serial <string>', 'vendor serial number')
-        .action(async (options) => {
+        .action(async options => {
             // implementation
         });
 }
@@ -69,6 +72,7 @@ Use the format: `<type>: <short description>`
 Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 
 Examples:
+
 - `feat: add voltage calibration command`
 - `fix: handle serial port disconnect gracefully`
 - `docs: update README with new options`

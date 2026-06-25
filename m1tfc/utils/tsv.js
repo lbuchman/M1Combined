@@ -24,7 +24,6 @@ function makeMinimalTsv(tsv) {
     return outFile;
 }
 
-
 module.exports = {
     makeMinimalTsv
 };

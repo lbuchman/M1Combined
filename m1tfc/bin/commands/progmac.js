@@ -9,11 +9,12 @@ const errorCodes = require('../errorCodes');
 const { loadConfig, errorAndExit, applyRuntime } = require('../commandSupport');
 
 function register(program) {
-    program.command('progmac')
+    program
+        .command('progmac')
         .description('program MAC to MP1 OTP, cannot be undone')
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug')
-        .action(async(options) => {
+        .action(async options => {
             const configData = await loadConfig();
             let logfile;
             let db;
@@ -22,7 +23,13 @@ function register(program) {
                 if (!options.serial) {
                     await errorAndExit('must define vendor serial number', console);
                 }
-                logfile = logger.getLogger(options.serial, 'progmac', options.serial, configData.mtfDir, options.debug);
+                logfile = logger.getLogger(
+                    options.serial,
+                    'progmac',
+                    options.serial,
+                    configData.mtfDir,
+                    options.debug
+                );
                 db = sqliteDriver.initialize(logfile);
                 logfile.info('--------------------------------------------');
                 logfile.info('Executing program MAC command ...');

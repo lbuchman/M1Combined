@@ -20,11 +20,23 @@ describe('exitCodes', () => {
 
     test('all expected keys are present', () => {
         const expected = [
-            'normalExit', 'configFileMissing', 'macMissing', 'commandFailed',
-            'ictTestFailed', 'testPointTestFailed', 'programEepromFailed',
-            'programMacFailed', 'tamperSensorTestFailed', 'configVendorSiteMissing',
-            'otpIsNotBlank', 'eepromIsNotBlank', 'notAllTestsPassed',
-            'functTestFailed', 'invalidArgument', 'precheckHWFailed', 'poeTestFailed'
+            'normalExit',
+            'configFileMissing',
+            'macMissing',
+            'commandFailed',
+            'ictTestFailed',
+            'testPointTestFailed',
+            'programEepromFailed',
+            'programMacFailed',
+            'tamperSensorTestFailed',
+            'configVendorSiteMissing',
+            'otpIsNotBlank',
+            'eepromIsNotBlank',
+            'notAllTestsPassed',
+            'functTestFailed',
+            'invalidArgument',
+            'precheckHWFailed',
+            'poeTestFailed'
         ];
         expected.forEach(key => expect(exitCodes).toHaveProperty(key));
     });

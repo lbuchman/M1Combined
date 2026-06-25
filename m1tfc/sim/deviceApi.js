@@ -31,7 +31,7 @@ function createSharedFixtureState() {
         { pinId: 8, pinName: 'J5.3', group: 0, reqValue: 0 }
     ];
 
-    const pinById = new Map(ioDef.map((pin) => [String(pin.pinId), pin]));
+    const pinById = new Map(ioDef.map(pin => [String(pin.pinId), pin]));
     const pinNameToGpio = {
         'J5.18': 'd.5',
         'J5.15': 'c.6',
@@ -59,7 +59,12 @@ function createFixtureApi(state) {
                 return state.ioDef;
             }
 
-            if (cmd === 'targetpoweron' || cmd === 'targetpoweroff' || cmd === 'batteryon' || cmd === 'batteryoff') {
+            if (
+                cmd === 'targetpoweron' ||
+                cmd === 'targetpoweroff' ||
+                cmd === 'batteryon' ||
+                cmd === 'batteryoff'
+            ) {
                 return ok();
             }
 
@@ -74,7 +79,7 @@ function createFixtureApi(state) {
                     return fail(`unknown pinId ${pinId}`);
                 }
                 const gpioKey = state.pinNameToGpio[pin.pinName];
-                const level = gpioKey ? (state.gpioState.get(gpioKey) || 0) : 0;
+                const level = gpioKey ? state.gpioState.get(gpioKey) || 0 : 0;
                 return ok({ value: level ? 3.3 : 0.0 });
             }
 
@@ -141,7 +146,7 @@ function startRestApiServer(host, port, api, logger = console) {
         }
 
         let body = '';
-        req.on('data', (chunk) => {
+        req.on('data', chunk => {
             body += chunk.toString();
         });
 

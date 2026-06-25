@@ -13,7 +13,8 @@ const configuration = {
     mtfDir: `${process.env.HOME}/m1mtf`,
     ictFWFilePath: 'fsbl.stm32',
     fwDir: 'stm32mp15-lenels2-m1',
-    layoutFilePath: 'flashlayout_st-ls2m1-image-core/trusted/FlashLayout_emmc_stm32mp151f-ls2m1-trusted.tsv',
+    layoutFilePath:
+        'flashlayout_st-ls2m1-image-core/trusted/FlashLayout_emmc_stm32mp151f-ls2m1-trusted.tsv',
     programmingCommand: `${process.env.HOME}/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI`,
     m1SerialDev: '/dev/ttyUSB0',
     m1defaultIP: '192.168.0.251',
@@ -37,7 +38,13 @@ const configuration = {
     productName: 'm1-3200'
 };
 
-async function exitCommandFailure(err, log = console, exitCode = exitCodes.commandFailed, logMessageOnly = false, delayMs = 100) {
+async function exitCommandFailure(
+    err,
+    log = console,
+    exitCode = exitCodes.commandFailed,
+    logMessageOnly = false,
+    delayMs = 100
+) {
     if (err) {
         if (logMessageOnly && err.message) {
             log.error(err.message);
@@ -77,9 +84,24 @@ function initDb(logFile) {
     return sqliteDriver.initialize(logFile);
 }
 
-async function createIctRunner(configData, logFile, ictFwFilePath = `${configData.mtfDir}/${configData.ictFWFilePath}`) {
-    const ictTestRunner = new IctTestRunner(ictFwFilePath, configData.tolerance, logFile, configData, false);
-    await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+async function createIctRunner(
+    configData,
+    logFile,
+    ictFwFilePath = `${configData.mtfDir}/${configData.ictFWFilePath}`
+) {
+    const ictTestRunner = new IctTestRunner(
+        ictFwFilePath,
+        configData.tolerance,
+        logFile,
+        configData,
+        false
+    );
+    await ictTestRunner.init(
+        configData.testBoardTerminalDev,
+        configData.serialBaudrate,
+        configData.m1SerialDev,
+        configData.serialBaudrate
+    );
     await delay(400);
     return ictTestRunner;
 }

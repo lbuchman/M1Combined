@@ -6,7 +6,6 @@ const delay = require('delay');
 const SerialLink = require('./serialLink');
 const runtimeContext = require('../utils/runtimeContext');
 
-
 module.exports = class M1TermLink {
     constructor(logger) {
         this.logger = logger;
@@ -16,19 +15,19 @@ module.exports = class M1TermLink {
     }
 
     /**
-      * @public
-      *
-      * @param {object} log
-    */
+     * @public
+     *
+     * @param {object} log
+     */
     async initSerial(devFile, baud, log, dump) {
         await this.serialLink.initSerial(devFile, baud, log, dump);
     }
 
     /**
-      * @public
-      * wait login prompt
-      * @param {object} log
-      */
+     * @public
+     * wait login prompt
+     * @param {object} log
+     */
     async waitLoginPrompt(timeout) {
         if (timeout - new Date() / 1000 > 0) {
             try {
@@ -44,10 +43,10 @@ module.exports = class M1TermLink {
     }
 
     /**
-   * @public
-   * wait login prompt
-   * @param {object} log
-   */
+     * @public
+     * wait login prompt
+     * @param {object} log
+     */
     async logInToTerminal(login, password) {
         await this.serialLink.sendData(`${login}\n\r`, login, 0);
         await delay(500);
@@ -56,10 +55,10 @@ module.exports = class M1TermLink {
     }
 
     /**
-* @public
-* wait login prompt
-* @param {object} log
-*/
+     * @public
+     * wait login prompt
+     * @param {object} log
+     */
     async initTestMode() {
         const runtime = runtimeContext.getRuntime();
         await this.executeCommand('\n\r', 0);
@@ -68,15 +67,18 @@ module.exports = class M1TermLink {
         await delay(1000);
         await this.executeCommand('/etc/init.d/sshd stop', 0);
         await delay(1000);
-        await this.executeCommand('/usr/sbin/sshd -h /var/run/ssh/ssh_host_rsa_key -o MaxSessions=10 -o UsePAM=no -o MaxAuthTries=10', 0);
+        await this.executeCommand(
+            '/usr/sbin/sshd -h /var/run/ssh/ssh_host_rsa_key -o MaxSessions=10 -o UsePAM=no -o MaxAuthTries=10',
+            0
+        );
         await delay(1000);
     }
 
     /**
-      * @public
-      * send command
-      * @param {object} log
-      */
+     * @public
+     * send command
+     * @param {object} log
+     */
     async executeCommand(cmd, timeout = 1000) {
         return this.serialLink.sendData(`${cmd}\n\r`, null, timeout);
     }

@@ -35,7 +35,7 @@ function testLogicalValue(value, voltageLevel, logicalValue) {
 }
 
 function removeNoneAscii(str) {
-    if ((str === null) || (str === '')) {
+    if (str === null || str === '') {
         return '';
     }
     const origStr = str.toString();
@@ -64,8 +64,8 @@ function getCPUSerial(data) {
     return sn;
 }
 
-const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-
+const genRanHex = size =>
+    [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 
 function isMacTheSame(word57, word58, mac) {
     const hexMac = mac.split(':');
@@ -73,7 +73,7 @@ function isMacTheSame(word57, word58, mac) {
     const address58Word = getWordData(word58, otp58).trim();
     const newWord57 = `0x${hexMac[3]}${hexMac[2]}${hexMac[1]}${hexMac[0]}`;
     const newWord58 = `0x0000${hexMac[5]}${hexMac[4]}`;
-    if ((address57Word !== newWord57) || (address58Word !== newWord58)) {
+    if (address57Word !== newWord57 || address58Word !== newWord58) {
         return false;
     }
     return true;
@@ -107,12 +107,14 @@ function getNextMac(MACaddress) {
         hex[p]++;
     }
     plusOne(hex.length - 1);
-    const ret = hex.map((x) => {
-        if (x < 16) {
-            return `0${x.toString(16).slice(-2)}`;
-        }
-        return `${x.toString(16).slice(-2)}`;
-    }).join(':');
+    const ret = hex
+        .map(x => {
+            if (x < 16) {
+                return `0${x.toString(16).slice(-2)}`;
+            }
+            return `${x.toString(16).slice(-2)}`;
+        })
+        .join(':');
 
     return ret;
 }
@@ -122,7 +124,7 @@ async function getTargetIp(mac) {
     if (!ret) {
         return null;
     }
-    const arpItem = ret.find((element) => {
+    const arpItem = ret.find(element => {
         if (element.mac.includes(mac.toUpperCase())) {
             return element;
         }
@@ -147,10 +149,10 @@ async function getTargetIpWait(mac, timeout) {
 }
 
 /**
-  * @public
-  *
-  * @param
-  */
+ * @public
+ *
+ * @param
+ */
 
 async function pingTarget(targetIp) {
     if (targetIp) {
@@ -177,12 +179,12 @@ async function pingTargetWait(targetIp, timeout /* Sec */) {
 }
 
 /**
-  * @public
-  *
-  * @param
-  */
+ * @public
+ *
+ * @param
+ */
 
-async function waitTargetSshPortUp(targetIp, timeout/* Sec */) {
+async function waitTargetSshPortUp(targetIp, timeout /* Sec */) {
     if (timeout - new Date() / 1000 > 0) {
         const ret = await pingus.default.tcp({ host: targetIp, port: 22 });
         if (ret && ret.status === 'open') {
@@ -197,10 +199,10 @@ async function waitTargetSshPortUp(targetIp, timeout/* Sec */) {
 }
 
 /**
-  * @public
-  *
-  * @param
-  */
+ * @public
+ *
+ * @param
+ */
 async function waitTargetDown(targetIp, timeout /* Sec */) {
     if (timeout - new Date() / 1000 > 0) {
         const ret = await pingTarget(targetIp);
@@ -269,7 +271,7 @@ async function printLabel(productName, mac, serial, tsId, dbError, logger) {
     if (dbError.length) {
         convertCmd = `convert -size 306x${160 + 25 * (dbError.length + 1)} xc:white -font "Ubuntu-Mono-Bold" -pointsize 32 -fill black -draw @${labelPath} ${pngPath}`;
         labelTxt = `text 1,1 "\nFailed\n${productName}\n${serial}${tsId}\n`;
-        dbError.forEach((item) => {
+        dbError.forEach(item => {
             labelTxt += `${item}\n`;
         });
         labelTxt += '"';

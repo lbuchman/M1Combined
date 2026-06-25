@@ -191,12 +191,24 @@ async function handleCommandRequest(req, res, options) {
     const { command, argument } = body;
 
     if (!command || typeof command !== 'string') {
-        writeJsonResponse(res, 400, createResponse('FAILED', exitCodes.invalidArgument, 'Field "command" must be a non-empty string'));
+        writeJsonResponse(
+            res,
+            400,
+            createResponse(
+                'FAILED',
+                exitCodes.invalidArgument,
+                'Field "command" must be a non-empty string'
+            )
+        );
         return;
     }
 
     if (!supportedCommands.has(command)) {
-        writeJsonResponse(res, 400, createResponse('FAILED', exitCodes.invalidArgument, `Unsupported command "${command}"`));
+        writeJsonResponse(
+            res,
+            400,
+            createResponse('FAILED', exitCodes.invalidArgument, `Unsupported command "${command}"`)
+        );
         return;
     }
 
@@ -222,9 +234,21 @@ function startRestServer(options) {
                 return;
             }
 
-            writeJsonResponse(res, 404, createResponse('FAILED', exitCodes.invalidArgument, 'Route not found'));
+            writeJsonResponse(
+                res,
+                404,
+                createResponse('FAILED', exitCodes.invalidArgument, 'Route not found')
+            );
         } catch (err) {
-            writeJsonResponse(res, 500, createResponse('FAILED', exitCodes.commandFailed, err.message || 'Internal server error'));
+            writeJsonResponse(
+                res,
+                500,
+                createResponse(
+                    'FAILED',
+                    exitCodes.commandFailed,
+                    err.message || 'Internal server error'
+                )
+            );
         }
     });
 

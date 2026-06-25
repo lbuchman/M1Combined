@@ -3,32 +3,32 @@ base: core22
 version: '0.0.1'
 summary: M1 test fixture CLI utility
 description: |
-  CLI utility to test and program M1-3200 boards.
+    CLI utility to test and program M1-3200 boards.
 
 grade: devel
 confinement: classic
 
 apps:
-  m1tfc:
-    command: bin/m1tfc.js
-    environment:
-      PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
-      NODE_PATH: $SNAP/node_modules
-      NODE_OPTIONS: --max-old-space-size=256
-    plugs:
-      - network
-      - network-bind
-      - raw-usb
-      - serial-port
+    m1tfc:
+        command: bin/m1tfc.js
+        environment:
+            PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
+            NODE_PATH: $SNAP/node_modules
+            NODE_OPTIONS: --max-old-space-size=256
+        plugs:
+            - network
+            - network-bind
+            - raw-usb
+            - serial-port
 
 parts:
-  m1tfc:
-    plugin: npm
-    source: ..
-    npm-node-version: 24.0.0
-    prime:
-      - bin/**
-      - src/**
-      - utils/**
-      - package.json
-      - node_modules/**
+    m1tfc:
+        plugin: npm
+        source: ..
+        npm-node-version: 24.0.0
+        prime:
+            - bin/**
+            - src/**
+            - utils/**
+            - package.json
+            - node_modules/**

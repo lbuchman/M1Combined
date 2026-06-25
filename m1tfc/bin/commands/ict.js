@@ -29,7 +29,9 @@ async function preCheckHardware(configData, logfile) {
         const printerStatus = await os.executeShellCommand('lsusb | grep "QL-810W"', logfile);
         if (!printerStatus) {
             allChecksPass = false;
-            logfile.error('Label Printer is not detected. Check connections and power and retry the test.');
+            logfile.error(
+                'Label Printer is not detected. Check connections and power and retry the test.'
+            );
         }
     }
 
@@ -39,7 +41,9 @@ async function preCheckHardware(configData, logfile) {
 
     if (interfaces.find(o => o.iface === tfInterface) === undefined) {
         allChecksPass = false;
-        logfile.error(`Internet Ethernet jack (${tfInterface}) is not plugged. Check connection and retry the test.`);
+        logfile.error(
+            `Internet Ethernet jack (${tfInterface}) is not plugged. Check connection and retry the test.`
+        );
     }
 
     if (interfaces.find(o => o.ip4 === '192.168.0.100') === undefined) {
@@ -59,14 +63,21 @@ async function preCheckHardware(configData, logfile) {
 }
 
 function register(program) {
-    program.command('ict')
+    program
+        .command('ict')
         .description('Executes ICT test')
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug')
-        .option('-b, --cellBatTol <cellBatTol>', 'tolerance for coin cell bat, valid values: new, used')
+        .option(
+            '-b, --cellBatTol <cellBatTol>',
+            'tolerance for coin cell bat, valid values: new, used'
+        )
         .option('-c, --callibrate <callibrate>', 'calibrate A/D and save data into the config file')
-        .option('-v, --cellBatVoltage <cellBatVoltage>', 'only for the calibration, measure cell bat voltage and enter it like: -v 3.0145')
-        .action(async(options) => {
+        .option(
+            '-v, --cellBatVoltage <cellBatVoltage>',
+            'only for the calibration, measure cell bat voltage and enter it like: -v 3.0145'
+        )
+        .action(async options => {
             const configData = await loadConfig();
             let logfile;
             let db;
@@ -84,7 +95,13 @@ function register(program) {
                 if (!options.serial) {
                     await errorAndExit('must define vendor serial number', console);
                 }
-                logfile = logger.getLogger(options.serial, '    ict', options.serial, configData.mtfDir, options.debug);
+                logfile = logger.getLogger(
+                    options.serial,
+                    '    ict',
+                    options.serial,
+                    configData.mtfDir,
+                    options.debug
+                );
                 db = sqliteDriver.initialize(logfile);
 
                 // Skip hardware checks only in developer debug mode
@@ -101,17 +118,33 @@ function register(program) {
                 if (!options.cellBatTol) {
                     await errorAndExit('must define cellBatTol', logfile);
                 }
-                if ((options.cellBatTol !== 'new') && (options.cellBatTol !== 'used')) {
+                if (options.cellBatTol !== 'new' && options.cellBatTol !== 'used') {
                     await errorAndExit('cellBatTol argument  -b option is not valid', logfile);
                 }
 
-                logfile.info(`Executing ICT command ${configData.mtfDir}/${configData.ictFWFilePath} ...`);
-                const ictTestRunner = new IctTestRunner(`${configData.mtfDir}/${configData.ictFWFilePath}`, configData.tolerance, logfile, configData);
-                await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+                logfile.info(
+                    `Executing ICT command ${configData.mtfDir}/${configData.ictFWFilePath} ...`
+                );
+                const ictTestRunner = new IctTestRunner(
+                    `${configData.mtfDir}/${configData.ictFWFilePath}`,
+                    configData.tolerance,
+                    logfile,
+                    configData
+                );
+                await ictTestRunner.init(
+                    configData.testBoardTerminalDev,
+                    configData.serialBaudrate,
+                    configData.m1SerialDev,
+                    configData.serialBaudrate
+                );
                 await delay(400);
 
-                const skipTestpointCheck = options.debug ? (configData.skipTestpointCheck || false) : false;
-                const memTestSize1MBBlocks = options.debug ? (configData.memTestSize1MBBlocks || 512) : 10;
+                const skipTestpointCheck = options.debug
+                    ? configData.skipTestpointCheck || false
+                    : false;
+                const memTestSize1MBBlocks = options.debug
+                    ? configData.memTestSize1MBBlocks || 512
+                    : 10;
                 const ictExitCode = await ictTestRunner.runTest(
                     configData.programmingCommand,
                     options.serial,

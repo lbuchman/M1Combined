@@ -5,26 +5,26 @@ This folder contains bare-bone simulators for running fixture-style tests withou
 ## What is simulated
 
 - `fake-stm32-programmer.js`:
-  - Drop-in CLI replacement for `STM32_Programmer_CLI`.
-  - Supports DFU list (`-l`), image download (`-d`), OTP display, OTP write.
+    - Drop-in CLI replacement for `STM32_Programmer_CLI`.
+    - Supports DFU list (`-l`), image download (`-d`), OTP display, OTP write.
 
 - `stm32mp-barebone-term-sim.js`:
-  - Serial terminal simulator for STM32MP target in bare-bone state.
-  - Starts in `U-Boot>` mode (no Linux).
-  - Can transition to Linux/login prompt when boot command is sent.
+    - Serial terminal simulator for STM32MP target in bare-bone state.
+    - Starts in `U-Boot>` mode (no Linux).
+    - Can transition to Linux/login prompt when boot command is sent.
 
 - `teensy2-rest-sim.js`:
-  - REST simulator for the second Teensy board.
-  - Endpoint: `POST /command`
-  - Contract: request `{ "cmd": "...", "arg": [...] }`, response `{ "status": true|false, "error": "..." }`
+    - REST simulator for the second Teensy board.
+    - Endpoint: `POST /command`
+    - Contract: request `{ "cmd": "...", "arg": [...] }`, response `{ "status": true|false, "error": "..." }`
 
 - `deviceApi.js`:
-  - Shared command API layer used by serial and REST simulators.
-  - Normalizes legacy serial commands to `{cmd, arg}` and returns JSON status objects.
+    - Shared command API layer used by serial and REST simulators.
+    - Normalizes legacy serial commands to `{cmd, arg}` and returns JSON status objects.
 
 - `run-ribbon-e2e.js`:
-  - End-to-end serial simulation for ribbon-cable test path.
-  - Creates fake PTY links using `socat`.
+    - End-to-end serial simulation for ribbon-cable test path.
+    - Creates fake PTY links using `socat`.
 
 ## Prerequisites
 

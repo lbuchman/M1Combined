@@ -1,7 +1,11 @@
 'use strict';
 
 const errorCodes = {
-    ICT_EXCEPT: { errorCode: 'ICT-EXCEPTION', test: 'ICT', desc: 'software exception, see debug log for details' },
+    ICT_EXCEPT: {
+        errorCode: 'ICT-EXCEPTION',
+        test: 'ICT',
+        desc: 'software exception, see debug log for details'
+    },
     TP204: { errorCode: '00000000TP204', test: 'ICT', desc: 'TP204 voltage is out of tolerance' },
     TP308: { errorCode: '00000000TP308', test: 'ICT', desc: 'TP308 voltage is out of tolerance' },
     TP303: { errorCode: '00000000TP303', test: 'ICT', desc: 'TP303 voltage is out of tolerance' },
@@ -15,10 +19,26 @@ const errorCodes = {
     TP1901: { errorCode: '0000000TP1901', test: 'ICT', desc: 'TP1901 voltage is out of tolerance' },
     TP1902: { errorCode: '0000000TP1902', test: 'ICT', desc: 'TP1902 voltage is out of tolerance' },
     TP202: { errorCode: '00000000TP202', test: 'ICT', desc: 'TP202 voltage is out of tolerance' },
-    'J2101.1': { errorCode: '0000000J2101.1', test: 'ICT', desc: 'J2101.1 voltage is out of tolerance' },
-    'J2001.1': { errorCode: '0000000J2001.1', test: 'ICT', desc: 'J2001.1 voltage is out of tolerance' },
-    'SW1601.6': { errorCode: '0000000SW1601.6', test: 'ICT', desc: 'SW1601.6 voltage is out of tolerance' },
-    'SW1602.6': { errorCode: '0000000SW1602.6', test: 'ICT', desc: 'SW1602.6 voltage is out of tolerance' },
+    'J2101.1': {
+        errorCode: '0000000J2101.1',
+        test: 'ICT',
+        desc: 'J2101.1 voltage is out of tolerance'
+    },
+    'J2001.1': {
+        errorCode: '0000000J2001.1',
+        test: 'ICT',
+        desc: 'J2001.1 voltage is out of tolerance'
+    },
+    'SW1601.6': {
+        errorCode: '0000000SW1601.6',
+        test: 'ICT',
+        desc: 'SW1601.6 voltage is out of tolerance'
+    },
+    'SW1602.6': {
+        errorCode: '0000000SW1602.6',
+        test: 'ICT',
+        desc: 'SW1602.6 voltage is out of tolerance'
+    },
     WGD1_D0_3V3: { errorCode: '0000000WGDRD1D0', test: 'ICT', desc: 'rd1d0 test failed' },
     WGD1_D1_3V3: { errorCode: '0000000WGDRD1D1', test: 'ICT', desc: 'rd1d1 test failed' },
     RD1_RLED: { errorCode: '0000000WRD1RLED', test: 'ICT', desc: 'rd1rled test failed' },
@@ -41,59 +61,187 @@ const errorCodes = {
     TP34: { errorCode: '000000000TP34', test: 'ICT', desc: 'TP34 voltage is out of tolerance' },
     TP36: { errorCode: '000000000TP36', test: 'ICT', desc: 'TP36 voltage is out of tolerance' },
     TP31: { errorCode: '000000000TP31', test: 'ICT', desc: 'TP31 voltage is out of tolerance' },
-    'J5.13': { errorCode: '000000TPJ5.13', test: 'ICT', desc: 'Ribbon Cable J5.13 voltage is out of tolerance' },
-    'J5.8': { errorCode: '0000000TPJ5.8', test: 'ICT', desc: 'Ribbon Cable J5.8 voltage is out of tolerance' },
-    BatCellBat: { errorCode: '000000CoinBat', test: 'ICT', desc: 'Coin Cell backup battery voltage is out of tolerance' },
+    'J5.13': {
+        errorCode: '000000TPJ5.13',
+        test: 'ICT',
+        desc: 'Ribbon Cable J5.13 voltage is out of tolerance'
+    },
+    'J5.8': {
+        errorCode: '0000000TPJ5.8',
+        test: 'ICT',
+        desc: 'Ribbon Cable J5.8 voltage is out of tolerance'
+    },
+    BatCellBat: {
+        errorCode: '000000CoinBat',
+        test: 'ICT',
+        desc: 'Coin Cell backup battery voltage is out of tolerance'
+    },
     'J5.18': { errorCode: '000000TPJ5.18', test: 'ICT', desc: 'Ribbon Cable continuity failed' },
     'J5.15': { errorCode: '000000TPJ5.15', test: 'ICT', desc: 'Ribbon Cable continuity failed' },
     'J5.17': { errorCode: '000000TPJ5.17', test: 'ICT', desc: 'Ribbon Cable continuity failed' },
     'J5.19': { errorCode: '000000TPJ5.19', test: 'ICT', desc: 'Ribbon Cable continuity failed' },
     'J5.16': { errorCode: '000000TPJ5.16', test: 'ICT', desc: 'Ribbon Cable continuity failed' },
-    'J5.5': { errorCode: '0000000TPJ5.5', test: 'ICT', desc: 'Ribbon Cable voltage is out of tolerance' },
-    'J5.6': { errorCode: '0000000TPJ5.6', test: 'ICT', desc: 'Ribbon Cable voltage is out of tolerance' },
-    'J5.7': { errorCode: '0000000TPJ5.7', test: 'ICT', desc: 'Ribbon Cable voltage is out of tolerance' },
-    'J5.14': { errorCode: '000000TPJ5.14', test: 'ICT', desc: 'Ribbon Cable voltage is out of tolerance' },
-    'J5.23': { errorCode: '000000TPJ5.23', test: 'ICT', desc: 'Ribbon Cable voltage is out of tolerance' },
-    'J5.25': { errorCode: '000000TPJ5.25', test: 'ICT', desc: 'Ribbon Cable voltage is out of tolerance' },
-    'J5.20': { errorCode: '000000TPJ5.20', test: 'ICT', desc: 'Ribbon Cable voltage is out of tolerance' },
-    'J5.22': { errorCode: '000000TPJ5.22', test: 'ICT', desc: 'Ribbon Cable voltage is out of tolerance' },
-    'J5.24': { errorCode: '000000TPJ5.24', test: 'ICT', desc: 'Ribbon Cable voltage is out of tolerance' },
-    'J5.26': { errorCode: '000000TPJ5.26', test: 'ICT', desc: 'Ribbon Cable voltage is out of tolerance' },
-    'J8.2': { errorCode: '0000000RedLed', test: 'ICT', desc: 'J8.2 Red Led voltage drop is out of tolerance' },
-    'J8.1': { errorCode: '0000000BlueLed', test: 'ICT', desc: 'J8.1 Blue Led voltage drop is out of tolerance' },
+    'J5.5': {
+        errorCode: '0000000TPJ5.5',
+        test: 'ICT',
+        desc: 'Ribbon Cable voltage is out of tolerance'
+    },
+    'J5.6': {
+        errorCode: '0000000TPJ5.6',
+        test: 'ICT',
+        desc: 'Ribbon Cable voltage is out of tolerance'
+    },
+    'J5.7': {
+        errorCode: '0000000TPJ5.7',
+        test: 'ICT',
+        desc: 'Ribbon Cable voltage is out of tolerance'
+    },
+    'J5.14': {
+        errorCode: '000000TPJ5.14',
+        test: 'ICT',
+        desc: 'Ribbon Cable voltage is out of tolerance'
+    },
+    'J5.23': {
+        errorCode: '000000TPJ5.23',
+        test: 'ICT',
+        desc: 'Ribbon Cable voltage is out of tolerance'
+    },
+    'J5.25': {
+        errorCode: '000000TPJ5.25',
+        test: 'ICT',
+        desc: 'Ribbon Cable voltage is out of tolerance'
+    },
+    'J5.20': {
+        errorCode: '000000TPJ5.20',
+        test: 'ICT',
+        desc: 'Ribbon Cable voltage is out of tolerance'
+    },
+    'J5.22': {
+        errorCode: '000000TPJ5.22',
+        test: 'ICT',
+        desc: 'Ribbon Cable voltage is out of tolerance'
+    },
+    'J5.24': {
+        errorCode: '000000TPJ5.24',
+        test: 'ICT',
+        desc: 'Ribbon Cable voltage is out of tolerance'
+    },
+    'J5.26': {
+        errorCode: '000000TPJ5.26',
+        test: 'ICT',
+        desc: 'Ribbon Cable voltage is out of tolerance'
+    },
+    'J8.2': {
+        errorCode: '0000000RedLed',
+        test: 'ICT',
+        desc: 'J8.2 Red Led voltage drop is out of tolerance'
+    },
+    'J8.1': {
+        errorCode: '0000000BlueLed',
+        test: 'ICT',
+        desc: 'J8.1 Blue Led voltage drop is out of tolerance'
+    },
     //
-    RS422: { errorCode: '00000000RS422', test: 'ICT', desc: 'Ribbon Cable RS-422 echo test failed' },
+    RS422: {
+        errorCode: '00000000RS422',
+        test: 'ICT',
+        desc: 'Ribbon Cable RS-422 echo test failed'
+    },
     RS485: { errorCode: '00000000RS485', test: 'ICT', desc: 'RS-485 echo test failed' },
     TamperPin: { errorCode: '0000000Tamper', test: 'ICT', desc: 'Tamper pin test failed' },
     DDR3Bus: { errorCode: '0000DDR3-DBus', test: 'ICT', desc: 'DDR3 data bus test failed' },
     DDR3ABus: { errorCode: '0000DDR3-ABus', test: 'ICT', desc: 'DDR3 address bus test failed' },
     DDR3: { errorCode: '000000000DDR3', test: 'ICT', desc: 'DDR3 read/write verify test failed' },
     EEPROM: { errorCode: '0000000EEPROM', test: 'ICT', desc: 'EEPROM test failed' },
-    EEPROMUPDATE: { errorCode: '00UPD-0EEPROM', test: 'ICT', desc: 'Update EEPROM with new data command failed' },
-    BATOP: { errorCode: '00BATT-SWITCH', test: 'ICT', desc: 'Test Main power to battery power switching failed' },
-    BACHR: { errorCode: '000BATT-CHARG', test: 'ICT', desc: 'The Battery module charging voltage is out of tolerance' },
-    STM: { errorCode: '000000USB-DFU', test: 'ICT', desc: 'Failed to program M1 bootstrap STM, DFU issue or UUT is down' },
-    APP80: { errorCode: '00000APP-PING', test: 'APP', desc: 'UUT Webserver is down, possible APP is not running' },
+    EEPROMUPDATE: {
+        errorCode: '00UPD-0EEPROM',
+        test: 'ICT',
+        desc: 'Update EEPROM with new data command failed'
+    },
+    BATOP: {
+        errorCode: '00BATT-SWITCH',
+        test: 'ICT',
+        desc: 'Test Main power to battery power switching failed'
+    },
+    BACHR: {
+        errorCode: '000BATT-CHARG',
+        test: 'ICT',
+        desc: 'The Battery module charging voltage is out of tolerance'
+    },
+    STM: {
+        errorCode: '000000USB-DFU',
+        test: 'ICT',
+        desc: 'Failed to program M1 bootstrap STM, DFU issue or UUT is down'
+    },
+    APP80: {
+        errorCode: '00000APP-PING',
+        test: 'APP',
+        desc: 'UUT Webserver is down, possible APP is not running'
+    },
     FLASH: { errorCode: '0000000000FLASH', test: 'FLASH', desc: 'Program FLASH failed' },
     MAC: { errorCode: '000000PROG-AMC', test: 'MAC', desc: 'Program MAC failed' },
-    MAC_CMP_ERR: { errorCode: '000MAC_CMP_ERR', test: 'FUNC', desc: 'ifconfig reported MAC does not match OTP MAC' },
-    PEN_DRIVE: { errorCode: '00000PEN_DRIVE', test: 'FUNC', desc: 'Pen drive failed. UUT USB Host port issue' },
+    MAC_CMP_ERR: {
+        errorCode: '000MAC_CMP_ERR',
+        test: 'FUNC',
+        desc: 'ifconfig reported MAC does not match OTP MAC'
+    },
+    PEN_DRIVE: {
+        errorCode: '00000PEN_DRIVE',
+        test: 'FUNC',
+        desc: 'Pen drive failed. UUT USB Host port issue'
+    },
     RTC: { errorCode: '00000000000RTC', test: 'FUNC', desc: 'RTC test failed' },
     SPI_RAM: { errorCode: '0000000SPI_RAM', test: 'FUNC', desc: 'SPI RAM test failed' },
-    FUNC_EXCEPT: { errorCode: 'FUN-EXCEPTION', test: 'FUNC', desc: 'functional test general faulure ' },
+    FUNC_EXCEPT: {
+        errorCode: 'FUN-EXCEPTION',
+        test: 'FUNC',
+        desc: 'functional test general faulure '
+    },
     WDT: { errorCode: '0000000000WDT', test: 'FUNC', desc: 'Watchdog test failed' },
-    UUT_ETHER: { errorCode: '0000UUT_ETHER', test: 'FUNC', desc: 'UUT not pingable, possibly Ethernet controller or cabling issue' },
-    UUT_TERM: { errorCode: '00000UUT_TERM', test: 'FUNC', desc: 'UUT terminal login error, check serial link, check FW/SW revisions' },
-    SSH_RECON: { errorCode: '0000SSH_RECON', test: 'FUNC', desc: 'ssh connection to UUT error, possibly Ethernet controller or cabling issue' },
-    DFU_STM: { errorCode: '000000DFU_STM', test: 'FUNC', desc: 'Program bootstrap STM file to UUT over DFU error,  try STM32CubeProg in a terminal, consult ST DFU documentation' },
+    UUT_ETHER: {
+        errorCode: '0000UUT_ETHER',
+        test: 'FUNC',
+        desc: 'UUT not pingable, possibly Ethernet controller or cabling issue'
+    },
+    UUT_TERM: {
+        errorCode: '00000UUT_TERM',
+        test: 'FUNC',
+        desc: 'UUT terminal login error, check serial link, check FW/SW revisions'
+    },
+    SSH_RECON: {
+        errorCode: '0000SSH_RECON',
+        test: 'FUNC',
+        desc: 'ssh connection to UUT error, possibly Ethernet controller or cabling issue'
+    },
+    DFU_STM: {
+        errorCode: '000000DFU_STM',
+        test: 'FUNC',
+        desc: 'Program bootstrap STM file to UUT over DFU error,  try STM32CubeProg in a terminal, consult ST DFU documentation'
+    },
     I2CBus1: { errorCode: '00000I2C_BUS1', test: 'FUNC', desc: 'I2C Bus 1 test failed' },
     I2CBus02: { errorCode: '0000I2C_BUS02', test: 'FUNC', desc: 'I2C Bus 0,2 test failed' },
-    NO_OTP_MAC: { errorCode: '000NO_OTP_MAC', test: 'FUNC', desc: 'MAC Address is not programmed in OTP' },
-    SERIAL_MISSMATH: { errorCode: 'SER_MISS_MATCH', test: 'LABEL', desc: 'Serial number provided does not match EEPROM value' },
-    FW_MISSMATH: { errorCode: 'FW_MISS_MATCH', test: 'LABEL', desc: 'The UUT programmed FW Rev does not match FW File' },
+    NO_OTP_MAC: {
+        errorCode: '000NO_OTP_MAC',
+        test: 'FUNC',
+        desc: 'MAC Address is not programmed in OTP'
+    },
+    SERIAL_MISSMATH: {
+        errorCode: 'SER_MISS_MATCH',
+        test: 'LABEL',
+        desc: 'Serial number provided does not match EEPROM value'
+    },
+    FW_MISSMATH: {
+        errorCode: 'FW_MISS_MATCH',
+        test: 'LABEL',
+        desc: 'The UUT programmed FW Rev does not match FW File'
+    },
     LeverSensor: { errorCode: 'LEVER_LOCK', test: 'ICT', desc: 'The Lock Lever is not locked' },
     POE: { errorCode: '00000000000POE', test: 'ICT', desc: 'Switch to POE power failed' },
-    ERR_UNDEF: { errorCode: '0000ERR_UNDEF', test: 'Label', desc: 'Undefined error, i.e. no error code available in the DB for this failure' }
+    ERR_UNDEF: {
+        errorCode: '0000ERR_UNDEF',
+        test: 'Label',
+        desc: 'Undefined error, i.e. no error code available in the DB for this failure'
+    }
 };
 
 exports.codes = errorCodes;

@@ -2,6 +2,8 @@
 
 'use strict';
 
+/* eslint-disable no-console */
+
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 
@@ -113,7 +115,7 @@ port.on('open', () => {
     writePrompt();
 });
 
-parser.on('data', (raw) => {
+parser.on('data', raw => {
     const cmd = String(raw || '').trim();
     if (!cmd) {
         writePrompt();
@@ -128,7 +130,7 @@ parser.on('data', (raw) => {
     handleLinuxCommand(cmd);
 });
 
-port.on('error', (err) => {
+port.on('error', err => {
     console.error(err.message);
     process.exit(1);
 });

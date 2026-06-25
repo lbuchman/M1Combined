@@ -2,6 +2,8 @@
 
 'use strict';
 
+/* eslint-disable no-console */
+
 const { createTeensyRestApi, startRestApiServer } = require('./deviceApi');
 
 function getArg(name, fallback) {
@@ -20,7 +22,7 @@ async function main() {
     await startRestApiServer(host, port, api, console);
 }
 
-main().catch((err) => {
+main().catch(err => {
     console.error(err);
     process.exit(1);
 });

@@ -21,7 +21,9 @@ let gpioHelper;
 
 async function getChargingVoltage(timeout) {
     if (timeout - new Date() / 1000 > 0) {
-        const batChargeVoltage = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName('batChargeVAD')}`);
+        const batChargeVoltage = await testBoardLink.sendCommand(
+            `getiopin ${testBoardLink.findPinIdByName('batChargeVAD')}`
+        );
         if (batChargeVoltage.status) {
             if (batChargeVoltage.value > chargerMinVoltage) {
                 return batChargeVoltage.value;
@@ -116,7 +118,9 @@ async function test(logger, db) {
             throw new Error('nDCIN_PWR expected 0, got 1');
         }
 
-        const batVoltage = await testBoardLink.sendCommand(`getiopin ${testBoardLink.findPinIdByName('bat12VAD')}`);
+        const batVoltage = await testBoardLink.sendCommand(
+            `getiopin ${testBoardLink.findPinIdByName('bat12VAD')}`
+        );
         if (!batVoltage.status) {
             throw Error('Failed to read battery voltage');
         }
@@ -124,7 +128,11 @@ async function test(logger, db) {
         const chargingVoltage = await getChargingVoltage(new Date() / 1000 + chargerIntervalCheck);
         logger.info(`Battery test passed. Charging voltage = ${chargingVoltage}V`);
     } catch (err) {
-        db.updateErrorCode(runtimeContext.getRuntime().serial, errorCodes.codes['BACHR'].errorCode, 'E');
+        db.updateErrorCode(
+            runtimeContext.getRuntime().serial,
+            errorCodes.codes['BACHR'].errorCode,
+            'E'
+        );
         throw new Error(err.message);
     } finally {
         await testBoardLink.batteryLoadOn(false);

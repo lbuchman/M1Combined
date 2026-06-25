@@ -30,7 +30,7 @@ function wrapAction(fn, log = console) {
  * @param {object} [log=console] - Logger instance
  */
 function registerGlobalHandlers(log = console) {
-    process.on('uncaughtException', (err) => {
+    process.on('uncaughtException', err => {
         log.error(`Uncaught exception: ${err.message}`);
         if (log.debug) {
             log.debug(err.stack);
@@ -38,7 +38,7 @@ function registerGlobalHandlers(log = console) {
         process.exit(exitCodes.commandFailed);
     });
 
-    process.on('unhandledRejection', (reason) => {
+    process.on('unhandledRejection', reason => {
         const message = reason instanceof Error ? reason.message : String(reason);
         log.error(`Unhandled promise rejection: ${message}`);
         process.exit(exitCodes.commandFailed);

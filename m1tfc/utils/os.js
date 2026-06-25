@@ -6,7 +6,14 @@ const { exec } = require('child_process');
  * @private
  * execute shell command
  */
-function executeShellCommand(command, log, nothrow = true, errorStdout = true, maxBuffer = 1024 * 1024, cdw = process.cwd()) {
+function executeShellCommand(
+    command,
+    log,
+    nothrow = true,
+    errorStdout = true,
+    maxBuffer = 1024 * 1024,
+    cdw = process.cwd()
+) {
     const cirrentDir = process.cwd();
     process.chdir(cdw);
     return new Promise((resolve, reject) => {
@@ -34,16 +41,15 @@ function executeShellCommand(command, log, nothrow = true, errorStdout = true, m
                 // log.debug(`${command},  stderr =:\n -> ${stderr}`);
             }
         });
-    })
-        .catch((err) => {
-            process.chdir(cirrentDir);
-            if (nothrow) {
-                // log.error(err.message);
-                // log.error(`${command},  stderr =:\n${stderrLocal}`);
-                return err;
-            }
-            throw (err);
-        });
+    }).catch(err => {
+        process.chdir(cirrentDir);
+        if (nothrow) {
+            // log.error(err.message);
+            // log.error(`${command},  stderr =:\n${stderrLocal}`);
+            return err;
+        }
+        throw err;
+    });
 }
 
 module.exports = {

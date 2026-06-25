@@ -7,10 +7,13 @@ const exitCodes = require('../../src/exitCodes');
 const { loadConfig, applyRuntime } = require('../commandSupport');
 
 function register(program) {
-    program.command('m1tbcmd')
-        .description('Execute M1 test board raw command (STM32MP1 core testing: voltages, programming, pogo pins)')
+    program
+        .command('m1tbcmd')
+        .description(
+            'Execute M1 test board raw command (STM32MP1 core testing: voltages, programming, pogo pins)'
+        )
         .option('-c, --command <string>', 'M1 test board command (enclose in quotes)')
-        .action(async(options) => {
+        .action(async options => {
             const configData = await loadConfig();
             const logfile = console;
             applyRuntime(configData);
@@ -21,8 +24,19 @@ function register(program) {
             }
 
             try {
-                const ictTestRunner = new IctTestRunner(configData.ictFWFilePath, configData.tolerance, logfile, configData, false);
-                await ictTestRunner.init(configData.testBoardTerminalDev, configData.serialBaudrate, configData.m1SerialDev, configData.serialBaudrate);
+                const ictTestRunner = new IctTestRunner(
+                    configData.ictFWFilePath,
+                    configData.tolerance,
+                    logfile,
+                    configData,
+                    false
+                );
+                await ictTestRunner.init(
+                    configData.testBoardTerminalDev,
+                    configData.serialBaudrate,
+                    configData.m1SerialDev,
+                    configData.serialBaudrate
+                );
                 await delay(400);
 
                 const output = await testBoardLink.sendCommand(options.command);

@@ -24,7 +24,7 @@ module.exports = class MacProvisioningService {
         const word58 = await otpTransport.readWord(programmer, utils.otp58);
         const otp57Value = utils.getWordData(word57, utils.otp57);
         const otp58Value = utils.getWordData(word58, utils.otp58);
-        const isBlank = (otp57Value === '0x00000000') || (otp58Value === '0x00000000');
+        const isBlank = otp57Value === '0x00000000' || otp58Value === '0x00000000';
 
         return {
             word57,

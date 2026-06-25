@@ -19,7 +19,6 @@ const MnpTests = require('./mnpTests');
 const CalibrationDefault = require('./calibrationDefault');
 const runtimeContext = require('../utils/runtimeContext');
 
-
 module.exports = class IctTestRunner {
     constructor(stm32, tolerance, log, config) {
         this.logger = log;
@@ -31,10 +30,10 @@ module.exports = class IctTestRunner {
     }
 
     /**
-      * @public
-      *
-      * @param {object} log
-      */
+     * @public
+     *
+     * @param {object} log
+     */
     async init(teensyDev, teensyDevBaudrate, m1Dev, m1DevBaudrate) {
         await testBoardLink.initSerial(teensyDev, teensyDevBaudrate, this.logger);
         this.m1Dev = m1Dev;
@@ -43,11 +42,18 @@ module.exports = class IctTestRunner {
     }
 
     /**
-      * @public
-      *
-      * @param
-      */
-    async runTest(programmer, serial, ddrblocks, skipTestpointCheck, initAndQuit = false, calibrate = false) {
+     * @public
+     *
+     * @param
+     */
+    async runTest(
+        programmer,
+        serial,
+        ddrblocks,
+        skipTestpointCheck,
+        initAndQuit = false,
+        calibrate = false
+    ) {
         runtimeContext.setRuntime({ serial });
         const runtime = runtimeContext.getRuntime();
         this.db.updateSerial(serial);
@@ -58,7 +64,17 @@ module.exports = class IctTestRunner {
 
         this.db.updateIctStatus(serial, utils.boolToInt(false));
         try {
-            await common.initializeTestFixture(this.config, programmer, initAndQuit, initAndQuit, this.stm32, this.m1Dev, this.logger, calibrate, this.CalibrationParam);
+            await common.initializeTestFixture(
+                this.config,
+                programmer,
+                initAndQuit,
+                initAndQuit,
+                this.stm32,
+                this.m1Dev,
+                this.logger,
+                calibrate,
+                this.CalibrationParam
+            );
             if (initAndQuit) {
                 return exitCodes.normalExit;
             }
@@ -68,7 +84,15 @@ module.exports = class IctTestRunner {
                 this.logger.info('Testing test points ...');
             }
             if (!skipTestpointCheck) {
-                if (!await regulators.test(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) {
+                if (
+                    !(await regulators.test(
+                        this.tolerance,
+                        this.logger,
+                        this.db,
+                        calibrate,
+                        this.CalibrationParam
+                    ))
+                ) {
                     ret = false;
                 }
             }
@@ -82,42 +106,68 @@ module.exports = class IctTestRunner {
             }
 
             if (!skipTestpointCheck && runtime.productName === 'mnplus') {
-                if (!await regulators.strikeBoostReg(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) {
+                if (
+                    !(await regulators.strikeBoostReg(
+                        this.tolerance,
+                        this.logger,
+                        this.db,
+                        calibrate,
+                        this.CalibrationParam
+                    ))
+                ) {
                     ret = false;
                 }
             }
             if (!skipTestpointCheck) {
-                if (!await regulators.testDDRVoltage(this.tolerance, this.logger, this.db, calibrate, this.CalibrationParam)) {
+                if (
+                    !(await regulators.testDDRVoltage(
+                        this.tolerance,
+                        this.logger,
+                        this.db,
+                        calibrate,
+                        this.CalibrationParam
+                    ))
+                ) {
                     ret = false;
                 }
             }
-            if (!await ribbonCable.runRibbonCableTest(skipTestpointCheck, this.tolerance, this.logger, this.db, this.config, calibrate, this.CalibrationParam)) {
+            if (
+                !(await ribbonCable.runRibbonCableTest(
+                    skipTestpointCheck,
+                    this.tolerance,
+                    this.logger,
+                    this.db,
+                    this.config,
+                    calibrate,
+                    this.CalibrationParam
+                ))
+            ) {
                 ret = false;
             }
 
             this.logger.info('Testing RS485 ...');
-            if (!await rs485.testRs485(this.logger, this.db)) {
+            if (!(await rs485.testRs485(this.logger, this.db))) {
                 ret = false;
             }
 
             this.logger.info('Testing Status LED ...');
-            if (!await ledTest.test(this.logger, this.db)) {
+            if (!(await ledTest.test(this.logger, this.db))) {
                 ret = false;
             }
             this.logger.info('Testing Tamper sensor ...');
-            if (!await tamperTest.test(this.logger, this.db)) {
+            if (!(await tamperTest.test(this.logger, this.db))) {
                 ret = false;
             }
             this.logger.info('Testing DDR3 memory ...');
-            if (!await ddr3.testDDR3Test(ddrblocks, this.logger, this.db)) {
+            if (!(await ddr3.testDDR3Test(ddrblocks, this.logger, this.db))) {
                 ret = false;
             }
             this.logger.info('Testing I2C EEPROM ...');
-            if (!await eeprom.checkEEPROM(this.logger, this.db)) {
+            if (!(await eeprom.checkEEPROM(this.logger, this.db))) {
                 ret = false;
             }
             if (runtime.productName === 'm1-3200') {
-                if (!await battery.test(this.logger, this.db)) {
+                if (!(await battery.test(this.logger, this.db))) {
                     ret = false;
                 }
             }
@@ -125,11 +175,10 @@ module.exports = class IctTestRunner {
             if (runtime.productName === 'mnplus') {
                 const mnp = new MnpTests(this.db, this.logger);
                 await mnp.begin();
-                if (!await mnp.run()) {
+                if (!(await mnp.run())) {
                     ret = false;
                 }
             }
-
 
             if (runtime.productName === 'mnplus') {
                 await testBoardLink.poeOn(true);
@@ -153,7 +202,9 @@ module.exports = class IctTestRunner {
                 try {
                     await common.testEndSuccess();
                 } catch (cleanupErr) {
-                    this.logger.warn(`ICT cleanup failed after successful tests: ${cleanupErr.message}`);
+                    this.logger.warn(
+                        `ICT cleanup failed after successful tests: ${cleanupErr.message}`
+                    );
                 }
                 return exitCodes.normalExit;
             }

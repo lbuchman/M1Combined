@@ -15,10 +15,10 @@ module.exports = class UdpGWSocket extends EventEmitter {
     }
 
     /**
-    * @public
-    * Create udp socket
-    *
-    */
+     * @public
+     * Create udp socket
+     *
+     */
     createSocket() {
         this.log.debug(`Attempting to create UDP socket on port ${this.port}`);
 
@@ -41,10 +41,10 @@ module.exports = class UdpGWSocket extends EventEmitter {
     }
 
     /**
-    * @public
-    * starts the domain socket server
-    *
-    */
+     * @public
+     * starts the domain socket server
+     *
+     */
     async startServer() {
         return new Promise((resolve, reject) => {
             this.createSocket();
@@ -54,12 +54,14 @@ module.exports = class UdpGWSocket extends EventEmitter {
                 this.log.debug(`server listening ${address.address}:${address.port}`);
             });
 
-            this.socket.on('error', (err) => {
-                this.log.error(`UDP socket error - ${err.message} - ${this.systemErrorDescription(err.errno)}`);
+            this.socket.on('error', err => {
+                this.log.error(
+                    `UDP socket error - ${err.message} - ${this.systemErrorDescription(err.errno)}`
+                );
                 this.emit('error', err);
             });
 
-            this.socket.bind(this.port, (err) => {
+            this.socket.bind(this.port, err => {
                 if (err) {
                     this.log.error(`UDP socket bind error - ${err.message}`);
                     reject(err);
@@ -72,15 +74,15 @@ module.exports = class UdpGWSocket extends EventEmitter {
     }
 
     /**
-    * @public
-    * close udp socket  listeners so event loop is released
-    *
-    */
+     * @public
+     * close udp socket  listeners so event loop is released
+     *
+     */
     closeSocketAndListeners() {
         this.socket.removeAllListeners('message');
         this.socket.removeAllListeners('listening');
         this.socket.removeAllListeners('error');
-        this.socket.close((err) => {
+        this.socket.close(err => {
             if (err) {
                 this.log.error(`UDP close error: ${err.message}`);
             }
@@ -89,10 +91,10 @@ module.exports = class UdpGWSocket extends EventEmitter {
     }
 
     /**
-    * @public
-    * close listeners so event loop is released
-    *
-    */
+     * @public
+     * close listeners so event loop is released
+     *
+     */
     close() {
         this.removeAllListeners('message');
         this.removeAllListeners('error');
@@ -123,7 +125,7 @@ module.exports = class UdpGWSocket extends EventEmitter {
                 reject(new Error('Udp socket is null'));
                 return;
             }
-            this.socket.send(data, 0, data.length, port, host, (err) => {
+            this.socket.send(data, 0, data.length, port, host, err => {
                 if (err) {
                     reject(err);
                 } else {
@@ -134,18 +136,18 @@ module.exports = class UdpGWSocket extends EventEmitter {
     }
 
     /**
-    * @private
-    * converts json object to buffer
-    * @param {Object} json object
-    * @return buffer
-    */
+     * @private
+     * converts json object to buffer
+     * @param {Object} json object
+     * @return buffer
+     */
     jsonToBuffer(json) {
         let socketData = null;
         try {
             socketData = JSON.stringify(json);
         } catch (err) {
             this.log.error(`Could not parse object => ${json}`);
-            throw (err);
+            throw err;
         }
         return Buffer.from(socketData);
     }
@@ -157,7 +159,8 @@ module.exports = class UdpGWSocket extends EventEmitter {
         destination: 'azurebridge'
     * @param {Object} data The data payload to be sent.
     */
-    sendTo(destination, data, enableRetry = true) { // eslint-disable-line
+    sendTo(destination, data, enableRetry = true) {
+        // eslint-disable-line
 
         let dataBuffer;
         if (!Buffer.isBuffer(data)) {
@@ -184,17 +187,22 @@ module.exports = class UdpGWSocket extends EventEmitter {
         const operation = retry.operation(retryOptions);
 
         return new Promise((resolve, reject) => {
-            operation.attempt((currentAttempt) => { // eslint-disable-line
+            operation.attempt(currentAttempt => {
+                // eslint-disable-line
                 this.sendAsync(destination, dataBuffer)
                     .then(() => {
                         resolve();
                     })
-                    .catch((err) => {
-                    // eslint-disable-next-line max-len
-                        this.log.warn(`Retrying to send datagram (retry = ${currentAttempt}) to ${destination} "${err.message}", message: ${dataBuffer.toString('utf8')}`);
-                        if (!operation.retry(err)) {
+                    .catch(err => {
                         // eslint-disable-next-line max-len
-                            this.log.error(`Failed to send datagram to ${destination} "${this.systemErrorDescription(err.errno)}", message: ${dataBuffer.toString('utf8')}`);
+                        this.log.warn(
+                            `Retrying to send datagram (retry = ${currentAttempt}) to ${destination} "${err.message}", message: ${dataBuffer.toString('utf8')}`
+                        );
+                        if (!operation.retry(err)) {
+                            // eslint-disable-next-line max-len
+                            this.log.error(
+                                `Failed to send datagram to ${destination} "${this.systemErrorDescription(err.errno)}", message: ${dataBuffer.toString('utf8')}`
+                            );
                             reject(operation.mainError());
                         }
                     });
@@ -203,12 +211,13 @@ module.exports = class UdpGWSocket extends EventEmitter {
     }
 
     /**
-    * @private
-    * decode Linux system error to string
-    * @param {integer} errCode
-    * @return {string} string error description
-    */
-    systemErrorDescription(errCode) { // eslint-disable-line
+     * @private
+     * decode Linux system error to string
+     * @param {integer} errCode
+     * @return {string} string error description
+     */
+    systemErrorDescription(errCode) {
+        // eslint-disable-line
         if (errCode === undefined) {
             return 'undefined error code';
         }

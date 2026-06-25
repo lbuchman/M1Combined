@@ -18,69 +18,73 @@ class TestBoardLink {
         this.busy = false;
         this.timeoutHandler = null;
         this.linkType = 'teensy4.1';
-        this.serialLink = new SerialLink('TestBoard', this.linkType, new ReadlineParser({ delimiter: '\n\r' }));
+        this.serialLink = new SerialLink(
+            'TestBoard',
+            this.linkType,
+            new ReadlineParser({ delimiter: '\n\r' })
+        );
     }
 
     /**
-      * @public
-      */
+     * @public
+     */
     // eslint-disable-next-line class-methods-use-this
     getGroupdDefinition() {
         return groupdDefinition;
     }
 
     /**
-      * @public
-      * send command
-      * @param {object} log
-      */
+     * @public
+     * send command
+     * @param {object} log
+     */
     async sendCommand(cmd, timeout = 1000) {
         return this.serialLink.sendCommand(cmd, timeout);
     }
 
     /**
-    * @public
-    * init
-    * @param {object} log
-    */
+     * @public
+     * init
+     * @param {object} log
+     */
     async initSerial(devFile, baud, log) {
         this.logger = log;
         await this.serialLink.initSerial(devFile, baud, log);
     }
 
     /**
- * @public
- * init
- * @param {object} log
- */
+     * @public
+     * init
+     * @param {object} log
+     */
     isPortOpen() {
         return !!(this.serialLink.serialPort && this.serialLink.serialPort.isOpen);
     }
 
     /**
-    * @public
-    * read io def from the test board
-    * @param {object} log
-    */
+     * @public
+     * read io def from the test board
+     * @param {object} log
+     */
     async retrieveIoDef() {
         this.logger.debug('Reading Io Def from the Test Board...');
         this.ioDef = await this.sendCommand('iodef');
     }
 
     /**
-    * @public
-    * get io def from the test board
-    * @param {object} log
-    */
+     * @public
+     * get io def from the test board
+     * @param {object} log
+     */
     getIoDef() {
         return this.ioDef;
     }
 
     /**
-   * @public
-   *
-   * @param
-   */
+     * @public
+     *
+     * @param
+     */
     findPinIdByName(pinName) {
         const pin = this.ioDef.find(o => o.pinName === pinName);
         if (pin) {
@@ -97,7 +101,7 @@ class TestBoardLink {
      * @public
      *
      * @param {integer} 1 is on, 0 is off
-    */
+     */
     // eslint-disable-next-line class-methods-use-this
     async targetPower(onoff) {
         if (onoff) {
@@ -111,7 +115,7 @@ class TestBoardLink {
      * @public
      *
      * @param {integer} 1 is on, 0 is off
-    */
+     */
     // eslint-disable-next-line class-methods-use-this
     async batteryOn(onoff) {
         const runtime = runtimeContext.getRuntime();
@@ -129,7 +133,7 @@ class TestBoardLink {
      * @public
      *
      * @param {integer} 1 is on, 0 is off
-    */
+     */
     // eslint-disable-next-line class-methods-use-this
     async poeOn(onoff) {
         const runtime = runtimeContext.getRuntime();
@@ -147,7 +151,7 @@ class TestBoardLink {
      * @public
      *
      * @param {integer} 1 is on, 0 is off
-    */
+     */
     // eslint-disable-next-line class-methods-use-this
     async batteryLoadOn(onoff) {
         if (onoff) {

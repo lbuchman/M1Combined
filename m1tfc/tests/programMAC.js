@@ -19,49 +19,85 @@ module.exports = class ProgramMac {
     }
 
     /**
-      * @public
-      *
-      * @param {object} log
-    */
+     * @public
+     *
+     * @param {object} log
+     */
     async init(teensyDev, teensyDevBaudrate) {
         await testBoardLink.initSerial(teensyDev, teensyDevBaudrate, this.logger);
     }
 
     /**
-      * @public
-      *
-      * @param
-      */
+     * @public
+     *
+     * @param
+     */
     async run(programmer) {
         try {
             const db = sqliteDriver.initialize(this.logger);
             db.updateSerial(this.serial);
-            await common.initializeTestFixture(null, null, false, false, null, null, this.logger, null, null);
+            await common.initializeTestFixture(
+                null,
+                null,
+                false,
+                false,
+                null,
+                null,
+                this.logger,
+                null,
+                null
+            );
             this.logger.debug('Wait for DFU ...');
             await common.waitDFU(programmer, this.logger);
             this.logger.debug('Programming TSV file ...');
             const fwDir = `${path.resolve(__dirname)}/../fw`;
             const minimalTsv = `${fwDir}/flashlayout_st-ls2m1-image-core/trusted/minimal.tsv`;
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${minimalTsv}`, this.logger, false, false, 1024 * 200, fwDir);
+            await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -d ${minimalTsv}`,
+                this.logger,
+                false,
+                false,
+                1024 * 200,
+                fwDir
+            );
             await delay(100);
 
             this.logger.debug('Reading current OTP values ...');
-            const word57 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp57}`, this.logger, false);
-            const word58 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp58}`, this.logger, false);
+            const word57 = await os.executeShellCommand(
+                `${programmer}  -c port=usb1  -otp displ word=${utils.otp57}`,
+                this.logger,
+                false
+            );
+            const word58 = await os.executeShellCommand(
+                `${programmer}  -c port=usb1  -otp displ word=${utils.otp58}`,
+                this.logger,
+                false
+            );
             const osdpKey = [60, 61, 62, 63];
             // eslint-disable-next-line no-restricted-syntax
             for (const address of osdpKey) {
                 const value = `0x${utils.genRanHex(8)}`;
                 // eslint-disable-next-line no-await-in-loop
-                await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${address} value=${value}`, this.logger, false);
+                await os.executeShellCommand(
+                    `${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${address} value=${value}`,
+                    this.logger,
+                    false
+                );
             }
 
             const cpuSerial = utils.getCPUSerial(word57);
             if (!this.config.testNewMac) {
                 db.updateCPUSerial(this.serial, cpuSerial);
             }
-            if (!this.config.testNewMac && (utils.getWordData(word57, utils.otp57) !== '0x00000000') && (utils.getWordData(word58, utils.otp58) !== '0x00000000')) {
-                const otpToMac = utils.otpToMac(utils.getWordData(word57, utils.otp57), utils.getWordData(word58, utils.otp58));
+            if (
+                !this.config.testNewMac &&
+                utils.getWordData(word57, utils.otp57) !== '0x00000000' &&
+                utils.getWordData(word58, utils.otp58) !== '0x00000000'
+            ) {
+                const otpToMac = utils.otpToMac(
+                    utils.getWordData(word57, utils.otp57),
+                    utils.getWordData(word58, utils.otp58)
+                );
                 this.logger.info(`OTP is not blank MAC Address is: ${otpToMac}`);
                 const dbRecord = db.getRecordFromMac(otpToMac);
                 if (dbRecord.length) {
@@ -75,7 +111,7 @@ module.exports = class ProgramMac {
                 await delay(300);
                 db.updateUid(this.serial, otpToMac);
                 const exitCode = exitCodes.normalExit;
-                return ({ exitCode, mac: this.mac });
+                return { exitCode, mac: this.mac };
             }
 
             const mac = utils.getNextMac(db.getLastUsedMac());
@@ -86,14 +122,32 @@ module.exports = class ProgramMac {
             this.logger.info('Programing OTP values ...');
             // const osdpKey = [];
             // genRanHex();
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp57} value=${progData.oTp57}`, this.logger, false);
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp58} value=${progData.oTp58}`, this.logger, false);
+            await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp57} value=${progData.oTp57}`,
+                this.logger,
+                false
+            );
+            await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp58} value=${progData.oTp58}`,
+                this.logger,
+                false
+            );
             this.logger.debug('Verifying OTP values ...');
-            const rbword57 = await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp57}`, this.logger, false);
-            const rbword58 = await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp58}`, this.logger, false);
+            const rbword57 = await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp57}`,
+                this.logger,
+                false
+            );
+            const rbword58 = await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp58}`,
+                this.logger,
+                false
+            );
 
             if (!utils.isMacTheSame(rbword57, rbword58, mac.toUpperCase())) {
-                this.logger.error(`OTP compare failed!!! programmed ${mac.toUpperCase()}, read back ${utils.otpToMac(utils.getWordData(rbword57, utils.otp57), utils.getWordData(rbword58, utils.otp58))}`);
+                this.logger.error(
+                    `OTP compare failed!!! programmed ${mac.toUpperCase()}, read back ${utils.otpToMac(utils.getWordData(rbword57, utils.otp57), utils.getWordData(rbword58, utils.otp58))}`
+                );
                 await common.testFailed();
                 const throwError = new Error('OTP (MAC) compare failed');
                 throwError.level = exitCodes.programMacFailed;
@@ -108,7 +162,7 @@ module.exports = class ProgramMac {
             this.mac = mac;
             await common.testEndSuccess();
             const exitCode = exitCodes.normalExit;
-            return ({ exitCode, mac: this.mac });
+            return { exitCode, mac: this.mac };
         } catch (err) {
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();
@@ -119,116 +173,278 @@ module.exports = class ProgramMac {
     }
 
     /**
-    * @public
-    *
-    * @param
-    */
+     * @public
+     *
+     * @param
+     */
     async getMac(programmer) {
-        await common.initializeTestFixture(null, null, false, false, null, null, this.logger, null, null);
+        await common.initializeTestFixture(
+            null,
+            null,
+            false,
+            false,
+            null,
+            null,
+            this.logger,
+            null,
+            null
+        );
         this.logger.debug('Programming TSV file ...');
         await common.waitDFU(programmer, this.logger);
         const fwDir = `${path.resolve(__dirname)}/../fw`;
         const minimalTsv = `${fwDir}/flashlayout_st-ls2m1-image-core/trusted/minimal.tsv`;
-        await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${minimalTsv}`, this.logger, false, false, 1024 * 200, fwDir);
+        await os.executeShellCommand(
+            `${programmer}  -c port=usb1 -d ${minimalTsv}`,
+            this.logger,
+            false,
+            false,
+            1024 * 200,
+            fwDir
+        );
         await delay(100);
 
         this.logger.debug('Reading current OTP values ...');
-        const word57 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp57}`, this.logger, false);
-        const word58 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp58}`, this.logger, false);
-        if ((utils.getWordData(word57, utils.otp57) !== '0x00000000') || (utils.getWordData(word58, utils.otp58) !== '0x00000000')) {
-            const otpToMac = utils.otpToMac(utils.getWordData(word57, utils.otp57), utils.getWordData(word58, utils.otp58));
+        const word57 = await os.executeShellCommand(
+            `${programmer}  -c port=usb1  -otp displ word=${utils.otp57}`,
+            this.logger,
+            false
+        );
+        const word58 = await os.executeShellCommand(
+            `${programmer}  -c port=usb1  -otp displ word=${utils.otp58}`,
+            this.logger,
+            false
+        );
+        if (
+            utils.getWordData(word57, utils.otp57) !== '0x00000000' ||
+            utils.getWordData(word58, utils.otp58) !== '0x00000000'
+        ) {
+            const otpToMac = utils.otpToMac(
+                utils.getWordData(word57, utils.otp57),
+                utils.getWordData(word58, utils.otp58)
+            );
             this.mac = otpToMac;
             await common.testEndSuccess();
             await delay(300);
             const exitCode = exitCodes.normalExit;
-            return ({ exitCode, mac: this.mac });
+            return { exitCode, mac: this.mac };
         }
         await common.testEndSuccess();
         const exitCode = exitCodes.normalExit;
-        return ({ exitCode, mac: this.mac });
+        return { exitCode, mac: this.mac };
     }
 
     /**
- * @public
- *
- * @param
- */
+     * @public
+     *
+     * @param
+     */
     async getSecreteKey(programmer) {
-        await common.initializeTestFixture(null, null, false, false, null, null, this.logger, null, null);
+        await common.initializeTestFixture(
+            null,
+            null,
+            false,
+            false,
+            null,
+            null,
+            this.logger,
+            null,
+            null
+        );
         this.logger.debug('Programming TSV file ...');
         await common.waitDFU(programmer, this.logger);
         const fwDir = `${path.resolve(__dirname)}/../fw`;
         const minimalTsv = `${fwDir}/flashlayout_st-ls2m1-image-core/trusted/minimal.tsv`;
-        await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${minimalTsv}`, this.logger, false, false, 1024 * 200, fwDir);
+        await os.executeShellCommand(
+            `${programmer}  -c port=usb1 -d ${minimalTsv}`,
+            this.logger,
+            false,
+            false,
+            1024 * 200,
+            fwDir
+        );
         await delay(100);
 
         this.logger.debug('Reading current OTP values ...');
-        const word60 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp60}`, this.logger, false);
-        const word61 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp61}`, this.logger, false);
-        const word62 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp62}`, this.logger, false);
-        const word63 = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.ot63}`, this.logger, false);
+        const word60 = await os.executeShellCommand(
+            `${programmer}  -c port=usb1  -otp displ word=${utils.otp60}`,
+            this.logger,
+            false
+        );
+        const word61 = await os.executeShellCommand(
+            `${programmer}  -c port=usb1  -otp displ word=${utils.otp61}`,
+            this.logger,
+            false
+        );
+        const word62 = await os.executeShellCommand(
+            `${programmer}  -c port=usb1  -otp displ word=${utils.otp62}`,
+            this.logger,
+            false
+        );
+        const word63 = await os.executeShellCommand(
+            `${programmer}  -c port=usb1  -otp displ word=${utils.ot63}`,
+            this.logger,
+            false
+        );
 
-        if ((utils.getWordData(word60, utils.otp60) !== '0x00000000') || (utils.getWordData(word61, utils.otp61) !== '0x00000000') || (utils.getWordData(word62, utils.otp62) !== '0x00000000') || (utils.getWordData(word63, utils.otp63) !== '0x00000000')) {
-            const otpToMac = utils.otpToMac(utils.getWordData(word62, utils.otp62), utils.getWordData(word63, utils.otp63));
+        if (
+            utils.getWordData(word60, utils.otp60) !== '0x00000000' ||
+            utils.getWordData(word61, utils.otp61) !== '0x00000000' ||
+            utils.getWordData(word62, utils.otp62) !== '0x00000000' ||
+            utils.getWordData(word63, utils.otp63) !== '0x00000000'
+        ) {
+            const otpToMac = utils.otpToMac(
+                utils.getWordData(word62, utils.otp62),
+                utils.getWordData(word63, utils.otp63)
+            );
             this.mac = otpToMac;
             await common.testEndSuccess();
             await delay(300);
             const exitCode = exitCodes.normalExit;
-            return ({ exitCode, mac: this.mac });
+            return { exitCode, mac: this.mac };
         }
         await common.testEndSuccess();
         const exitCode = exitCodes.normalExit;
-        return ({ exitCode, mac: this.mac });
+        return { exitCode, mac: this.mac };
     }
 
     /**
-  * @public
-  *
-  * @param
-  */
+     * @public
+     *
+     * @param
+     */
     async runProgSecret(programmer) {
         try {
-            const secretKey = { word0: this.getRandomInt(), word1: this.getRandomInt(), word2: this.getRandomInt(), word3: this.getRandomInt() };
+            const secretKey = {
+                word0: this.getRandomInt(),
+                word1: this.getRandomInt(),
+                word2: this.getRandomInt(),
+                word3: this.getRandomInt()
+            };
             const db = sqliteDriver.initialize(this.logger);
             const exitCode = exitCodes.normalExit;
             db.updateSerial(this.serial);
-            await common.initializeTestFixture(null, null, false, false, null, null, this.logger, null, null);
+            await common.initializeTestFixture(
+                null,
+                null,
+                false,
+                false,
+                null,
+                null,
+                this.logger,
+                null,
+                null
+            );
             this.logger.debug('Wait for DFU ...');
             await common.waitDFU(programmer, this.logger);
             this.logger.debug('Programming TSV file ...');
             const fwDir = `${path.resolve(__dirname)}/../fw`;
             const minimalTsv = `${fwDir}/flashlayout_st-ls2m1-image-core/trusted/minimal.tsv`;
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -d ${minimalTsv}`, this.logger, false, false, 1024 * 200, fwDir);
+            await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -d ${minimalTsv}`,
+                this.logger,
+                false,
+                false,
+                1024 * 200,
+                fwDir
+            );
             await delay(100);
             this.logger.debug('Reading current OTP values for Secrete Key...');
-            const word60Tmp = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp60}`, this.logger, false);
-            const word61Tmp = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp61}`, this.logger, false);
-            const word62Tmp = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp62}`, this.logger, false);
-            const word63Tmp = await os.executeShellCommand(`${programmer}  -c port=usb1  -otp displ word=${utils.otp63}`, this.logger, false);
+            const word60Tmp = await os.executeShellCommand(
+                `${programmer}  -c port=usb1  -otp displ word=${utils.otp60}`,
+                this.logger,
+                false
+            );
+            const word61Tmp = await os.executeShellCommand(
+                `${programmer}  -c port=usb1  -otp displ word=${utils.otp61}`,
+                this.logger,
+                false
+            );
+            const word62Tmp = await os.executeShellCommand(
+                `${programmer}  -c port=usb1  -otp displ word=${utils.otp62}`,
+                this.logger,
+                false
+            );
+            const word63Tmp = await os.executeShellCommand(
+                `${programmer}  -c port=usb1  -otp displ word=${utils.otp63}`,
+                this.logger,
+                false
+            );
             const readBackSecretKey = {};
             readBackSecretKey.word0 = utils.getWordData(word60Tmp, utils.otp60);
             readBackSecretKey.word1 = utils.getWordData(word61Tmp, utils.otp61);
             readBackSecretKey.word2 = utils.getWordData(word62Tmp, utils.otp62);
             readBackSecretKey.word3 = utils.getWordData(word63Tmp, utils.otp63);
-            this.logger.info(`Read OTP Secret Key ${readBackSecretKey.word3}.${readBackSecretKey.word2}.${readBackSecretKey.word1}.${readBackSecretKey.word0}`);
-            if (!(readBackSecretKey.word3 === '0x00000000' && readBackSecretKey.word2 === '0x00000000' && readBackSecretKey.word1 === '0x00000000' && readBackSecretKey.word0 === '0x00000000')) {
+            this.logger.info(
+                `Read OTP Secret Key ${readBackSecretKey.word3}.${readBackSecretKey.word2}.${readBackSecretKey.word1}.${readBackSecretKey.word0}`
+            );
+            if (
+                !(
+                    readBackSecretKey.word3 === '0x00000000' &&
+                    readBackSecretKey.word2 === '0x00000000' &&
+                    readBackSecretKey.word1 === '0x00000000' &&
+                    readBackSecretKey.word0 === '0x00000000'
+                )
+            ) {
                 this.logger.info('Secret Key OTP is already programmed ');
                 await common.testEndSuccess();
                 await delay(300);
-                return ({ exitCode, readBackSecretKey });
+                return { exitCode, readBackSecretKey };
             }
 
-            this.logger.info(`Programing Secret Key OTP values ${secretKey.word3}.${secretKey.word2}.${secretKey.word1}.${secretKey.word0}`);
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp60} value=0x${(secretKey.word0).toString(16)}`, this.logger, false);
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp61} value=0x${(secretKey.word1).toString(16)}`, this.logger, false);
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp62} value=0x${(secretKey.word2).toString(16)}`, this.logger, false);
-            await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp63} value=0x${(secretKey.word3).toString(16)}`, this.logger, false);
+            this.logger.info(
+                `Programing Secret Key OTP values ${secretKey.word3}.${secretKey.word2}.${secretKey.word1}.${secretKey.word0}`
+            );
+            await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp60} value=0x${secretKey.word0.toString(16)}`,
+                this.logger,
+                false
+            );
+            await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp61} value=0x${secretKey.word1.toString(16)}`,
+                this.logger,
+                false
+            );
+            await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp62} value=0x${secretKey.word2.toString(16)}`,
+                this.logger,
+                false
+            );
+            await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -c port=USB1 -y -otp write lock word=${utils.otp63} value=0x${secretKey.word3.toString(16)}`,
+                this.logger,
+                false
+            );
             this.logger.debug('Verifying Secret Key OTP values ...');
-            const word0 = await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp60}`, this.logger, false);
-            const word1 = await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp61}`, this.logger, false);
-            const word2 = await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp62}`, this.logger, false);
-            const word3 = await os.executeShellCommand(`${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp63}`, this.logger, false);
-            if (utils.getWordData(word3, utils.otp63).toLowerCase() !== `0x${secretKey.word3.toString(16)}` || utils.getWordData(word2, utils.otp62).toLowerCase() !== `0x${secretKey.word2.toString(16)}` || utils.getWordData(word1, utils.otp61).toLowerCase() !== `0x${secretKey.word1.toString(16)}` || utils.getWordData(word0, utils.otp60).toLowerCase() !== `0x${secretKey.word0.toString(16)}`) {
+            const word0 = await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp60}`,
+                this.logger,
+                false
+            );
+            const word1 = await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp61}`,
+                this.logger,
+                false
+            );
+            const word2 = await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp62}`,
+                this.logger,
+                false
+            );
+            const word3 = await os.executeShellCommand(
+                `${programmer}  -c port=usb1 -c port=USB1 -otp displ word=${utils.otp63}`,
+                this.logger,
+                false
+            );
+            if (
+                utils.getWordData(word3, utils.otp63).toLowerCase() !==
+                    `0x${secretKey.word3.toString(16)}` ||
+                utils.getWordData(word2, utils.otp62).toLowerCase() !==
+                    `0x${secretKey.word2.toString(16)}` ||
+                utils.getWordData(word1, utils.otp61).toLowerCase() !==
+                    `0x${secretKey.word1.toString(16)}` ||
+                utils.getWordData(word0, utils.otp60).toLowerCase() !==
+                    `0x${secretKey.word0.toString(16)}`
+            ) {
                 this.logger.error('Secretekey in OTP compare failed!!!)');
                 await common.testFailed();
                 const throwError = new Error('OTP (SecretKey) compare failed');
@@ -238,7 +454,7 @@ module.exports = class ProgramMac {
             this.logger.info('Secret Key: is programmed');
 
             await common.testEndSuccess();
-            return ({ exitCode, secretKey });
+            return { exitCode, secretKey };
         } catch (err) {
             // if (err.stack) this.logger.debug(err.stack);
             await common.testFailed();

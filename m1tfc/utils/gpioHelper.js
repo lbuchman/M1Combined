@@ -73,7 +73,7 @@ class GPIOHelper {
      */
     async configureAndSet(pin, level) {
         // Configure
-        if (!await this.configureOutput(pin.port, pin.pin, pin.pinNameOnTestBoard)) {
+        if (!(await this.configureOutput(pin.port, pin.pin, pin.pinNameOnTestBoard))) {
             return false;
         }
 
@@ -92,7 +92,9 @@ class GPIOHelper {
                 `confgpio ${pin.port} ${pin.pin} input none`
             );
             if (!ret.status) {
-                this.logger.error(`Failed to configure ${pin.port}.${pin.pin} as input: ${ret.error}`);
+                this.logger.error(
+                    `Failed to configure ${pin.port}.${pin.pin} as input: ${ret.error}`
+                );
                 return false;
             }
         }

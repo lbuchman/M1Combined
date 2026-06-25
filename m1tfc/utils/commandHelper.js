@@ -30,7 +30,11 @@ class CommandHelper {
                 if (errorCodeName && this.db) {
                     const errorCode = errorCodes.codes[errorCodeName]?.errorCode;
                     if (errorCode) {
-                        this.db.updateErrorCode(runtimeContext.getRuntime().serial, errorCode, errorSeverity);
+                        this.db.updateErrorCode(
+                            runtimeContext.getRuntime().serial,
+                            errorCode,
+                            errorSeverity
+                        );
                     }
                 }
                 return false;

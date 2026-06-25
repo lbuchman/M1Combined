@@ -74,9 +74,9 @@ class VoltageHelper {
             if (calibrate) {
                 this.logger.error(
                     `Voltage out of tolerance (cannot calibrate). TP=${testPoint.name}, ` +
-                    `measured=${scaledValue.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
-                    `expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
-                    `error=${(error * 100).toFixed(1)}%`
+                        `measured=${scaledValue.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                        `expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                        `error=${(error * 100).toFixed(1)}%`
                 );
                 return { passed: false, error, scaledValue };
             }
@@ -87,17 +87,17 @@ class VoltageHelper {
             }
             this.logger.error(
                 `Failed: Voltage out of tolerance. TP=${testPoint.name}, ` +
-                `measured=${scaledValue.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
-                `expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V`
+                    `measured=${scaledValue.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                    `expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V`
             );
             return { passed: false, error, scaledValue };
         }
 
         this.logger.info(
             `Passed TP=${testPoint.name}. ` +
-            `Measured=${scaledValue.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
-            `Expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
-            `Error=${(error * 100).toFixed(1)}%`
+                `Measured=${scaledValue.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                `Expected=${testPoint.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)}V, ` +
+                `Error=${(error * 100).toFixed(1)}%`
         );
 
         return { passed: true, error, scaledValue };

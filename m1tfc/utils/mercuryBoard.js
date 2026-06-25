@@ -8,7 +8,7 @@ module.exports = class MercuryBoardLink {
         this.logger = log;
         this.reply = [];
         this.udpDgram = gwUdpDgram.gwUdpSocket(this.logger, 0); // eslint-disable-line
-        this.udpDgram.on('message', (event) => {
+        this.udpDgram.on('message', event => {
             this.reply.push(event);
         });
     }
@@ -27,12 +27,12 @@ module.exports = class MercuryBoardLink {
                 // eslint-disable-next-line no-await-in-loop
                 ret = await this.sendCommandRaw(cmd, arg);
                 if (ret.status !== true) {
-                    throw (new Error(`command ${cmd} ${arg} failed, ${ret.error}`));
+                    throw new Error(`command ${cmd} ${arg} failed, ${ret.error}`);
                 }
                 return ret;
             } catch (err) {
                 if (count === 3) {
-                    throw (err);
+                    throw err;
                 }
             }
         }
@@ -48,7 +48,11 @@ module.exports = class MercuryBoardLink {
                     clearInterval(handler);
                     const reply = this.reply[0];
                     if (!reply.status) {
-                        reject(new Error(`Error, command to Mercury Board ${cmd} ${arg} failed, ${reply.error} `));
+                        reject(
+                            new Error(
+                                `Error, command to Mercury Board ${cmd} ${arg} failed, ${reply.error} `
+                            )
+                        );
                         clearInterval(handler);
                         return;
                     }
@@ -58,7 +62,11 @@ module.exports = class MercuryBoardLink {
                 }
                 count -= 1;
                 if (count === 0) {
-                    reject(new Error(`Error, command to Mercury Board "${cmd} ${arg}" failed, udp timeout `));
+                    reject(
+                        new Error(
+                            `Error, command to Mercury Board "${cmd} ${arg}" failed, udp timeout `
+                        )
+                    );
                     clearInterval(handler);
                 }
             }, 100);

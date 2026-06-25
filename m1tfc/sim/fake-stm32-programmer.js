@@ -2,6 +2,8 @@
 
 'use strict';
 
+/* eslint-disable no-console */
+
 const args = process.argv.slice(2);
 const joined = ` ${args.join(' ')} `;
 

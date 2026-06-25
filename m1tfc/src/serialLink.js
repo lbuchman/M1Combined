@@ -17,16 +17,16 @@ module.exports = class SerialLink {
     }
 
     /**
-      * @public
-      * send command
-      * @param {object} log
-      */
+     * @public
+     * send command
+     * @param {object} log
+     */
     async sendCommand(cmd, timeout = 1000) {
         if (this.busy) {
-            throw (new Error(`${this.linkName} cmd - ${cmd} faled, serial terminal is busy`));
+            throw new Error(`${this.linkName} cmd - ${cmd} faled, serial terminal is busy`);
         }
         if (!this.serialPort) {
-            throw (new Error('Serial object is NULL'));
+            throw new Error('Serial object is NULL');
         }
         this.busy = true;
         await this.serialPort.flush();
@@ -35,7 +35,7 @@ module.exports = class SerialLink {
         let timeoutHandle;
         return new Promise((resolve, reject) => {
             let jsonRet;
-            this.parser.on('data', (data) => {
+            this.parser.on('data', data => {
                 this.busy = false;
                 clearTimeout(timeoutHandle);
                 this.parser.removeAllListeners('data');
@@ -59,14 +59,14 @@ module.exports = class SerialLink {
     }
 
     /**
-      * @public
-      * send command
-      * @param {object} log
-      */
+     * @public
+     * send command
+     * @param {object} log
+     */
     async waitTillReady(timeout) {
         let timeoutHandle;
         return new Promise((resolve, reject) => {
-            this.parser.on('data', (data) => {
+            this.parser.on('data', data => {
                 if (!data.includes('login:')) {
                     return;
                 }
@@ -82,10 +82,10 @@ module.exports = class SerialLink {
     }
 
     /**
-      * @public
-      * send command
-      * @param {object} log
-      */
+     * @public
+     * send command
+     * @param {object} log
+     */
     async sendData(cmd, extectedData, timeout = 100) {
         this.serialPort.flush();
         this.serialPort.write(cmd);
@@ -94,7 +94,7 @@ module.exports = class SerialLink {
         }
         let timeoutHandle;
         return new Promise((resolve, reject) => {
-            this.parser.on('data', (data) => {
+            this.parser.on('data', data => {
                 if (extectedData) {
                     const cleanData = utils.removeNoneAscii(data);
                     if (!cleanData) {
@@ -121,10 +121,10 @@ module.exports = class SerialLink {
     }
 
     /**
-    * @public
-    * init
-    * @param {object} log
-    */
+     * @public
+     * init
+     * @param {object} log
+     */
     async initSerial(devFile, baud, log, dumpdata = false) {
         this.logger = log;
         this.devFile = devFile;
@@ -139,7 +139,7 @@ module.exports = class SerialLink {
             const runtime = runtimeContext.getRuntime();
             const dumpFile = `${runtime.logDir}\\${runtime.serial}_dump.log`;
             fs.writeFileSync(dumpFile, '/n/r');
-            this.serialPort.on('data', (data) => {
+            this.serialPort.on('data', data => {
                 fs.writeFileSync(dumpFile, data.toString(), { flag: 'a' });
             });
         }
@@ -149,7 +149,7 @@ module.exports = class SerialLink {
                 resolve(0);
             });
 
-            this.serialPort.on('error', (error) => {
+            this.serialPort.on('error', error => {
                 reject(error);
             });
         });

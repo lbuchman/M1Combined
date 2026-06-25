@@ -10,11 +10,12 @@ const errorCodes = require('../errorCodes');
 const { loadConfig, errorAndExit, applyRuntime } = require('../commandSupport');
 
 function register(program) {
-    program.command('flash')
+    program
+        .command('flash')
         .description('program STM32M1 with the flash layout file')
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
-        .action(async(options) => {
+        .action(async options => {
             const configData = await loadConfig();
             let logfile;
             let db;
@@ -23,10 +24,18 @@ function register(program) {
                 if (!options.serial) {
                     await errorAndExit('must define vendor serial number', console);
                 }
-                logfile = logger.getLogger(options.serial, '   eMMC', options.serial, configData.mtfDir, options.debug);
+                logfile = logger.getLogger(
+                    options.serial,
+                    '   eMMC',
+                    options.serial,
+                    configData.mtfDir,
+                    options.debug
+                );
                 db = sqliteDriver.initialize(logfile);
                 logfile.info('--------------------------------------------');
-                const revisionFile = fs.readFileSync(`${configData.mtfDir}/${configData.fwDir}/VERSION`);
+                const revisionFile = fs.readFileSync(
+                    `${configData.mtfDir}/${configData.fwDir}/VERSION`
+                );
                 logfile.info(`Flashing eMMC revision: ${revisionFile.toString()}`);
                 const tsvPath = `${configData.mtfDir}/${configData.fwDir}/${configData.layoutFilePath}`;
                 const flashEmmc = new FlashEmmc(tsvPath, options.serial, logfile);
