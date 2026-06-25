@@ -5,7 +5,11 @@
   "main": "bin/m1tfc.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./bin/m1tfc.js"
+    "start": "node ./bin/m1tfc.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write ."
   },
   "bin": {
     "m1tfc": "bin/m1tfc.js"
@@ -38,5 +42,9 @@
     "systeminformation": "^5.23.5",
     "time-stamp": "^2.2.0",
     "winston": "^3.8.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.1"
   }
 }
