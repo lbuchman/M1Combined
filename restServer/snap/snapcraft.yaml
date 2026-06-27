@@ -7,7 +7,7 @@ description: |
   and returns a normalized JSON status response.
 
 grade: devel
-confinement: strict
+confinement: classic
 
 apps:
   rest-server:
@@ -20,26 +20,26 @@ apps:
       M1TFC_CMD: m1tfc
       M1TFC_BASE_ARGS: ''
       M1TFC_CWD: $SNAP_COMMON
+      PATH: /snap/bin:$PATH
 
 parts:
   rest-server:
     plugin: npm
-    source: ..
-    npm-node-version: 20.19.2
+    source: .
+    npm-include-node: true
+    npm-node-version: 24.0.0
     prime:
       - src/**
-      - package.json
       - node_modules/**
       - bin/server
 
   launcher:
     plugin: dump
-    source: .
+    source: snap/local
+    override-build: |
+      craftctl default
+      chmod +x "$CRAFT_PART_INSTALL/bin/server"
     organize:
       bin/server: bin/server
 
-plugs:
-  raw-usb:
-  serial-port:
-  network:
-  network-bind:
+

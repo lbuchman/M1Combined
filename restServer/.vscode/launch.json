@@ -23,6 +23,15 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
+            "env": {
+                "PORT": "3300",
+                "HOST": "127.0.0.1",
+                "M1TFC_CMD": "node",
+                "M1TFC_BASE_ARGS": "/home/lenel/myGitHub/M1Combined/m1tfc/bin/m1tfc.js",
+                "M1TFC_CWD": "/home/lenel/myGitHub/M1Combined/m1tfc",
+                "SNAP_DATA": "/home/lbuchman/snap_data",
+                "SNAP_COMMON": "/home/lbuchman/snap_common"
+            },
             "program": "${workspaceFolder}/src/server.js",
             "console": "integratedTerminal"
         },
