@@ -11,6 +11,8 @@ base: core22
 apps:
     cli:
       command: bin/m1tfc
+      environment:
+        PATH: $SNAP/bin:$PATH
       plugs: [network, network-bind]
 
     app:
@@ -23,7 +25,7 @@ parts:
       source-type: local
       plugin: npm
       npm-include-node: true
-      npm-node-version: 20.18.0
+      npm-node-version: 24.2.0
       stage-packages: 
           - musl
           
