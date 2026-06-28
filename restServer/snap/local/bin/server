@@ -1,5 +1,2 @@
 #!/bin/sh
-set -eu
-
-cd "$SNAP" || exit 1
-exec "$SNAP/usr/bin/node" "$SNAP/src/server.js"
+exec "$SNAP/bin/node" "$SNAP/lib/node_modules/m1tfc-rest-server/src/server.js"

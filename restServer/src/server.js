@@ -5,22 +5,26 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { CommandRunner, getSupportedCommands } = require('./commandRunner');
+const logger = require('./logger');
 
 const port = Number(process.env.PORT || 3300);
 const host = process.env.HOST || '0.0.0.0';
-const defaultCliPath = process.env.M1TFC_CMD || 'm1tfc';
+const defaultCliPath = process.env.M1TFC_CMD || 'm1tfd1.cli';
 const defaultCliArgs = process.env.M1TFC_BASE_ARGS
     ? process.env.M1TFC_BASE_ARGS.split(' ').filter(Boolean)
     : [];
 const cliCwd = process.env.M1TFC_CWD || process.cwd();
+const snapData = process.env.SNAP_DATA || path.join(require('os').homedir(), 'snap_data');
 const defaultConfigFile = process.env.CONFIG_JSON
-    || path.join(process.env.SNAP_DATA || process.cwd(), 'config.json');
+    || path.join(snapData, 'config.json');
 const defaultSnapcraftFile = process.env.SNAPCRAFT_YAML
     || path.join(process.cwd(), 'snap', 'snapcraft.yaml');
 const sseHeartbeatMs = Number(process.env.LOG_SSE_HEARTBEAT_MS || 15000);
+const testHookReportOnly = process.env.REST_TEST_HOOK === '1';
+const testHookHistory = [];
 
-// PIN storage — use SNAP_DATA if available, else same dir as server.js
-const pinDir  = process.env.SNAP_DATA || path.dirname(__filename);
+// PIN storage — always snap: use SNAP_DATA
+const pinDir  = snapData;
 const pinFile = path.join(pinDir, 'pin.json');
 const PIN_ITERATIONS = 100000;
 const PIN_KEYLEN     = 64;
@@ -116,6 +120,33 @@ const commandRunner = new CommandRunner({
 
 const app = express();
 app.use(express.json({ limit: '1mb' }));
+
+function normalizeIncomingCommandRequest(body = {}) {
+    return {
+        command: body.command || body.cmd,
+        argument: body.argument || body.arg || body.args
+    };
+}
+
+function createTestHookReport(command, argument) {
+    return {
+        command,
+        args: typeof argument === 'string' ? argument.split(/\s+/).filter(Boolean) : argument,
+        rawArgument: argument
+    };
+}
+
+function writeRdtfResponse(res, command, ok, error, details) {
+    const response = {
+        cmd: command,
+        status: ok,
+        ...(ok ? {} : { error: error || 'Command execution failed' })
+    };
+    if (details && !ok) {
+        response.details = details;
+    }
+    res.status(ok ? 200 : 500).json(response);
+}
 
 app.get('/health', (req, res) => {
     res.json({
@@ -300,6 +331,19 @@ app.get('/commands', (req, res) => {
     });
 });
 
+app.get('/test-hook/status', (req, res) => {
+    res.json({
+        enabled: testHookReportOnly,
+        totalReported: testHookHistory.length
+    });
+});
+
+app.get('/test-hook/last-command', (req, res) => {
+    res.json({
+        report: testHookHistory[testHookHistory.length - 1] || null
+    });
+});
+
 app.post('/auth', (req, res) => {
     const { pin, mode } = req.body || {};
     if (!mode || typeof mode !== 'string' || !VALID_PIN_MODES.has(mode)) {
@@ -324,10 +368,15 @@ app.post('/changepin', (req, res) => {
     res.json({ status: 'OK' });
 });
 
-app.post('/command', async (req, res) => {
-    const { command, argument } = req.body || {};
+async function handleCommandExecution(req, res, source) {
+    const { command, argument } = normalizeIncomingCommandRequest(req.body || {});
 
     if (!command || typeof command !== 'string') {
+        if (source === 'rdtf') {
+            res.status(400).json({ status: false, error: 'Field "cmd" must be a non-empty string' });
+            return;
+        }
+
         res.status(400).json({
             status: 'FAILED',
             errorCode: 14,
@@ -336,8 +385,88 @@ app.post('/command', async (req, res) => {
         return;
     }
 
+    if (command === 'help') {
+        const cmds = getSupportedCommands();
+        const helpData = {
+            commands: cmds.join('  '),
+            argument: 'string "--flag val"  |  array ["--flag","val"]  |  object {positional:["val"], flag:"val", boolFlag:true}'
+        };
+        if (source === 'rdtf') {
+            res.status(200).json({ cmd: 'help', status: true, ...helpData });
+            return;
+        }
+        res.status(200).json({ status: 'OK', errorCode: 0, ErrorDescription: 'Help', commands: cmds, ...helpData });
+        return;
+    }
+
+    if (testHookReportOnly) {
+        const report = createTestHookReport(command, argument);
+        testHookHistory.push(report);
+        if (source === 'rdtf') {
+            res.status(200).json({ cmd: command, status: true, report });
+            return;
+        }
+
+        res.status(200).json({
+            status: 'OK',
+            errorCode: 0,
+            ErrorDescription: 'Success',
+            report
+        });
+        return;
+    }
+
     const result = await commandRunner.run(command, argument);
+    if (source === 'rdtf') {
+        writeRdtfResponse(res, command, result.status === 'OK', result.ErrorDescription, {
+            errorCode: result.errorCode,
+            commandOutput: result.commandOutput
+        });
+        return;
+    }
+
     res.status(result.status === 'OK' ? 200 : 500).json(result);
+}
+
+app.get('/help', (req, res) => {
+    res.json({
+        status: 'OK',
+        routes: [
+            { method: 'GET',  path: '/health',              description: 'Server liveness check' },
+            { method: 'GET',  path: '/config',              description: 'Runtime config: machineName, logFile, snapVersion, fwVersion' },
+            { method: 'GET',  path: '/help',                description: 'This help document' },
+            { method: 'GET',  path: '/commands',            description: 'List supported command names' },
+            { method: 'POST', path: '/command',             description: 'Run one command, returns full JSON result' },
+            { method: 'POST', path: '/commands/',           description: 'Run one command, returns RDTF-style {cmd, status} response' },
+            { method: 'POST', path: '/auth',                description: 'Verify PIN — body: { pin, mode: "production"|"debug" }' },
+            { method: 'POST', path: '/changepin',           description: 'Change PIN — body: { currentPin, newPin, mode: "production"|"debug" }' },
+            { method: 'GET',  path: '/logs/stream',         description: 'SSE log stream — query: ?lines=<N> (default 500, max 2000)' },
+            { method: 'GET',  path: '/logs/tail',           description: 'Last N log lines — query: ?lines=<N> (default 100, max 2000)' },
+            { method: 'GET',  path: '/logs/download',       description: 'Download full log file' },
+            { method: 'POST', path: '/logs/clear',          description: 'Truncate the log file' }
+        ],
+        commandEndpoint: {
+            path: '/command',
+            method: 'POST',
+            body: {
+                command: `One of: ${getSupportedCommands().join(', ')}`,
+                argument: {
+                    description: 'Optional. Accepted formats:',
+                    string:  '"--flag value --other"',
+                    array:   '["--flag", "value"]',
+                    object:  '{ "positional": ["val"], "flagName": "value", "boolFlag": true }'
+                }
+            }
+        }
+    });
+});
+
+app.post('/command', async (req, res) => {
+    await handleCommandExecution(req, res, 'json');
+});
+
+app.post('/commands/', async (req, res) => {
+    await handleCommandExecution(req, res, 'rdtf');
 });
 
 app.use((err, req, res, next) => {
@@ -348,8 +477,19 @@ app.use((err, req, res, next) => {
     });
 });
 
-app.listen(port, host, () => {
-    console.log(`m1tfc REST server listening on http://${host}:${port}`);
-    console.log(`CLI command: ${defaultCliPath} ${defaultCliArgs.join(' ')}`.trim());
-    console.log(`CLI cwd: ${cliCwd}`);
-});
+function startServer() {
+    return app.listen(port, host, () => {
+        logger.info(`m1tfc REST server listening on http://${host}:${port}`);
+        logger.info(`CLI command: ${defaultCliPath} ${defaultCliArgs.join(' ')}`.trim());
+        logger.info(`CLI cwd: ${cliCwd}`);
+    });
+}
+
+if (require.main === module) {
+    startServer();
+}
+
+module.exports = {
+    app,
+    startServer
+};

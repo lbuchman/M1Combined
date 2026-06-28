@@ -2,6 +2,7 @@
 
 const { spawn } = require('child_process');
 const { exitCodeDescriptions } = require('./errorMap');
+const logger = require('./logger');
 
 const supportedCommands = new Set([
     'm1dfu',
@@ -22,65 +23,7 @@ function getSupportedCommands() {
     return Array.from(supportedCommands);
 }
 
-function parseQuotedArgs(argumentString) {
-    const args = [];
-    const regex = /"([^"]*)"|'([^']*)'|([^\s"']+)/g;
-    let match;
 
-    while ((match = regex.exec(argumentString)) !== null) {
-        args.push(match[1] || match[2] || match[3]);
-    }
-
-    return args;
-}
-
-function normalizeFlagName(key) {
-    if (key.startsWith('-')) return key;
-    return key.length === 1 ? `-${key}` : `--${key}`;
-}
-
-function normalizeArguments(argument) {
-    if (argument === undefined || argument === null) return [];
-
-    if (Array.isArray(argument)) {
-        return argument.map(value => String(value));
-    }
-
-    if (typeof argument === 'string') {
-        return parseQuotedArgs(argument);
-    }
-
-    if (typeof argument === 'object') {
-        const args = [];
-        const positional = argument.positional || argument.args;
-
-        if (Array.isArray(positional)) {
-            positional.forEach(value => args.push(String(value)));
-        }
-
-        Object.entries(argument).forEach(([key, value]) => {
-            if (key === 'positional' || key === 'args') return;
-            if (value === undefined || value === null || value === false) return;
-
-            const flag = normalizeFlagName(key);
-            if (value === true) {
-                args.push(flag);
-                return;
-            }
-
-            if (Array.isArray(value)) {
-                value.forEach(item => args.push(flag, String(item)));
-                return;
-            }
-
-            args.push(flag, String(value));
-        });
-
-        return args;
-    }
-
-    return [String(argument)];
-}
 
 function parseJsonStdout(stdout) {
     if (!stdout) return null;
@@ -110,6 +53,42 @@ function parseJsonStdout(stdout) {
     }
 
     return null;
+}
+
+function flagFor(key) {
+    return key.length === 1 ? `-${key}` : `--${key}`;
+}
+
+function toArgv(argument) {
+    if (argument === undefined || argument === null || argument === '') return [];
+    if (typeof argument === 'string') {
+        return argument.split(/\s+/).filter(Boolean);
+    }
+    if (typeof argument === 'number') return [String(argument)];
+    if (typeof argument !== 'object' || Array.isArray(argument)) return [String(argument)];
+
+    const argv = [];
+
+    if (Array.isArray(argument.positional)) {
+        for (const item of argument.positional) {
+            argv.push(String(item));
+        }
+    }
+
+    for (const [key, value] of Object.entries(argument)) {
+        if (key === 'positional') continue;
+        if (value === undefined || value === null || value === false) continue;
+
+        const flag = flagFor(key);
+        if (value === true) {
+            argv.push(flag);
+            continue;
+        }
+
+        argv.push(flag, String(value));
+    }
+
+    return argv;
 }
 
 function buildResult(exitCode, stdout, stderr) {
@@ -157,12 +136,11 @@ function descriptionFor(exitCode, stderr) {
 
 class CommandRunner {
     constructor(options = {}) {
-        this.baseCommand = options.baseCommand || 'm1tfc';
+        this.baseCommand = options.baseCommand || 'm1tfd1.cli';
         this.baseArgs = Array.isArray(options.baseArgs) ? options.baseArgs : [];
         this.cwd = options.cwd || process.cwd();
         this.env = options.env || process.env;
         this.spawnImpl = typeof options.spawnImpl === 'function' ? options.spawnImpl : spawn;
-        this.queue = Promise.resolve();
     }
 
     run(command, argument) {
@@ -175,18 +153,27 @@ class CommandRunner {
             });
         }
 
-        const commandArgs = normalizeArguments(argument);
-
-        const task = () => this.execute(command, commandArgs);
-        const resultPromise = this.queue.then(task, task);
-
-        this.queue = resultPromise.then(() => undefined, () => undefined);
-        return resultPromise;
+        return this.execute(command, argument || '');
     }
 
-    execute(command, commandArgs) {
+    execute(command, argument) {
         return new Promise((resolve) => {
-            const child = this.spawnImpl(this.baseCommand, [...this.baseArgs, command, ...commandArgs], {
+            const cmdArgs = [...this.baseArgs, command, ...toArgv(argument)];
+            
+            // Log environment context for debugging
+            logger.info('Executing command with environment', {
+                command: this.baseCommand,
+                args: cmdArgs,
+                cwd: this.cwd,
+                PATH: this.env.PATH,
+                SNAP_DATA: this.env.SNAP_DATA,
+                SNAP_COMMON: this.env.SNAP_COMMON,
+                USER: this.env.USER,
+                HOME: this.env.HOME,
+                NODE_ENV: this.env.NODE_ENV
+            });
+
+            const child = this.spawnImpl(this.baseCommand, cmdArgs, {
                 cwd: this.cwd,
                 env: this.env,
                 shell: false
@@ -196,25 +183,45 @@ class CommandRunner {
             let stderr = '';
 
             child.stdout.on('data', chunk => {
-                stdout += chunk.toString();
+                const data = chunk.toString();
+                stdout += data;
+                logger.info(`[STDOUT] ${data.trim()}`);
             });
 
             child.stderr.on('data', chunk => {
-                stderr += chunk.toString();
+                const data = chunk.toString();
+                stderr += data;
+                logger.warn(`[STDERR] ${data.trim()}`);
             });
 
             child.on('error', err => {
+                const errorMsg = `Failed to start command process: ${err.message}`;
+                logger.error(errorMsg, {
+                    command: this.baseCommand,
+                    args: cmdArgs,
+                    cwd: this.cwd,
+                    envPath: this.env.PATH
+                });
                 resolve({
                     status: 'FAILED',
                     errorCode: 3,
-                    ErrorDescription: `Failed to start command process: ${err.message}`,
+                    ErrorDescription: errorMsg,
                     commandOutput: null
                 });
             });
 
             child.on('close', code => {
                 const exitCode = Number.isInteger(code) ? code : 3;
-                resolve(buildResult(exitCode, stdout, stderr));
+                const result = buildResult(exitCode, stdout, stderr);
+                if (exitCode !== 0) {
+                    logger.error(`Command exited with code ${exitCode}`, {
+                        command: this.baseCommand,
+                        args: cmdArgs,
+                        cwd: this.cwd,
+                        stderr: stderr.substring(0, 200)
+                    });
+                }
+                resolve(result);
             });
         });
     }

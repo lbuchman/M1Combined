@@ -17,7 +17,19 @@ apps:
     environment:
       PORT: '3300'
       HOST: '0.0.0.0'
-      M1TFC_CMD: m1tfc
+      M1TFC_CMD: m1tfd1.cli
+      M1TFC_BASE_ARGS: ''
+      M1TFC_CWD: $SNAP_COMMON
+      PATH: /snap/bin:$PATH
+
+  rest-server-debug:
+    command: bin/server-debug
+    daemon: simple
+    restart-condition: always
+    environment:
+      PORT: '3300'
+      HOST: '0.0.0.0'
+      M1TFC_CMD: m1tfd1.cli
       M1TFC_BASE_ARGS: ''
       M1TFC_CWD: $SNAP_COMMON
       PATH: /snap/bin:$PATH
@@ -27,19 +39,11 @@ parts:
     plugin: npm
     source: .
     npm-include-node: true
-    npm-node-version: 24.0.0
-    prime:
-      - src/**
-      - node_modules/**
-      - bin/server
-
+    npm-node-version: "24"
   launcher:
     plugin: dump
     source: snap/local
-    override-build: |
-      craftctl default
-      chmod +x "$CRAFT_PART_INSTALL/bin/server"
-    organize:
-      bin/server: bin/server
+
+
 
 
