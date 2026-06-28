@@ -24,8 +24,6 @@ apps:
 
   rest-server-debug:
     command: bin/server-debug
-    daemon: simple
-    restart-condition: always
     environment:
       PORT: '3300'
       HOST: '0.0.0.0'
