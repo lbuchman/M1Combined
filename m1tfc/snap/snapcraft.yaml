@@ -25,7 +25,7 @@ parts:
     m1tfc:
         plugin: npm
         source: ..
-        npm-node-version: 24.0.0
+        npm-node-version: 24.18.0
         prime:
             - bin/**
             - src/**

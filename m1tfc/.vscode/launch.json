@@ -12,8 +12,8 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
-                "SNAP_DATA": "/home/lbuchman/snap_data",
-                "SNAP_COMMON": "/home/lbuchman/snap_common"
+                "SNAP_DATA": "/home/lenel/snap_data",
+                "SNAP_COMMON": "/home/lenel/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["ict", "-d", "2", "-s", "3226120077", "-b", "used", "-v", "3.0", "-c", "false"]
@@ -36,8 +36,8 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
-                "SNAP_DATA": "/home/lbuchman/snap_data",
-                "SNAP_COMMON": "/home/lbuchman/snap_common"
+                "SNAP_DATA": "/home/lenel/snap_data",
+                "SNAP_COMMON": "/home/lenel/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["cleanup", "-d", "1", "-s", "3226120077"]
@@ -50,8 +50,8 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
-                "SNAP_DATA": "/home/lbuchman/snap_data",
-                "SNAP_COMMON": "/home/lbuchman/snap_common"
+                "SNAP_DATA": "/home/lenel/snap_data",
+                "SNAP_COMMON": "/home/lenel/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["progmac", "-d", "2", "-s", "3226120077"]
@@ -63,8 +63,8 @@
             "skipFiles": ["<node_internals>/**"],
             "outputCapture": "std",
             "env": {
-                "SNAP_DATA": "/home/lbuchman/snap_data",
-                "SNAP_COMMON": "/home/lbuchman/snap_common"
+                "SNAP_DATA": "/home/lenel/snap_data",
+                "SNAP_COMMON": "/home/lenel/snap_common"
             },
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/bin/m1tfc.js",
@@ -78,8 +78,8 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
-                "SNAP_DATA": "/home/lbuchman/snap_data",
-                "SNAP_COMMON": "/home/lbuchman/snap_common"
+                "SNAP_DATA": "/home/lenel/snap_data",
+                "SNAP_COMMON": "/home/lenel/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["eeprom", "-d", "2", "-s", "3226120077"]
@@ -92,8 +92,8 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
-                "SNAP_DATA": "/home/lbuchman/snap_data",
-                "SNAP_COMMON": "/home/lbuchman/snap_common"
+                "SNAP_DATA": "/home/lenel/snap_data",
+                "SNAP_COMMON": "/home/lenel/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["pingM1apps", "-d", "2", "-s", "3226120077"]
@@ -106,8 +106,8 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
-                "SNAP_DATA": "/home/lbuchman/snap_data",
-                "SNAP_COMMON": "/home/lbuchman/snap_common"
+                "SNAP_DATA": "/home/lenel/snap_data",
+                "SNAP_COMMON": "/home/lenel/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["functest", "-d", "2", "-s", "3226120077"]
@@ -120,8 +120,8 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
-                "SNAP_DATA": "/home/lbuchman/snap_data",
-                "SNAP_COMMON": "/home/lbuchman/snap_common"
+                "SNAP_DATA": "/home/lenel/snap_data",
+                "SNAP_COMMON": "/home/lenel/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["makelabel", "-d", "2", "-s", "label"]
@@ -134,8 +134,8 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
-                "SNAP_DATA": "/home/lbuchman/snap_data",
-                "SNAP_COMMON": "/home/lbuchman/snap_common"
+                "SNAP_DATA": "/home/lenel/snap_data",
+                "SNAP_COMMON": "/home/lenel/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["m1dfu"]
@@ -148,8 +148,8 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
-                "SNAP_DATA": "/home/lbuchman/snap_data",
-                "SNAP_COMMON": "/home/lbuchman/snap_common"
+                "SNAP_DATA": "/home/lenel/snap_data",
+                "SNAP_COMMON": "/home/lenel/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["tbcmd", "-c", "date"]
@@ -162,8 +162,8 @@
             "outputCapture": "std",
             "console": "integratedTerminal",
             "env": {
-                "SNAP_DATA": "/home/lbuchman/snap_data",
-                "SNAP_COMMON": "/home/lbuchman/snap_common"
+                "SNAP_DATA": "/home/lenel/snap_data",
+                "SNAP_COMMON": "/home/lenel/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
             "args": ["m1cmd", "-c", "getfwrev"]

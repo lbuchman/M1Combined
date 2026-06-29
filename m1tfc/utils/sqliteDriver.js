@@ -252,11 +252,11 @@ class DBClass {
                 throw new Error('DB file is not open');
             }
             const insert = this.db.prepare(
-                'INSERT INTO records (vendorSerial,downloadedCumulus, ictTestPassed, functionalTestPassed, flashProgrammed, cloudPushed) VALUES (?,?,?,?,?,?)'
+                'INSERT OR IGNORE INTO records (vendorSerial,downloadedCumulus, ictTestPassed, functionalTestPassed, flashProgrammed, cloudPushed) VALUES (?,?,?,?,?,?)'
             );
             const ret = insert.run(serial, 0, 0, 0, 0, 0);
             if (ret.changes === 0) {
-                throw new Error('DB call to update vendorSerial failed');
+                this.log.debug(`Serial ${serial} already exists in the DB`);
             }
         } catch (err) {
             this.log.debug(`${err.message}`);

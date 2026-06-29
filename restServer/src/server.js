@@ -121,6 +121,18 @@ const commandRunner = new CommandRunner({
 const app = express();
 app.use(express.json({ limit: '1mb' }));
 
+// Enable CORS for all origins
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+    } else {
+        next();
+    }
+});
+
 function normalizeIncomingCommandRequest(body = {}) {
     return {
         command: body.command || body.cmd,
@@ -478,11 +490,19 @@ app.use((err, req, res, next) => {
 });
 
 function startServer() {
-    return app.listen(port, host, () => {
+    const server = app.listen(port, host, () => {
         logger.info(`m1tfc REST server listening on http://${host}:${port}`);
         logger.info(`CLI command: ${defaultCliPath} ${defaultCliArgs.join(' ')}`.trim());
         logger.info(`CLI cwd: ${cliCwd}`);
     });
+
+    server.on('error', (err) => {
+        console.error('Server error:', err.message);
+        logger.error(`Server error: ${err.message}`);
+        process.exit(1);
+    });
+
+    return server;
 }
 
 if (require.main === module) {

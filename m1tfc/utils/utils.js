@@ -1,9 +1,5 @@
 'use strict';
 
-const pingus = require('pingus');
-const ping = require('ping');
-const arpScanner = require('arpscan/promise');
-const delay = require('delay');
 const fs = require('fs-extra');
 const os = require('../utils/os');
 
@@ -119,103 +115,8 @@ function getNextMac(MACaddress) {
     return ret;
 }
 
-async function getTargetIp(mac) {
-    const ret = await arpScanner({ command: 'arp-scan', interface: 'eth0', sudo: false });
-    if (!ret) {
-        return null;
-    }
-    const arpItem = ret.find(element => {
-        if (element.mac.includes(mac.toUpperCase())) {
-            return element;
-        }
-        return null;
-    });
-    if (!arpItem) {
-        return null;
-    }
-    return arpItem.ip;
-}
-
-async function getTargetIpWait(mac, timeout) {
-    if (timeout - new Date() / 1000 > 0) {
-        const ret = await getTargetIp(mac);
-        if (ret) {
-            return ret;
-        }
-        return getTargetIpWait(mac, timeout);
-    }
-
-    throw new Error('A: Target is not pingable, down or not flashed?');
-}
-
-/**
- * @public
- *
- * @param
- */
-
-async function pingTarget(targetIp) {
-    if (targetIp) {
-        const host = [targetIp];
-        const res = await ping.promise.probe(host, { timeout: 1, extra: ['-c', '1'] });
-        if (!res.alive) {
-            return null;
-        }
-        return targetIp;
-    }
-    throw new Error('B: Target is not pingable, down or not flashed?');
-}
-
-async function pingTargetWait(targetIp, timeout /* Sec */) {
-    if (timeout - new Date() / 1000 > 0) {
-        const ret = await pingTarget(targetIp);
-        if (ret) {
-            return ret;
-        }
-        return pingTargetWait(targetIp, timeout);
-    }
-
-    throw new Error('C: Target is not pingable, down or not flashed?');
-}
-
-/**
- * @public
- *
- * @param
- */
-
-async function waitTargetSshPortUp(targetIp, timeout /* Sec */) {
-    if (timeout - new Date() / 1000 > 0) {
-        const ret = await pingus.default.tcp({ host: targetIp, port: 22 });
-        if (ret && ret.status === 'open') {
-            return;
-        }
-        await delay(100);
-        // eslint-disable-next-line consistent-return
-        return waitTargetSshPortUp(targetIp, timeout);
-    }
-
-    throw new Error('D: Target is not pingable, down or not flashed?');
-}
-
-/**
- * @public
- *
- * @param
- */
-async function waitTargetDown(targetIp, timeout /* Sec */) {
-    if (timeout - new Date() / 1000 > 0) {
-        const ret = await pingTarget(targetIp);
-        if (!ret) {
-            return;
-        }
-        await delay(100);
-        // eslint-disable-next-line consistent-return
-        return waitTargetDown(targetIp, timeout);
-    }
-
-    throw new Error('Target did not reboot');
-}
+// Network connectivity functions removed - these dependencies (ping, pingus, arpscan)
+// caused incompatibility with Node.js 24 due to raw-socket native module compilation failures
 
 function boolToInt(value) {
     return value ? 1 : 0;
@@ -303,11 +204,7 @@ module.exports = {
     otp61,
     otp62,
     otp63,
-    pingTargetWait,
-    getTargetIpWait,
     checkDbRecord,
-    waitTargetSshPortUp,
-    waitTargetDown,
     printLabel,
     getCPUSerial,
     macToUid,

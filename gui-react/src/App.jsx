@@ -12,7 +12,7 @@ const COMMANDS = [
 
 const PROGRESS = { ict:5, progmac:3, flash:40, functest:43, eeprom:5, pingM1apps:3, makelabel:8 };
 const RETEST_SKIP = new Set(['flash']);
-const API = localStorage.getItem('m1-api') || 'http://127.0.0.1:3301';
+const API = localStorage.getItem('m1-api') || `http://${window.location.hostname}:3300`;
 // TODO: Read max idle timeout from restServer config. Default is 1.5h for now.
 const MAX_IDLE_MS = 90 * 60 * 1000;
 const PROD_PIN_BYPASS = '1234';
@@ -362,8 +362,8 @@ export default function App() {
   }
 
   async function callCommand(key, isRetest) {
-    const arg = { serial: serial.trim(), debug };
-    if (key === 'ict') arg.cellBatTol = isRetest ? 'used' : 'new';
+    let arg = `--serial ${serial.trim()} --debug ${debug}`;
+    if (key === 'ict') arg += ` --cellBatTol used -v 2.5`;
     setLed(key, 'running');
     try {
       const body = await apiPost('/command', { command: key, argument: arg });
@@ -396,7 +396,7 @@ export default function App() {
     }
 
     if (!failed) {
-      await apiPost('/command', { command: 'cleanup', argument: { serial: serial.trim() } });
+      await apiPost('/command', { command: 'cleanup', argument: `--serial ${serial.trim()}` });
     }
 
     setResult(failed ? { ok: false, ...failed } : { ok: true, step: '', description: 'All tests passed' });
@@ -408,20 +408,20 @@ export default function App() {
   async function setPower(newState) {
     setPowerState(newState);
     try {
-      await apiPost('/command', { command: 'power', argument: { state: newState } });
+      await apiPost('/command', { command: 'power', argument: `--state ${newState}` });
     } catch (err) {}
   }
 
   async function setPoe(newState) {
     setPoeState(newState);
     try {
-      await apiPost('/command', { command: 'poe', argument: { state: newState } });
+      await apiPost('/command', { command: 'poe', argument: `--state ${newState}` });
     } catch (err) {}
   }
 
   async function reboot() {
     try {
-      await apiPost('/command', { command: 'reboot', argument: {} });
+      await apiPost('/command', { command: 'reboot', argument: '' });
     } catch (err) {}
   }
 
