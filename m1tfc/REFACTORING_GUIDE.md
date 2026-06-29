@@ -4,16 +4,19 @@
 
 This guide documents the refactoring initiative to eliminate code duplication across the M1TFC test suite. The effort focuses on extracting common patterns into reusable utility helpers.
 
-## Completed Refactoring (Phase 1 & 2)
+## Completed Refactoring (Phase 1, 2 & 3)
 
 ### Utility Helpers Created ✅
 
-| Helper        | Location                 | Purpose                                | Status      |
-| ------------- | ------------------------ | -------------------------------------- | ----------- |
-| CommandHelper | `utils/commandHelper.js` | Command execution + error handling     | ✅ Complete |
-| GPIOHelper    | `utils/gpioHelper.js`    | GPIO operations (configure, set, read) | ✅ Complete |
-| VoltageHelper | `utils/voltageHelper.js` | Voltage reading & validation           | ✅ Complete |
-| TestHelper    | `utils/testHelper.js`    | Test execution patterns                | ✅ Complete |
+| Helper             | Location                      | Purpose                                | Status      |
+| ------------------ | ----------------------------- | -------------------------------------- | ----------- |
+| CommandHelper      | `utils/commandHelper.js`      | Command execution + error handling     | ✅ Complete |
+| GPIOHelper         | `utils/gpioHelper.js`         | GPIO operations (configure, set, read) | ✅ Complete |
+| VoltageHelper      | `utils/voltageHelper.js`      | Voltage reading & validation           | ✅ Complete |
+| TestHelper         | `utils/testHelper.js`         | Test execution patterns                | ✅ Complete |
+| EepromHelper       | `utils/eepromHelper.js`       | EEPROM verify, write, map handling     | ✅ Complete |
+| MercuryBoardHelper | `utils/mercuryBoardHelper.js` | Mercury board I/O ops                  | ✅ Complete |
+| runCommand         | `bin/commandRunner.js`        | CLI boilerplate abstraction            | ✅ Complete |
 
 ### Test Files Refactored ✅
 
@@ -26,112 +29,13 @@ This guide documents the refactoring initiative to eliminate code duplication ac
 | tests/tamper.js      | GPIO helper integration   | ~40              | ✅ Complete |
 | tests/battery.js     | GPIO configuration        | ~80              | ✅ Complete |
 | tests/ribbonCable.js | Centralized GPIO patterns | ~100             | ✅ Complete |
+| tests/eeprom.js      | EEPROMHelper inclusion    | ~100             | ✅ Complete |
+| tests/mnpTests.js    | MercuryBoardHelper inc.   | ~50              | ✅ Complete |
+| bin/commands/*       | Boilerplate abstraction   | ~250             | ✅ Complete |
 
-**Total Impact:** 150+ lines of duplicate code eliminated
+**Total Impact:** 730+ lines of duplicate code eliminated
 
-## Usage Patterns
-
-### CommandHelper Example
-
-```javascript
-const CommandHelper = require('../utils/commandHelper');
-
-async function testSomething(logger, db) {
-    const cmdHelper = new CommandHelper(logger, db);
-
-    // For generic command execution
-    const ret = await cmdHelper.execute(
-        () => targetICTLink.sendCommand('testcmd'),
-        'Test command description',
-        'ERROR_CODE_NAME', // key in errorCodes.codes
-        'E' // severity: 'T' (temp) or 'E' (error)
-    );
-
-    if (!ret) return false; // Already logged and DB updated
-
-    // For test pass/fail pattern
-    const passed = await cmdHelper.executeTest(
-        () => targetICTLink.sendCommand('ddrdatabus'),
-        'DDR3 databus test',
-        'DDR3Bus' // error code name
-    );
-
-    return passed;
-}
-```
-
-### GPIOHelper Example
-
-```javascript
-const GPIOHelper = require('../utils/gpioHelper');
-const targetICTLink = require('../src/m1ICTLink');
-
-async function testGpio(logger, db) {
-    const gpioHelper = new GPIOHelper(targetICTLink, logger, db);
-
-    // Configure GPIO as output
-    const configured = await gpioHelper.configureOutput('b', 1, 'PIN_NAME');
-    if (!configured) return false;
-
-    // Set GPIO level
-    await gpioHelper.setLevel('b', 1, 1, 'PIN_NAME');
-
-    // Read GPIO level
-    const level = await gpioHelper.readLevel('b', 1, 'PIN_NAME');
-
-    // Atomic configure + set
-    const pin = { port: 'b', pin: 1, pinNameOnTestBoard: 'J5.18' };
-    await gpioHelper.configureAndSet(pin, 1);
-}
-```
-
-### VoltageHelper Example
-
-```javascript
-const VoltageHelper = require('../utils/voltageHelper');
-
-async function testVoltage(testPoint, tolerance, logger, db) {
-    const voltageHelper = new VoltageHelper(testBoardLink, logger, db);
-
-    // Read voltage
-    const voltage = await voltageHelper.readVoltage('TP001');
-
-    // Calculate error percentage
-    const error = voltageHelper.calculateError(voltage, 3.3, 1.0);
-
-    // Full test with tolerance checking
-    const result = await voltageHelper.testVoltage(
-        { name: 'TP001', voltage: 3.3, scale: 1.0, tolerance: 0.05 },
-        0.05 // default tolerance
-    );
-
-    if (result.passed) {
-        console.log(`Passed: ${result.scaledValue}V`);
-    }
-}
-```
-
-## Remaining Refactoring Opportunities
-
-### High Priority (Large Duplication)
-
-1. **tests/eeprom.js**
-    - Patterns: Verify, write, calibrate patterns
-    - Opportunity: Extract EEPROM command wrapper
-    - Estimated savings: 100+ lines
-
-2. **bin/commands/ files** (8 files)
-    - Pattern: try → init → execute → error → exit
-    - Opportunity: Extract common command pattern
-    - Files: ict.js, eeprom.js, flash.js, progmac.js, m1dfu.js, m1cmd.js, mnpcmd.js, makelabel.js
-    - Estimated savings: 200+ lines
-
-3. **tests/mnpTests.js**
-    - Pattern: Mercury board command/test patterns
-    - Opportunity: Create MercuryBoardHelper
-    - Estimated savings: 50+ lines
-
-### Medium Priority (Well-Structured, Can Defer)
+## Medium Priority (Well-Structured, Can Defer)
 
 4. **tests/funcTest.js** - Complex functional test runner
 5. **tests/programEeprom.js** - IctTestRunner wrapper (class pattern OK)

@@ -1,13 +1,11 @@
 'use strict';
 
 const delay = require('delay');
-const logger = require('../../utils/logger');
 const Eeprom = require('../../tests/programEeprom');
 const common = require('../../tests/common');
-const sqliteDriver = require('../../utils/sqliteDriver');
 const exitCodes = require('../../src/exitCodes');
-const errorCodes = require('../errorCodes');
-const { loadConfig, errorAndExit, applyRuntime } = require('../commandSupport');
+const { errorAndExit } = require('../commandSupport');
+const { runCommand } = require('../commandRunner');
 
 function register(program) {
     program
@@ -15,23 +13,8 @@ function register(program) {
         .description('Program I2C EEPROM.')
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
-        .action(async options => {
-            const configData = await loadConfig();
-            let logfile;
-            let db;
-            applyRuntime(configData, { serial: options.serial, debugLevel: options.debug || '0' });
-            try {
-                if (!options.serial) {
-                    await errorAndExit('must define vendor serial number', console);
-                }
-                logfile = logger.getLogger(
-                    options.serial,
-                    ' eeprom',
-                    options.serial,
-                    configData.mtfDir,
-                    options.debug
-                );
-                db = sqliteDriver.initialize(logfile);
+        .action(options => {
+            runCommand(options, ' eeprom', 'EEPROMUPDATE', async (configData, logfile, _db) => {
                 if (!configData.progEEPROM) {
                     logfile.error('Prog EEPROM is disabled');
                     await delay(100);
@@ -60,28 +43,14 @@ function register(program) {
                 await delay(400);
                 await eeprom.program(
                     configData.programmingCommand,
-                    options.serial,
+                    options.serial, // use runCommand serial? using options.serial works too.
                     configData.vendorSite,
                     configData.forceEppromOverwrite
                 );
                 await delay(100);
                 await common.testEndSuccess();
                 process.exit(exitCodes.normalExit);
-            } catch (err) {
-                if (!logfile) {
-                    logfile = console;
-                }
-                logfile.error(err);
-                if (db && options.serial) {
-                    db.updateErrorCode(
-                        options.serial,
-                        errorCodes.codes.EEPROMUPDATE.errorCode,
-                        'E'
-                    );
-                }
-                await delay(100);
-                process.exit(exitCodes.commandFailed);
-            }
+            });
         });
 }
 

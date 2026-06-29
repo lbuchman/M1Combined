@@ -3,14 +3,12 @@
 const fs = require('fs-extra');
 const delay = require('delay');
 const si = require('systeminformation');
-const logger = require('../../utils/logger');
 const IctTestRunner = require('../../tests/ictTestRunner');
 const os = require('../../utils/os');
-const sqliteDriver = require('../../utils/sqliteDriver');
 const targetICTLink = require('../../src/m1ICTLink');
 const exitCodes = require('../../src/exitCodes');
-const errorCodes = require('../errorCodes');
-const { loadConfig, errorAndExit, applyRuntime } = require('../commandSupport');
+const { errorAndExit, applyRuntime } = require('../commandSupport');
+const { runCommand } = require('../commandRunner');
 
 /**
  * Pre-check hardware connections (network, USB devices, printer)
@@ -77,32 +75,16 @@ function register(program) {
             '-v, --cellBatVoltage <cellBatVoltage>',
             'only for the calibration, measure cell bat voltage and enter it like: -v 3.0145'
         )
-        .action(async options => {
-            const configData = await loadConfig();
-            let logfile;
-            let db;
-
+        .action(options => {
             const calibrate = options.callibrate === 'true';
-            applyRuntime(configData, {
-                serial: options.serial,
-                debugLevel: options.debug || '0',
-                cellBatTol: options.cellBatTol,
-                cellBatVoltage: options.cellBatVoltage ? Number(options.cellBatVoltage) : null,
-                logDir: options.serial ? `${configData.mtfDir}/logs/${options.serial}` : null
-            });
 
-            try {
-                if (!options.serial) {
-                    await errorAndExit('must define vendor serial number', console);
-                }
-                logfile = logger.getLogger(
-                    options.serial,
-                    '    ict',
-                    options.serial,
-                    configData.mtfDir,
-                    options.debug
-                );
-                db = sqliteDriver.initialize(logfile);
+            runCommand(options, '    ict', 'ICT_EXCEPT', async (configData, logfile, _db) => {
+                // NOTE: Apply runtime specific extra fields not handled by base `runCommand`
+                applyRuntime(configData, {
+                    cellBatTol: options.cellBatTol,
+                    cellBatVoltage: options.cellBatVoltage ? Number(options.cellBatVoltage) : null,
+                    logDir: options.serial ? `${configData.mtfDir}/logs/${options.serial}` : null
+                });
 
                 // Skip hardware checks only in developer debug mode
                 if (options.debug !== '2') {
@@ -154,17 +136,7 @@ function register(program) {
                     calibrate
                 );
                 process.exit(ictExitCode);
-            } catch (err) {
-                if (!logfile) {
-                    logfile = console;
-                }
-                logfile.error(err);
-                if (db && options.serial) {
-                    db.updateErrorCode(options.serial, errorCodes.codes.ICT_EXCEPT.errorCode, 'E');
-                }
-                await delay(100);
-                process.exit(exitCodes.commandFailed);
-            }
+            });
         });
 }
 

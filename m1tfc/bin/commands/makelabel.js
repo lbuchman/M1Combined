@@ -1,8 +1,6 @@
 'use strict';
 
 const delay = require('delay');
-const logger = require('../../utils/logger');
-const sqliteDriver = require('../../utils/sqliteDriver');
 const ProgramMac = require('../../tests/programMAC');
 const Eeprom = require('../../tests/programEeprom');
 const testBoardLink = require('../../src/testBoardLink');
@@ -10,7 +8,7 @@ const buzzer = require('../../tests/buzzer');
 const utils = require('../../utils/utils');
 const exitCodes = require('../../src/exitCodes');
 const errorCodes = require('../errorCodes');
-const { loadConfig, errorAndExit, applyRuntime } = require('../commandSupport');
+const { runCommand } = require('../commandRunner');
 
 function register(program) {
     program
@@ -19,26 +17,14 @@ function register(program) {
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
         .option('-e, --error', 'error print from the database')
-        .action(async options => {
-            if (!options.serial) {
-                await errorAndExit('must define vendor serial number', console);
-            }
-            const configData = await loadConfig();
-            const logfile = logger.getLogger(
-                options.serial,
-                '  label',
-                options.serial,
-                configData.mtfDir,
-                options.debug
-            );
-            const db = sqliteDriver.initialize(logfile);
-            applyRuntime(configData, { serial: options.serial, debugLevel: options.debug || '0' });
-            if (!configData.makeLabel) {
-                logfile.info('Make Label is disabled');
-                await delay(100);
-                process.exit(exitCodes.normalExit);
-            }
-            try {
+        .action(options => {
+            runCommand(options, '  label', null, async (configData, logfile, db) => {
+                if (!configData.makeLabel) {
+                    logfile.info('Make Label is disabled');
+                    await delay(100);
+                    process.exit(exitCodes.normalExit);
+                }
+
                 await testBoardLink.initSerial(
                     configData.testBoardTerminalDev,
                     configData.serialBaudrate,
@@ -118,16 +104,14 @@ function register(program) {
                 await testBoardLink.batteryOn(false);
                 await delay(100);
                 process.exit(exitCodes.normalExit);
-            } catch (err) {
-                if (err.message) {
-                    logfile.error(err.message);
-                }
+            }).catch(async () => {
+                // handle specific error behavior from old makelabel.js
                 await buzzer.buzzerBeepFailed();
                 await delay(100);
                 await testBoardLink.targetPower(false);
                 await testBoardLink.batteryOn(false);
                 process.exit(exitCodes.commandFailed);
-            }
+            });
         });
 }
 

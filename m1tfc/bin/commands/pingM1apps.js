@@ -11,9 +11,11 @@ function register(program) {
         .description('[DISABLED] try to establish connection to port 80')
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
-        .action(async() => {
+        .action(async () => {
             // eslint-disable-next-line no-console
-            console.log('The pingM1apps command has been removed (network diagnostic functionality removed)');
+            console.log(
+                'The pingM1apps command has been removed (network diagnostic functionality removed)'
+            );
             process.exit(exitCodes.normalExit);
         });
 }

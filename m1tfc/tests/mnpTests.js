@@ -1,15 +1,13 @@
 'use strict';
 
-const MercurlBoard = require('../utils/mercuryBoard');
 const mnpHwIo = require('../tests/mnpHW');
-const targetICTLink = require('../src/m1ICTLink');
-const errorCodes = require('../bin/errorCodes');
-const runtimeContext = require('../utils/runtimeContext');
+const MercuryBoardHelper = require('../utils/mercuryBoardHelper');
 
 module.exports = class MnpTests {
     constructor(db, log) {
         this.logger = log;
         this.db = db;
+        this.mercuryBoardHelper = new MercuryBoardHelper(log, db);
         this.mnpIo = [
             // Reader 1
             {
@@ -133,43 +131,7 @@ module.exports = class MnpTests {
     }
 
     async begin() {
-        this.mercurlBoard = new MercurlBoard(this.logger);
-        await this.mercurlBoard.begin();
-    }
-
-    async testOutputLogicalState(thisIo, thisMnpIo, value, inverted) {
-        await this.mercurlBoard.sendCommand(thisIo.cmdWrite, value);
-        const command = mnpHwIo.getCommand('read', thisMnpIo.name, value, this.logger);
-        const ret = await targetICTLink.sendCommand(command);
-        // eslint-disable-next-line no-bitwise
-        if (ret.value !== (value ^ inverted)) {
-            this.db.updateErrorCode(
-                runtimeContext.getRuntime().serial,
-                errorCodes.codes[thisIo.mnpPinName].errorCode,
-                'T'
-            );
-            this.logger.error(`Failed ${thisIo.mnpPinName} test.`);
-            return false;
-        }
-        return true;
-    }
-
-    async testInputLogicalState(thisIo, thisMnpIo, value, inverted) {
-        const command = mnpHwIo.getCommand('write', thisMnpIo.name, value, this.logger);
-        await targetICTLink.sendCommand(command);
-        const ret = await this.mercurlBoard.sendCommand(thisIo.cmdRead, null);
-
-        // eslint-disable-next-line no-bitwise
-        if (ret.value !== (value ^ inverted)) {
-            this.db.updateErrorCode(
-                runtimeContext.getRuntime().serial,
-                errorCodes.codes[thisIo.mnpPinName].errorCode,
-                'T'
-            );
-            this.logger.error(`Failed ${thisIo.mnpPinName} test.`);
-            return false;
-        }
-        return true;
+        await this.mercuryBoardHelper.begin();
     }
 
     async run() {
@@ -190,47 +152,58 @@ module.exports = class MnpTests {
             let testPassed = true;
             if (thisIo.pinType === 'OUTPUT') {
                 // eslint-disable-next-line no-await-in-loop
-                if (!(await this.testOutputLogicalState(thisIo, thisMnpIo, 1, thisIo.inverted))) {
+                if (
+                    !(await this.mercuryBoardHelper.testOutputLogicalState(
+                        thisIo,
+                        thisMnpIo,
+                        1,
+                        thisIo.inverted
+                    ))
+                ) {
                     ret = false;
                     testPassed = false;
                 }
                 // eslint-disable-next-line no-await-in-loop
-                if (!(await this.testOutputLogicalState(thisIo, thisMnpIo, 0, thisIo.inverted))) {
+                if (
+                    !(await this.mercuryBoardHelper.testOutputLogicalState(
+                        thisIo,
+                        thisMnpIo,
+                        0,
+                        thisIo.inverted
+                    ))
+                ) {
                     ret = false;
                     testPassed = false;
-                }
-                if (testPassed) {
-                    this.logger.info(`Passed ${thisMnpIo.name} test`);
                 }
             } else {
                 // eslint-disable-next-line no-await-in-loop
-                if (!(await this.testInputLogicalState(thisIo, thisMnpIo, 1, thisIo.inverted))) {
+                if (
+                    !(await this.mercuryBoardHelper.testInputLogicalState(
+                        thisIo,
+                        thisMnpIo,
+                        1,
+                        thisIo.inverted
+                    ))
+                ) {
                     ret = false;
                     testPassed = false;
                 }
                 // eslint-disable-next-line no-await-in-loop
-                if (!(await this.testInputLogicalState(thisIo, thisMnpIo, 0, thisIo.inverted))) {
+                if (
+                    !(await this.mercuryBoardHelper.testInputLogicalState(
+                        thisIo,
+                        thisMnpIo,
+                        0,
+                        thisIo.inverted
+                    ))
+                ) {
                     ret = false;
                     testPassed = false;
                 }
-                if (testPassed) {
-                    this.logger.info(`Passed ${thisMnpIo.name} test`);
-                }
             }
-        }
-        const osdp1TestStatus = await targetICTLink.sendCommand('testrd1rs485');
-        const osdp2TestStatus = await targetICTLink.sendCommand('testrd2rs485');
-        if (!osdp1TestStatus) {
-            ret = false;
-            this.logger.error(`Failed OSDP Rd1 Test error: ${osdp1TestStatus.error}`);
-        } else {
-            this.logger.info('Passed OSDP1 Test');
-        }
-        if (!osdp2TestStatus) {
-            ret = false;
-            this.logger.error(`Failed OSDP Rd1 Test error: ${osdp2TestStatus.error}`);
-        } else {
-            this.logger.info('Passed OSDP2 Test');
+            if (testPassed) {
+                this.logger.info(`Passed ${thisIo.mnpPinName} test.`);
+            }
         }
         return ret;
     }

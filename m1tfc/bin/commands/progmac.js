@@ -1,12 +1,8 @@
 'use strict';
 
-const delay = require('delay');
-const logger = require('../../utils/logger');
 const ProgramMac = require('../../tests/programMAC');
-const sqliteDriver = require('../../utils/sqliteDriver');
 const exitCodes = require('../../src/exitCodes');
-const errorCodes = require('../errorCodes');
-const { loadConfig, errorAndExit, applyRuntime } = require('../commandSupport');
+const { runCommand } = require('../commandRunner');
 
 function register(program) {
     program
@@ -14,38 +10,25 @@ function register(program) {
         .description('program MAC to MP1 OTP, cannot be undone')
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug')
-        .action(async options => {
-            const configData = await loadConfig();
-            let logfile;
-            let db;
-            applyRuntime(configData, { serial: options.serial, debugLevel: options.debug || '0' });
-            try {
-                if (!options.serial) {
-                    await errorAndExit('must define vendor serial number', console);
-                }
-                logfile = logger.getLogger(
-                    options.serial,
-                    'progmac',
-                    options.serial,
-                    configData.mtfDir,
-                    options.debug
-                );
-                db = sqliteDriver.initialize(logfile);
+        .action(options => {
+            runCommand(options, 'progmac', 'MAC', async (configData, logfile, _db) => {
                 logfile.info('--------------------------------------------');
                 logfile.info('Executing program MAC command ...');
                 const macProgram = new ProgramMac(configData, options.serial, logfile);
                 await macProgram.init(configData.testBoardTerminalDev, configData.serialBaudrate);
                 await macProgram.run(configData.programmingCommand);
                 await macProgram.runProgSecret(configData.programmingCommand);
+
+                // Keep the default exit status or explicitly process.exit if custom err handling was done
+                // runCommand handles default success via the executionFn resolving and normal error capturing
+                // but the original explicity exit-ed with code 0 on the try block
                 process.exit(exitCodes.normalExit);
-            } catch (err) {
-                logfile.error(err.message);
-                if (db && options.serial) {
-                    db.updateErrorCode(options.serial, errorCodes.codes.MAC.errorCode, 'E');
+            }).catch(err => {
+                // To maintain custom catch block behavior that runCommand may obscure for specific custom err.level issues.
+                if (err.level) {
+                    process.exit(err.level);
                 }
-                await delay(100);
-                process.exit(err.level || exitCodes.commandFailed);
-            }
+            });
         });
 }
 

@@ -2,18 +2,15 @@
 
 const delay = require('delay');
 const IctTestRunner = require('../../tests/ictTestRunner');
-const exitCodes = require('../../src/exitCodes');
-const { loadConfig, applyRuntime } = require('../commandSupport');
+const { runCommand } = require('../commandRunner');
 
 function register(program) {
     program
         .command('m1dfu')
         .description('Start M1 in DFU mode and program bootstrap FW')
-        .action(async() => {
-            const configData = await loadConfig();
-            const logfile = console;
-            applyRuntime(configData);
-            try {
+        .action(options => {
+            // Note: `executionFn` doesn't require serial
+            const action = async (configData, logfile, _db) => {
                 const ictTestRunner = new IctTestRunner(
                     `${configData.mtfDir}/${configData.ictFWFilePath}`,
                     configData.tolerance,
@@ -30,11 +27,9 @@ function register(program) {
                 await delay(400);
                 await ictTestRunner.runTest(configData.programmingCommand, 'debug', 0, false, true);
                 process.exit(0);
-            } catch (err) {
-                logfile.error(err);
-                await delay(100);
-                process.exit(exitCodes.commandFailed);
-            }
+            };
+            action.requiresSerial = false; // Add property to say this command bypasses runCommand serial assertion
+            runCommand(options, 'm1dfu', null, action);
         });
 }
 
