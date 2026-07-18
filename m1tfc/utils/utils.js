@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs-extra');
+const delay = require('delay');
 const os = require('../utils/os');
 
 const otp57 = 57;
@@ -161,6 +162,19 @@ function macToUid(mac) {
     return `0000${mac.split(':').join('')}`;
 }
 
+async function waitTargetDown(targetIp, timeout /* Sec */) {
+    while (timeout - new Date() / 1000 > 0) {
+        try {
+            await os.executeShellCommand(`ping -c 1 -W 1 ${targetIp}`, console, false, true);
+            await delay(100);
+        } catch (err) {
+            return;
+        }
+    }
+
+    throw new Error('Target did not reboot');
+}
+
 async function printLabel(productName, mac, serial, tsId, dbError, logger) {
     const labelPath = '/tmp/label.txt';
     const pngPath = '/tmp/label.png';
@@ -209,5 +223,6 @@ module.exports = {
     getCPUSerial,
     macToUid,
     isString,
-    genRanHex
+    genRanHex,
+    waitTargetDown
 };

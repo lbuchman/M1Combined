@@ -147,22 +147,7 @@ module.exports = class FuncTest {
             this.logger.info(`Expect WD to reboot ${runtime.productName}`);
             this.logger.debug('Dropping secure link before reboot');
             await client.disconnect();
-            
-            // waitTargetDown replacement manually polling with ping via os.executeShellCommand
-            let isDown = false;
-            let timeoutStamp = new Date() / 1000 + 100;
-            while (new Date() / 1000 < timeoutStamp) {
-                try {
-                    await os.executeShellCommand(`ping  -c 1 -W 1 ${ipAddress}`, this.logger, false, true);
-                    await delay(100); 
-                } catch (err) {
-                    isDown = true; 
-                    break;
-                }
-            }
-            if (!isDown) {
-                throw new Error('Target did not reboot');
-            }
+            await utils.waitTargetDown(ipAddress, new Date() / 1000 + 100);
 
             this.logger.info('Waiting for login promt');
             await m1TermLink.waitLoginPrompt(new Date() / 1000 + 200);
@@ -245,7 +230,6 @@ module.exports = class FuncTest {
             this.db.updateFuncTestStatus(this.serial, utils.boolToInt(true));
             this.logger.info('Functional test passed');
             await client.execCommand('halt');
-            await delay('sync');
             await delay(100);
             await common.testEndSuccess();
             return exitCodes.normalExit;
