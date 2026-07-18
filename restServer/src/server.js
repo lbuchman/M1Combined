@@ -2,6 +2,7 @@
 
 const express = require('express');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { CommandRunner, getSupportedCommands } = require('./commandRunner');
 const logger = require('./logger');
@@ -13,7 +14,7 @@ const defaultCliArgs = process.env.M1TFC_BASE_ARGS
     ? process.env.M1TFC_BASE_ARGS.split(' ').filter(Boolean)
     : [];
 const cliCwd = process.env.M1TFC_CWD || process.cwd();
-const snapData = process.env.SNAP_DATA || path.join(require('os').homedir(), 'snap_data');
+const snapData = process.env.SNAP_DATA || path.join(os.homedir(), 'snap_data');
 const m1tfcSnapConfigFile = '/var/snap/m1tfc/current/config.json';
 const fallbackConfigFile = path.join(snapData, 'config.json');
 const defaultSnapcraftFile = process.env.SNAPCRAFT_YAML
@@ -64,6 +65,25 @@ function readSnapVersion() {
         const yaml = fs.readFileSync(defaultSnapcraftFile, 'utf8');
         const match = yaml.match(/^version:\s*['\"]?([^'\"\n]+)['\"]?\s*$/m);
         return match ? match[1] : 'unknown';
+    } catch {
+        return 'unknown';
+    }
+}
+
+function readFwVersion(cfg) {
+    const configuredVersion = process.env.FW_VERSION
+        || cfg.firmwareVersion
+        || cfg.fwVersion
+        || cfg.flashVersion;
+    if (configuredVersion) return String(configuredVersion);
+
+    if (!cfg.fwDir || typeof cfg.fwDir !== 'string') return 'unknown';
+
+    const mtfDir = cfg.mtfDir || path.join(os.homedir(), 'm1mtf');
+    const versionFile = path.join(mtfDir, cfg.fwDir, 'VERSION');
+    try {
+        const version = fs.readFileSync(versionFile, 'utf8').trim();
+        return version || 'unknown';
     } catch {
         return 'unknown';
     }
@@ -164,7 +184,7 @@ app.get('/config', (req, res) => {
         configFile: resolveRuntimeConfigFile(),
         logFile: resolveLogFile(),
         snapVersion: process.env.SNAP_VERSION || cfg.snapVersion || readSnapVersion(),
-        fwVersion: process.env.FW_VERSION || cfg.firmwareVersion || cfg.fwVersion || cfg.flashVersion || 'unknown'
+        fwVersion: readFwVersion(cfg)
     });
 });
 
