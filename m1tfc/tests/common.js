@@ -56,7 +56,8 @@ async function getICTFWRev(retries) {
         await delay(500);
         return getICTFWRev(retries - 1);
     }
-    throw new Error('cannot get rev from M1 ict fw');
+    const runtime = require('../utils/runtimeContext').getRuntime();
+    throw new Error(`cannot get rev from ${runtime.productName} ict fw`);
 }
 
 async function programStm(programmer, stm32, m1Dev, logger) {
@@ -96,7 +97,8 @@ async function initializeTestFixture(
         throw new Error('cannot get fw rev from teensy test board');
     }
     if (testBoardFwRev.boardId === 255) {
-        throw new Error('cannot get M1 Testboard boardId, update FW and program boardId');
+        const runtime = require('../utils/runtimeContext').getRuntime();
+        throw new Error(`cannot get ${runtime.productName} Testboard boardId, update FW and program boardId`);
     }
     if (calibrationData) {
         calibrationData.setBoardId(testBoardFwRev.boardId);

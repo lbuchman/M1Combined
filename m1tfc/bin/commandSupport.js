@@ -59,7 +59,8 @@ const defaultConfiguration = {
     makeLabel: true,
     funcTestDisable: false,
     coinCellDebug: true,
-    productName: 'm1-3200'
+    productName: 'm1-3200',
+    progEmmc: true
 };
 
 /**

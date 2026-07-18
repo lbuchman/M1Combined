@@ -82,7 +82,7 @@ module.exports = class FuncTest {
 
             this.logger.info('Verifying MAC address');
             const link = await client.execCommand('ip link show eth0 | grep link/ether', 2000);
-            if (!link.toLowerCase().includes(macValue.mac.toLowerCase())) {
+            if (!link || !link.toLowerCase().includes(macValue.mac.toLowerCase())) {
                 /* eslint-disable dot-notation */
                 throw new Error('Invalid MAC Address, check OTP');
             }
@@ -144,17 +144,33 @@ module.exports = class FuncTest {
             await client.execCommand('sync');
             this.logger.info('Testing WD');
             await client.execCommand('echo 1 > /dev/watchdog1');
-            this.logger.info('Expect WD to reboot M1-3200');
+            this.logger.info(`Expect WD to reboot ${runtime.productName}`);
             this.logger.debug('Dropping secure link before reboot');
             await client.disconnect();
-            await utils.waitTargetDown(ipAddress, new Date() / 1000 + 100);
+            
+            // waitTargetDown replacement manually polling with ping via os.executeShellCommand
+            let isDown = false;
+            let timeoutStamp = new Date() / 1000 + 100;
+            while (new Date() / 1000 < timeoutStamp) {
+                try {
+                    await os.executeShellCommand(`ping  -c 1 -W 1 ${ipAddress}`, this.logger, false, true);
+                    await delay(100); 
+                } catch (err) {
+                    isDown = true; 
+                    break;
+                }
+            }
+            if (!isDown) {
+                throw new Error('Target did not reboot');
+            }
+
             this.logger.info('Waiting for login promt');
             await m1TermLink.waitLoginPrompt(new Date() / 1000 + 200);
-            this.logger.info('Logging to M1');
+            this.logger.info(`Logging to ${runtime.productName}`);
             await m1TermLink.logInToTerminal(login, password);
-            this.logger.debug('Initializing M1');
+            this.logger.debug(`Initializing ${runtime.productName}`);
             await m1TermLink.initTestMode();
-            this.logger.debug('Reconnecting to M1');
+            this.logger.debug(`Reconnecting to ${runtime.productName}`);
             await client.reConnect('root', password, null, new Date() / 1000 + 30);
             this.logger.info('WD test passed');
             await delay(300);
@@ -206,16 +222,16 @@ module.exports = class FuncTest {
             await delay(3000);
             await testBoardLink.targetPower(false);
             await testBoardLink.batteryOn(false);
-            this.logger.debug('M1 power is off');
+            this.logger.debug(`${runtime.productName} power is off`);
             await delay(10000);
             await testBoardLink.targetPower(true);
             this.logger.debug('Waiting for login promt');
             await m1TermLink.waitLoginPrompt(new Date() / 1000 + 200);
-            this.logger.info('Logging to M1');
+            this.logger.info(`Logging to ${runtime.productName}`);
             await m1TermLink.logInToTerminal(login, password);
-            this.logger.debug('Initializing M1');
+            this.logger.debug(`Initializing ${runtime.productName}`);
             await m1TermLink.initTestMode();
-            this.logger.debug('Reconnecting to M1');
+            this.logger.debug(`Reconnecting to ${runtime.productName}`);
             await client.reConnect('root', password, null, new Date() / 1000 + 30);
             const dateTime = new Date(await client.execCommand('hwclock -r')) / 1000;
             const pcDate = new Date() / 1000;
@@ -262,7 +278,7 @@ module.exports = class FuncTest {
             return { error: 'MAC_CMP_ERR', sufx: 'E' };
         case 'A: Target is not pingable, down or not flashed?':
             return { error: 'UUT_ETHER', sufx: 'TE' };
-        case 'No login promt, did M1-3200 boot?':
+        case `No login promt, did ${runtimeContext.getRuntime().productName} boot?`:
             return { error: 'UUT_TERM', sufx: 'TE' };
         case 'ssh reconnect failed':
             return { error: 'SSH_RECON', sufx: 'TE' };

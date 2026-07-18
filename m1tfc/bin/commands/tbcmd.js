@@ -43,7 +43,7 @@ function register(program) {
                 logfile.log(JSON.stringify(output));
                 process.exit(0);
             } catch (err) {
-                logfile.error(`M1 test board command failed: ${err.message}`);
+                logfile.error(`${configData.productName} test board command failed: ${err.message}`);
                 await delay(100);
                 process.exit(exitCodes.commandFailed);
             }

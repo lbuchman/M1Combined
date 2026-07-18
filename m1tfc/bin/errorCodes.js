@@ -171,7 +171,7 @@ const errorCodes = {
     STM: {
         errorCode: '000000USB-DFU',
         test: 'ICT',
-        desc: 'Failed to program M1 bootstrap STM, DFU issue or UUT is down'
+        desc: 'Failed to program board bootstrap STM, DFU issue or UUT is down'
     },
     APP80: {
         errorCode: '00000APP-PING',

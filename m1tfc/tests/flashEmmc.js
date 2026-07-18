@@ -49,9 +49,11 @@ module.exports = class ProgramMac {
                 null,
                 null
             );
+            await common.waitDFU(programmer, this.logger);
+            await delay(1000);
             this.logger.debug('Programming TSV file ...');
             await os.executeShellCommand(
-                `${programmer}  -c port=usb1 -w ${this.tsv}`,
+                `${programmer}  -c port=usb1 -w ${this.tsv} mmc1`,
                 this.logger,
                 false,
                 false,
@@ -59,7 +61,8 @@ module.exports = class ProgramMac {
                 fwDir
             );
             try {
-                db.updateFlashStatus(this.serial, utils.boolToInt(true));
+                db.
+                updateFlashStatus(this.serial, utils.boolToInt(true));
             } catch (err) {
                 //
             }

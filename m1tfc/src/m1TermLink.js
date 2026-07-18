@@ -11,7 +11,8 @@ module.exports = class M1TermLink {
         this.logger = logger;
         this.timeoutHandler = null;
         this.parser = new ReadlineParser({ delimiter: '\r' });
-        this.serialLink = new SerialLink('M1-3200 Term', 'm1Trm', this.parser);
+        const productName = require('../utils/runtimeContext').getRuntime().productName;
+        this.serialLink = new SerialLink(`${productName} Term`, 'm1Trm', this.parser);
     }
 
     /**
@@ -39,7 +40,8 @@ module.exports = class M1TermLink {
             return this.waitLoginPrompt(timeout);
         }
 
-        throw new Error('No login promt, did M1-3200 boot?');
+        const productName = require('../utils/runtimeContext').getRuntime().productName;
+        throw new Error(`No login promt, did ${productName} boot?`);
     }
 
     /**

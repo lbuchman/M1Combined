@@ -17,7 +17,7 @@ const { runCommand } = require('../commandRunner');
 async function preCheckHardware(configData, logfile) {
     const devices = [
         { name: '/dev/ttyACM0', desc: 'Testboard Teensy' },
-        { name: '/dev/ttyUSB0', desc: 'M1-3200 Terminal Serial Converter' }
+        { name: '/dev/ttyUSB0', desc: `${configData.productName} Terminal Serial Converter` }
     ];
 
     let allChecksPass = true;
@@ -46,7 +46,7 @@ async function preCheckHardware(configData, logfile) {
 
     if (interfaces.find(o => o.ip4 === '192.168.0.100') === undefined) {
         allChecksPass = false;
-        logfile.error('M1-3200 Ethernet jack is not plugged. Check connection and retry the test.');
+        logfile.error(`${configData.productName} Ethernet jack is not plugged. Check connection and retry the test.`);
     }
 
     // Check USB devices

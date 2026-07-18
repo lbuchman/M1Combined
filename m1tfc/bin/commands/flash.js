@@ -24,7 +24,8 @@ function register(program) {
                 logfile.info('Executing eMMC flashing command ...');
 
                 const flashEmmc = new FlashEmmc(
-                    `${configData.mtfDir}/${configData.ictFWFilePath}`,
+                    `${configData.mtfDir}/${configData.fwDir}/${configData.layoutFilePath}`,
+                    options.serial,
                     logfile
                 );
                 await flashEmmc.init(
@@ -35,8 +36,13 @@ function register(program) {
                 );
                 await delay(400);
 
-                await flashEmmc.program(configData.programmingCommand, options.serial);
+                const exitCode = await flashEmmc.run(configData.programmingCommand);
                 await delay(100);
+                
+                if (exitCode !== exitCodes.normalExit) {
+                    process.exit(exitCode);
+                }
+                
                 await common.testEndSuccess();
                 process.exit(exitCodes.normalExit);
             });

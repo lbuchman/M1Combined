@@ -76,7 +76,8 @@ module.exports = class SerialLink {
             timeoutHandle = setTimeout(() => {
                 clearTimeout(timeoutHandle);
                 this.parser.removeAllListeners('data');
-                reject(new Error('Cannot get M1-3200 login promt, the board did not boot?'));
+                const productName = require('../utils/runtimeContext').getRuntime().productName;
+                reject(new Error(`Cannot get ${productName} login promt, the board did not boot?`));
             }, timeout);
         });
     }

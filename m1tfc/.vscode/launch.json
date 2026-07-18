@@ -124,7 +124,7 @@
                 "SNAP_COMMON": "/home/lenel/snap_common"
             },
             "program": "${workspaceFolder}/bin/m1tfc.js",
-            "args": ["makelabel", "-d", "2", "-s", "label"]
+            "args": ["makelabel", "-d", "2", "-s", "3226120077"]
         },
         {
             "type": "pwa-node",

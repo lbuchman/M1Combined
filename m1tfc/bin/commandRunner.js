@@ -53,7 +53,8 @@ async function runCommand(options, commandName, defaultErrorCodeName, executionF
             db.updateErrorCode(serial, errorCodes.codes[defaultErrorCodeName].errorCode, 'E');
         }
         await delay(100);
-        process.exit(exitCodes.commandFailed);
+        const exitCode = typeof err.level === 'number' ? err.level : (typeof err.code === 'number' ? err.code : exitCodes.commandFailed);
+        process.exit(exitCode);
     }
 }
 

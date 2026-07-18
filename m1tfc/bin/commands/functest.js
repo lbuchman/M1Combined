@@ -40,7 +40,7 @@ function register(program) {
                 logfile.info('Executing m1-3200 functional test ...');
                 const funcTest = new FuncTest(options.serial, configData, logfile);
                 await funcTest.init(configData.testBoardTerminalDev, configData.serialBaudrate);
-                await funcTest.run(
+                const exitCode = await funcTest.run(
                     configData.programmingCommand,
                     `${configData.mtfDir}/${configData.fwDir}/${configData.layoutFilePath}`,
                     configData.login,
@@ -49,7 +49,7 @@ function register(program) {
                     configData.skipUSBPenDriveTest,
                     '115200'
                 );
-                process.exit(exitCodes.normalExit);
+                process.exit(exitCode);
             } catch (err) {
                 if (!logfile) {
                     logfile = console;
