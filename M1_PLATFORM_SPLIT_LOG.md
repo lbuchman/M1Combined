@@ -10,5 +10,8 @@
 - Imported components: `m1tfc`, `m1-fixture-teensy-fw`, `mercury-testboard-fw`, `stm32mp1-baremetal`, `m1-rest-server`, `m1-operator-ui`, `tfcroncli`, `m1-cloud-client`.
 - Excluded generated folders during import: `.git`, `node_modules`, `dist`, `build`.
 - Branch policy set locally: new component repos use `main`. Existing `stm32mp1-baremetal` repo may be used, but do not touch Makefiles or C/C++ source files there; only platform docs/metadata/integration files should be changed unless explicitly approved.
+- Initialized local root repo at `/home/lenel/myGitHub/m1-platform-work` on branch `main`.
+- Added root `README.md` defining intended GitHub path and each component repo.
+- Added root `.gitignore` so `components/` stays as separate repos.
 - GitHub remotes were not created yet. `gh` is now installed and authenticated as `lbuchman`.
 - Next step: create private GitHub repos, add remotes to local component repos, push each component, then create the root `m1-platform` repo with `repos.json`, scripts, docs, and manifests.
