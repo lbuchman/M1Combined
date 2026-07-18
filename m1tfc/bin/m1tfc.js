@@ -15,7 +15,7 @@ ensureSnapEnv();
 registerGlobalHandlers(console);
 
 program
-    .name('m1test')
+    .name('m1tfc')
     .description('CLI utility to test and program M1-3200 boards')
     .version(process.env.SNAP_VERSION || 'dev');
 

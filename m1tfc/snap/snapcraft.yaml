@@ -10,10 +10,10 @@ confinement: classic
 
 apps:
     m1tfc:
-        command: bin/m1tfc.js
+        command: bin/m1tfc
         environment:
             PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
-            NODE_PATH: $SNAP/node_modules
+            NODE_PATH: $SNAP/lib/node_modules/m1tfc/node_modules
             NODE_OPTIONS: --max-old-space-size=256
         plugs:
             - network
@@ -24,11 +24,9 @@ apps:
 parts:
     m1tfc:
         plugin: npm
-        source: ..
+        source: .
+        npm-include-node: true
         npm-node-version: 24.18.0
         prime:
             - bin/**
-            - src/**
-            - utils/**
-            - package.json
-            - node_modules/**
+            - lib/node_modules/**

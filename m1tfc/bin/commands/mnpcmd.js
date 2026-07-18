@@ -10,7 +10,7 @@ function register(program) {
     program
         .command('mnpcmd <action> [sigNameOrTestpont] [value]')
         .description(
-            'execute mnp IO commands\n\tCommands: [read, write, printio]\nExample:\n\tm1test write WGD1_BPR 1\n\ttm1test read WGD2_D0_3V3 WGD1_BPR 0\n\nuse command printio to list testpoints and signames\n\nMake sure to execute m1dfu command before this command to load the FW'
+            'execute mnp IO commands\n\tCommands: [read, write, printio]\nExample:\n\tm1tfc mnpcmd write WGD1_BPR 1\n\tm1tfc mnpcmd read WGD2_D0_3V3 WGD1_BPR 0\n\nuse command printio to list testpoints and signames\n\nMake sure to execute m1dfu command before this command to load the FW'
         )
         .action((readOrWrite, name, value, options) => {
             const action = async(configData, logfile, _db) => {
