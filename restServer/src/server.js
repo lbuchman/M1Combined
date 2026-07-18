@@ -440,6 +440,31 @@ async function handleCommandExecution(req, res, source) {
     res.status(result.status === 'OK' ? 200 : 500).json(result);
 }
 
+async function handleCommandStreamingExecution(req, res) {
+    const { command, argument } = normalizeIncomingCommandRequest(req.body || {});
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    if (typeof res.flushHeaders === 'function') res.flushHeaders();
+
+    if (!command || typeof command !== 'string') {
+        res.write(`data: ${JSON.stringify({ error: 'Field "command" must be a non-empty string' })}\n\n`);
+        res.end();
+        return;
+    }
+
+    if (command === 'help') {
+        const cmds = getSupportedCommands();
+        res.write(`data: ${JSON.stringify({ commands: cmds.join('  ') })}\n\n`);
+        res.end();
+        return;
+    }
+
+    await commandRunner.runStream(command, argument, res);
+}
+
 app.get('/help', (req, res) => {
     res.json({
         status: 'OK',
@@ -449,6 +474,7 @@ app.get('/help', (req, res) => {
             { method: 'GET',  path: '/help',                description: 'This help document' },
             { method: 'GET',  path: '/commands',            description: 'List supported command names' },
             { method: 'POST', path: '/command',             description: 'Run one command, returns full JSON result' },
+            { method: 'POST', path: '/command/stream',      description: 'Run one command, streams output as SSE' },
             { method: 'POST', path: '/commands/',           description: 'Run one command, returns RDTF-style {cmd, status} response' },
             { method: 'POST', path: '/auth',                description: 'Verify PIN — body: { pin, mode: "production"|"debug" }' },
             { method: 'POST', path: '/changepin',           description: 'Change PIN — body: { currentPin, newPin, mode: "production"|"debug" }' },
@@ -475,6 +501,10 @@ app.get('/help', (req, res) => {
 
 app.post('/command', async (req, res) => {
     await handleCommandExecution(req, res, 'json');
+});
+
+app.post('/command/stream', async (req, res) => {
+    await handleCommandStreamingExecution(req, res);
 });
 
 app.post('/commands/', async (req, res) => {

@@ -103,3 +103,93 @@ test('run falls back to stderr text when the exit code is unknown', async () => 
     assert.equal(result.ErrorDescription, 'something failed');
     assert.equal(result.commandOutput, null);
 });
+
+test('run serializes command execution', async () => {
+    const children = [createMockChild(), createMockChild()];
+    const started = [];
+
+    const runner = new CommandRunner({
+        spawnImpl: (command, args) => {
+            started.push(args[0]);
+            return children[started.length - 1];
+        }
+    });
+
+    const firstResult = runner.run('m1cmd');
+    const secondResult = runner.run('ict');
+    await nextTick();
+
+    assert.deepEqual(started, ['m1cmd']);
+
+    children[0].emit('close', 0);
+    await nextTick();
+
+    assert.deepEqual(started, ['m1cmd', 'ict']);
+
+    children[1].emit('close', 0);
+
+    assert.equal((await firstResult).status, 'OK');
+    assert.equal((await secondResult).status, 'OK');
+});
+
+test('runStream waits for an active command before starting', async () => {
+    const children = [createMockChild(), createMockChild()];
+    const started = [];
+    const response = {
+        write() {},
+        end() {}
+    };
+
+    const runner = new CommandRunner({
+        spawnImpl: (command, args) => {
+            started.push(args[0]);
+            return children[started.length - 1];
+        }
+    });
+
+    const firstResult = runner.run('m1cmd');
+    const streamResult = runner.runStream('ict', '', response);
+    await nextTick();
+
+    assert.deepEqual(started, ['m1cmd']);
+
+    children[0].emit('close', 0);
+    await nextTick();
+
+    assert.deepEqual(started, ['m1cmd', 'ict']);
+
+    children[1].emit('close', 0);
+
+    assert.equal((await firstResult).status, 'OK');
+    assert.equal((await streamResult).status, 'OK');
+});
+
+test('runStream preserves lines split across process output chunks', async () => {
+    const child = createMockChild();
+    const events = [];
+    const response = {
+        write(event) {
+            events.push(event);
+        },
+        end() {}
+    };
+    const runner = new CommandRunner({
+        spawnImpl: () => child
+    });
+
+    const resultPromise = runner.runStream('m1cmd', '', response);
+    await nextTick();
+    child.stdout.emit('data', Buffer.from('first par'));
+    child.stdout.emit('data', Buffer.from('tial\nsecond'));
+    child.stdout.emit('data', Buffer.from(' line\n'));
+    child.emit('close', 0);
+
+    const result = await resultPromise;
+    const payloads = events.map(event => JSON.parse(event.slice(6)));
+
+    assert.deepEqual(payloads, [
+        { stream: 'stdout', line: 'first partial' },
+        { stream: 'stdout', line: 'second line' },
+        { stream: 'done', result }
+    ]);
+});

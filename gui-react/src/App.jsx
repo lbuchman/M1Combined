@@ -1,5 +1,7 @@
 ﻿import { useRef, useState, useEffect, version as reactVersion } from 'react';
 
+const APP_VERSION = '0.1.1'; // Added version tracking constant
+
 const COMMANDS = [
   { key: 'ict',         label: 'ICT'       },
   { key: 'progmac',    label: 'MAC PROGRAM'  },
@@ -25,7 +27,7 @@ function initLeds() {
 }
 
 export default function App() {
-  const [serial,   setSerial]   = useState('');
+  const [serial,   setSerial]   = useState('3226120077');
   const [debug,    setDebug]    = useState('1');
   const [appMode,  setAppMode]  = useState('locked');
   const [busy,     setBusy]     = useState(false);
@@ -57,6 +59,7 @@ export default function App() {
   const lastActivityRef = useRef(Date.now());
   const logViewportRef = useRef(null);
   const logSourceRef = useRef(null);
+  const lastRunSerialRef = useRef(null);
   const isDebug = appMode === 'debug';
   const isLocked = appMode === 'locked';
 
@@ -366,10 +369,56 @@ export default function App() {
     if (key === 'ict') arg += ` --cellBatTol used -v 2.5`;
     setLed(key, 'running');
     try {
-      const body = await apiPost('/command', { command: key, argument: arg });
-      const ok   = body.status === 'OK';
+      if (fakeServer) {
+         const body = await apiPost('/command', { command: key, argument: arg });
+         const ok   = body.status === 'OK';
+         setLed(key, ok ? 'ok' : 'fail');
+         return { ok, description: body.ErrorDescription || '' };
+      }
+
+      const res = await fetch(`${API}/command/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: key, argument: arg })
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let ok = false;
+      let description = 'Stream ended prematurely';
+      let eventBuffer = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        eventBuffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+
+        let delimiter = eventBuffer.match(/\r?\n\r?\n/);
+        while (delimiter) {
+          const event = eventBuffer.slice(0, delimiter.index);
+          eventBuffer = eventBuffer.slice(delimiter.index + delimiter[0].length);
+          const data = event
+            .split(/\r?\n/)
+            .filter(line => line.startsWith('data:'))
+            .map(line => line.slice(5).trimStart())
+            .join('\n');
+           if (data) {
+            const payload = JSON.parse(data);
+            if (payload.line) {
+              setLogLines(prev => {
+                const next = [...prev, `[CMD] ${payload.line}`];
+                return next.length > MAX_LOG_LINES ? next.slice(next.length - MAX_LOG_LINES) : next;
+              });
+            } else if (payload.stream === 'done' && payload.result) {
+              ok = payload.result.status === 'OK';
+              description = payload.result.ErrorDescription || '';
+            }
+          }
+           delimiter = eventBuffer.match(/\r?\n\r?\n/);
+        }
+        if (done) break;
+      }
       setLed(key, ok ? 'ok' : 'fail');
-      return { ok, description: body.ErrorDescription || '' };
+      return { ok, description };
     } catch (err) {
       setLed(key, 'fail');
       return { ok: false, description: err.message };
@@ -378,7 +427,17 @@ export default function App() {
 
   async function runSequence(mode) {
     if (busy) return;
-    if (!validSerial()) { setResult({ ok: false, step: '', description: 'Invalid serial number' }); return; }
+    if (!validSerial()) {
+      setResult({ ok: false, step: '', description: 'Invalid serial number' });
+      return;
+    }
+
+    // In production mode, prevent running the same serial number twice in a row ONLY if it passed previously
+    if (appMode === 'production' && serial.trim() === lastRunSerialRef.current) {
+      setResult({ ok: false, step: '', description: 'Please scan a NEW board serial number. This board already PASSED.' });
+      return;
+    }
+
     stopRef.current = false;
     setBusy(true);
     resetPanel();
@@ -397,6 +456,8 @@ export default function App() {
 
     if (!failed) {
       await apiPost('/command', { command: 'cleanup', argument: `--serial ${serial.trim()}` });
+      // Only lock out this serial number if the entire sequence passed perfectly
+      lastRunSerialRef.current = serial.trim();
     }
 
     setResult(failed ? { ok: false, ...failed } : { ok: true, step: '', description: 'All tests passed' });
@@ -496,18 +557,13 @@ export default function App() {
         ))}
       </div>
 
-      {/* PROGRESS */}
-      <div className={`progress-track${!isDebug ? ' hidden' : ''}`}>
-        <div className="progress-fill" style={{ width: `${progress}%` }} />
-        <span className="progress-txt">{progress > 0 ? `${progress}%` : ''}</span>
-      </div>
 
       {/* ACTION BUTTONS */}
       <div className="action-bar">
         <button className="btn btn-comm"   disabled={busy || isLocked} onClick={() => runSequence('commission')}>COMMISSION</button>
         <button className="btn btn-retest" disabled={busy || isLocked} onClick={() => runSequence('retest')}>TEST</button>
         <button className="btn btn-stop"   disabled={isLocked}         onClick={stop}>STOP</button>
-        <button className="btn btn-clear"                  onClick={resetPanel}>CLEAR</button>
+        <button className="btn btn-clear"  style={{ marginLeft: 'auto' }} onClick={resetPanel}>RESET</button>
       </div>
 
       {isDebug && (
@@ -526,9 +582,7 @@ export default function App() {
                 <option value="2">TRACE</option>
               </select>
             </div>
-            <button className="log-btn" onClick={downloadLogs} disabled={logLines.length === 0}>DOWNLOAD</button>
-            <button className="log-btn" onClick={() => setLogPaused(p => !p)}>{logPaused ? 'RESUME' : 'PAUSE'}</button>
-            <button className="log-btn" onClick={() => setLogLines([])}>CLEAR</button>
+              <button className="log-btn" onClick={() => setLogLines([])}>CLEAR</button>
           </div>
           <div className="log-body" ref={logViewportRef}>
             {logLines.length === 0 ? (
@@ -586,6 +640,7 @@ export default function App() {
         <div className="version-overlay" onClick={() => setVersionModal(false)}>
           <div className="version-box" onClick={e => e.stopPropagation()}>
             <div className="version-title">SYSTEM VERSIONS</div>
+            <div className="version-row"><span>UI App Version</span><strong>{APP_VERSION}</strong></div>
             <div className="version-row"><span>React</span><strong>{reactVersion}</strong></div>
             <div className="version-row"><span>Snap</span><strong>{snapVersion}</strong></div>
             <div className="version-row"><span>FW to Flash</span><strong>{fwVersion}</strong></div>

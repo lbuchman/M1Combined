@@ -141,6 +141,13 @@ class CommandRunner {
         this.cwd = options.cwd || process.cwd();
         this.env = options.env || process.env;
         this.spawnImpl = typeof options.spawnImpl === 'function' ? options.spawnImpl : spawn;
+        this.queue = Promise.resolve();
+    }
+
+    enqueue(operation) {
+        const queued = this.queue.catch(() => undefined).then(operation);
+        this.queue = queued.catch(() => undefined);
+        return queued;
     }
 
     run(command, argument) {
@@ -153,7 +160,7 @@ class CommandRunner {
             });
         }
 
-        return this.execute(command, argument || '');
+        return this.enqueue(() => this.execute(command, argument || ''));
     }
 
     execute(command, argument) {
@@ -222,6 +229,110 @@ class CommandRunner {
                     });
                 }
                 resolve(result);
+            });
+        });
+    }
+
+    runStream(command, argument, res) {
+        if (!supportedCommands.has(command)) {
+            res.write(`data: ${JSON.stringify({
+                stream: 'done',
+                result: {
+                    status: 'FAILED',
+                    errorCode: 14,
+                    ErrorDescription: `Unsupported command "${command}"`,
+                    commandOutput: null
+                }
+            })}\n\n`);
+            res.end();
+            return Promise.resolve({
+                status: 'FAILED',
+                errorCode: 14,
+                ErrorDescription: `Unsupported command "${command}"`,
+                commandOutput: null
+            });
+        }
+        return this.enqueue(() => this.executeStream(command, argument || '', res));
+    }
+
+    executeStream(command, argument, res) {
+        return new Promise((resolve) => {
+            const cmdArgs = [...this.baseArgs, command, ...toArgv(argument)];
+
+            logger.info('Executing command (stream)', {
+                command: this.baseCommand,
+                args: cmdArgs
+            });
+
+            const child = this.spawnImpl(this.baseCommand, cmdArgs, {
+                cwd: this.cwd,
+                env: this.env,
+                shell: false
+            });
+
+            let stdout = '';
+            let stderr = '';
+            let finished = false;
+
+            const streamLines = (stream) => {
+                let pending = '';
+
+                const writeLine = (line) => {
+                    if (line.trim()) {
+                        res.write(`data: ${JSON.stringify({ stream, line })}\n\n`);
+                    }
+                };
+
+                return {
+                    write(data) {
+                        pending += data;
+                        const lines = pending.split(/\r?\n/);
+                        pending = lines.pop();
+                        lines.forEach(writeLine);
+                    },
+                    flush() {
+                        if (pending) writeLine(pending);
+                        pending = '';
+                    }
+                };
+            };
+
+            const stdoutLines = streamLines('stdout');
+            const stderrLines = streamLines('stderr');
+
+            const finish = (result) => {
+                if (finished) return;
+                finished = true;
+                res.write(`data: ${JSON.stringify({ stream: 'done', result })}\n\n`);
+                res.end();
+                resolve(result);
+            };
+
+            child.stdout.on('data', chunk => {
+                const data = chunk.toString();
+                stdout += data;
+                stdoutLines.write(data);
+            });
+
+            child.stderr.on('data', chunk => {
+                const data = chunk.toString();
+                stderr += data;
+                stderrLines.write(data);
+            });
+
+            child.on('error', err => {
+                const errorMsg = `Failed to start: ${err.message}`;
+                stderr += errorMsg;
+                stderrLines.write(`${errorMsg}\n`);
+                finish(buildResult(3, stdout, stderr));
+            });
+
+            child.on('close', code => {
+                const exitCode = Number.isInteger(code) ? code : 3;
+                const result = buildResult(exitCode, stdout, stderr);
+                stdoutLines.flush();
+                stderrLines.flush();
+                finish(result);
             });
         });
     }
