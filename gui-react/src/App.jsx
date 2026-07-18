@@ -17,9 +17,6 @@ const RETEST_SKIP = new Set(['flash']);
 const API = localStorage.getItem('m1-api') || `http://${window.location.hostname}:3300`;
 // TODO: Read max idle timeout from restServer config. Default is 1.5h for now.
 const MAX_IDLE_MS = 90 * 60 * 1000;
-const PROD_PIN_BYPASS = '1234';
-const DEBUG_PIN_BYPASS = '4321';
-const DEBUG_PIN_BYPASS_ALT = '1234';
 const MAX_LOG_LINES = 500;
 
 function initLeds() {
@@ -36,7 +33,7 @@ export default function App() {
   const [result,    setResult]    = useState(null);   // { ok, step, description }
   const [powerState, setPowerState] = useState('auto'); // 'auto', 'on', 'off'
   const [poeState,   setPoeState]   = useState('auto'); // 'auto', 'on', 'off'
-  const [machineName, setMachineName] = useState('FC?');
+  const [fixtureLabel, setFixtureLabel] = useState('FC?');
   const [snapVersion, setSnapVersion] = useState('unknown');
   const [fwVersion, setFwVersion] = useState('unknown');
   const [versionModal, setVersionModal] = useState(false);
@@ -56,17 +53,14 @@ export default function App() {
   const [logConnected, setLogConnected] = useState(false);
   const [logError, setLogError] = useState('');
   const stopRef = useRef(false);
+  const activeCommandRef = useRef(null);
+  const activeCommandAbortRef = useRef(null);
   const lastActivityRef = useRef(Date.now());
   const logViewportRef = useRef(null);
   const logSourceRef = useRef(null);
   const lastRunSerialRef = useRef(null);
   const isDebug = appMode === 'debug';
   const isLocked = appMode === 'locked';
-
-  function getFakePin(mode) {
-    const key = `mnplus-fake-pin-${mode}`;
-    return localStorage.getItem(key) || (mode === 'production' ? '1223' : '4321');
-  }
 
   async function apiPost(path, payload) {
     try {
@@ -78,13 +72,6 @@ export default function App() {
       return await res.json();
     } catch {
       setFakeServer(true);
-      if (path === '/auth') {
-        return { status: payload.pin === getFakePin(payload.mode) ? 'OK' : 'FAILED' };
-      }
-      if (path === '/changepin') {
-        localStorage.setItem(`mnplus-fake-pin-${payload.mode}`, payload.pin);
-        return { status: 'OK' };
-      }
       if (path === '/command') {
         return { status: 'OK', ErrorDescription: 'FAKE SERVER' };
       }
@@ -98,14 +85,14 @@ export default function App() {
       return await res.json();
     } catch {
       setFakeServer(true);
-      if (path === '/config') return { status: 'OK', machineName: 'FC?' };
+      if (path === '/config') return { status: 'OK', machineName: 'FC?', vendorSite: '' };
       return { status: 'FAILED' };
     }
   }
 
   useEffect(() => {
     apiGet('/config').then(b => {
-      if (b.machineName) setMachineName(b.machineName);
+      setFixtureLabel(b.vendorSite ? `Vendor Site ${b.vendorSite}` : b.machineName || 'FC?');
       if (b.snapVersion) setSnapVersion(String(b.snapVersion));
       if (b.fwVersion) setFwVersion(String(b.fwVersion));
     });
@@ -312,12 +299,7 @@ export default function App() {
     setPinEntry(next);
     if (next.length >= 4) {
       try {
-        // Temporary bypass: production/debug PINs are validated locally and skip server auth.
-        const body = pinTargetMode === 'production'
-          ? { status: next === PROD_PIN_BYPASS ? 'OK' : 'FAILED' }
-          : pinTargetMode === 'debug'
-            ? { status: (next === DEBUG_PIN_BYPASS || next === DEBUG_PIN_BYPASS_ALT) ? 'OK' : 'FAILED' }
-            : await apiPost('/auth', { pin: next, mode: pinTargetMode });
+        const body = await apiPost('/auth', { pin: next, mode: pinTargetMode });
         if (body.status === 'OK') {
           setPinModal(false);
           setAppMode(pinTargetMode);
@@ -349,6 +331,16 @@ export default function App() {
     return /^\d{10}$/.test(serial.trim());
   }
 
+  function displayStatus() {
+    if (busy) return { state: 'running', text: 'RUNNING', detail: '' };
+    if (!result) return { state: 'ready', text: 'READY', detail: '' };
+    if (result.description === 'Stopped by operator') {
+      return { state: 'stopped', text: 'STOPPED', detail: result.step || '' };
+    }
+    if (result.ok) return { state: 'passed', text: 'PASSED', detail: '' };
+    return { state: 'failed', text: 'FAILED', detail: result.step || result.description || '' };
+  }
+
   function downloadLogs() {
     if (logLines.length === 0) return;
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -364,10 +356,12 @@ export default function App() {
     URL.revokeObjectURL(url);
   }
 
-  async function callCommand(key, isRetest) {
+  async function callCommand(key, isRetest, extraArgs = '') {
     let arg = `--serial ${serial.trim()} --debug ${debug}`;
-    if (key === 'ict') arg += ` --cellBatTol used -v 2.5`;
+    if (key === 'ict') arg += ` --cellBatTol ${isRetest ? 'used' : 'new'}`;
+    if (extraArgs) arg += extraArgs;
     setLed(key, 'running');
+    activeCommandRef.current = key;
     try {
       if (fakeServer) {
          const body = await apiPost('/command', { command: key, argument: arg });
@@ -376,10 +370,13 @@ export default function App() {
          return { ok, description: body.ErrorDescription || '' };
       }
 
+      const controller = new AbortController();
+      activeCommandAbortRef.current = controller;
       const res = await fetch(`${API}/command/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: key, argument: arg })
+        body: JSON.stringify({ command: key, argument: arg }),
+        signal: controller.signal
       });
 
       const reader = res.body.getReader();
@@ -420,9 +417,40 @@ export default function App() {
       setLed(key, ok ? 'ok' : 'fail');
       return { ok, description };
     } catch (err) {
+      if (stopRef.current || err.name === 'AbortError') {
+        setLed(key, 'fail');
+        return { ok: false, stopped: true, description: 'Stopped by operator' };
+      }
       setLed(key, 'fail');
       return { ok: false, description: err.message };
+    } finally {
+      if (activeCommandRef.current === key) activeCommandRef.current = null;
+      if (activeCommandAbortRef.current) activeCommandAbortRef.current = null;
     }
+  }
+
+  async function runManualCommand(key) {
+    if (busy || !isDebug || !validSerial()) return;
+
+    setBusy(true);
+    setResult(null);
+    try {
+      const r = await callCommand(key, key === 'ict');
+      setResult({ ok: r.ok, step: COMMANDS.find(c => c.key === key)?.label || key, description: r.description });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function printErrorLabel() {
+    setLed('makelabel', 'running');
+    const body = await apiPost('/command', {
+      command: 'makelabel',
+      argument: `--serial ${serial.trim()} --debug ${debug} --error`
+    });
+    const ok = body.status === 'OK';
+    setLed('makelabel', ok ? 'ok' : 'fail');
+    return { ok, description: body.ErrorDescription || '' };
   }
 
   async function runSequence(mode) {
@@ -451,7 +479,17 @@ export default function App() {
       const r = await callCommand(item.key, isRetest);
       done += PROGRESS[item.key] || 5;
       setProgress(Math.min(100, done));
-      if (!r.ok) { failed = { step: item.label, description: r.description }; break; }
+      if (!r.ok) { failed = { step: item.label, description: r.description, stopped: r.stopped }; break; }
+    }
+
+    if (failed && !failed.stopped && failed.step !== 'PRINT LABEL') {
+      const labelResult = await printErrorLabel();
+      if (!labelResult.ok) {
+        failed = {
+          ...failed,
+          description: `${failed.description || 'Test failed'}; error label failed: ${labelResult.description || 'Unknown error'}`
+        };
+      }
     }
 
     if (!failed) {
@@ -464,27 +502,58 @@ export default function App() {
     setBusy(false);
   }
 
-  function stop() { stopRef.current = true; setBusy(false); }
+  async function stop() {
+    if (!window.confirm('Stop current operation?')) return;
+    stopRef.current = true;
+    const activeKey = activeCommandRef.current;
+    if (activeKey) setLed(activeKey, 'fail');
+    setResult({ ok: false, step: activeKey ? COMMANDS.find(c => c.key === activeKey)?.label || activeKey : '', description: 'Stopped by operator' });
+    try {
+      await apiPost('/command/stop', {});
+    } catch (err) {}
+    if (activeCommandAbortRef.current) activeCommandAbortRef.current.abort();
+    setBusy(false);
+  }
 
   async function setPower(newState) {
     setPowerState(newState);
+    const commandState = newState === 'auto' ? 'off' : newState;
     try {
-      await apiPost('/command', { command: 'power', argument: `--state ${newState}` });
+      await apiPost('/command', { command: 'power', argument: `--state ${commandState}` });
     } catch (err) {}
   }
 
   async function setPoe(newState) {
     setPoeState(newState);
+    const commandState = newState === 'auto' ? 'off' : newState;
     try {
-      await apiPost('/command', { command: 'poe', argument: `--state ${newState}` });
+      await apiPost('/command', { command: 'poe', argument: `--state ${commandState}` });
     } catch (err) {}
   }
 
   async function reboot() {
+    if (!window.confirm('Reboot target?')) return;
     try {
       await apiPost('/command', { command: 'reboot', argument: '' });
     } catch (err) {}
   }
+
+  async function calibrate() {
+    if (busy || !isDebug || !validSerial()) return;
+    if (!window.confirm('Run ICT calibration?')) return;
+
+    stopRef.current = false;
+    setBusy(true);
+    setResult(null);
+    try {
+      const r = await callCommand('ict', true, ' --calibrate true');
+      setResult({ ok: r.ok, step: 'ICT CALIBRATION', description: r.description });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const status = displayStatus();
 
   return (
     <div className={`panel${!isDebug ? ' panel-prod' : ''}`}>
@@ -495,7 +564,7 @@ export default function App() {
           <span className="honeywell-text">HONEYWELL</span>
         </div>
         <span className="title-text">MnPlus</span>
-        <span className="machine-name">{machineName}</span>
+        <span className="machine-name">{fixtureLabel}</span>
         <div className="mode-wrap">
           <button className="mode-btn info-btn" onClick={() => setVersionModal(true)}>INFO</button>
           <button className={`mode-btn ${appMode === 'production' ? 'mode-on' : ''}`} onClick={() => switchMode('production')}>PRODUCTION</button>
@@ -516,6 +585,7 @@ export default function App() {
           <button className={`seg-btn${poeState === 'on' ? ' seg-on' : poeState === 'off' ? ' seg-off' : ''}`} onClick={() => setPoe(poeState === 'on' ? 'off' : 'on')} disabled={!isDebug}>{poeState === 'off' ? 'OFF' : 'ON'}</button>
         </div>
         <button className="btn btn-reboot seg-lbl-gap" onClick={reboot} disabled={!isDebug}>⟳  REBOOT</button>
+        {isDebug && <button className="btn btn-calibrate debug-tool-gap" onClick={calibrate} disabled={busy}>CALIBRATE</button>}
       </div>
 
       {/* SERIAL + DEBUG LEVEL */}
@@ -536,10 +606,9 @@ export default function App() {
           </div>
         </div>
 
-        <div className="ctrl-group status-group">
-          <span className="ctrl-lbl">STATUS</span>
-          <span className={`status-led ${busy ? 'led-running' : 'led-idle'}`} />
-          <span className="status-txt">{busy ? 'RUNNING' : 'READY'}</span>
+        <div className={`result-status result-status-${status.state}`}>
+          <span className="result-status-main">{status.text}</span>
+          {status.detail && <span className="result-status-detail">{status.detail}</span>}
         </div>
       </div>
 
@@ -549,7 +618,7 @@ export default function App() {
           <div
             key={item.key}
             className={`step-cell${isDebug && !busy ? ' step-clickable' : ''}`}
-            onClick={() => isDebug && !busy && validSerial() && callCommand(item.key, false)}
+            onClick={() => runManualCommand(item.key)}
           >
             <span className={`led ${leds[item.key]}`} />
             <span className="step-lbl">{item.label}</span>
@@ -569,13 +638,8 @@ export default function App() {
       {isDebug && (
         <div className="log-drawer">
           <div className="log-head">
-            <span className="log-title">DEBUG LOG</span>
-            <span className={`log-state ${logConnected ? 'log-up' : 'log-down'}`}>
-              {logConnected ? 'LIVE' : 'DOWN'}
-            </span>
-            {logError && <span className="log-error">{logError}</span>}
             <div className="log-level-wrap">
-              <span className="log-level-lbl">DEBUG LVL</span>
+              <span className="log-level-lbl">LEVEL</span>
               <select className="log-level-select" value={debug} onChange={e => setDebug(e.target.value)}>
                 <option value="0">INFO</option>
                 <option value="1">DEBUG</option>

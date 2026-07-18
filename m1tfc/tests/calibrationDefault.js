@@ -13,7 +13,7 @@ module.exports = class CalibrationData {
 
         this.coinCellBattery = {
             name: 'BatCellBat',
-            minVoltageNew: 3.1,
+            minVoltageNew: 3.2,
             minVoltageAged: 2.9,
             scale: 1
         };
@@ -83,7 +83,7 @@ module.exports = class CalibrationData {
     }
 
     async initConfigFile() {
-        this.config = await config.getConfig({});
+        this.config = await config.getCalibration();
         if (this.boardId === 255) {
             throw new Error('Invalid board ID, update M1 testboard FW and program an ID');
         }
@@ -141,6 +141,6 @@ module.exports = class CalibrationData {
         this.defaults.ddrVoltageMnp = this.ddrVoltageMnp;
         this.defaults.coinCellBattery = this.coinCellBattery;
         this.config.boards[this.boardId] = JSON.parse(JSON.stringify(this.defaults));
-        await config.saveConfig(this.config);
+        await config.saveCalibration(this.config);
     }
 };

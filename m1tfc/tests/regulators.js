@@ -217,13 +217,7 @@ async function cellBatTest(logger, db, calibrate, calibrateData) {
         const scaledVoltage = measuredVoltage * batConfig.scale;
 
         if (calibrate) {
-            if (!runtime.cellBatVoltage) {
-                throw new Error('Calibration requires voltage flag: -v voltage');
-            }
-            batConfig.scale = runtime.cellBatVoltage / measuredVoltage;
-            logger.info(`Calibrated coin cell battery scale=${batConfig.scale.toFixed(4)}`);
-            await calibrateData.saveConfigFile();
-            return true;
+            logger.info('Coin cell battery test is not calibrated');
         }
 
         if (scaledVoltage < minVoltage) {

@@ -65,4 +65,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 console.log('✓ Logger initialized');
 
+logger.logFile = logFile;
+
 module.exports = logger;

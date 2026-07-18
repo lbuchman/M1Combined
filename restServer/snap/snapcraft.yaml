@@ -17,7 +17,7 @@ apps:
     environment:
       PORT: '3300'
       HOST: '0.0.0.0'
-      M1TFC_CMD: m1tfd1.cli
+      M1TFC_CMD: m1tfc
       M1TFC_BASE_ARGS: ''
       M1TFC_CWD: $SNAP_COMMON
       PATH: /snap/bin:$PATH
@@ -27,7 +27,7 @@ apps:
     environment:
       PORT: '3300'
       HOST: '0.0.0.0'
-      M1TFC_CMD: m1tfd1.cli
+      M1TFC_CMD: m1tfc
       M1TFC_BASE_ARGS: ''
       M1TFC_CWD: $SNAP_COMMON
       PATH: /snap/bin:$PATH

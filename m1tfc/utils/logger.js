@@ -12,9 +12,12 @@ let logger;
 const addCallerInfo = winston.format(info => {
     const err = new Error();
     const stack = err.stack.split('\n');
+    const isDependencyFrame = line => line.includes('node_modules')
+        && !line.includes('node_modules/m1tfc/')
+        && !line.includes('node_modules/m1tfc\\');
     const callerLine = stack.find(
         line =>
-            line.includes('.js:') && !line.includes('node_modules') && !line.includes('logger.js')
+            line.includes('.js:') && !isDependencyFrame(line) && !line.includes('logger.js')
     );
     if (callerLine) {
         const match =

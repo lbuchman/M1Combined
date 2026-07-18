@@ -70,19 +70,15 @@ function register(program) {
             '-b, --cellBatTol <cellBatTol>',
             'tolerance for coin cell bat, valid values: new, used'
         )
-        .option('-c, --callibrate <callibrate>', 'calibrate A/D and save data into the config file')
-        .option(
-            '-v, --cellBatVoltage <cellBatVoltage>',
-            'only for the calibration, measure cell bat voltage and enter it like: -v 3.0145'
-        )
+        .option('-c, --calibrate <calibrate>', 'calibrate A/D and save data into the config file')
+        .option('--callibrate <callibrate>', 'deprecated alias for --calibrate')
         .action(options => {
-            const calibrate = options.callibrate === 'true';
+            const calibrate = options.calibrate === 'true' || options.callibrate === 'true';
 
             runCommand(options, '    ict', 'ICT_EXCEPT', async(configData, logfile, _db) => {
                 // NOTE: Apply runtime specific extra fields not handled by base `runCommand`
                 applyRuntime(configData, {
                     cellBatTol: options.cellBatTol,
-                    cellBatVoltage: options.cellBatVoltage ? Number(options.cellBatVoltage) : null,
                     logDir: options.serial ? `${configData.mtfDir}/logs/${options.serial}` : null
                 });
 

@@ -1,7 +1,6 @@
 'use strict';
 
 const express = require('express');
-const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { CommandRunner, getSupportedCommands } = require('./commandRunner');
@@ -9,34 +8,44 @@ const logger = require('./logger');
 
 const port = Number(process.env.PORT || 3300);
 const host = process.env.HOST || '0.0.0.0';
-const defaultCliPath = process.env.M1TFC_CMD || 'm1tfd1.cli';
+const defaultCliPath = process.env.M1TFC_CMD || 'm1tfc';
 const defaultCliArgs = process.env.M1TFC_BASE_ARGS
     ? process.env.M1TFC_BASE_ARGS.split(' ').filter(Boolean)
     : [];
 const cliCwd = process.env.M1TFC_CWD || process.cwd();
 const snapData = process.env.SNAP_DATA || path.join(require('os').homedir(), 'snap_data');
-const defaultConfigFile = process.env.CONFIG_JSON
-    || path.join(snapData, 'config.json');
+const m1tfcSnapConfigFile = '/var/snap/m1tfc/current/config.json';
+const fallbackConfigFile = path.join(snapData, 'config.json');
 const defaultSnapcraftFile = process.env.SNAPCRAFT_YAML
     || path.join(process.cwd(), 'snap', 'snapcraft.yaml');
 const sseHeartbeatMs = Number(process.env.LOG_SSE_HEARTBEAT_MS || 15000);
 const testHookReportOnly = process.env.REST_TEST_HOOK === '1';
 const testHookHistory = [];
 
-// PIN storage — always snap: use SNAP_DATA
-const pinDir  = snapData;
-const pinFile = path.join(pinDir, 'pin.json');
-const PIN_ITERATIONS = 100000;
-const PIN_KEYLEN     = 64;
-const PIN_DIGEST     = 'sha512';
 const VALID_PIN_MODES = new Set(['production', 'debug']);
+const DEFAULT_PASSWORDS = {
+    production: '1223',
+    debug: '4321'
+};
+
+function resolveRuntimeConfigFile() {
+    if (process.env.CONFIG_JSON) return process.env.CONFIG_JSON;
+    if (fs.existsSync(m1tfcSnapConfigFile)) return m1tfcSnapConfigFile;
+    return fallbackConfigFile;
+}
 
 function loadRuntimeConfig() {
     try {
-        return JSON.parse(fs.readFileSync(defaultConfigFile, 'utf8'));
+        return JSON.parse(fs.readFileSync(resolveRuntimeConfigFile(), 'utf8'));
     } catch {
         return {};
     }
+}
+
+function saveRuntimeConfig(cfg) {
+    const configFile = resolveRuntimeConfigFile();
+    fs.mkdirSync(path.dirname(configFile), { recursive: true });
+    fs.writeFileSync(configFile, `${JSON.stringify(cfg, null, 2)}\n`, 'utf8');
 }
 
 function resolveLogFile() {
@@ -44,7 +53,8 @@ function resolveLogFile() {
     const configured = process.env.LOG_FILE
         || cfg.teensyLogFilename
         || cfg.logFile
-        || cfg.logFilename;
+        || cfg.logFilename
+        || logger.logFile;
     if (!configured || typeof configured !== 'string' || !configured.trim()) return null;
     return path.resolve(configured.trim());
 }
@@ -69,46 +79,23 @@ function tailLogLines(logFile, numLines) {
     return content.split('\n').filter(line => line.trim()).slice(-numLines);
 }
 
-function hashPin(pin, salt) {
-    return crypto.pbkdf2Sync(pin, salt, PIN_ITERATIONS, PIN_KEYLEN, PIN_DIGEST).toString('hex');
+function passwordKeyForMode(mode) {
+    return `${mode}Password`;
 }
 
-function loadPinData() {
-    try {
-        const parsed = JSON.parse(fs.readFileSync(pinFile, 'utf8'));
-        // Backward compatibility with old single-pin format: { hash, salt }
-        if (parsed && parsed.hash && parsed.salt) {
-            return {
-                production: { hash: parsed.hash, salt: parsed.salt },
-                debug: { hash: parsed.hash, salt: parsed.salt }
-            };
-        }
-        return parsed;
-    } catch {
-        return null;
-    }
+function verifyPassword(mode, password) {
+    const cfg = loadRuntimeConfig();
+    const configured = cfg[passwordKeyForMode(mode)];
+    const expected = configured === undefined || configured === null
+        ? DEFAULT_PASSWORDS[mode]
+        : String(configured);
+    return password === expected;
 }
 
-function savePinData(pinData) {
-    fs.mkdirSync(pinDir, { recursive: true });
-    fs.writeFileSync(pinFile, JSON.stringify(pinData), 'utf8');
-}
-
-function savePin(mode, pin) {
-    const current = loadPinData() || {};
-    const salt = crypto.randomBytes(32).toString('hex');
-    current[mode] = { hash: hashPin(pin, salt), salt };
-    savePinData(current);
-}
-
-function verifyPin(mode, pin) {
-    const stored = loadPinData();
-    if (!stored || !stored[mode]) {
-        // defaults when not provisioned yet
-        const defaultPin = mode === 'production' ? '1223' : '4321';
-        return pin === defaultPin;
-    }
-    return hashPin(pin, stored[mode].salt) === stored[mode].hash;
+function savePassword(mode, password) {
+    const cfg = loadRuntimeConfig();
+    cfg[passwordKeyForMode(mode)] = password;
+    saveRuntimeConfig(cfg);
 }
 
 const commandRunner = new CommandRunner({
@@ -173,6 +160,8 @@ app.get('/config', (req, res) => {
     res.json({
         status: 'OK',
         machineName: process.env.MACHINE_NAME || cfg.machineName || 'FC?',
+        vendorSite: process.env.VENDOR_SITE || cfg.vendorSite || '',
+        configFile: resolveRuntimeConfigFile(),
         logFile: resolveLogFile(),
         snapVersion: process.env.SNAP_VERSION || cfg.snapVersion || readSnapVersion(),
         fwVersion: process.env.FW_VERSION || cfg.firmwareVersion || cfg.fwVersion || cfg.flashVersion || 'unknown'
@@ -364,8 +353,8 @@ app.post('/auth', (req, res) => {
     if (!pin || typeof pin !== 'string' || !/^\d{4,6}$/.test(pin)) {
         return res.status(400).json({ status: 'FAILED', ErrorDescription: 'Invalid PIN format' });
     }
-    if (verifyPin(mode, pin)) return res.json({ status: 'OK' });
-    res.status(401).json({ status: 'FAILED', ErrorDescription: 'Wrong PIN' });
+    if (verifyPassword(mode, pin)) return res.json({ status: 'OK' });
+    res.status(401).json({ status: 'FAILED', ErrorDescription: 'Wrong password' });
 });
 
 app.post('/changepin', (req, res) => {
@@ -376,8 +365,13 @@ app.post('/changepin', (req, res) => {
     if (!pin || typeof pin !== 'string' || !/^\d{4,6}$/.test(pin)) {
         return res.status(400).json({ status: 'FAILED', ErrorDescription: 'Invalid PIN format' });
     }
-    savePin(mode, pin);
-    res.json({ status: 'OK' });
+    try {
+        savePassword(mode, pin);
+        res.json({ status: 'OK' });
+    } catch (err) {
+        logger.error('Failed to save password', { mode, error: err.message });
+        res.status(500).json({ status: 'FAILED', ErrorDescription: 'Failed to save password' });
+    }
 });
 
 async function handleCommandExecution(req, res, source) {
@@ -475,6 +469,7 @@ app.get('/help', (req, res) => {
             { method: 'GET',  path: '/commands',            description: 'List supported command names' },
             { method: 'POST', path: '/command',             description: 'Run one command, returns full JSON result' },
             { method: 'POST', path: '/command/stream',      description: 'Run one command, streams output as SSE' },
+            { method: 'POST', path: '/command/stop',        description: 'Stop the currently running command' },
             { method: 'POST', path: '/commands/',           description: 'Run one command, returns RDTF-style {cmd, status} response' },
             { method: 'POST', path: '/auth',                description: 'Verify PIN — body: { pin, mode: "production"|"debug" }' },
             { method: 'POST', path: '/changepin',           description: 'Change PIN — body: { currentPin, newPin, mode: "production"|"debug" }' },
@@ -505,6 +500,10 @@ app.post('/command', async (req, res) => {
 
 app.post('/command/stream', async (req, res) => {
     await handleCommandStreamingExecution(req, res);
+});
+
+app.post('/command/stop', (req, res) => {
+    res.json(commandRunner.cancelCurrent());
 });
 
 app.post('/commands/', async (req, res) => {

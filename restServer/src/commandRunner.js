@@ -16,7 +16,9 @@ const supportedCommands = new Set([
     'pingM1apps',
     'cleanup',
     'functest',
-    'makelabel'
+    'makelabel',
+    'power',
+    'poe'
 ]);
 
 function getSupportedCommands() {
@@ -134,14 +136,26 @@ function descriptionFor(exitCode, stderr) {
     return fallback || 'Unknown error';
 }
 
+function stoppedResult() {
+    return {
+        status: 'FAILED',
+        errorCode: 130,
+        ErrorDescription: 'Stopped by operator',
+        commandOutput: null
+    };
+}
+
 class CommandRunner {
     constructor(options = {}) {
-        this.baseCommand = options.baseCommand || 'm1tfd1.cli';
+        this.baseCommand = options.baseCommand || 'm1tfc';
         this.baseArgs = Array.isArray(options.baseArgs) ? options.baseArgs : [];
         this.cwd = options.cwd || process.cwd();
         this.env = options.env || process.env;
         this.spawnImpl = typeof options.spawnImpl === 'function' ? options.spawnImpl : spawn;
         this.queue = Promise.resolve();
+        this.currentChild = null;
+        this.currentCommand = null;
+        this.cancelRequested = false;
     }
 
     enqueue(operation) {
@@ -161,6 +175,26 @@ class CommandRunner {
         }
 
         return this.enqueue(() => this.execute(command, argument || ''));
+    }
+
+    cancelCurrent() {
+        if (!this.currentChild || this.currentChild.killed || typeof this.currentChild.kill !== 'function') {
+            return {
+                status: 'OK',
+                stopped: false,
+                ErrorDescription: 'No command is running'
+            };
+        }
+
+        this.cancelRequested = true;
+        logger.warn('Stopping current command', this.currentCommand || {});
+        this.currentChild.kill('SIGTERM');
+        return {
+            status: 'OK',
+            stopped: true,
+            ErrorDescription: 'Stop requested',
+            command: this.currentCommand
+        };
     }
 
     execute(command, argument) {
@@ -186,6 +220,10 @@ class CommandRunner {
                 shell: false
             });
 
+            this.currentChild = child;
+            this.currentCommand = { command, args: cmdArgs, stream: false };
+            this.cancelRequested = false;
+
             let stdout = '';
             let stderr = '';
 
@@ -209,6 +247,11 @@ class CommandRunner {
                     cwd: this.cwd,
                     envPath: this.env.PATH
                 });
+                if (this.currentChild === child) {
+                    this.currentChild = null;
+                    this.currentCommand = null;
+                    this.cancelRequested = false;
+                }
                 resolve({
                     status: 'FAILED',
                     errorCode: 3,
@@ -219,14 +262,20 @@ class CommandRunner {
 
             child.on('close', code => {
                 const exitCode = Number.isInteger(code) ? code : 3;
-                const result = buildResult(exitCode, stdout, stderr);
-                if (exitCode !== 0) {
+                const wasStopped = this.cancelRequested && this.currentChild === child;
+                const result = wasStopped ? stoppedResult() : buildResult(exitCode, stdout, stderr);
+                if (exitCode !== 0 && !wasStopped) {
                     logger.error(`Command exited with code ${exitCode}`, {
                         command: this.baseCommand,
                         args: cmdArgs,
                         cwd: this.cwd,
                         stderr: stderr.substring(0, 200)
                     });
+                }
+                if (this.currentChild === child) {
+                    this.currentChild = null;
+                    this.currentCommand = null;
+                    this.cancelRequested = false;
                 }
                 resolve(result);
             });
@@ -270,9 +319,14 @@ class CommandRunner {
                 shell: false
             });
 
+            this.currentChild = child;
+            this.currentCommand = { command, args: cmdArgs, stream: true };
+            this.cancelRequested = false;
+
             let stdout = '';
             let stderr = '';
             let finished = false;
+            let responseClosed = false;
 
             const streamLines = (stream) => {
                 let pending = '';
@@ -303,10 +357,22 @@ class CommandRunner {
             const finish = (result) => {
                 if (finished) return;
                 finished = true;
-                res.write(`data: ${JSON.stringify({ stream: 'done', result })}\n\n`);
-                res.end();
+                res.off?.('close', abortChild);
+                if (!responseClosed) {
+                    res.write(`data: ${JSON.stringify({ stream: 'done', result })}\n\n`);
+                    res.end();
+                }
                 resolve(result);
             };
+
+            const abortChild = () => {
+                responseClosed = true;
+                this.cancelRequested = true;
+                if (finished || child.killed || typeof child.kill !== 'function') return;
+                child.kill('SIGTERM');
+            };
+
+            res.on?.('close', abortChild);
 
             child.stdout.on('data', chunk => {
                 const data = chunk.toString();
@@ -324,14 +390,25 @@ class CommandRunner {
                 const errorMsg = `Failed to start: ${err.message}`;
                 stderr += errorMsg;
                 stderrLines.write(`${errorMsg}\n`);
+                if (this.currentChild === child) {
+                    this.currentChild = null;
+                    this.currentCommand = null;
+                    this.cancelRequested = false;
+                }
                 finish(buildResult(3, stdout, stderr));
             });
 
             child.on('close', code => {
                 const exitCode = Number.isInteger(code) ? code : 3;
-                const result = buildResult(exitCode, stdout, stderr);
+                const wasStopped = this.cancelRequested && this.currentChild === child;
+                const result = wasStopped ? stoppedResult() : buildResult(exitCode, stdout, stderr);
                 stdoutLines.flush();
                 stderrLines.flush();
+                if (this.currentChild === child) {
+                    this.currentChild = null;
+                    this.currentCommand = null;
+                    this.cancelRequested = false;
+                }
                 finish(result);
             });
         });

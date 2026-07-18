@@ -10,6 +10,11 @@ function createMockChild() {
     const child = new EventEmitter();
     child.stdout = new EventEmitter();
     child.stderr = new EventEmitter();
+    child.killed = false;
+    child.kill = function kill(signal) {
+        child.killed = true;
+        child.signal = signal;
+    };
     return child;
 }
 
@@ -22,6 +27,8 @@ test('getSupportedCommands exposes the CLI surface', () => {
 
     assert.ok(commands.includes('m1cmd'));
     assert.ok(commands.includes('m1tbcmd'));
+    assert.ok(commands.includes('power'));
+    assert.ok(commands.includes('poe'));
     assert.ok(!commands.includes('tbcmd'));
 });
 
@@ -82,6 +89,24 @@ test('run forwards arguments and merges JSON stdout into the response', async ()
         ErrorDescription: 'Success',
         echoedArgs: ['m1cmd', 'alpha', 'beta', '-c', 'hello world', '-v']
     });
+});
+
+test('run defaults to the m1tfc executable', async () => {
+    const child = createMockChild();
+    const captured = {};
+    const runner = new CommandRunner({
+        spawnImpl: (command) => {
+            captured.command = command;
+            return child;
+        }
+    });
+
+    const resultPromise = runner.run('m1cmd');
+    await nextTick();
+    child.emit('close', 0);
+
+    assert.equal(captured.command, 'm1tfc');
+    assert.equal((await resultPromise).status, 'OK');
 });
 
 test('run falls back to stderr text when the exit code is unknown', async () => {
@@ -192,4 +217,68 @@ test('runStream preserves lines split across process output chunks', async () =>
         { stream: 'stdout', line: 'second line' },
         { stream: 'done', result }
     ]);
+});
+
+test('runStream terminates the child process when the response closes', async () => {
+    const child = createMockChild();
+    const response = new EventEmitter();
+    let writesAfterClose = 0;
+    let closed = false;
+    response.write = () => {
+        if (closed) writesAfterClose += 1;
+    };
+    response.end = () => {
+        if (closed) writesAfterClose += 1;
+    };
+    const runner = new CommandRunner({
+        spawnImpl: () => child
+    });
+
+    const resultPromise = runner.runStream('m1cmd', '', response);
+    await nextTick();
+    closed = true;
+    response.emit('close');
+    child.emit('close', null);
+
+    assert.equal(child.killed, true);
+    assert.equal(child.signal, 'SIGTERM');
+    assert.equal(writesAfterClose, 0);
+    assert.equal((await resultPromise).status, 'FAILED');
+});
+
+test('cancelCurrent terminates an active streamed command', async () => {
+    const child = createMockChild();
+    const events = [];
+    const response = new EventEmitter();
+    response.write = event => events.push(event);
+    response.end = () => {};
+    const runner = new CommandRunner({
+        spawnImpl: () => child
+    });
+
+    const resultPromise = runner.runStream('m1cmd', '', response);
+    await nextTick();
+    const stopResult = runner.cancelCurrent();
+    child.emit('close', null);
+
+    const result = await resultPromise;
+    const payloads = events.map(event => JSON.parse(event.slice(6)));
+
+    assert.equal(stopResult.status, 'OK');
+    assert.equal(stopResult.stopped, true);
+    assert.equal(child.killed, true);
+    assert.equal(child.signal, 'SIGTERM');
+    assert.equal(result.status, 'FAILED');
+    assert.equal(result.errorCode, 130);
+    assert.equal(result.ErrorDescription, 'Stopped by operator');
+    assert.deepEqual(payloads, [{ stream: 'done', result }]);
+});
+
+test('cancelCurrent reports no-op when no command is active', () => {
+    const runner = new CommandRunner();
+    const result = runner.cancelCurrent();
+
+    assert.equal(result.status, 'OK');
+    assert.equal(result.stopped, false);
+    assert.equal(result.ErrorDescription, 'No command is running');
 });

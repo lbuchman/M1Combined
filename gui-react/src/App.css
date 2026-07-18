@@ -55,9 +55,19 @@ body{background:var(--chassis);color:var(--txt);font-family:var(--mono);min-heig
 .ctrl-select{background:#0e0e0e;border:2px solid #282828;border-top-color:#0a0a0a;border-left-color:#0a0a0a;
   color:var(--amber);font-family:var(--mono);font-size:1.1rem;font-weight:bold;padding:10px 12px;
   box-shadow:inset 0 2px 4px #000}
-.status-group{flex-direction:row;align-items:center;gap:8px;margin-left:auto}
-.status-led{width:32px;height:32px;border-radius:50%;border:2px solid #0a0a0a;flex-shrink:0}
-.status-txt{font-size:1rem;letter-spacing:2px;color:var(--txt-dim);font-weight:bold}
+.result-status{margin-left:auto;min-width:360px;align-self:stretch;display:flex;flex-direction:column;
+  align-items:flex-end;justify-content:center;gap:4px;padding:8px 14px;background:#111;
+  border:2px solid #0a0a0a;border-top-color:#333;border-left-color:#333;box-shadow:inset 0 2px 6px #000}
+.result-status-main{font-size:1.4rem;letter-spacing:4px;font-weight:bold;color:#606060}
+.result-status-detail{max-width:520px;font-size:.95rem;letter-spacing:1px;font-weight:bold;color:#8a8a8a;text-align:right;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.result-status-ready .result-status-main{color:#707070}
+.result-status-running{background:#1f1d08;box-shadow:inset 0 0 24px rgba(245,224,32,.08)}
+.result-status-running .result-status-main{color:var(--yellow);text-shadow:0 0 14px var(--yellow-glow)}
+.result-status-passed{background:#0a1e0e;box-shadow:inset 0 0 24px rgba(31,221,98,.08)}
+.result-status-passed .result-status-main{color:var(--green);text-shadow:0 0 14px var(--green-glow)}
+.result-status-failed,.result-status-stopped{background:#1e0a0a;box-shadow:inset 0 0 24px rgba(255,60,60,.08)}
+.result-status-failed .result-status-main,.result-status-stopped .result-status-main{color:var(--red);text-shadow:0 0 14px var(--red-glow)}
 
 /* STEP ROW */
 .step-row{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;
@@ -84,11 +94,6 @@ body{background:var(--chassis);color:var(--txt);font-family:var(--mono);min-heig
   box-shadow:0 0 14px var(--green-glow),inset 0 -2px 4px rgba(0,0,0,.4)}
 .fail{background:var(--red);
   box-shadow:0 0 14px var(--red-glow),inset 0 -2px 4px rgba(0,0,0,.4)}
-
-/* STATUS LED (small one in controls) */
-.led-idle{background:#222}
-.led-running{background:var(--yellow);
-  box-shadow:0 0 10px var(--yellow-glow);animation:blink .6s linear infinite}
 
 /* PROGRESS */
 .hidden{display:none}
@@ -195,6 +200,11 @@ body{background:var(--chassis);color:var(--txt);font-family:var(--mono);min-heig
   border-color:#6030a0 #0a0a0a #0a0a0a #6030a0;padding:18px 32px;font-size:1.1rem;
   box-shadow:0 0 12px rgba(160,80,255,.15),inset 0 1px 0 rgba(200,100,255,.07)}
 .btn-reboot:disabled{opacity:.25;cursor:not-allowed}
+.debug-tool-gap{margin-left:18px}
+.btn-calibrate{background:#181f12;color:#b8ff7a;text-shadow:0 0 14px rgba(150,255,80,.5);
+  border-color:#4f7030 #0a0a0a #0a0a0a #4f7030;padding:18px 32px;font-size:1.1rem;
+  box-shadow:0 0 12px rgba(120,220,70,.12),inset 0 1px 0 rgba(170,255,120,.07)}
+.btn-calibrate:disabled{opacity:.25;cursor:not-allowed}
 
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 @keyframes pinshake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
