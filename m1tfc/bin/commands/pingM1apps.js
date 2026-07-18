@@ -17,7 +17,7 @@ async function waitForPort80(ipAddress, logfile) {
             await os.executeShellCommand(`nc -z -w 2 ${ipAddress} 80`, logfile, false, true);
             return true;
         } catch (err) {
-            logfile.debug(`port 80 open = false`);
+            logfile.debug('port 80 open = false');
             timerCount -= 1;
             await delay(5000);
         }

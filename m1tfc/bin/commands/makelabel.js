@@ -18,7 +18,7 @@ function register(program) {
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
         .option('-e, --error', 'error print from the database')
         .action(options => {
-            runCommand(options, '  label', null, async (configData, logfile, db) => {
+            runCommand(options, '  label', null, async(configData, logfile, db) => {
                 if (!configData.makeLabel) {
                     logfile.info('Make Label is disabled');
                     await delay(100);
@@ -104,7 +104,7 @@ function register(program) {
                 await testBoardLink.batteryOn(false);
                 await delay(100);
                 process.exit(exitCodes.normalExit);
-            }).catch(async () => {
+            }).catch(async() => {
                 // handle specific error behavior from old makelabel.js
                 await buzzer.buzzerBeepFailed();
                 await delay(100);

@@ -11,7 +11,7 @@ function register(program) {
         .description('execute M1 bootstrap raw command, make sure to run m1dfu command before ')
         .option('-c, --command <string>', 'M1-3200 command, make sure to inclose the command in ""')
         .action(options => {
-            const action = async (configData, logfile, _db) => {
+            const action = async(configData, logfile, _db) => {
                 const ictTestRunner = new IctTestRunner(
                     `${configData.mtfDir}/${configData.ictFWFilePath}`,
                     configData.tolerance,

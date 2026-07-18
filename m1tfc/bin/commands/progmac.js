@@ -11,7 +11,7 @@ function register(program) {
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug')
         .action(options => {
-            runCommand(options, 'progmac', 'MAC', async (configData, logfile, _db) => {
+            runCommand(options, 'progmac', 'MAC', async(configData, logfile, _db) => {
                 logfile.info('--------------------------------------------');
                 logfile.info('Executing program MAC command ...');
                 const macProgram = new ProgramMac(configData, options.serial, logfile);

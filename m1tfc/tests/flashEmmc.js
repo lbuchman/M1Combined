@@ -62,7 +62,7 @@ module.exports = class ProgramMac {
             );
             try {
                 db.
-                updateFlashStatus(this.serial, utils.boolToInt(true));
+                    updateFlashStatus(this.serial, utils.boolToInt(true));
             } catch (err) {
                 //
             }

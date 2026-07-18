@@ -19,7 +19,7 @@ class MercuryBoardHelper {
 
     async testOutputLogicalState(thisIo, thisMnpIo, value, inverted) {
         return await this.commandHelper.executeTest(
-            async () => {
+            async() => {
                 await this.mercurlBoard.sendCommand(thisIo.cmdWrite, value);
                 const command = mnpHwIo.getCommand('read', thisMnpIo.name, value, this.logger);
                 const ret = await targetICTLink.sendCommand(command);
@@ -37,7 +37,7 @@ class MercuryBoardHelper {
 
     async testInputLogicalState(thisIo, thisMnpIo, value, inverted) {
         return await this.commandHelper.executeTest(
-            async () => {
+            async() => {
                 const command = mnpHwIo.getCommand('write', thisMnpIo.name, value, this.logger);
                 await targetICTLink.sendCommand(command);
                 const ret = await this.mercurlBoard.sendCommand(thisIo.cmdRead, null);

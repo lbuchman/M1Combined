@@ -78,7 +78,7 @@ function register(program) {
         .action(options => {
             const calibrate = options.callibrate === 'true';
 
-            runCommand(options, '    ict', 'ICT_EXCEPT', async (configData, logfile, _db) => {
+            runCommand(options, '    ict', 'ICT_EXCEPT', async(configData, logfile, _db) => {
                 // NOTE: Apply runtime specific extra fields not handled by base `runCommand`
                 applyRuntime(configData, {
                     cellBatTol: options.cellBatTol,

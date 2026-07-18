@@ -10,7 +10,7 @@ function register(program) {
         .description('Start M1 in DFU mode and program bootstrap FW')
         .action(options => {
             // Note: `executionFn` doesn't require serial
-            const action = async (configData, logfile, _db) => {
+            const action = async(configData, logfile, _db) => {
                 const ictTestRunner = new IctTestRunner(
                     `${configData.mtfDir}/${configData.ictFWFilePath}`,
                     configData.tolerance,

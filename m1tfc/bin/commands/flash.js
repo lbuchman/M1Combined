@@ -13,7 +13,7 @@ function register(program) {
         .option('-s, --serial <string>', 'vendor serial number')
         .option('-d, --debug <level>', 'set debug level, 0 error, 1 - info, 2 - debug ')
         .action(options => {
-            runCommand(options, ' flash', 'FLASHEMMC', async (configData, logfile, _db) => {
+            runCommand(options, ' flash', 'FLASHEMMC', async(configData, logfile, _db) => {
                 if (!configData.progEmmc) {
                     logfile.error('Prog EMMC is disabled');
                     await delay(100);
@@ -38,11 +38,11 @@ function register(program) {
 
                 const exitCode = await flashEmmc.run(configData.programmingCommand);
                 await delay(100);
-                
+
                 if (exitCode !== exitCodes.normalExit) {
                     process.exit(exitCode);
                 }
-                
+
                 await common.testEndSuccess();
                 process.exit(exitCodes.normalExit);
             });
