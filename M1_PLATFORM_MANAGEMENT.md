@@ -126,6 +126,8 @@ Each component repo should own its own source code, build instructions, tests, a
 
 The root repo should not contain active source code for these components. It should contain links, documentation, scripts, and release manifests.
 
+Special rule for `stm32mp1-baremetal`: use the existing repository. Platform-management work may add or update documentation, metadata, manifests, or integration notes, but must not modify Makefiles or C/C++ source files unless that change is explicitly requested.
+
 ## Component Link Strategy
 
 There are two useful ways to link component repos from the root.
